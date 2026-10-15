@@ -33,7 +33,7 @@ public class JayceeScreen extends Screen {
  private void highlight(GuiGraphics g,int x,int y,int w,int h){box(g,left+x,top+y,w,h,true);}
  @Override public void render(GuiGraphics g,int mx,int my,float dt){
   renderBackground(g,mx,my,dt);
-  box(g,left,top,520,310,false);
+  box(g,left,top,520,310,false);DivineFrame.ribbon(g,left+6,top+5,508,36);
   box(g,left+5,top+46,130,257,false);box(g,left+141,top+46,270,257,false);box(g,left+415,top+46,100,257,false);
   highlight(g,6+tab*84,8,85,31);
   text(g,"JAYCEE",18,56,0xFFF2F8FF);
@@ -57,7 +57,7 @@ public class JayceeScreen extends Screen {
  private void status(GuiGraphics g){
   var player=Minecraft.getInstance().player;
   text(g,"CHARACTER",22,108,0xFFC4E5FF);
-  highlight(g,13,125,114,130);
+  DivineFrame.portrait(g,left+13,top+125,114,130);
   // The actual world player's 3D skin + equipped armor. No fixed Steve texture.
   if(player!=null)InventoryScreen.renderEntityInInventoryFollowsMouse(
    g,left+18,top+133,left+122,top+247,38,0f,224f,123f,player);
@@ -65,7 +65,7 @@ public class JayceeScreen extends Screen {
   DivineFrame.divider(g,left+19,top+285,101);
   text(g,"STATUS OVERVIEW",155,83,0xFF8FCFFF);
   DivineFrame.divider(g,left+156,top+98,235);
-  highlight(g,153,106,246,167);
+  box(g,left+153,top+106,246,167,false);
   text(g,"ADVENTURER PROFILE",173,119,0xFFE5F5FF);
   DivineFrame.divider(g,left+171,top+132,201);
   if(player!=null)text(g,font.plainSubstrByWidth(player.getName().getString(),184),172,139,0xFF8DD7FF);

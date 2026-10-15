@@ -75,9 +75,17 @@ public final class LoadoutService {
             || (request.action() == LoadoutNetwork.EQUIP && AbilityCatalog.get(request.ability()) == null)) return;
         CompoundTag tag = data(player);
         long now = player.serverLevel().getServer().overworld().getGameTime();
-        // Bound both mutation and REQUEST snapshot traffic; this timestamp is server-written only.
-        if (tag.contains("LastAction") && now >= tag.getLong("LastAction") && now - tag.getLong("LastAction") < 2) return;
-        tag.putLong("LastAction", now);
+        // Twelve-action burst and twelve actions/second refill, shared by mutations and REQUEST.
+        // Units are twentieths of an action, so normal simultaneous slot keys are not discarded.
+        int budget = tag.contains("PacketBudget") ? clamp(tag.getInt("PacketBudget"), 0, 240) : 240;
+        long elapsed = tag.contains("PacketBudgetTick") ? Math.max(0, Math.min(20, now - tag.getLong("PacketBudgetTick"))) : 0;
+        budget = Math.min(240, budget + (int) elapsed * 12);
+        tag.putLong("PacketBudgetTick", now);
+        if (budget < 20) {
+            tag.putInt("PacketBudget", budget);
+            return;
+        }
+        tag.putInt("PacketBudget", budget - 20);
         if (request.action() == LoadoutNetwork.REQUEST) { sync(player); return; }
         if (!accessible(player) || !player.isAlive() || player.isSpectator()) { sync(player); return; }
         int[] slots = tag.getIntArray("Abilities"), modes = tag.getIntArray("Modes");

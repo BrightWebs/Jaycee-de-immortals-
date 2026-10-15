@@ -9,7 +9,7 @@ public final class LoadoutConfig {
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
         BETA_HUD = builder.comment("Expose the beta HUD without essence mastery. Individual ability unlocks still apply.")
-            .define("betaHud", true);
+            .define("betaUnlockAbilityHud", true);
         SPEC = builder.build();
     }
 

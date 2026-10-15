@@ -15,20 +15,25 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
+import com.brightwebs.jaycee.gameplay.Gameplay;
+import com.brightwebs.jaycee.gameplay.PlayerState;
+import com.brightwebs.jaycee.config.HudConfig;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.config.ModConfig;
 
 @Mod(JayceeMod.ID)
 public final class JayceeMod {
  public static final String ID="jaycee";
  public static final DeferredRegister.Items ITEMS=DeferredRegister.createItems(ID);
  public static final DeferredItem<Item> ESSENCE=ITEMS.register("jayces_essence",()->new Essence(new Item.Properties().stacksTo(16)));
- public JayceeMod(IEventBus bus){ ITEMS.register(bus); NeoForge.EVENT_BUS.addListener(this::commands); }
+ public JayceeMod(IEventBus bus,ModContainer container){ ITEMS.register(bus); Gameplay.register(bus); container.registerConfig(ModConfig.Type.CLIENT,HudConfig.SPEC); NeoForge.EVENT_BUS.addListener(this::commands); }
  private void commands(RegisterCommandsEvent event){event.getDispatcher().register(Commands.literal("jayceeessence").requires(s->s.hasPermission(2)).executes(c->{ServerPlayer p=c.getSource().getPlayerOrException();p.getInventory().add(new ItemStack(ESSENCE.get(),3));c.getSource().sendSuccess(()->Component.literal("Received 3 Jayce's Essences"),false);return 1;}));}
- public static boolean unlocked(Player p){return p.getPersistentData().getInt("JayceeConsumed")>=3;}
+ public static boolean unlocked(Player p){return PlayerState.get(p).unlocked();}
  public static final class Essence extends Item {
   public Essence(Properties properties){super(properties);}
   @Override public InteractionResultHolder<ItemStack> use(Level level,Player player,InteractionHand hand){
     ItemStack stack=player.getItemInHand(hand);
-    if(!level.isClientSide){int n=Math.min(3,player.getPersistentData().getInt("JayceeConsumed")+1);player.getPersistentData().putInt("JayceeConsumed",n);if(!player.getAbilities().instabuild)stack.shrink(1);player.displayClientMessage(Component.literal(n==3?"Jaycee UI unlocked. Press M.":"Essence absorbed: "+n+" / 3"),true);}
+    if(!level.isClientSide){int n=Gameplay.absorbEssence(player);if(!player.getAbilities().instabuild)stack.shrink(1);player.displayClientMessage(Component.literal(n==3?"Jaycee UI unlocked. Press M.":"Essence absorbed: "+n+" / 3"),true);}
     return InteractionResultHolder.sidedSuccess(stack,level.isClientSide);
   }
  }

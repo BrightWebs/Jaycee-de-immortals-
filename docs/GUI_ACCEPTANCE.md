@@ -24,3 +24,21 @@
 
 ## Source of truth
 Actual supplied artwork is required to establish exact geometry and colors. If those images are missing, don't invent a supposedly exact recreation.
+
+## HUD/resource regression checklist (not yet runtime-verified)
+- Start a clean Java 21 / NeoForge 21.1.172 client and a separate dedicated server. Confirm the server never loads client rendering classes.
+- Consume three essences on the server; confirm M opens immediately, then confirm unlock survives death and reconnect.
+- Check all four empty slots at middle-right. Rebind Z/X/C/V and confirm labels and inputs follow the new bindings.
+- Equip Soul Restore in a selected slot through Abilities, switch tabs, close/reopen M, and check the HUD shows the same equipment/page. Right-click a menu slot to clear it.
+- Alt-scroll through all ten pages in both menu and gameplay, including rapid scrolling and wraparound. Confirm vanilla hotbar scrolling is not also triggered.
+- Alt-key/Alt-click a slot to cycle modes; reconnect and confirm the mode persists. Verify duplicate copies/pages cannot bypass an ability's cooldown.
+- Check Face View with a multiplayer skin and toggle Hat in Skin Customization without relogging. Check 3D View with hat, jacket, sleeves and pants toggled; both portraits must use the shared Status preference.
+- Damage/heal the player and change `minecraft:generic.max_health` via `/attribute`. Check actual HP values, smooth bar motion, delayed HP damage, and no overflow.
+- Use the explicit server spiritual hooks to damage/heal SP, apply resistance/barriers, and change its maximum. Confirm ordinary physical damage/healing does not mirror into SP.
+- At zero SP, verify nonfatal penalties and activation refusal. At partial SP, verify Soul Restore consumes mana exactly once, updates SP/mana immediately, and enforces its cooldown server-side.
+- Try locked, dead and spectator activation, invalid page/slot/mode/backend requests, and insufficient resources. None may activate or charge resources.
+- Die, respawn, change dimension, disconnect/reconnect and restart the server. Verify resources, page, equipment, modes, backend choice and portrait preference; no stale cooldown pulse from another session.
+- Toggle HUD/vanilla-heart compatibility, F1, F3, spectator mode, screens and pause. Hearts must not disappear when the custom health bar is unavailable.
+- Test common GUI scales, small windows and configured anchors/offsets/scales; check hotbar, chat, bossbars, effects and scoreboard. Manually offset around third-party overlays as needed.
+- Install a pack containing the six mapped icons, reload with F3+T, and check list/equipment/HUD consistency. Remove an icon and confirm a single missing-art warning and safe fallback.
+- Once real optional adapters are supplied: test standalone, Iron's-only, Ars-only, both installed, capability unavailability and removal of an optional mod between sessions. Confirm exactly one backend is charged, no extra regeneration, and owner's resource synchronization works. Current guarded stubs are not evidence of external compatibility.

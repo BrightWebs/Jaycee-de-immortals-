@@ -1,0 +1,8 @@
+plugins { id 'java-library'; id 'net.neoforged.moddev' version '2.0.107' }
+version = mod_version
+group = mod_group
+base { archivesName = mod_id }
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+neoForge { version = neo_version; runs { client { client() }; server { server() } }; mods { jaycee { sourceSet sourceSets.main } } }
+repositories { mavenCentral() }
+tasks.withType(ProcessResources).configureEach { def p = [mod_id:mod_id,mod_name:mod_name,mod_version:mod_version]; inputs.properties p; filesMatching('META-INF/neoforge.mods.toml') { expand p } }

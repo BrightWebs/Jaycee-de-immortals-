@@ -19,7 +19,13 @@ public class JayceeScreen extends Screen {
  private static final String[] TABS={"Status","Abilities","Skills","Magic","Species","Quests","Sovereign"};
  private static final String[] TRACKS={"Body","Spirit","Divine","Utility"};
  private static final String[] ELEMENTS={"Fire","Water","Wind","Earth","Light","Dark"};
- private int tab,page,slot,art,category,offset,branch,tier,element,quest,speciesChoice,magicSchool,nexus,editorStep,root,delivery,effect,alignment;\n private boolean editorOpen=false;\n private final String[] sections={"Dashboard","Ability Library","Essence & Followers","Divine Seats","Spirits","Passives","Inhibitor","Realm Builder"};\n private final String[] roots={"Reality","Fire","Water","Storm","Void","Nature"};\n private final String[] deliveries={"Self","Ray","Touch","Projectile","Beam","Area"};\n private final String[] effects={"Damage","Healing","Teleport","Status","Summon","Soul"};\n private final String[] alignments={"Pure","Dark","Crimson"};
+ private int tab,page,slot,art,category,offset,branch,tier,element,quest,speciesChoice,magicSchool,nexus,editorStep,root,delivery,effect,alignment;
+ private boolean editorOpen=false;
+ private final String[] sections={"Dashboard","Ability Library","Essence & Followers","Divine Seats","Spirits","Passives","Inhibitor","Realm Builder"};
+ private final String[] roots={"Reality","Fire","Water","Storm","Void","Nature"};
+ private final String[] deliveries={"Self","Ray","Touch","Projectile","Beam","Area"};
+ private final String[] effects={"Damage","Healing","Teleport","Status","Summon","Soul"};
+ private final String[] alignments={"Pure","Dark","Crimson"};
  private double originX,originY,scale=1;
  private String query="";
  private EditBox search;
@@ -44,7 +50,18 @@ public class JayceeScreen extends Screen {
   }
   for(int i=0;i<10;i++){final int p=i;var b=button(""+(i+1),500+(i%5)*19,248+(i/5)*20,18,18,()->setPage(p));b.selected=page==i;}
   button("Clear slot",501,296,91,23,()->setArt(-1));
-  rows.clear();search=null;equip=null;\n  if(tab==6){\n   if(editorOpen){\n    for(int i=0;i<4;i++){final int step=i;var b=button(new String[]{"Source","Delivery","Effects","Identity"}[i],11+i*117,76,110,27,()->{editorStep=step;rebuild();});b.selected=editorStep==i;}\n    String[] opts=editorStep==0?roots:editorStep==1?deliveries:editorStep==2?effects:alignments;\n    for(int i=0;i<opts.length;i++){final int n=i;int row=i/2,col=i%2;var b=button(opts[i],23+col*139,143+row*39,128,31,()->{if(editorStep==0)root=n;else if(editorStep==1)delivery=n;else if(editorStep==2)effect=n;else alignment=n;rebuild();});b.selected=n==(editorStep==0?root:editorStep==1?delivery:editorStep==2?effect:alignment);}\n    button("Back to Nexus",334,294,135,27,()->{editorOpen=false;rebuild();});\n   }else{\n    for(int i=0;i<sections.length;i++){final int n=i;var b=button(sections[i],12,83+i*30,148,27,()->{nexus=n;rebuild();});b.selected=nexus==i;}\n    button("+ CREATE ABILITY",309,67,161,29,()->{editorOpen=true;editorStep=0;rebuild();});\n   }\n  }
+  rows.clear();search=null;equip=null;
+  if(tab==6){
+   if(editorOpen){
+    for(int i=0;i<4;i++){final int step=i;var b=button(new String[]{"Source","Delivery","Effects","Identity"}[i],11+i*117,76,110,27,()->{editorStep=step;rebuild();});b.selected=editorStep==i;}
+    String[] opts=editorStep==0?roots:editorStep==1?deliveries:editorStep==2?effects:alignments;
+    for(int i=0;i<opts.length;i++){final int n=i;int row=i/2,col=i%2;var b=button(opts[i],23+col*139,143+row*39,128,31,()->{if(editorStep==0)root=n;else if(editorStep==1)delivery=n;else if(editorStep==2)effect=n;else alignment=n;rebuild();});b.selected=n==(editorStep==0?root:editorStep==1?delivery:editorStep==2?effect:alignment);}
+    button("Back to Nexus",334,294,135,27,()->{editorOpen=false;rebuild();});
+   }else{
+    for(int i=0;i<sections.length;i++){final int n=i;var b=button(sections[i],12,83+i*30,148,27,()->{nexus=n;rebuild();});b.selected=nexus==i;}
+    button("+ CREATE ABILITY",309,67,161,29,()->{editorOpen=true;editorStep=0;rebuild();});
+   }
+  }
   if(tab==1){
    for(int i=0;i<AbilityCatalog.CATEGORIES.length;i++){
     final int c=i;var b=button(AbilityCatalog.CATEGORIES[i],9,82+i*31,111,27,()->{category=c;offset=0;rebuild();});b.selected=category==i;
@@ -61,8 +78,13 @@ public class JayceeScreen extends Screen {
     final int bb=b,tt=t;var n=button(""+(t+1),149+b*80,120+t*40,27,27,()->{branch=bb;tier=tt;rebuild();});n.icon=(b+t)%10;n.compact=true;n.selected=b==branch&&t==tier;
    }
   }else if(tab==3){
-   for(int i=0;i<6;i++){final int e=i;var b=button(ELEMENTS[i],14,85+i*32,102,27,()->{element=e;rebuild();});b.selected=element==i;}\n   String[] schools={"Divine","Arcane","Elemental","Spatial","Temporal","Reality","Spirit","Healing","Summoning","Forbidden"};\n   for(int i=0;i<schools.length;i++){final int n=i;var b=button(schools[i],128,87+i*23,133,21,()->{magicSchool=n;rebuild();});b.selected=magicSchool==i;}
-  }else if(tab==4){\n   String[] races={"Human","Elf","Demon","Dragon","Angel","Beastkin","Undead","Primordial","Custom"};\n   for(int i=0;i<races.length;i++){final int chosen=i;var b=button(races[i],14,87+i*25,106,23,()->{speciesChoice=chosen;rebuild();});b.selected=speciesChoice==i;}\n  }else if(tab==5){
+   for(int i=0;i<6;i++){final int e=i;var b=button(ELEMENTS[i],14,85+i*32,102,27,()->{element=e;rebuild();});b.selected=element==i;}
+   String[] schools={"Divine","Arcane","Elemental","Spatial","Temporal","Reality","Spirit","Healing","Summoning","Forbidden"};
+   for(int i=0;i<schools.length;i++){final int n=i;var b=button(schools[i],128,87+i*23,133,21,()->{magicSchool=n;rebuild();});b.selected=magicSchool==i;}
+  }else if(tab==4){
+   String[] races={"Human","Elf","Demon","Dragon","Angel","Beastkin","Undead","Primordial","Custom"};
+   for(int i=0;i<races.length;i++){final int chosen=i;var b=button(races[i],14,87+i*25,106,23,()->{speciesChoice=chosen;rebuild();});b.selected=speciesChoice==i;}
+  }else if(tab==5){
    String[] names={"Awakening","Essence of Existence","First Ascension"};
    for(int i=0;i<3;i++){final int q=i;var b=button(names[i],15,88+i*40,166,33,()->{quest=q;rebuild();});b.selected=quest==i;}
   }
@@ -111,7 +133,8 @@ public class JayceeScreen extends Screen {
   if(tab==2)skills(g);
   if(tab==3)magic(g);
   if(tab==4)species(g);
-  if(tab==5)quests(g);\n  if(tab==6)sovereign(g);
+  if(tab==5)quests(g);
+  if(tab==6)sovereign(g);
   super.render(g,localX,localY,dt);
   for(int i=0;i<4;i++){
    int x=500+(i%2)*47,y=113+(i/2)*62,id=loadout()[page*4+i];

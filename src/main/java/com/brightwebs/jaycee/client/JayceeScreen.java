@@ -121,18 +121,28 @@ public class JayceeScreen extends Screen {
   g.pose().popPose();
  }
  private void profile(GuiGraphics g,int mx,int my){
-  panel(g,1,48,135,284);var p=Minecraft.getInstance().player;if(p==null)return;
-  panel(g,13,62,45,57);
-  InventoryScreen.renderEntityInInventoryFollowsMouse(g,16,65,55,115,20,0f,mx,my,p);
-  text(g,font.plainSubstrByWidth(p.getName().getString(),65),63,68,INK);
-  text(g,"Human",63,84,MUTED);text(g,"Lv. "+p.experienceLevel,63,99,MUTED);
-  line(g,15,131,106);text(g,"Player Profile",15,145,INK);
-  text(g,"Health",15,169,0xFFFFA6BA);
-  g.fill(15,184,121,190,0xFF26364B);
-  g.fill(15,184,15+(int)(106*Math.clamp(p.getHealth()/Math.max(1,p.getMaxHealth()),0,1)),190,0xFFDD668C);
-  text(g,"Armor   "+p.getArmorValue(),15,205,MUTED);
-  text(g,"Mana    --",15,225,MUTED);text(g,"Soul HP --",15,245,MUTED);
-  line(g,15,266,106);wrap(g,"Divine interface awakened",15,282,105,0xFF9BC9F3);
+  panel(g,1,48,135,284);
+  var p=Minecraft.getInstance().player;if(p==null)return;
+  DivineFrame.portrait(g,11,57,55,65);
+  InventoryScreen.renderEntityInInventoryFollowsMouse(g,15,62,62,118,22,0f,mx,my,p);
+  text(g,font.plainSubstrByWidth(p.getName().getString(),64),70,64,INK);
+  text(g,"The Immortales",70,81,0xFF91C5F3);
+  text(g,"Lv. "+p.experienceLevel,70,100,0xFFDFCD9B);
+  line(g,12,129,111);
+  text(g,"Race",13,137,INK);text(g,"Human",79,137,0xFF9FCDF8);
+  text(g,"HP",13,163,0xFFFFA5B7);
+  g.fill(34,165,126,172,0xFF213C56);
+  g.fill(34,165,34+(int)(92*Math.clamp(p.getHealth()/Math.max(1,p.getMaxHealth()),0,1)),172,0xFFFF6C8B);
+  text(g,"Soul HP",13,180,0xFFCEA6F9);g.fill(63,183,126,190,0xFF282544);
+  text(g,"--",108,181,MUTED);
+  text(g,"Mana",13,198,0xFF89CEFF);g.fill(48,201,126,208,0xFF143A58);
+  text(g,"--",109,199,MUTED);
+  line(g,12,217,110);text(g,"Core Attributes",14,228,0xFF9FD7FF);
+  String[] stats={"Strength","Endurance","Agility","Magic","Spiritual","Luck"};
+  for(int i=0;i<stats.length;i++){
+   text(g,stats[i],13,242+i*13,MUTED);
+   text(g,"--",109,242+i*13,INK);
+  }
  }
  private void status(GuiGraphics g,int mx,int my){
   panel(g,2,48,486,284);

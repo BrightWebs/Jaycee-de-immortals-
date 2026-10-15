@@ -25,7 +25,7 @@ Minecraft 1.21.1 / Java 21 / NeoForge 21.1.x.
 
 1. Open this repository's **Actions** tab and select **Build NeoForge 1.21.1**. Choose a **successful run for the UI pull request's latest commit**, not an older run from another branch. PR builds run automatically; **Run workflow** can also build a selected branch manually.
    - If GitHub shows **Action required** or **Workflows awaiting approval**, a repository maintainer must use **Approve and run** on the pull request before the build can start. There is no downloadable artifact until that approved build succeeds.
-2. Under **Artifacts**, download `jaycee-neoforge-1.21.1` (GitHub sign-in required). Extract the ZIP to get `jaycee-0.1.0.jar`. The ZIP and GitHub's source-code downloads are not installable mods.
+2. Under **Artifacts**, download `jaycee-neoforge-1.21.1` (GitHub sign-in required). Extract the ZIP to get `jaycee-0.1.1.jar` (UI blur fix). The ZIP and GitHub's source-code downloads are not installable mods.
 3. Install **NeoForge 21.1.172** for **Minecraft 1.21.1**, launch that profile once, then close the game. Use Java 21; Forge and Fabric are not compatible loaders for this JAR.
 4. Put the extracted JAR into the **mods** folder of that profile's game directory. Remove older Jaycee JARs so only one version is installed.
 5. Launch the NeoForge profile, confirm **Jaycee Di Immortales** appears in **Mods**, and enter a test world. Press **M** to open the UI immediately—no essence is needed. If M conflicts with another mod, rebind it under **Options → Controls → Key Binds → Jaycee**.
@@ -35,6 +35,12 @@ Test all six tabs, select skills and journal entries, scroll the ability list, a
 If no successful run/artifact exists for the latest commit, **there is no verified download yet**. A failed build does not publish a JAR. The same source can be built locally using the commands below; an internet connection to the NeoForge and Minecraft dependency hosts is required.
 
 The build also checks that the output JAR contains NeoForge metadata and the mod entry point, client key handler and screen classes before uploading it. This checks packaging, not in-game behavior.
+
+### UI blur test (0.1.1)
+
+This screen now uses a plain dim overlay instead of Minecraft's post-processing menu blur. The backdrop is drawn once before the panels; inherited background calls do not apply a blur pass over the interface. This change is local to the Immortals screen and does not alter your global menu blur setting.
+
+Remove `jaycee-0.1.0.jar` before installing the replacement. With menu background blur enabled in Minecraft, open the UI with M and compare Status text, borders, all other tabs, the loadout and Face/3D portraits. Close and reopen the screen and resize the window. The world should be dimmed, not blurred, while the interface stays unblurred. Layout scaling on very small windows can still reduce text legibility; that is separate from the removed full-screen blur effect.
 
 ## Run in development
 

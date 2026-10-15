@@ -71,7 +71,7 @@ public final class JayceeScreen extends Screen {
   DivineFrame.divider(g,x+12,y+26,w-24);
  }
  @Override public void render(GuiGraphics g,int mx,int my,float delta){
-  renderBackground(g,mx,my,delta);
+  g.fill(0,0,width,height,0x99040A14);
   int localX=(int)localX(mx),localY=(int)localY(my);
   g.pose().pushPose();
   g.pose().translate(originX,originY,0);
@@ -90,6 +90,9 @@ public final class JayceeScreen extends Screen {
   }
   super.render(g,localX,localY,delta);
   g.pose().popPose();
+ }
+ @Override public void renderBackground(GuiGraphics g,int mx,int my,float delta){
+  // Own the backdrop in render(): vanilla background blur must never post-process our UI.
  }
  private double localX(double x){return (x-originX)/scale;}
  private double localY(double y){return (y-originY)/scale;}

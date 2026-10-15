@@ -3,26 +3,29 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import com.brightwebs.jaycee.gameplay.AbilityCatalog;
 import com.brightwebs.jaycee.gameplay.GameplayActions;
 import com.brightwebs.jaycee.gameplay.PlayerState;
 
-/** Six interactive pages; the status portrait uses the real local player's skin. */
+/** Sapphire pages; race details are accessed from Status, not a separate tab. */
 public class JayceeScreen extends Screen {
- private static final String[] TABS={"Status","Abilities","Skills","Magic","Species","Quests"};
+ private static final String[] TABS={"Status","Abilities","Skills","Magic","Quests"};
  private static final String[] CATS={"All","Offense","Defense","Support","Movement","Reality"};
  private static final String[] ARTS=AbilityCatalog.ALL.stream().map(AbilityCatalog.Art::name).toArray(String[]::new);
  private static final String[] TRACKS={"Body","Spirit","Divine","Utility"};
  private int tab=0,selected=0,category=0,art=0,skill=0,skillTier=0;
  private int left,top;
  private OrnateButton portraitButton;
+ private boolean speciesOpen;
  public JayceeScreen(){super(Component.literal("Jaycee : Di Immortales"));}
  private void button(String label,int x,int y,int w,int h,Runnable r){addRenderableWidget(new OrnateButton(label,left+x,top+y,w,h,r));}
  private PlayerState state(){return PlayerState.get(Minecraft.getInstance().player);}
  @Override protected void init(){
   left=(width-520)/2;top=(height-310)/2;
-  for(int i=0;i<6;i++){final int t=i;button(TABS[i],8+i*84,10,82,27,()->{tab=t;rebuild();});}
+  for(int i=0;i<TABS.length;i++){final int t=i;button(TABS[i],8+i*84,10,82,27,()->{tab=t;speciesOpen=false;rebuild();});}
   button("<",420,59,22,20,()->GameplayActions.pageDelta(-1));button(">",490,59,22,20,()->GameplayActions.pageDelta(1));
   for(int i=0;i<4;i++){final int s=i;button(""+(i+1),420+(i%2)*43,100+(i/2)*52,39,39,()->selected=s);}
   if(tab==1||tab==3){
@@ -34,14 +37,26 @@ public class JayceeScreen extends Screen {
   portraitButton=null;
   if(tab==0){
    portraitButton=addRenderableWidget(new OrnateButton("3D View",left+15,top+261,112,20,()->GameplayActions.portrait(!state().portrait3d())));
+   // Human is the existing evolution preview's race, not a duplicate progression store.
+   var race=addRenderableWidget(new Button(left+14,top+88,110,14,Component.literal("Human"),
+    b->{speciesOpen=!speciesOpen;rebuild();},Button.DEFAULT_NARRATION){
+     @Override protected void renderWidget(GuiGraphics g,int mx,int my,float dt){
+      g.drawString(font,getMessage(),getX(),getY()+3,isHoveredOrFocused()?0xFFE5F4FF:0xFF8CC7FF,false);
+      if(isHoveredOrFocused())g.fill(getX(),getY()+12,getX()+font.width(getMessage()),getY()+13,0xFF8CC7FF);
+     }
+   });
+   race.setTooltip(Tooltip.create(Component.literal("Open species and evolution details")));
+   if(speciesOpen)button("Back to Status",153,274,246,23,()->{speciesOpen=false;rebuild();});
   }
  }
  private void rebuild(){clearWidgets();init();}
  private void box(GuiGraphics g,int x,int y,int w,int h,boolean bright){DivineFrame.frame(g,x,y,w,h,bright);}
  private void text(GuiGraphics g,String s,int x,int y,int color){g.drawString(font,s,left+x,top+y,color,false);}
  private void highlight(GuiGraphics g,int x,int y,int w,int h){box(g,left+x,top+y,w,h,true);}
+ // Screen.render invokes this after our panels; draw the background only before them.
+ @Override public void renderBackground(GuiGraphics g,int mx,int my,float dt){}
  @Override public void render(GuiGraphics g,int mx,int my,float dt){
-  renderBackground(g,mx,my,dt);
+  super.renderBackground(g,mx,my,dt);
   box(g,left,top,520,310,false);DivineFrame.ribbon(g,left+6,top+5,508,36);
   box(g,left+5,top+46,130,257,false);box(g,left+141,top+46,270,257,false);box(g,left+415,top+46,100,257,false);
   highlight(g,6+tab*84,8,85,31);
@@ -52,7 +67,7 @@ public class JayceeScreen extends Screen {
   int page=state.page();
   if(portraitButton!=null)portraitButton.setMessage(Component.literal(state.portrait3d()?"3D View":"Face View"));
   text(g,player==null?"Player":font.plainSubstrByWidth(player.getName().getString(),105),16,73,0xFF9BDAFF);
-  text(g,"DIVINE INITIATE",14,91,0xFF8CC7FF);
+  if(tab!=0)text(g,"DIVINE INITIATE",14,91,0xFF8CC7FF);
   if(tab!=0)for(int i=0;i<3;i++){int y=135+i*31;int color=i==0?0xFFE96888:i==1?0xFF52B7EE:0xFFAE8CFF;
    text(g,new String[]{"HEALTH","MANA","SOUL HP"}[i],15,y,color);
    g.fill(left+15,top+y+14,left+119,top+y+21,0xFF203B5A);
@@ -64,7 +79,7 @@ public class JayceeScreen extends Screen {
   text(g,"PAGE "+(page+1)+"/10",449,65,0xFF9CD4FF);
   for(int i=0;i<4;i++){int xx=419+(i%2)*43,yy=99+(i/2)*52;highlight(g,xx,yy,41,41);}
   text(g,"Alt + scroll",422,257,0xFF90BBE8);
-  if(tab==0)status(g);else if(tab==1||tab==3)abilities(g);else if(tab==2)skills(g);else if(tab==4)species(g);else quests(g);
+  if(tab==0)status(g);else if(tab==1||tab==3)abilities(g);else if(tab==2)skills(g);else quests(g);
   super.render(g,mx,my,dt);
   for(int i=0;i<4;i++){
    int xx=left+419+(i%2)*43,yy=top+99+(i/2)*52;
@@ -103,6 +118,7 @@ public class JayceeScreen extends Screen {
    else PlayerPortrait.render(g,player,left+22,top+141,96,false);
   }
   DivineFrame.divider(g,left+19,top+285,101);
+  if(speciesOpen){species(g);return;}
   text(g,"STATUS OVERVIEW",155,83,0xFF8FCFFF);
   DivineFrame.divider(g,left+156,top+98,235);
   box(g,left+153,top+106,246,167,false);
@@ -145,7 +161,7 @@ public class JayceeScreen extends Screen {
  private void species(GuiGraphics g){
   text(g,"DIVINE EVOLUTION",158,88,0xFF9AD9FF);highlight(g,159,118,228,121);
   text(g,"Human  >  Demigod  >  Divine",171,151,0xFFE4EBFF);
-  text(g,"Evolution gameplay coming later",157,272,0xFF9ABDDC);
+  text(g,"Evolution gameplay coming later",157,255,0xFF9ABDDC);
  }
  private void quests(GuiGraphics g){
   text(g,"QUEST JOURNAL",155,88,0xFF9AD9FF);

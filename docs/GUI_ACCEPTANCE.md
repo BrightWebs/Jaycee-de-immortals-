@@ -10,9 +10,10 @@
 - Match artwork before adding gameplay abilities. Compare in-game screenshots with each reference image before declaring completion.
 
 ## Screen anatomy
-- Tabs: Status / Abilities / Skills / Magic / Species / Quests, each clickable and visually distinct.
+- Tabs: Status / Abilities / Skills / Magic / Quests, each clickable and visually distinct. No Species tab: click the race name on Status for evolution details, then Back to Status. The baseline race remains the existing Human preview until progression integration is implemented.
+- Confirm panel text, bars, borders and player portrait stay sharp with Minecraft Menu Background Blurriness above zero. The world background may blur, but must be processed only before Sapphire content, never between panels and widgets.
 - Player preview: render actual local player's animated 3D entity with the player's own skin and equipment, not a static portrait or default Steve.
-- Shared ability loadout frame: four slots always visible across six tabs; ten page selectors consistently accessible. Swapping tabs must not reset equipped abilities or page.
+- Shared ability loadout frame: four slots always visible across all tabs and race details; ten page selectors consistently accessible. Swapping tabs must not reset equipped abilities or page.
 - Ability/skill nodes: real widget hitboxes, selectable states and live descriptions, not painted-on buttons. Unimplemented gameplay content must show honest placeholder text.
 - In-game HUD: four-slot loadout rendered with the same visual design language as the menu, not plain square placeholders.
 

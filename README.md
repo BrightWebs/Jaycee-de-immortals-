@@ -9,7 +9,7 @@ The interface is the first deliverable. We will not build combat powers until th
 - Consume **three Jayce's Essences** to unlock the GUI (progress saved per player).
 - Give players a development/test command to receive three essences.
 - Render the **actual player's animated 3D model and skin**, not a screenshot of Steve.
-- Six clickable tabs: Status, Abilities, Skills, Magic, Species, Quests.
+- Five clickable tabs: Status, Abilities, Skills, Magic, Quests. Click the race name on Status to open species/evolution details; use Back to Status to return.
 - A **persistent four-slot ability loadout with ten selectable pages** on every tab.
 - Use the user's reference art as a guide for separately rendered UI pieces, interactive hitboxes, labels, tooltips, and responsive layouts, **not as a single background screenshot**.
 - Gameplay ability implementation comes later.

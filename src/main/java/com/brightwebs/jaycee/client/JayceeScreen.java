@@ -40,7 +40,7 @@ public class JayceeScreen extends Screen {
   var player=Minecraft.getInstance().player;
   text(g,player==null?"Player":font.plainSubstrByWidth(player.getName().getString(),105),16,73,0xFF9BDAFF);
   text(g,"DIVINE INITIATE",14,91,0xFF8CC7FF);
-  for(int i=0;i<3;i++){int y=135+i*31;int color=i==0?0xFFE96888:i==1?0xFF52B7EE:0xFFAE8CFF;
+  if(tab!=0)for(int i=0;i<3;i++){int y=135+i*31;int color=i==0?0xFFE96888:i==1?0xFF52B7EE:0xFFAE8CFF;
    text(g,new String[]{"HEALTH","MANA","SOUL HP"}[i],15,y,color);
    g.fill(left+15,top+y+14,left+119,top+y+21,0xFF203B5A);
    double ratio=i==0&&player!=null?player.getHealth()/Math.max(1,player.getMaxHealth()):0;
@@ -55,12 +55,29 @@ public class JayceeScreen extends Screen {
   super.render(g,mx,my,dt);
  }
  private void status(GuiGraphics g){
-  text(g,"STATUS OVERVIEW",155,83,0xFF8FCFFF);DivineFrame.divider(g,left+156,top+98,235);
-  highlight(g,173,108,208,157);DivineFrame.jewel(g,left+278,top+187,System.currentTimeMillis()/50,0xFF64B7FF);
-  if(Minecraft.getInstance().player!=null)
-   InventoryScreen.renderEntityInInventoryFollowsMouse(g,left+205,top+115,left+350,top+250,43,0f,245f,130f,Minecraft.getInstance().player);
-  text(g,"PLAYER MODEL",213,266,0xFFE3EFFA);
-  text(g,"Rank: Initiate     Essence: "+(Minecraft.getInstance().player==null?"?":Minecraft.getInstance().player.experienceLevel)+" Lv",155,282,0xFF88B4DD);
+  var player=Minecraft.getInstance().player;
+  text(g,"CHARACTER",22,108,0xFFC4E5FF);
+  highlight(g,13,125,114,130);
+  // The actual world player's 3D skin + equipped armor. No fixed Steve texture.
+  if(player!=null)InventoryScreen.renderEntityInInventoryFollowsMouse(
+   g,left+18,top+133,left+122,top+247,38,0f,224f,123f,player);
+  text(g,"LIVE PLAYER MODEL",17,268,0xFF9ED2FA);
+  text(g,"STATUS OVERVIEW",155,83,0xFF8FCFFF);
+  DivineFrame.divider(g,left+156,top+98,235);
+  highlight(g,153,106,246,167);
+  text(g,"ADVENTURER PROFILE",173,119,0xFFE5F5FF);
+  if(player!=null)text(g,font.plainSubstrByWidth(player.getName().getString(),184),172,139,0xFF8DD7FF);
+  String[] stats={"HEALTH","MANA","SOUL"};
+  int[] colors={0xFFE96F91,0xFF67C2FF,0xFFA58AFF};
+  for(int i=0;i<3;i++){
+   int y=163+i*30;int col=colors[i];
+   text(g,stats[i],169,y,col);
+   g.fill(left+169,top+y+12,left+376,top+y+20,0xFF1E3150);
+   double ratio=i==0&&player!=null?player.getHealth()/Math.max(1,player.getMaxHealth()):0;
+   if(i==0)g.fill(left+170,top+y+13,left+170+(int)(205*Math.max(0,Math.min(1,ratio))),top+y+19,col);
+   if(i>0)text(g,"-",380,y+9,0xFF8699BA);
+  }
+  text(g,"LEVEL "+(player==null?"?":player.experienceLevel),168,283,0xFFB8DDFF);
  }
  private void abilities(GuiGraphics g){
   text(g,tab==1?"DIVINE ARTS":"ARCANE LIBRARY",151,78,0xFF91CFFE);DivineFrame.divider(g,left+154,top+86,237);

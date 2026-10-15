@@ -2,6 +2,7 @@ name: Build NeoForge 1.21.1
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 jobs:
   build:
@@ -15,12 +16,19 @@ jobs:
           distribution: temurin
           java-version: '21'
       - uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.10.2'
       - name: Compile mod
-        run: gradle build --no-daemon
+        run: ./gradlew build --no-daemon
+      - name: Verify installable mod contents
+        shell: bash
+        run: |
+          jars=(build/libs/jaycee-*.jar)
+          test "${#jars[@]}" -eq 1
+          jar tf "${jars[0]}" | grep -Fx 'META-INF/neoforge.mods.toml'
+          jar tf "${jars[0]}" | grep -Fx 'com/brightwebs/jaycee/JayceeMod.class'
+          jar tf "${jars[0]}" | grep -Fx 'com/brightwebs/jaycee/client/JayceeClient.class'
+          jar tf "${jars[0]}" | grep -Fx 'com/brightwebs/jaycee/client/JayceeScreen.class'
       - uses: actions/upload-artifact@v4
         with:
           name: jaycee-neoforge-1.21.1
-          path: build/libs/*.jar
+          path: build/libs/jaycee-*.jar
           if-no-files-found: error

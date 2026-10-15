@@ -32,7 +32,7 @@ public final class GreatSageEnergyCore {
   double now=seconds();
   // Coalesce bursts into the latest pending event rather than snapping an active curve.
   if(event!=State.IDLE&&now-eventStart<duration()){pending=state;return;}
-  event=state;eventStart=now;
+  pending=State.IDLE;event=state;eventStart=now;
  }
  private double seconds(){return (System.nanoTime()-started)*1.0e-9;}
  private double duration(){return event==State.AWAKENING?5:event==State.ULTIMATE?4:3;}

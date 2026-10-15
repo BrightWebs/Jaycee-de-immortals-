@@ -44,7 +44,7 @@ public class JayceeScreen extends Screen {
   }
   for(int i=0;i<10;i++){final int p=i;var b=button(""+(i+1),500+(i%5)*19,248+(i/5)*20,18,18,()->setPage(p));b.selected=page==i;}
   button("Clear slot",501,296,91,23,()->setArt(-1));
-  rows.clear();search=null;equip=null;\n  if(tab==6){\n   if(editorOpen){\n    for(int i=0;i<4;i++){final int step=i;var b=button(new String[]{"Source","Delivery","Effects","Identity"}[i],11+i*117,76,110,27,()->{editorStep=step;rebuild();});b.selected=editorStep==i;}\n    String[] opts=editorStep==0?roots:editorStep==1?deliveries:editorStep==2?effects:alignments;\n    for(int i=0;i<opts.length;i++){final int n=i;int row=i/3,col=i%3;var b=button(opts[i],23+col*150,139+row*41,137,33,()->{if(editorStep==0)root=n;else if(editorStep==1)delivery=n;else if(editorStep==2)effect=n;else alignment=n;rebuild();});b.selected=n==(editorStep==0?root:editorStep==1?delivery:editorStep==2?effect:alignment);}\n    button("Back to Nexus",18,293,146,27,()->{editorOpen=false;rebuild();});\n   }else{\n    for(int i=0;i<sections.length;i++){final int n=i;var b=button(sections[i],12,83+i*30,148,27,()->{nexus=n;rebuild();});b.selected=nexus==i;}\n    button("+ CREATE ABILITY",309,67,161,29,()->{editorOpen=true;editorStep=0;rebuild();});\n   }\n  }
+  rows.clear();search=null;equip=null;\n  if(tab==6){\n   if(editorOpen){\n    for(int i=0;i<4;i++){final int step=i;var b=button(new String[]{"Source","Delivery","Effects","Identity"}[i],11+i*117,76,110,27,()->{editorStep=step;rebuild();});b.selected=editorStep==i;}\n    String[] opts=editorStep==0?roots:editorStep==1?deliveries:editorStep==2?effects:alignments;\n    for(int i=0;i<opts.length;i++){final int n=i;int row=i/2,col=i%2;var b=button(opts[i],23+col*139,143+row*39,128,31,()->{if(editorStep==0)root=n;else if(editorStep==1)delivery=n;else if(editorStep==2)effect=n;else alignment=n;rebuild();});b.selected=n==(editorStep==0?root:editorStep==1?delivery:editorStep==2?effect:alignment);}\n    button("Back to Nexus",334,294,135,27,()->{editorOpen=false;rebuild();});\n   }else{\n    for(int i=0;i<sections.length;i++){final int n=i;var b=button(sections[i],12,83+i*30,148,27,()->{nexus=n;rebuild();});b.selected=nexus==i;}\n    button("+ CREATE ABILITY",309,67,161,29,()->{editorOpen=true;editorStep=0;rebuild();});\n   }\n  }
   if(tab==1){
    for(int i=0;i<AbilityCatalog.CATEGORIES.length;i++){
     final int c=i;var b=button(AbilityCatalog.CATEGORIES[i],9,82+i*31,111,27,()->{category=c;offset=0;rebuild();});b.selected=category==i;
@@ -205,9 +205,9 @@ public class JayceeScreen extends Screen {
    text(g,"01  ROOT       02  DELIVERY       03  EFFECT       04  ALIGNMENT",27,114,0xFF9BBDDB);
    panel(g,19,126,451,101);
    text(g,"ART CONFIGURATION",29,237,0xFFE6CA90);
-   text(g,"Source: "+roots[root]+"  /  Target: "+deliveries[delivery],30,254,INK);
-   text(g,"Effect: "+effects[effect]+"  /  Essence: "+alignments[alignment],30,269,MUTED);
-   text(g,"Visual editor preview  |  Ability creation not yet enabled",187,306,0xFFE2AD8F);
+   text(g,"Source: "+roots[root]+"  /  Target: "+deliveries[delivery],30,288,INK);
+   text(g,"Effect: "+effects[effect]+"  /  Essence: "+alignments[alignment],30,305,MUTED);
+   
    return;
   }
   text(g,"JAYCEE  /  SOVEREIGN NEXUS",17,60,0xFFEFDCA6);

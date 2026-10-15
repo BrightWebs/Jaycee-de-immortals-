@@ -16,10 +16,10 @@ import java.util.Locale;
 /** Coordinates and hitboxes share one transform, including on small GUI scales. */
 public class JayceeScreen extends Screen {
  private static final int W=740,H=340,INK=0xFFD5E5FF,MUTED=0xFF8AA9CD;
- private static final String[] TABS={"Status","Abilities","Skills","Magic","Species","Quests"};
+ private static final String[] TABS={"Status","Abilities","Skills","Magic","Species","Quests","Sovereign"};
  private static final String[] TRACKS={"Body","Spirit","Divine","Utility"};
  private static final String[] ELEMENTS={"Fire","Water","Wind","Earth","Light","Dark"};
- private int tab,page,slot,art,category,offset,branch,tier,element,quest;
+ private int tab,page,slot,art,category,offset,branch,tier,element,quest,nexus,editorStep,root,delivery,effect,alignment;\n private boolean editorOpen=false;\n private final String[] sections={"Dashboard","Ability Library","Essence & Followers","Divine Seats","Spirits","Passives","Inhibitor","Realm Builder"};\n private final String[] roots={"Reality","Fire","Water","Storm","Void","Nature"};\n private final String[] deliveries={"Self","Ray","Touch","Projectile","Beam","Area"};\n private final String[] effects={"Damage","Healing","Teleport","Status","Summon","Soul"};\n private final String[] alignments={"Pure","Dark","Crimson"};
  private double originX,originY,scale=1;
  private String query="";
  private EditBox search;
@@ -34,7 +34,7 @@ public class JayceeScreen extends Screen {
   scale=Math.min(1.0,Math.min((width-12.0)/W,(height-12.0)/H));
   originX=(width-W*scale)/2;originY=(height-H*scale)/2;
   for(int i=0;i<TABS.length;i++){
-   final int t=i;var b=button(TABS[i],58+i*80,7,78,31,()->{tab=t;rebuild();});b.selected=tab==i;b.tabIcon=i;
+   final int t=i;var b=button(TABS[i],45+i*74,7,72,31,()->{tab=t;rebuild();});b.selected=tab==i;b.tabIcon=i;
   }
   button("x",568,12,24,23,this::onClose);
   button("<",500,79,20,20,()->changePage(-1));button(">",574,79,20,20,()->changePage(1));
@@ -44,7 +44,7 @@ public class JayceeScreen extends Screen {
   }
   for(int i=0;i<10;i++){final int p=i;var b=button(""+(i+1),500+(i%5)*19,248+(i/5)*20,18,18,()->setPage(p));b.selected=page==i;}
   button("Clear slot",501,296,91,23,()->setArt(-1));
-  rows.clear();search=null;equip=null;
+  rows.clear();search=null;equip=null;\n  if(tab==6){\n   if(editorOpen){\n    for(int i=0;i<4;i++){final int step=i;var b=button(new String[]{"Source","Delivery","Effects","Identity"}[i],11+i*117,76,110,27,()->{editorStep=step;rebuild();});b.selected=editorStep==i;}\n    String[] opts=editorStep==0?roots:editorStep==1?deliveries:editorStep==2?effects:alignments;\n    for(int i=0;i<opts.length;i++){final int n=i;int row=i/3,col=i%3;var b=button(opts[i],23+col*150,139+row*41,137,33,()->{if(editorStep==0)root=n;else if(editorStep==1)delivery=n;else if(editorStep==2)effect=n;else alignment=n;rebuild();});b.selected=n==(editorStep==0?root:editorStep==1?delivery:editorStep==2?effect:alignment);}\n    button("Back to Nexus",18,293,146,27,()->{editorOpen=false;rebuild();});\n   }else{\n    for(int i=0;i<sections.length;i++){final int n=i;var b=button(sections[i],12,83+i*30,148,27,()->{nexus=n;rebuild();});b.selected=nexus==i;}\n    button("+ CREATE ABILITY",309,67,161,29,()->{editorOpen=true;editorStep=0;rebuild();});\n   }\n  }
   if(tab==1){
    for(int i=0;i<AbilityCatalog.CATEGORIES.length;i++){
     final int c=i;var b=button(AbilityCatalog.CATEGORIES[i],9,82+i*31,111,27,()->{category=c;offset=0;rebuild();});b.selected=category==i;
@@ -111,7 +111,7 @@ public class JayceeScreen extends Screen {
   if(tab==2)skills(g);
   if(tab==3)magic(g);
   if(tab==4)species(g);
-  if(tab==5)quests(g);
+  if(tab==5)quests(g);\n  if(tab==6)sovereign(g);
   super.render(g,localX,localY,dt);
   for(int i=0;i<4;i++){
    int x=500+(i%2)*47,y=113+(i/2)*62,id=loadout()[page*4+i];
@@ -196,6 +196,50 @@ public class JayceeScreen extends Screen {
   String[] titles={"Awakening","Essence of Existence","First Ascension"};text(g,titles[quest],212,67,INK);line(g,212,87,255);
   if(quest==0){wrap(g,"Consume three Jayce's Essences to awaken the interface.",213,108,247,MUTED);text(g,"Complete: 3 / 3 essences",213,163,0xFF98E7CC);text(g,"Reward: Divine menu access",213,184,INK);}
   else {wrap(g,"This chapter is planned. Objectives and rewards will be added with gameplay progression.",213,109,247,MUTED);text(g,"Not available yet",213,182,0xFFD9B87F);}
+ }
+ private void sovereign(GuiGraphics g){
+  panel(g,2,48,486,284);
+  if(editorOpen){
+   text(g,"DIVINE ART FORGE",18,60,0xFFEBD6A0);
+   text(g,"An original ability, assembled by its creator",180,61,MUTED);
+   text(g,"01  ROOT       02  DELIVERY       03  EFFECT       04  ALIGNMENT",27,114,0xFF9BBDDB);
+   panel(g,19,126,451,101);
+   text(g,"ART CONFIGURATION",29,237,0xFFE6CA90);
+   text(g,"Source: "+roots[root]+"  /  Target: "+deliveries[delivery],30,254,INK);
+   text(g,"Effect: "+effects[effect]+"  /  Essence: "+alignments[alignment],30,269,MUTED);
+   text(g,"Visual editor preview  |  Ability creation not yet enabled",187,306,0xFFE2AD8F);
+   return;
+  }
+  text(g,"JAYCEE  /  SOVEREIGN NEXUS",17,60,0xFFEFDCA6);
+  panel(g,7,75,160,248);
+  panel(g,175,106,298,215);
+  String headline=sections[nexus];
+  text(g,headline.toUpperCase(Locale.ROOT),187,120,0xFFE9D1A0);
+  line(g,187,137,273);
+  if(nexus==0){
+   text(g,"CURRENT",191,153,MUTED);text(g,"Jaycee  |  Source",289,153,INK);
+   text(g,"ESSENCE",191,177,MUTED);text(g,"Unbounded  |  Pure / Dark / Crimson",263,177,INK);
+   text(g,"SOUL",191,201,MUTED);text(g,"Damage control: preview",263,201,INK);
+   text(g,"ABILITIES",191,225,MUTED);text(g,"Personal + server arts",263,225,INK);
+   text(g,"REALITY",191,249,MUTED);text(g,"Existence / Creation / Destruction",263,249,INK);
+   wrap(g,"Sovereign administration features require server-authoritative gameplay.",191,281,260,MUTED);
+  }else if(nexus==1){
+   wrap(g,"Your personal and server-created arts will appear here. Open Create Ability to configure a new art's source, targeting, effect and essence alignment.",190,153,262,INK);
+  }else if(nexus==2){
+   text(g,"PURE   /   DARK   /   CRIMSON",191,157,0xFFCEB9F4);
+   wrap(g,"Follower selection, essence gifting and reclaiming, Soul HP and inherited abilities will be managed here.",190,182,266,MUTED);
+  }else if(nexus==3){
+   wrap(g,"Olympian and lesser divine seats, succession challenges and approval records. A seat cannot have duplicate owners.",190,155,267,MUTED);
+  }else if(nexus==4){
+   wrap(g,"Spirit creation, ownership, presence and commands. Jaycee has no fixed spirit limit in the design.",190,154,264,MUTED);
+  }else if(nexus==5){
+   String[] names={"Flight and speed","Aquatic breathing","Underwater movement","Night vision","Regeneration","Universal Shapeshift"};
+   for(int i=0;i<names.length;i++){int y=149+i*24;UiArt.frame(g,189,y,269,22,false);text(g,names[i],198,y+7,INK);text(g,"CONFIG",407,y+7,0xFFE6C98D);}
+  }else if(nexus==6){
+   wrap(g,"The divine inhibitor limits granted strength, authority and abilities. Changing restrictions must be validated by the server.",190,156,265,MUTED);
+  }else{
+   wrap(g,"Realm Builder: choose Divine or Dark blocks, assemble a 3D boxed layout, preview it, then confirm world edits using bounded server operations.",190,156,261,MUTED);
+  }
  }
  private double x(double x){return (x-originX)/scale-140;}private double y(double y){return (y-originY)/scale;}
  @Override public boolean mouseClicked(double x,double y,int b){return super.mouseClicked(x(x),y(y),b);}

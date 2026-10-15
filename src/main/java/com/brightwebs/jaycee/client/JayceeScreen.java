@@ -15,6 +15,7 @@ public final class JayceeScreen extends Screen {
   new JournalView(JournalData.MAGIC),new JournalView(JournalData.SPECIES),new JournalView(JournalData.QUESTS)};
  private final Ability[][] loadout=new Ability[10][4];
  private static final int DESIGN_WIDTH=640,DESIGN_HEIGHT=500;
+ private static final float UI_SIZE=0.86f;
  private int tab,page,slot;
  private boolean showLoadout;
  private float scale=1;
@@ -22,7 +23,7 @@ public final class JayceeScreen extends Screen {
 
  public JayceeScreen(){super(Component.literal("Jaycee : Di Immortales"));}
  @Override protected void init(){
-  scale=Math.min(1f,Math.min(width/(float)DESIGN_WIDTH,height/(float)DESIGN_HEIGHT));
+  scale=UI_SIZE*Math.min(1f,Math.min(width/(float)DESIGN_WIDTH,height/(float)DESIGN_HEIGHT));
   originX=(int)((width-DESIGN_WIDTH*scale)/2);originY=(int)((height-DESIGN_HEIGHT*scale)/2);
   for(int i=0;i<TABS.length;i++){
    final int index=i;
@@ -67,8 +68,10 @@ public final class JayceeScreen extends Screen {
  }
  public void panel(GuiGraphics g,int x,int y,int w,int h,String title){
   DivineFrame.frame(g,x,y,w,h,false);
-  text(g,title,x+12,y+12,w-24);
-  DivineFrame.divider(g,x+12,y+26,w-24);
+  // Reserve a quiet title band so corner filigree never intersects the glyphs.
+  g.fill(x+10,y+10,x+w-10,y+25,0xFF081424);
+  text(g,title,x+20,y+14,w-40);
+  DivineFrame.divider(g,x+14,y+28,w-28);
  }
  @Override public void render(GuiGraphics g,int mx,int my,float delta){
   g.fill(0,0,width,height,0x99040A14);

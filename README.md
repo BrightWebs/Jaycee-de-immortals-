@@ -25,7 +25,7 @@ Minecraft 1.21.1 / Java 21 / NeoForge 21.1.x.
 
 1. Open this repository's **Actions** tab and select **Build NeoForge 1.21.1**. Choose a **successful run for the UI pull request's latest commit**, not an older run from another branch. PR builds run automatically; **Run workflow** can also build a selected branch manually.
    - If GitHub shows **Action required** or **Workflows awaiting approval**, a repository maintainer must use **Approve and run** on the pull request before the build can start. There is no downloadable artifact until that approved build succeeds.
-2. Under **Artifacts**, download `jaycee-neoforge-1.21.1` (GitHub sign-in required). Extract the ZIP to get `jaycee-0.1.1.jar` (UI blur fix). The ZIP and GitHub's source-code downloads are not installable mods.
+2. Under **Artifacts**, download `jaycee-neoforge-1.21.1` (GitHub sign-in required). Extract the ZIP to get `jaycee-0.1.2.jar` (smaller UI and padded headings, including the prior blur fix). The ZIP and GitHub's source-code downloads are not installable mods.
 3. Install **NeoForge 21.1.172** for **Minecraft 1.21.1**, launch that profile once, then close the game. Use Java 21; Forge and Fabric are not compatible loaders for this JAR.
 4. Put the extracted JAR into the **mods** folder of that profile's game directory. Remove older Jaycee JARs so only one version is installed.
 5. Launch the NeoForge profile, confirm **Jaycee Di Immortales** appears in **Mods**, and enter a test world. Press **M** to open the UI immediately—no essence is needed. If M conflicts with another mod, rebind it under **Options → Controls → Key Binds → Jaycee**.
@@ -40,7 +40,13 @@ The build also checks that the output JAR contains NeoForge metadata and the mod
 
 This screen now uses a plain dim overlay instead of Minecraft's post-processing menu blur. The backdrop is drawn once before the panels; inherited background calls do not apply a blur pass over the interface. This change is local to the Immortals screen and does not alter your global menu blur setting.
 
-Remove `jaycee-0.1.0.jar` before installing the replacement. With menu background blur enabled in Minecraft, open the UI with M and compare Status text, borders, all other tabs, the loadout and Face/3D portraits. Close and reopen the screen and resize the window. The world should be dimmed, not blurred, while the interface stays unblurred. Layout scaling on very small windows can still reduce text legibility; that is separate from the removed full-screen blur effect.
+Remove older Jaycee JARs before installing the replacement. With menu background blur enabled in Minecraft, open the UI with M and compare Status text, borders, all other tabs, the loadout and Face/3D portraits. Close and reopen the screen and resize the window. The world should be dimmed, not blurred, while the interface stays unblurred. Layout scaling on very small windows can still reduce text legibility; that is separate from the removed full-screen blur effect.
+
+### Compact layout and heading test (0.1.2)
+
+The interface is 14% smaller than 0.1.1 at the same window size and GUI scale, leaving more room around the centered window. The shared panel header has a solid navy backing, 20-pixel horizontal text inset, and a divider below the text so ornamental corners cannot run through headings such as **Stats**, **Titles**, or **Racial Trait**. All tabs use this heading treatment. Artwork and the logical 640 × 500 layout remain unchanged.
+
+Compare the overall footprint, heading clearance, ability scrolling, skill-node selection, journal entries, loadout controls and Face/3D portraits at multiple GUI scales. Drawing, mouse input and portrait bounds all use the same reduced scale. [Tensura: Reincarnated](https://www.curseforge.com/minecraft/mc-mods/tensura-reincarnated) is a general RPG-interface reference, not a source of copied assets or an exact sizing specification.
 
 ## Run in development
 

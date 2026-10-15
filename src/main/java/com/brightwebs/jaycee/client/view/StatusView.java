@@ -21,9 +21,14 @@ public final class StatusView implements TabView {
   s.text(g,"Level / EXP: live",24,213,126);
   s.text(g,"Other stats: sample",24,235,126);
   DivineFrame.portrait(g,200,82,200,190);
-  if(player!=null)InventoryScreen.renderEntityInInventoryFollowsMouse(g,210,90,390,264,65,0f,mx,my,player);
   s.text(g,"HP  "+(player==null?"-":(int)player.getHealth()+" / "+(int)player.getMaxHealth()),450,88,165);
   int y=120;
   for(var stat:PreviewData.STATS){s.text(g,stat.name()+"  "+stat.value(),450,y,165);y+=28;}
+ }
+ @Override public void renderUnscaled(JayceeScreen s,GuiGraphics g,int mx,int my){
+  var player=Minecraft.getInstance().player;
+  if(player!=null)InventoryScreen.renderEntityInInventoryFollowsMouse(g,
+   s.screenX(210),s.screenY(90),s.screenX(390),s.screenY(264),
+   Math.max(1,s.scaledSize(65)),0f,mx,my,player);
  }
 }

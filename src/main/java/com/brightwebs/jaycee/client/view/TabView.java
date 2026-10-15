@@ -7,5 +7,7 @@ import net.minecraft.client.gui.GuiGraphics;
 public interface TabView {
  void init(JayceeScreen screen);
  void render(JayceeScreen screen, GuiGraphics graphics, int mouseX, int mouseY);
+ /** Entity renderers use screen-space clipping, outside the shell's pose transform. */
+ default void renderUnscaled(JayceeScreen screen, GuiGraphics graphics, int mouseX, int mouseY) {}
  default boolean scroll(JayceeScreen screen, double x, double y, double delta) { return false; }
 }

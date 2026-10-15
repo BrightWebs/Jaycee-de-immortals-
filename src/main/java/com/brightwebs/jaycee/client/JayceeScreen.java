@@ -65,11 +65,19 @@ public final class JayceeScreen extends Screen {
   panel(g,12,304,616,48,"LOADOUT PREVIEW (NOT SAVED)");
   text(g,"Page "+(page+1)+"/10",42,333,64);
   views[tab].render(this,g,localX,localY);
+  g.pose().popPose();
+  views[tab].renderUnscaled(this,g,mx,my);
+  g.pose().pushPose();
+  g.pose().translate(originX,originY,0);
+  g.pose().scale(scale,scale,1);
   super.render(g,localX,localY,delta);
   g.pose().popPose();
  }
  private double localX(double x){return (x-originX)/scale;}
  private double localY(double y){return (y-originY)/scale;}
+ public int screenX(int x){return Math.round(originX+x*scale);}
+ public int screenY(int y){return Math.round(originY+y*scale);}
+ public int scaledSize(int size){return Math.round(size*scale);}
  @Override public boolean mouseClicked(double x,double y,int button){
   return super.mouseClicked(localX(x),localY(y),button);
  }

@@ -39,7 +39,7 @@ public class JayceeScreen extends Screen {
    portraitButton=addRenderableWidget(new OrnateButton("3D View",left+15,top+261,112,20,()->GameplayActions.portrait(!state().portrait3d())));
    // Human is the existing evolution preview's race, not a duplicate progression store.
    var race=addRenderableWidget(new Button(left+14,top+88,110,14,Component.literal("Human"),
-    b->{speciesOpen=!speciesOpen;rebuild();},Button.DEFAULT_NARRATION){
+    b->{speciesOpen=!speciesOpen;rebuild();},narration->narration.get()){
      @Override protected void renderWidget(GuiGraphics g,int mx,int my,float dt){
       g.drawString(font,getMessage(),getX(),getY()+3,isHoveredOrFocused()?0xFFE5F4FF:0xFF8CC7FF,false);
       if(isHoveredOrFocused())g.fill(getX(),getY()+12,getX()+font.width(getMessage()),getY()+13,0xFF8CC7FF);

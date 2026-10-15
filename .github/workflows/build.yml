@@ -18,6 +18,15 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Compile mod
         run: ./gradlew build --no-daemon
+      - name: Verify installable mod contents
+        shell: bash
+        run: |
+          jars=(build/libs/jaycee-*.jar)
+          test "${#jars[@]}" -eq 1
+          jar tf "${jars[0]}" | grep -Fx 'META-INF/neoforge.mods.toml'
+          jar tf "${jars[0]}" | grep -Fx 'com/brightwebs/jaycee/JayceeMod.class'
+          jar tf "${jars[0]}" | grep -Fx 'com/brightwebs/jaycee/client/JayceeClient.class'
+          jar tf "${jars[0]}" | grep -Fx 'com/brightwebs/jaycee/client/JayceeScreen.class'
       - uses: actions/upload-artifact@v4
         with:
           name: jaycee-neoforge-1.21.1

@@ -15,34 +15,51 @@ public final class JayceeScreen extends Screen {
   new PlaceholderView("Species","Human > Demigod > Divine\n\nSample evolution path"),
   new PlaceholderView("Quests","Awakening\nEssence of Existence\nThe First Ascension")};
  private final Ability[][] loadout=new Ability[10][4];
+ private static final int DESIGN_WIDTH=640,DESIGN_HEIGHT=500;
  private int tab,page,slot;
+ private boolean showLoadout;
  private float scale=1;
  private int originX,originY;
 
  public JayceeScreen(){super(Component.literal("Jaycee : Di Immortales"));}
  @Override protected void init(){
-  scale=Math.min(1f,Math.min(width/640f,height/360f));
-  originX=(int)((width-640*scale)/2);originY=(int)((height-360*scale)/2);
+  scale=Math.min(1f,Math.min(width/(float)DESIGN_WIDTH,height/(float)DESIGN_HEIGHT));
+  originX=(int)((width-DESIGN_WIDTH*scale)/2);originY=(int)((height-DESIGN_HEIGHT*scale)/2);
   for(int i=0;i<TABS.length;i++){
    final int index=i;
-   button(TABS[i],12+i*103,10,101,28,()->{tab=index;rebuild();}).selected(tab==i);
+   button(TABS[i],12+i*103,6,101,62,()->{tab=index;rebuild();}).selected(tab==i).navigation(i);
   }
-  button("<",16,325,22,22,()->{page=(page+9)%10;rebuild();});
-  button(">",109,325,22,22,()->{page=(page+1)%10;rebuild();});
+  if(!showLoadout)views[tab].init(this);
+  button(showLoadout?"Close loadout":"Loadout",282,472,124,20,()->{showLoadout=!showLoadout;rebuild();});
+  if(!showLoadout)return;
+  button("<",20,438,22,22,()->{page=(page+9)%10;rebuild();});
+  button(">",113,438,22,22,()->{page=(page+1)%10;rebuild();});
   for(int i=0;i<4;i++){
    final int index=i;
    Ability ability=loadout[page][i];
-   button((i+1)+": "+(ability==null?"Empty":ability.name()),144+i*120,324,116,24,()->{
+   button((i+1)+": "+(ability==null?"Empty":ability.name()),144+i*120,437,116,24,()->{
     slot=index;rebuild();
    }).selected(slot==i);
   }
-  views[tab].init(this);
  }
  public void rebuild(){clearWidgets();init();}
  public OrnateButton button(String label,int x,int y,int w,int h,Runnable action){
   return addRenderableWidget(new OrnateButton(label,x,y,w,h,action));
  }
- public void equip(Ability ability){loadout[page][slot]=ability;rebuild();}
+ public void equip(Ability ability){loadout[page][slot]=ability;showLoadout=true;rebuild();}
+ public void coloredText(GuiGraphics g,String text,int x,int y,int maxWidth,int color){
+  g.drawString(font,font.plainSubstrByWidth(text,maxWidth),x,y,color,false);
+ }
+ public void rightText(GuiGraphics g,String text,int right,int y,int color){
+  g.drawString(font,text,right-font.width(text),y,color,false);
+ }
+ public void largeText(GuiGraphics g,String text,int x,int y,int maxWidth,float size,int color){
+  g.pose().pushPose();
+  g.pose().translate(x,y,0);
+  g.pose().scale(size,size,1);
+  coloredText(g,text,0,0,(int)(maxWidth/size),color);
+  g.pose().popPose();
+ }
  public void text(GuiGraphics g,String text,int x,int y,int maxWidth){
   g.drawString(font,font.plainSubstrByWidth(text,maxWidth),x,y,0xFFC3E6FF,false);
  }
@@ -60,16 +77,18 @@ public final class JayceeScreen extends Screen {
   g.pose().pushPose();
   g.pose().translate(originX,originY,0);
   g.pose().scale(scale,scale,1);
-  DivineFrame.frame(g,0,0,640,360,false);
-  DivineFrame.ribbon(g,6,5,628,36);
-  panel(g,12,304,616,48,"LOADOUT PREVIEW (NOT SAVED)");
-  text(g,"Page "+(page+1)+"/10",42,333,64);
+  DivineFrame.frame(g,0,0,640,74,true);
+  DivineFrame.frame(g,0,82,640,418,false);
   views[tab].render(this,g,localX,localY);
   g.pose().popPose();
   views[tab].renderUnscaled(this,g,mx,my);
   g.pose().pushPose();
   g.pose().translate(originX,originY,0);
   g.pose().scale(scale,scale,1);
+  if(showLoadout){
+   panel(g,12,410,616,58,"LOADOUT PREVIEW (NOT SAVED)");
+   text(g,"Page "+(page+1)+"/10",46,445,64);
+  }
   super.render(g,localX,localY,delta);
   g.pose().popPose();
  }
@@ -90,6 +109,7 @@ public final class JayceeScreen extends Screen {
  }
  @Override public boolean mouseScrolled(double x,double y,double dx,double dy){
   if(dy!=0&&hasAltDown()){page=Math.floorMod(page+(dy<0?1:-1),10);rebuild();return true;}
+  if(showLoadout)return super.mouseScrolled(localX(x),localY(y),dx,dy);
   return views[tab].scroll(this,localX(x),localY(y),dy)
    ||super.mouseScrolled(localX(x),localY(y),dx,dy);
  }

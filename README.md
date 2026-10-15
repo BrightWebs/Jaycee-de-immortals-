@@ -8,10 +8,10 @@ The interface is the first deliverable. We will not build combat powers until th
 
 - Press **M** during normal gameplay to open the interface; no unlock item is required.
 - The existing essence item and operator command `/jayceeessence` remain available for experimentation, but do not gate the UI.
-- Render the **actual player's animated 3D model and skin**, not a screenshot of Steve.
+- Render the **actual player's skin** in the compact portrait, with a **3D** toggle for the live animated player model.
 - Six clickable tabs: Status, Abilities, Skills, Magic, Species, Quests.
-- A **persistent four-slot ability loadout with ten selectable pages** on every tab.
-- Dark sapphire panels, glowing accents, separate interactive controls, and a layout that scales to the window. Reference images were not attached to this task, so exact visual fidelity is not claimed.
+- A **four-slot preview loadout with ten selectable pages**, accessible from every tab.
+- Reference-inspired sapphire glass, blue-silver ornamental borders, glowing icon tabs and a central magical seal. The visible Status reference guides the proportions; pixel-perfect parity is not claimed.
 - Gameplay ability implementation comes later.
 
 ## Development baseline
@@ -37,23 +37,30 @@ Join a world and press **M** (rebind under Options → Controls → Jaycee). Esc
 
 ## UI preview and customization
 
-- **Status:** live player name, model, health, vanilla level and experience progress; MP, Attack, Defense, Speed and Luck are sample values.
+- **Status:** compact live skin portrait and player name, race/title/faction labels, level/EXP bar and core stats on the left; a glowing magical seal in the center; titles, racial trait and six elemental affinities on the right. The **3D / Face** toggle switches the portrait to the animated player model. Health, vanilla level and experience progress are live; RPG stats, traits and affinities are explicitly sample data.
 - **Abilities:** category filtering, six visible list rows, wheel scrolling over the list or arrow buttons, selected details and an **Equip preview** button.
 - **Skills:** four mastery columns, four selectable tiers, and a details panel.
 - **Magic / Species / Quests:** distinct placeholder panels.
-- The bottom loadout has four selectable slots and ten pages (`<` / `>` or Alt + scroll). Equip assigns to the selected slot/page. It survives tab switches and resizing, but resets when the screen closes. It is not synchronized, saved, or connected to gameplay powers.
+- **Loadout** opens a collapsible tray with four selectable slots and ten pages (`<` / `>` or Alt + scroll). **Equip preview** assigns to the selected slot/page and opens the tray so the result is visible. Close the tray to resume panel interactions. It survives tab switches and resizing, but resets when the screen closes. It is not synchronized, saved, or connected to gameplay powers.
 
 Source organization (under `src/main/java/com/brightwebs/jaycee/`):
 
 - `client/JayceeClient.java`: client-only registration and gameplay key handling. The common mod entry point never references client classes.
-- `client/JayceeScreen.java`: navigation, loadout state and a 640 × 360 logical layout; rendering and pointer input share the same scale.
+- `client/JayceeScreen.java`: icon navigation, collapsible loadout state and a 640 × 500 logical layout; rendering and pointer input share the same scale.
 - `client/view/`: independent tab panels implementing `TabView`.
 - `client/widget/OrnateButton.java`: shared hover, selected, focus, tooltip and disabled visuals.
+- `client/widget/StatusSymbols.java`: compact heart/star/sword/shield/boot/clover and elemental silhouettes for the Status rows.
 - `client/model/PreviewData.java`: replaceable UI-only records and sample values.
-- `client/DivineFrame.java` and `client/DivineGlyph.java`: centralized vector-like placeholder panels, portraits, borders and icons. No external UI textures are required.
+- `client/DivineFrame.java` and `client/DivineGlyph.java`: centralized procedural panels, ornamental borders, magical seal and recognizable navigation icons. No external UI textures are required; the portrait uses the player's loaded Minecraft skin.
 
-For final art, replace drawing inside the frame/glyph helpers with resource-location blits and place textures under `src/main/resources/assets/jaycee/textures/gui/`. Preserve helper dimensions and control hitboxes; assets can then be overridden by resource packs. Adjust panel geometry in the individual views and the shared design size in the shell together. Follow-up polish includes supplied artwork, localization of preview labels, synchronized progression data and a gameplay HUD.
+For final art, replace drawing inside the frame/glyph helpers with resource-location blits and place textures under `src/main/resources/assets/jaycee/textures/gui/`. Preserve helper dimensions and control hitboxes; assets can then be overridden by resource packs. Adjust panel geometry in the individual views and the shared design size in the shell together. Follow-up polish includes hand-painted borders and icon textures, localization of preview labels, synchronized progression data and a gameplay HUD.
+
+### Reference scope
+
+The supplied Status mockup (`df5d9c15-68d6-4f26-a806-bcb9b23ba011`) guides the separate tab strip and main frame, left profile/stat stack, central luminous emblem and right inset cards. Its black presentation background, explanatory callout boxes and arrows are annotations, not in-game controls, and are intentionally omitted. Names and values use the current player or marked preview data rather than copying fixed screenshot text.
+
+The other two attachment URLs were supplied but their images were not visible in this session. Abilities and Skills retain their working interactions and share the redesigned frame/icon language; they are not claimed to reproduce those unseen references. Procedural art and Minecraft's default font are an approximation, not a pixel-identical recreation.
 
 ## Manual acceptance checks
 
-Build validation does not establish in-game fidelity. In a dev client, check M in a new world without essences, all six selected tabs, every category, list scrolling and endpoints, skill node details, equip/page persistence, long labels, Escape, and resize at multiple GUI scales (including a window smaller than the design size). Check that M does not replace chat/inventory screens. Start a dedicated dev server to verify client-only isolation. Compare screenshots to the reference images once supplied.
+Build validation does not establish in-game fidelity. In a dev client, check M in a new world without essences, all six icon tabs, portrait Face/3D modes, every category, list scrolling and endpoints, skill node details, opening/closing the loadout, equip/page persistence, long labels, Escape, and resize at multiple GUI scales (including a window smaller than the design size). While the tray is open, covered view controls must not respond. Check that M does not replace chat/inventory screens. Start a dedicated dev server to verify client-only isolation. Compare Status screenshots to the supplied reference; obtain the other two images before claiming their layouts match.

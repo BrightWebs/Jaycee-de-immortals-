@@ -21,6 +21,18 @@ https://github.com/NeoForgeMDKs/MDK-1.21.1-ModDevGradle
 
 Minecraft 1.21.1 / Java 21 / NeoForge 21.1.x.
 
+## Download and play the UI test build
+
+1. Open this repository's **Actions** tab and select **Build NeoForge 1.21.1**. Choose a **successful run for the UI pull request's latest commit**, not an older run from another branch. PR builds run automatically; **Run workflow** can also build a selected branch manually.
+2. Under **Artifacts**, download `jaycee-neoforge-1.21.1` (GitHub sign-in required). Extract the ZIP to get `jaycee-0.1.0.jar`. The ZIP and GitHub's source-code downloads are not installable mods.
+3. Install **NeoForge 21.1.172** for **Minecraft 1.21.1**, launch that profile once, then close the game. Use Java 21; Forge and Fabric are not compatible loaders for this JAR.
+4. Put the extracted JAR into the **mods** folder of that profile's game directory. Remove older Jaycee JARs so only one version is installed.
+5. Launch the NeoForge profile, confirm **Jaycee Di Immortales** appears in **Mods**, and enter a test world. Press **M** to open the UI immediately—no essence is needed. If M conflicts with another mod, rebind it under **Options → Controls → Key Binds → Jaycee**.
+
+Test all six tabs, select skills and journal entries, scroll the ability list, and use **Equip preview** and **Loadout**. Escape closes the screen. Powers, progression, quests and equipment remain UI previews; this is an interface test build, not a completed RPG gameplay mod. Back up existing worlds before testing.
+
+If no successful run/artifact exists for the latest commit, **there is no verified download yet**. A failed build does not publish a JAR. The same source can be built locally using the commands below; an internet connection to the NeoForge and Minecraft dependency hosts is required.
+
 ## Run in development
 
 Install **JDK 21** and set `JAVA_HOME` to it. From the repository root:

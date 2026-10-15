@@ -19,7 +19,7 @@ public class JayceeScreen extends Screen {
  private static final String[] TABS={"Status","Abilities","Skills","Magic","Species","Quests","Sovereign"};
  private static final String[] TRACKS={"Body","Spirit","Divine","Utility"};
  private static final String[] ELEMENTS={"Fire","Water","Wind","Earth","Light","Dark"};
- private int tab,page,slot,art,category,offset,branch,tier,element,quest,nexus,editorStep,root,delivery,effect,alignment;\n private boolean editorOpen=false;\n private final String[] sections={"Dashboard","Ability Library","Essence & Followers","Divine Seats","Spirits","Passives","Inhibitor","Realm Builder"};\n private final String[] roots={"Reality","Fire","Water","Storm","Void","Nature"};\n private final String[] deliveries={"Self","Ray","Touch","Projectile","Beam","Area"};\n private final String[] effects={"Damage","Healing","Teleport","Status","Summon","Soul"};\n private final String[] alignments={"Pure","Dark","Crimson"};
+ private int tab,page,slot,art,category,offset,branch,tier,element,quest,speciesChoice,nexus,editorStep,root,delivery,effect,alignment;\n private boolean editorOpen=false;\n private final String[] sections={"Dashboard","Ability Library","Essence & Followers","Divine Seats","Spirits","Passives","Inhibitor","Realm Builder"};\n private final String[] roots={"Reality","Fire","Water","Storm","Void","Nature"};\n private final String[] deliveries={"Self","Ray","Touch","Projectile","Beam","Area"};\n private final String[] effects={"Damage","Healing","Teleport","Status","Summon","Soul"};\n private final String[] alignments={"Pure","Dark","Crimson"};
  private double originX,originY,scale=1;
  private String query="";
  private EditBox search;
@@ -62,7 +62,7 @@ public class JayceeScreen extends Screen {
    }
   }else if(tab==3){
    for(int i=0;i<6;i++){final int e=i;var b=button(ELEMENTS[i],14,85+i*32,102,27,()->{element=e;rebuild();});b.selected=element==i;}
-  }else if(tab==5){
+  }else if(tab==4){\n   String[] races={"Human","Elf","Demon","Dragon","Angel","Beastkin","Undead","Primordial","Custom"};\n   for(int i=0;i<races.length;i++){final int chosen=i;var b=button(races[i],14,87+i*25,106,23,()->{speciesChoice=chosen;rebuild();});b.selected=speciesChoice==i;}\n  }else if(tab==5){
    String[] names={"Awakening","Essence of Existence","First Ascension"};
    for(int i=0;i<3;i++){final int q=i;var b=button(names[i],15,88+i*40,166,33,()->{quest=q;rebuild();});b.selected=quest==i;}
   }
@@ -227,18 +227,52 @@ public class JayceeScreen extends Screen {
   text(g,"Unavailable",392,309,MUTED);
  }
  private void species(GuiGraphics g){
-  panel(g,2,48,486,284);text(g,"Divine Evolution",20,65,INK);text(g,"Current species: Human",20,85,MUTED);
-  String[] names={"Human","Demigod","Minor God","Major God","Olympian","Protogenos"};
-  for(int i=0;i<6;i++){
-   int x=22+(i%3)*155,y=123+(i/3)*75;panel(g,x,y,137,55);text(g,names[i],x+12,y+12,INK);text(g,i==0?"Current":"Locked",x+12,y+31,i==0?0xFF9EE9D5:MUTED);
+  panel(g,2,48,486,284);
+  text(g,"Species / Race",211,60,INK);
+  panel(g,8,79,119,248);
+  panel(g,132,79,219,248);
+  panel(g,355,79,125,248);
+  String[] races={"Human","Elf","Demon","Dragon","Angel","Beastkin","Undead","Primordial Divinity","Custom"};
+  DivineFrame.jewel(g,236,167,System.currentTimeMillis()/35,
+    speciesChoice==7?0xFFE5D0FC:speciesChoice==3?0xFFFF9B73:0xFF7EC6FF);
+  text(g,font.plainSubstrByWidth(races[speciesChoice],188),147,236,0xFFE9D6AA);
+  wrap(g,speciesChoice==7?"An origin beyond creation, transcending ordinary divine limits.":"Race preview. Evolution paths and requirements depend on the server's progression rules.",145,255,194,MUTED);
+  text(g,"Race Traits",373,92,0xFFBFE6FF);
+  line(g,368,109,94);
+  String[] traits=speciesChoice==7?
+   new String[]{"Existence affinity","All elements","Immortality","Reality","Divine essence"}:
+   new String[]{"Race identity","Affinity: unknown","Resistances: --","Growth: --","Awakening: --"};
+  for(int i=0;i<traits.length;i++){
+   DivineFrame.gem(g,370,125+i*26,2,i%2==0?0xFFE8CD8F:0xFF6EA2DA);
+   wrap(g,traits[i],378,120+i*26,95,MUTED);
   }
-  wrap(g,"Evolution requirements and the final Jaycee branch will be connected when progression gameplay is implemented.",24,282,437,MUTED);
+  text(g,"Selected race preview",365,296,0xFFD9BD87);
+  text(g,"Evolution is not enabled",365,309,MUTED);
  }
  private void quests(GuiGraphics g){
-  panel(g,2,48,188,284);panel(g,195,48,293,284);text(g,"Quest Journal",16,64,INK);
-  String[] titles={"Awakening","Essence of Existence","First Ascension"};text(g,titles[quest],212,67,INK);line(g,212,87,255);
-  if(quest==0){wrap(g,"Consume three Jayce's Essences to awaken the interface.",213,108,247,MUTED);text(g,"Complete: 3 / 3 essences",213,163,0xFF98E7CC);text(g,"Reward: Divine menu access",213,184,INK);}
-  else {wrap(g,"This chapter is planned. Objectives and rewards will be added with gameplay progression.",213,109,247,MUTED);text(g,"Not available yet",213,182,0xFFD9B87F);}
+  panel(g,2,48,486,284);
+  text(g,"Quest List",147,60,INK);
+  panel(g,11,77,177,245);
+  panel(g,193,77,171,245);
+  panel(g,370,77,107,245);
+  String[] names={"Awakening","Essence of Existence","First Ascension"};
+  for(int i=0;i<names.length;i++){
+   int y=95+i*44;
+   UiArt.icon(g,199,y,26,i);
+   wrap(g,names[i],231,y+3,126,i==quest?0xFFEED8A2:INK);
+   text(g,i==0?"Complete":"Locked",232,y+26,i==0?0xFF9EE2CF:MUTED);
+  }
+  String name=names[quest];
+  text(g,font.plainSubstrByWidth(name,92),378,92,INK);
+  line(g,378,109,92);
+  text(g,quest==0?"MAIN QUEST":"COMING SOON",379,118,0xFFE3C792);
+  wrap(g,quest==0?"Consume three Jayce's Essences to awaken your divine interface.":"This chapter unlocks when its progression system becomes available.",378,145,91,MUTED);
+  text(g,"Objectives",378,214,INK);
+  wrap(g,quest==0?"Essences 3 / 3":"Not available",378,229,90,0xFFA5CFF0);
+  text(g,"Rewards",378,265,INK);
+  DivineFrame.gem(g,390,289,8,0xFF7BC5FF);
+  text(g,quest==0?"Menu":"TBD",407,286,MUTED);
+  text(g,"Quest details",24,307,0xFF96C6EF);
  }
  private void sovereign(GuiGraphics g){
   panel(g,2,48,486,284);

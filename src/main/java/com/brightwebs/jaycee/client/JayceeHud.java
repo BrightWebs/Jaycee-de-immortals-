@@ -18,7 +18,7 @@ public final class JayceeHud {
   var g=event.getGuiGraphics();int page=JayceeNetwork.page(p);int[] slots=JayceeNetwork.slots(p);
   int x=mc.getWindow().getGuiScaledWidth()-148,y=mc.getWindow().getGuiScaledHeight()-69;
   UiArt.frame(g,x,y,140,61,false);
-  for(int i=0;i<4;i++){int sx=x+7+i*32;UiArt.frame(g,sx,y+8,30,30,false);UiArt.icon(g,sx+4,y+12,22,slots[page*4+i]);}
+  for(int i=0;i<4;i++){\n   int sx=x+7+i*32,id=slots[page*4+i];\n   UiArt.slot(g,sx,y+8,30,30,false,id>=0);\n   if(id>=0)UiArt.icon(g,sx+4,y+12,22,id);\n  }
   g.drawCenteredString(mc.font,"Page "+(page+1)+" / 10",x+70,y+43,0xFFB7D9FA);
  }
  @SubscribeEvent public static void scroll(InputEvent.MouseScrollingEvent event){

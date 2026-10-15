@@ -16,6 +16,9 @@ public final class DivineGlyph {
    else{if(d%2==0){g.fill(cx-span,cy+d,cx-span+2,cy+d+1,col);g.fill(cx+span-1,cy+d,cx+span+1,cy+d+1,col);}}
   }
   g.fill(cx-2,cy-2,cx+2,cy+2,0xFFE7F8FF);
+  // Stable binary corner marks distinguish abilities even when base glyph motifs repeat.
+  for(int bit=0;bit<4;bit++)if((id&(1<<bit))!=0)
+   g.fill(x+2+bit*3,y+size-3,x+4+bit*3,y+size-1,0xFFE9D7FF);
  }
  static int color(int id){return COLORS[Math.floorMod(id,COLORS.length)];}
  /** Six unboxed, 19-pixel silver-blue symbols centered above navigation labels. */

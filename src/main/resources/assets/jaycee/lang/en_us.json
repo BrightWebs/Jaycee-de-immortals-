@@ -1,5 +1,12 @@
 {
   "item.jaycee.jayces_essence": "Jayce's Essence",
   "key.jaycee.open": "Open Jaycee Interface",
-  "key.categories.jaycee": "Jaycee"
+  "key.categories.jaycee": "Jaycee",
+  "key.jaycee.slot1": "Ability Slot 1 (Alt: Cycle Mode)",
+  "key.jaycee.slot2": "Ability Slot 2 (Alt: Cycle Mode)",
+  "key.jaycee.slot3": "Ability Slot 3 (Alt: Cycle Mode)",
+  "key.jaycee.slot4": "Ability Slot 4 (Alt: Cycle Mode)",
+  "hud.jaycee.page": "Page %s/10",
+  "hud.jaycee.mana": "Mana %s",
+  "hud.jaycee.empty": "Empty"
 }

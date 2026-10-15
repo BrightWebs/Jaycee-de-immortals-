@@ -15,20 +15,35 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
+import com.brightwebs.jaycee.ability.LoadoutConfig;
+import com.brightwebs.jaycee.ability.LoadoutNetwork;
+import com.brightwebs.jaycee.ability.LoadoutService;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.config.ModConfig;
 
 @Mod(JayceeMod.ID)
 public final class JayceeMod {
  public static final String ID="jaycee";
  public static final DeferredRegister.Items ITEMS=DeferredRegister.createItems(ID);
  public static final DeferredItem<Item> ESSENCE=ITEMS.register("jayces_essence",()->new Essence(new Item.Properties().stacksTo(16)));
- public JayceeMod(IEventBus bus){ ITEMS.register(bus); NeoForge.EVENT_BUS.addListener(this::commands); }
+ public JayceeMod(IEventBus bus, ModContainer container){
+  ITEMS.register(bus);
+  container.registerConfig(ModConfig.Type.COMMON, LoadoutConfig.SPEC);
+  bus.addListener(LoadoutNetwork::register);
+  NeoForge.EVENT_BUS.addListener(this::commands);
+  NeoForge.EVENT_BUS.addListener(LoadoutService::tick);
+  NeoForge.EVENT_BUS.addListener(LoadoutService::clone);
+  NeoForge.EVENT_BUS.addListener(LoadoutService::login);
+  NeoForge.EVENT_BUS.addListener(LoadoutService::respawn);
+  NeoForge.EVENT_BUS.addListener(LoadoutService::dimension);
+ }
  private void commands(RegisterCommandsEvent event){event.getDispatcher().register(Commands.literal("jayceeessence").requires(s->s.hasPermission(2)).executes(c->{ServerPlayer p=c.getSource().getPlayerOrException();p.getInventory().add(new ItemStack(ESSENCE.get(),3));c.getSource().sendSuccess(()->Component.literal("Received 3 Jayce's Essences"),false);return 1;}));}
  public static boolean unlocked(Player p){return p.getPersistentData().getInt("JayceeConsumed")>=3;}
  public static final class Essence extends Item {
   public Essence(Properties properties){super(properties);}
   @Override public InteractionResultHolder<ItemStack> use(Level level,Player player,InteractionHand hand){
     ItemStack stack=player.getItemInHand(hand);
-    if(!level.isClientSide){int n=Math.min(3,player.getPersistentData().getInt("JayceeConsumed")+1);player.getPersistentData().putInt("JayceeConsumed",n);if(!player.getAbilities().instabuild)stack.shrink(1);player.displayClientMessage(Component.literal(n==3?"Essence mastered. Press M for the Jaycee UI.":"Essence absorbed: "+n+" / 3"),true);}
+    if(!level.isClientSide){int n=Math.min(3,Math.max(0,player.getPersistentData().getInt("JayceeConsumed"))+1);player.getPersistentData().putInt("JayceeConsumed",n);if(!player.getAbilities().instabuild)stack.shrink(1);player.displayClientMessage(Component.literal(n==3?"Essence mastered. Press M for the Jaycee UI.":"Essence absorbed: "+n+" / 3"),true);if(player instanceof ServerPlayer serverPlayer)LoadoutService.sync(serverPlayer);}
     return InteractionResultHolder.sidedSuccess(stack,level.isClientSide);
   }
  }

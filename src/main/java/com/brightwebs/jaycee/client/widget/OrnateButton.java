@@ -53,7 +53,7 @@ public final class OrnateButton extends Button {
    DivineGlyph.navigation(g,x+19,y+h/2,rowIcon,hover);
    g.drawString(font,font.plainSubstrByWidth(getMessage().getString(),w-44),x+36,y+(h-8)/2,color,false);
   }else{
-   String label=font.plainSubstrByWidth(getMessage().getString(),w-8);
+   String label=font.plainSubstrByWidth(getMessage().getString(),w<=18?w-2:w-8);
    g.drawCenteredString(font,label,x+w/2,navigationIcon>=0?y+h-17:y+(h-8)/2,color);
   }
  }

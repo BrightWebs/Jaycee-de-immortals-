@@ -2,17 +2,17 @@
 
 A clean-room Minecraft **1.21.1 / NeoForge / Java 21** mod project.
 
-## First milestone: the interface
+## Sapphire interface and beta abilities
 
-The interface is the first deliverable. We will not build combat powers until the interface is functional and tested.
+The Sapphire menu shares server-owned loadouts with a compact gameplay ability HUD. Other RPG progression systems remain previews.
 
-- Press **M** during normal gameplay to open the interface; no unlock item is required.
-- The existing essence item and operator command `/jayceeessence` remain available for experimentation, but do not gate the UI.
+- Press **M** during normal gameplay to open the interface; the default beta configuration does not require an unlock item.
+- The existing essence item and operator command `/jayceeessence` remain available for testing ability unlock requirements.
 - Render the **actual player's skin** in the compact portrait, with a **3D** toggle for the live animated player model.
-- Six clickable tabs: Status, Abilities, Skills, Magic, Species, Quests.
-- A **four-slot preview loadout with ten selectable pages**, accessible from every tab.
+- Five clickable tabs: Status, Abilities, Skills, Magic, Quests. Click **Race: Human** within Status for the Species preview.
+- A permanent **Equip Page** with four slots and ten saved pages, accessible from every tab and the Species interface.
 - Reference-inspired sapphire glass, blue-silver ornamental borders, glowing icon tabs and a central magical seal. The visible Status reference guides the proportions; pixel-perfect parity is not claimed.
-- Gameplay ability implementation comes later.
+- Server-validated beta ability effects, mana, cooldowns and modes; this is not a completed RPG combat/progression system.
 
 ## Development baseline
 
@@ -25,12 +25,12 @@ Minecraft 1.21.1 / Java 21 / NeoForge 21.1.x.
 
 1. Open this repository's **Actions** tab and select **Build NeoForge 1.21.1**. Choose a **successful run for the UI pull request's latest commit**, not an older run from another branch. PR builds run automatically; **Run workflow** can also build a selected branch manually.
    - If GitHub shows **Action required** or **Workflows awaiting approval**, a repository maintainer must use **Approve and run** on the pull request before the build can start. There is no downloadable artifact until that approved build succeeds.
-2. Under **Artifacts**, download `jaycee-neoforge-1.21.1` (GitHub sign-in required). Extract the ZIP to get `jaycee-0.1.3.jar` (animated Status energy core, including the earlier size/header/blur fixes). The ZIP and GitHub's source-code downloads are not installable mods.
+2. Under **Artifacts**, download `jaycee-neoforge-1.21.1` (GitHub sign-in required). For this update, extract the ZIP to get `jaycee-0.1.4.jar` (persistent loadouts and gameplay HUD). The ZIP and GitHub's source-code downloads are not installable mods.
 3. Install **NeoForge 21.1.172** for **Minecraft 1.21.1**, launch that profile once, then close the game. Use Java 21; Forge and Fabric are not compatible loaders for this JAR.
 4. Put the extracted JAR into the **mods** folder of that profile's game directory. Remove older Jaycee JARs so only one version is installed.
 5. Launch the NeoForge profile, confirm **Jaycee Di Immortales** appears in **Mods**, and enter a test world. Press **M** to open the UI immediately—no essence is needed. If M conflicts with another mod, rebind it under **Options → Controls → Key Binds → Jaycee**.
 
-Test all six tabs, select skills and journal entries, scroll the ability list, and use **Equip preview** and **Loadout**. Escape closes the screen. Powers, progression, quests and equipment remain UI previews; this is an interface test build, not a completed RPG gameplay mod. Back up existing worlds before testing.
+Test all five tabs and nested Species, search/select an unlocked ability and click an Equip Page slot, switch pages and close the screen. Escape closes the screen. The normal gameplay HUD should show the same four assignments. Skills, magic, race evolution and quests remain previews. Back up existing worlds before testing.
 
 If no successful run/artifact exists for the latest commit, **there is no verified download yet**. A failed build does not publish a JAR. The same source can be built locally using the commands below; an internet connection to the NeoForge and Minecraft dependency hosts is required.
 
@@ -76,20 +76,34 @@ On Windows use `gradlew.bat`. The first build downloads Gradle and the Minecraft
 
 Join a world and press **M** (rebind under Options → Controls → Jaycee). Escape closes the non-pausing screen. Tabs and skill nodes support mouse clicks and normal keyboard focus/activation.
 
+## Loadouts, controls and persistence (0.1.4)
+
+- **M** opens the non-pausing menu. **Z / X / C / V** activate slots 1–4 on the selected page.
+- **Alt + slot key** cycles the assigned ability's modes. **Alt + mouse wheel** switches pages (including while the menu is open). Keys are registered through Minecraft Controls; resolve conflicts and remap them there.
+- In Abilities, search by name, choose a category, select an unlocked ability and click any of the four Equip Page squares. Clicking an occupied square replaces its assignment; its **Remove** button clears it. Locked abilities can be inspected but not equipped.
+- The server saves all 40 positions, selected page and per-position modes in player NBT, copies data on respawn and synchronizes snapshots on login, dimension changes and edits. Equipment changes never reset an ability's shared cooldown.
+- The gameplay HUD is hidden over menus/loading screens and when Minecraft's HUD is hidden. It shows empty slots, bound keys, modes, cooldown shading/countdowns, active highlights and disabled assignments. It reads the same snapshot as the menu; clients do not decide unlocks, mana or activation.
+- `betaUnlockAbilityHud = true` in the server's `config/jaycee-common.toml` is the development access setting. It enables the menu and four empty HUD slots without granting every ability. Set it to `false` to use the existing three-essence access gate until a dedicated advancement gate is implemented; the access predicate is centralized so that future change need not rewrite the HUD.
+- Face/3D portrait preference and HUD position/scale persist in `config/jaycee-client.properties`. Edit `hud.x`, `hud.y` (GUI-pixel offsets) and `hud.scale` (0.5–2.0), then restart the client to reload. HUD offsets allow moving the default placement away from other mods' overlays.
+
+The backend catalog documents each implemented beta effect and essence threshold. Names such as Aether Flight are thematic: consult the displayed effects rather than assuming unrestricted flight or world-altering powers. Progression is not yet advancement-driven.
+
 ## UI preview and customization
 
 - **Status:** compact live skin portrait and player name, race/title/faction labels, level/EXP bar and core stats on the left; a glowing magical seal in the center; titles, racial trait and six elemental affinities on the right. The **3D / Face** toggle switches the portrait to the animated player model. Health, vanilla level and experience progress are live; RPG stats, traits and affinities are explicitly sample data.
-- **Abilities:** illustrated category and ability rows, six visible rows with wheel/arrow scrolling, a glowing selected-art emblem, inset description card and **Equip preview** button.
+- **Abilities:** illustrated categories, name search, six visible rows with wheel/arrow scrolling and details showing unlock status, effects, mana, cooldown, range and modes.
 - **Skills:** four mastery columns with connected diamond-shaped symbol nodes, four selectable tiers, a mastery seal, and inset requirement/effect cards. Hover/focus tooltips identify each node's branch and tier.
 - **Magic:** six selectable elemental entries, a grimoire seal, spell notes and sample affinity/mana information.
-- **Species:** selectable lineage stages, an ascension emblem and preview racial traits/requirements.
+- **Species (within Status):** selectable lineage stages, an ascension emblem and preview racial traits/requirements. Race evolution is not yet gameplay progression.
 - **Quests:** a selectable journal, featured chronicle emblem, objective and sample reward cards. These are not accepted or tracked quests.
-- **Loadout** opens a collapsible tray with four selectable slots and ten pages (`<` / `>` or Alt + scroll). **Equip preview** assigns to the selected slot/page and opens the tray so the result is visible. Close the tray to resume panel interactions. It survives tab switches and resizing, but resets when the screen closes. It is not synchronized, saved, or connected to gameplay powers.
+- **Equip Page:** a permanent side panel outside the original 640 × 500 content, with 2 × 2 slots, previous/next arrows, ten page indicators and removal controls. The outer canvas is now 840 × 500; the original artwork coordinates and animated Status seal are unchanged. The entire canvas scales to fit together.
 
 Source organization (under `src/main/java/com/brightwebs/jaycee/`):
 
 - `client/JayceeClient.java`: client-only registration and gameplay key handling. The common mod entry point never references client classes.
-- `client/JayceeScreen.java`: icon navigation, collapsible loadout state and a 640 × 500 logical layout; rendering and pointer input share the same scale.
+- `client/JayceeScreen.java`: five-tab navigation, nested Species routing and shared permanent Equip Page; rendering and pointer input share the same scale.
+- `ability/`: common catalog, server-owned persistence/access/activation and bounded network payloads. Common code does not load Minecraft client classes.
+- `client/AbilityHud.java`: gameplay-only loadout rendering. `client/ClientPreferences.java`: saved portrait/HUD settings.
 - `client/view/`: independent tab panels implementing `TabView`.
 - `client/widget/OrnateButton.java`: shared hover, selected, focus, tooltip and disabled visuals.
 - `client/view/ViewArt.java`: shared featured emblems, inset notes and preview meters.
@@ -98,14 +112,21 @@ Source organization (under `src/main/java/com/brightwebs/jaycee/`):
 - `client/model/PreviewData.java`: replaceable UI-only records and sample values.
 - `client/DivineFrame.java` and `client/DivineGlyph.java`: centralized procedural panels, ornamental borders, magical seal and recognizable navigation icons. No external UI textures are required; the portrait uses the player's loaded Minecraft skin.
 
-For final art, replace drawing inside the frame/glyph helpers with resource-location blits and place textures under `src/main/resources/assets/jaycee/textures/gui/`. Preserve helper dimensions and control hitboxes; assets can then be overridden by resource packs. Adjust panel geometry in the individual views and the shared design size in the shell together. Follow-up polish includes hand-painted borders and icon textures, localization of preview labels, synchronized progression data and a gameplay HUD.
+For final art, replace drawing inside the frame/glyph helpers with resource-location blits and place textures under `src/main/resources/assets/jaycee/textures/gui/`. Preserve helper dimensions and control hitboxes; assets can then be overridden by resource packs. Adjust panel geometry in the individual views and the shared design size in the shell together. Follow-up polish includes hand-painted borders/icons, localization, advancement-driven progression, race evolution and combat balancing.
 
 ### Reference scope
 
 The supplied Status mockup (`df5d9c15-68d6-4f26-a806-bcb9b23ba011`) guides the separate tab strip and main frame, left profile/stat stack, central luminous emblem and right inset cards. Its black presentation background, explanatory callout boxes and arrows are annotations, not in-game controls, and are intentionally omitted. Names and values use the current player or marked preview data rather than copying fixed screenshot text.
 
-The other attachment URLs were supplied but their images were not visible in this session. All six tabs now extrapolate the visible Status artwork's dark glass, blue-silver ornament, glowing symbols and left/center/right hierarchy. Abilities and Skills retain their working interactions; Magic, Species and Quests use illustrated selectable preview collections rather than empty panels. These are not claimed to reproduce unseen layouts. Procedural art and Minecraft's default font are an approximation, not a pixel-identical recreation.
+The other attachment URLs were supplied but their images were not visible in this session. The views extrapolate the visible Status artwork's dark glass, blue-silver ornament, glowing symbols and left/center/right hierarchy. Abilities and Skills retain their working interactions; Magic, Species and Quests use illustrated selectable preview collections rather than empty panels. These are not claimed to reproduce unseen layouts. Procedural art and Minecraft's default font are an approximation, not a pixel-identical recreation.
 
 ## Manual acceptance checks
 
-Build validation does not establish in-game fidelity. In a dev client, check M in a new world without essences, all six icon tabs, portrait Face/3D modes, every category, list scrolling and endpoints, skill node details/tooltips, every Magic/Species/Quests entry, selection persistence across tab changes, opening/closing the loadout, equip/page persistence, long labels, Escape, and resize at multiple GUI scales (including a window smaller than the design size). Use Tab and Enter/Space to exercise illustrated rows and diamond nodes. While the tray is open, covered view controls must not respond. Check that M does not replace chat/inventory screens. Start a dedicated dev server to verify client-only isolation. Compare Status screenshots to the supplied reference; obtain the other images before claiming their layouts match.
+Build validation does not establish in-game fidelity or multiplayer correctness. Test:
+
+1. Join a fresh world with beta access enabled: four empty HUD slots and M are available, but locked abilities stay locked. Disable beta access and check the essence gate.
+2. Equip/replace/remove an unlocked ability, compare HUD and menu, visit every page and nested Species, and test name search while typing continuously. Locked equipment requests must be rejected by the server.
+3. Activate all four keys, remap them, cycle modes with Alt, change pages with Alt+wheel, and verify mana/cooldowns prevent repeated casts or swapping around cooldowns.
+4. Check selected page, assignments and modes after closing/reopening, dimension changes, death/respawn, disconnect/reconnect and server restart. Check Face/3D after restarting the client.
+5. Check HUD visibility, empty/active/disabled/cooldown/mode states, no overlap with hotbar/health/hunger/XP, multiplayer isolation and dedicated-server startup.
+6. Check all five tabs, Species return, core animation, long labels, keyboard focus, Escape and scaled hitboxes at multiple GUI scales/small windows. M must not replace chat/inventory. Compare to available artwork; obtain missing references before claiming exact fidelity.

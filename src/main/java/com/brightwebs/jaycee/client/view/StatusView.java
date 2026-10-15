@@ -3,6 +3,7 @@ package com.brightwebs.jaycee.client.view;
 import com.brightwebs.jaycee.client.DivineFrame;
 import com.brightwebs.jaycee.client.DivineGlyph;
 import com.brightwebs.jaycee.client.GreatSageEnergyCore;
+import com.brightwebs.jaycee.client.ClientPreferences;
 import com.brightwebs.jaycee.client.model.EnergyCoreMotion.State;
 import com.brightwebs.jaycee.client.JayceeScreen;
 import com.brightwebs.jaycee.client.model.PreviewData;
@@ -13,18 +14,20 @@ import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 
 /** Reference layout: compact profile/stats, free-floating seal, and inset detail cards. */
 public final class StatusView implements TabView {
- private boolean fullModel;
  private final GreatSageEnergyCore energyCore=new GreatSageEnergyCore();
  private int lastLevel=-1;
  /** Integration hook for future client-side learning, ultimate and awakening notifications. */
  public GreatSageEnergyCore energyCore(){return energyCore;}
  @Override public void init(JayceeScreen s){
-  s.button(fullModel?"Face":"3D",84,182,26,18,()->{fullModel=!fullModel;s.rebuild();});
+  s.button(ClientPreferences.face3d()?"Face":"3D",84,182,26,18,()->{
+   ClientPreferences.setFace3d(!ClientPreferences.face3d());s.rebuild();
+  });
+  s.button("Race: Human",126,140,180,22,s::openSpecies);
  }
  @Override public void render(JayceeScreen s,GuiGraphics g,int mx,int my){
   var player=Minecraft.getInstance().player;
   DivineFrame.portrait(g,24,106,94,94);
-  if(player!=null&&!fullModel){
+  if(player!=null&&!ClientPreferences.face3d()){
    // Skin layers stay separate from the frame, so resource-pack frames remain replaceable.
    g.pose().pushPose();
    g.pose().translate(39,121,0);
@@ -34,7 +37,6 @@ public final class StatusView implements TabView {
    g.pose().popPose();
   }
   s.largeText(g,player==null?"PlayerName":player.getName().getString(),132,115,306,1.35f,0xFFE3E9F6);
-  s.coloredText(g,"Race: Human",132,147,280,0xFF8EAFD1);
   s.coloredText(g,"Title: None",132,166,280,0xFF8EAFD1);
   s.coloredText(g,"Faction: None",132,185,280,0xFF8EAFD1);
   s.largeText(g,"Lv. "+(player==null?0:player.experienceLevel),28,220,230,1.9f,0xFF90C3FF);
@@ -89,7 +91,7 @@ public final class StatusView implements TabView {
  }
  @Override public void renderUnscaled(JayceeScreen s,GuiGraphics g,int mx,int my){
   var player=Minecraft.getInstance().player;
-  if(player!=null&&fullModel)InventoryScreen.renderEntityInInventoryFollowsMouse(g,
+  if(player!=null&&ClientPreferences.face3d())InventoryScreen.renderEntityInInventoryFollowsMouse(g,
    s.screenX(32),s.screenY(114),s.screenX(110),s.screenY(180),
    Math.max(1,s.scaledSize(29)),0f,mx,my,player);
  }

@@ -1,26 +1,29 @@
 # Jaycee: Di Immortales
 
-A clean-room Minecraft **1.21.1 / NeoForge / Java 21** mod project.
+Minecraft 1.21.1, NeoForge 21.1.172, Java 21.
 
-## First milestone: the interface
+## UI beta 0.2.0
 
-The interface is the first deliverable. We will not build combat powers until the interface is functional and tested.
+- Six interactive tabs: Status, Abilities, Skills, Magic, Species and Quests.
+- Original reference artwork split into reusable panel borders and ability icons; all text and controls are live.
+- Status displays the local player's actual skin and equipment, health, armor and Minecraft experience.
+- Searchable ability library with category filtering, selection and descriptions.
+- Forty saved loadout slots organized into ten pages of four slots. Select a slot and press Equip; Clear slot removes its entry.
+- Persistent equipment panel on all tabs, direct page buttons, arrows and Alt + scroll.
+- Matching four-slot gameplay HUD. Alt + scroll changes its page without scrolling the vanilla hotbar.
+- UI scales to fit the window; render and mouse input use the same coordinate transform.
+- Server-owned essence progress and loadout data synchronize on login, consumption, respawn and editing. State is copied on player clone.
 
-- Consume **three Jayce's Essences** to unlock the GUI (progress saved per player).
-- Give players a development/test command to receive three essences.
-- Render the **actual player's animated 3D model and skin**, not a screenshot of Steve.
-- Six clickable tabs: Status, Abilities, Skills, Magic, Species, Quests.
-- A **persistent four-slot ability loadout with ten selectable pages** on every tab.
-- Use the user's reference art as a guide for separately rendered UI pieces, interactive hitboxes, labels, tooltips, and responsive layouts, **not as a single background screenshot**.
-- Gameplay ability implementation comes later.
+## Try it
 
-## Development baseline
+Install the beta JAR in a Minecraft 1.21.1 NeoForge instance, removing the previous Jaycee JAR first. Multiplayer servers need the same version.
 
-Official NeoForge 1.21.1 ModDevGradle starter:
-https://github.com/NeoForgeMDKs/MDK-1.21.1-ModDevGradle
+With operator permission, run `/jayceeessence`. Use the three essences, then press **M**. Choose **Abilities**, select an entry and a right-hand equipment slot, then click **Equip to selected slot**. Switch tabs, pages and reconnect to check persistence.
 
-Minecraft 1.21.1 / Java 21 / NeoForge 21.1.x.
+Abilities, mastery, magic and evolution are interface previews. Equipping does not cast a combat power. Unimplemented values and chapters are labeled accordingly. The Awakening quest reflects the three-essence menu unlock.
 
-## Status
+## Build
 
-The repository is newly initialized. **No playable JAR has been built or tested yet.** Next changes will add the Gradle build and Java sources.
+Use Java 21 and Gradle 8.14.3. Run `gradle build`. Run `gradle runClient` for a development client. The production JAR is written to `build/libs/`.
+
+See `docs/GUI_ACCEPTANCE.md` for the visual and interactive acceptance requirements. A successful compile does not establish exact reference fidelity or replace in-game testing.

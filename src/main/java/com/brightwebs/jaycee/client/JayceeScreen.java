@@ -1,129 +1,211 @@
 package com.brightwebs.jaycee.client;
+
+import com.brightwebs.jaycee.AbilityCatalog;
+import com.brightwebs.jaycee.JayceeNetwork;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
+import net.neoforged.neoforge.network.PacketDistributor;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
-/** Six interactive pages; the status portrait uses the real local player's skin. */
+/** Coordinates and hitboxes share one transform, including on small GUI scales. */
 public class JayceeScreen extends Screen {
+ private static final int W=740,H=340,INK=0xFFD5E5FF,MUTED=0xFF8AA9CD;
  private static final String[] TABS={"Status","Abilities","Skills","Magic","Species","Quests"};
- private static final String[] CATS={"All","Offense","Defense","Support","Movement","Reality"};
- private static final String[] ARTS={"Reality Severance","Celestial Guard","Divine Pulse","Temporal Step","Soul Restore","Aether Flight"};
  private static final String[] TRACKS={"Body","Spirit","Divine","Utility"};
- private int tab=0,page=0,selected=0,category=0,art=0,skill=0,skillTier=0;
- private int left,top;
- public JayceeScreen(){super(Component.literal("Jaycee : Di Immortales"));}
- private void button(String label,int x,int y,int w,int h,Runnable r){addRenderableWidget(new OrnateButton(label,left+x,top+y,w,h,r));}
+ private static final String[] ELEMENTS={"Fire","Water","Wind","Earth","Light","Dark"};
+ private int tab,page,slot,art,category,offset,branch,tier,element,quest;
+ private double originX,originY,scale=1;
+ private String query="";
+ private EditBox search;
+ private final List<OrnateButton> rows=new ArrayList<>();
+ private final List<Integer> filtered=new ArrayList<>();
+ private OrnateButton equip;
+ public JayceeScreen(){super(Component.literal("Jaycee: Di Immortales"));var p=Minecraft.getInstance().player;if(p!=null)page=JayceeNetwork.page(p);}
+ private OrnateButton button(String label,int x,int y,int w,int h,Runnable action){
+  var b=new OrnateButton(label,x,y,w,h,action);addRenderableWidget(b);return b;
+ }
  @Override protected void init(){
-  left=(width-520)/2;top=(height-310)/2;
-  for(int i=0;i<6;i++){final int t=i;button(TABS[i],8+i*84,10,82,27,()->{tab=t;rebuild();});}
-  button("<",420,59,22,20,()->page=(page+9)%10);button(">",490,59,22,20,()->page=(page+1)%10);
-  for(int i=0;i<4;i++){final int s=i;button(""+(i+1),420+(i%2)*43,100+(i/2)*52,39,39,()->selected=s);}
-  if(tab==1||tab==3){
-   for(int i=0;i<CATS.length;i++){final int c=i;button(CATS[i],149,90+i*30,97,25,()->{category=c;rebuild();});}
-   for(int i=0;i<ARTS.length;i++){final int a=i;button(ARTS[i],250,92+i*29,152,25,()->{art=a;});}
+  scale=Math.min(1.0,Math.min((width-12.0)/W,(height-12.0)/H));
+  originX=(width-W*scale)/2;originY=(height-H*scale)/2;
+  for(int i=0;i<TABS.length;i++){
+   final int t=i;var b=button(TABS[i],58+i*80,7,78,31,()->{tab=t;rebuild();});b.selected=tab==i;b.tabIcon=i;
+  }
+  button("x",568,12,24,23,this::onClose);
+  button("<",500,79,20,20,()->changePage(-1));button(">",574,79,20,20,()->changePage(1));
+  for(int i=0;i<4;i++){
+   final int s=i;var b=button("Slot "+(i+1),500+(i%2)*47,113+(i/2)*62,43,55,()->{slot=s;updateSelection();});
+   b.icon=loadout()[page*4+i];b.compact=true;b.selected=slot==i;
+  }
+  for(int i=0;i<10;i++){final int p=i;var b=button(""+(i+1),500+(i%5)*19,248+(i/5)*20,18,18,()->setPage(p));b.selected=page==i;}
+  button("Clear slot",501,296,91,23,()->setArt(-1));
+  rows.clear();search=null;equip=null;
+  if(tab==1){
+   for(int i=0;i<AbilityCatalog.CATEGORIES.length;i++){
+    final int c=i;var b=button(AbilityCatalog.CATEGORIES[i],9,82+i*31,111,27,()->{category=c;offset=0;rebuild();});b.selected=category==i;
+   }
+   search=new EditBox(font,137,81,144,18,Component.literal("Search abilities"));
+   search.setMaxLength(60);search.setValue(query);search.setHint(Component.literal("Search abilities..."));
+   search.setResponder(value->{query=value;offset=0;filter();});addRenderableWidget(search);
+   for(int i=0;i<7;i++){final int row=i;rows.add(button("",133,108+i*27,152,25,()->{int n=offset+row;if(n<filtered.size()){art=filtered.get(n);filter();}}));}
+   button("^",136,303,30,23,()->{offset=Math.max(0,offset-1);filter();});
+   button("v",254,303,30,23,()->{offset=Math.min(Math.max(0,filtered.size()-7),offset+1);filter();});
+   equip=button("Equip to selected slot",307,298,170,25,()->setArt(art));filter();
   }else if(tab==2){
-   for(int i=0;i<4;i++){final int branch=i;button(TRACKS[i],153+i*63,94,58,24,()->{skill=branch;});}
+   for(int b=0;b<4;b++)for(int t=0;t<4;t++){
+    final int bb=b,tt=t;var n=button(""+(t+1),149+b*80,120+t*40,27,27,()->{branch=bb;tier=tt;rebuild();});n.icon=(b+t)%10;n.compact=true;n.selected=b==branch&&t==tier;
+   }
+  }else if(tab==3){
+   for(int i=0;i<6;i++){final int e=i;var b=button(ELEMENTS[i],14,85+i*32,102,27,()->{element=e;rebuild();});b.selected=element==i;}
+  }else if(tab==5){
+   String[] names={"Awakening","Essence of Existence","First Ascension"};
+   for(int i=0;i<3;i++){final int q=i;var b=button(names[i],15,88+i*40,166,33,()->{quest=q;rebuild();});b.selected=quest==i;}
   }
  }
+ private void updateSelection(){rebuild();}
  private void rebuild(){clearWidgets();init();}
- private void box(GuiGraphics g,int x,int y,int w,int h,boolean bright){DivineFrame.frame(g,x,y,w,h,bright);}
- private void text(GuiGraphics g,String s,int x,int y,int color){g.drawString(font,s,left+x,top+y,color,false);}
- private void highlight(GuiGraphics g,int x,int y,int w,int h){box(g,left+x,top+y,w,h,true);}
+ private int[] loadout(){var p=Minecraft.getInstance().player;return p==null?new int[40]:JayceeNetwork.slots(p);}
+ private void changePage(int n){setPage(Math.floorMod(page+n,10));}
+ private void setPage(int p){page=p;send(-1,-1);rebuild();}
+ private void setArt(int a){send(slot,a);rebuild();}
+ private void send(int s,int a){
+  var p=Minecraft.getInstance().player;if(p==null)return;
+  p.getPersistentData().putInt("JayceePage",page);
+  if(s>=0){var slots=loadout();slots[page*4+s]=a;p.getPersistentData().putIntArray("JayceeSlots",slots);}
+  PacketDistributor.sendToServer(new JayceeNetwork.Edit(page,s,a));
+ }
+ private void filter(){
+  filtered.clear();
+  for(int i=0;i<AbilityCatalog.ARTS.length;i++){
+   var a=AbilityCatalog.ARTS[i];
+   if((category==0||a.category().equals(AbilityCatalog.CATEGORIES[category]))&&a.name().toLowerCase(Locale.ROOT).contains(query.toLowerCase(Locale.ROOT)))filtered.add(i);
+  }
+  if(!filtered.isEmpty()&&!filtered.contains(art))art=filtered.get(0);
+  for(int i=0;i<rows.size();i++){
+   var b=rows.get(i);int n=offset+i;b.visible=n<filtered.size();b.active=b.visible;
+   if(b.visible){int id=filtered.get(n);b.setMessage(Component.literal(AbilityCatalog.ARTS[id].name()));b.icon=id;b.selected=id==art;}
+  }
+  if(equip!=null)equip.active=!filtered.isEmpty();
+ }
+ private void text(GuiGraphics g,String s,int x,int y,int color){g.drawString(font,s,x,y,color,false);}
+ private void wrap(GuiGraphics g,String s,int x,int y,int width,int color){g.drawWordWrap(font,Component.literal(s),x,y,width,color);}
+ private void line(GuiGraphics g,int x,int y,int w){DivineFrame.divider(g,x,y,w);}
+ private void panel(GuiGraphics g,int x,int y,int w,int h){UiArt.frame(g,x,y,w,h,false);}
  @Override public void render(GuiGraphics g,int mx,int my,float dt){
   renderBackground(g,mx,my,dt);
-  box(g,left,top,520,310,false);DivineFrame.ribbon(g,left+6,top+5,508,36);
-  box(g,left+5,top+46,130,257,false);box(g,left+141,top+46,270,257,false);box(g,left+415,top+46,100,257,false);
-  highlight(g,6+tab*84,8,85,31);
-  text(g,"JAYCEE",18,56,0xFFF2F8FF);
-  var player=Minecraft.getInstance().player;
-  text(g,player==null?"Player":font.plainSubstrByWidth(player.getName().getString(),105),16,73,0xFF9BDAFF);
-  text(g,"DIVINE INITIATE",14,91,0xFF8CC7FF);
-  if(tab!=0)for(int i=0;i<3;i++){int y=135+i*31;int color=i==0?0xFFE96888:i==1?0xFF52B7EE:0xFFAE8CFF;
-   text(g,new String[]{"HEALTH","MANA","SOUL HP"}[i],15,y,color);
-   g.fill(left+15,top+y+14,left+119,top+y+21,0xFF203B5A);
-   double ratio=i==0&&player!=null?player.getHealth()/Math.max(1,player.getMaxHealth()):0;
-   if(i==0)g.fill(left+16,top+y+15,left+16+(int)(102*Math.max(0,Math.min(1,ratio))),top+y+20,color);
+  int localX=(int)((mx-originX)/scale)-140,localY=(int)((my-originY)/scale);
+  g.pose().pushPose();g.pose().translate((float)originX,(float)originY,0);g.pose().scale((float)scale,(float)scale,1);
+  profile(g,localX+140,localY);g.pose().translate(140,0,0);
+  panel(g,53,3,490,39);
+  panel(g,493,48,106,284);
+  text(g,"Equip Page",510,60,INK);text(g,(page+1)+" / 10",532,85,MUTED);
+  text(g,"Selected: "+(slot+1),513,236,MUTED);
+  text(g,"Alt + scroll",515,280,MUTED);
+  if(tab==0)status(g,localX,localY);
+  if(tab==1)abilities(g);
+  if(tab==2)skills(g);
+  if(tab==3)magic(g);
+  if(tab==4)species(g);
+  if(tab==5)quests(g);
+  super.render(g,localX,localY,dt);
+  for(int i=0;i<4;i++){
+   int x=500+(i%2)*47,y=113+(i/2)*62,id=loadout()[page*4+i];
+   if(id>=0&&id<AbilityCatalog.ARTS.length&&localX>=x&&localX<x+43&&localY>=y&&localY<y+55)
+    g.renderTooltip(font,Component.literal(AbilityCatalog.ARTS[id].name()),Math.min(localX,420),localY);
   }
-  text(g,TABS[tab].toUpperCase(),154,58,0xFFE5F4FF);
-  text(g,"EQUIPMENT",427,52,0xFFE0F1FF);DivineFrame.divider(g,left+423,top+79,82);
-  text(g,"PAGE "+(page+1)+"/10",449,65,0xFF9CD4FF);
-  for(int i=0;i<4;i++){int xx=419+(i%2)*43,yy=99+(i/2)*52;highlight(g,xx,yy,41,41);DivineGlyph.icon(g,left+xx+8,top+yy+8,25,(page*4+i)%ARTS.length,i==selected);if(i==selected)g.fill(left+xx+7,top+yy+35,left+xx+33,top+yy+37,0xFFA3E9FF);}
-  text(g,"Alt + scroll",422,257,0xFF90BBE8);
-  if(tab==0)status(g);else if(tab==1||tab==3)abilities(g);else if(tab==2)skills(g);else if(tab==4)species(g);else quests(g);
-  super.render(g,mx,my,dt);
+  g.pose().popPose();
  }
- private void status(GuiGraphics g){
-  var player=Minecraft.getInstance().player;
-  text(g,"CHARACTER",22,108,0xFFC4E5FF);
-  DivineFrame.portrait(g,left+13,top+125,114,130);
-  // The actual world player's 3D skin + equipped armor. No fixed Steve texture.
-  if(player!=null)InventoryScreen.renderEntityInInventoryFollowsMouse(
-   g,left+18,top+133,left+122,top+247,38,0f,224f,123f,player);
-  text(g,"LIVE PLAYER MODEL",17,268,0xFF9ED2FA);
-  DivineFrame.divider(g,left+19,top+285,101);
-  text(g,"STATUS OVERVIEW",155,83,0xFF8FCFFF);
-  DivineFrame.divider(g,left+156,top+98,235);
-  box(g,left+153,top+106,246,167,false);
-  text(g,"ADVENTURER PROFILE",173,119,0xFFE5F5FF);
-  DivineFrame.divider(g,left+171,top+132,201);
-  if(player!=null)text(g,font.plainSubstrByWidth(player.getName().getString(),184),172,139,0xFF8DD7FF);
-  String[] stats={"HEALTH","MANA","SOUL"};
-  int[] colors={0xFFE96F91,0xFF67C2FF,0xFFA58AFF};
-  for(int i=0;i<3;i++){
-   int y=163+i*30;int col=colors[i];
-   text(g,stats[i],169,y,col);
-   g.fill(left+169,top+y+12,left+376,top+y+20,0xFF1E3150);
-   double ratio=i==0&&player!=null?player.getHealth()/Math.max(1,player.getMaxHealth()):0;
-   if(i==0)g.fill(left+170,top+y+13,left+170+(int)(205*Math.max(0,Math.min(1,ratio))),top+y+19,col);
-   if(i>0)text(g,"-",380,y+9,0xFF8699BA);
-  }
-  text(g,"LEVEL "+(player==null?"?":player.experienceLevel),168,283,0xFFB8DDFF);
+ private void profile(GuiGraphics g,int mx,int my){
+  panel(g,1,48,135,284);var p=Minecraft.getInstance().player;if(p==null)return;
+  panel(g,13,62,45,57);
+  InventoryScreen.renderEntityInInventoryFollowsMouse(g,16,65,55,115,20,0f,mx,my,p);
+  text(g,font.plainSubstrByWidth(p.getName().getString(),65),63,68,INK);
+  text(g,"Human",63,84,MUTED);text(g,"Lv. "+p.experienceLevel,63,99,MUTED);
+  line(g,15,131,106);text(g,"Player Profile",15,145,INK);
+  text(g,"Health",15,169,0xFFFFA6BA);
+  g.fill(15,184,121,190,0xFF26364B);
+  g.fill(15,184,15+(int)(106*Math.clamp(p.getHealth()/Math.max(1,p.getMaxHealth()),0,1)),190,0xFFDD668C);
+  text(g,"Armor   "+p.getArmorValue(),15,205,MUTED);
+  text(g,"Mana    --",15,225,MUTED);text(g,"Soul HP --",15,245,MUTED);
+  line(g,15,266,106);wrap(g,"Divine interface awakened",15,282,105,0xFF9BC9F3);
+ }
+ private void status(GuiGraphics g,int mx,int my){
+  panel(g,2,48,486,284);var p=Minecraft.getInstance().player;if(p==null)return;
+  text(g,font.plainSubstrByWidth(p.getName().getString(),180),24,64,INK);
+  text(g,"Race: Human",24,80,MUTED);text(g,"Title: None equipped",24,94,MUTED);
+  panel(g,18,112,138,157);
+  InventoryScreen.renderEntityInInventoryFollowsMouse(g,24,119,150,259,49,0f,mx,my,p);
+  text(g,"Lv. "+p.experienceLevel,31,281,0xFF98D3FF);
+  g.fill(26,302,147,307,0xFF243853);g.fill(26,302,26+(int)(121*p.experienceProgress),307,0xFF66BFFF);
+  DivineFrame.jewel(g,254,149,System.currentTimeMillis()/50,0xFF7FBFFF);
+  text(g,"JAYCEE",232,202,INK);text(g,"Di Immortales",211,216,MUTED);
+  panel(g,171,239,167,79);text(g,"Core Stats",183,249,INK);
+  text(g,String.format(Locale.ROOT,"Health   %.0f / %.0f",p.getHealth(),p.getMaxHealth()),183,265,0xFFFF9AB4);
+  text(g,"Armor    "+p.getArmorValue(),183,280,MUTED);
+  text(g,"Mana     Not unlocked",183,295,MUTED);
+  panel(g,350,62,125,65);text(g,"Titles",361,74,INK);wrap(g,"No title equipped",361,94,102,MUTED);
+  panel(g,350,135,125,66);text(g,"Racial Traits",361,146,INK);wrap(g,"No racial traits unlocked.",361,165,101,MUTED);
+  panel(g,350,208,125,109);text(g,"Elemental Affinity",360,219,INK);
+  for(int i=0;i<6;i++)text(g,ELEMENTS[i]+"    --",365,236+i*12,MUTED);
  }
  private void abilities(GuiGraphics g){
-  text(g,tab==1?"DIVINE ARTS":"ARCANE LIBRARY",151,78,0xFF91CFFE);DivineFrame.divider(g,left+154,top+86,237);
-  for(int i=0;i<CATS.length;i++){if(i==category)highlight(g,147,88+i*30,101,29);DivineGlyph.icon(g,left+149,top+93+i*30,14,i,i==category);}
-  for(int i=0;i<ARTS.length;i++){if(i==art)highlight(g,249,90+i*29,155,28);DivineGlyph.icon(g,left+251,top+95+i*29,14,i,i==art);}
-  highlight(g,153,274,250,23);
-  text(g,font.plainSubstrByWidth(ARTS[art]+"  |  UI preview",235),163,281,0xFFE0EFFF);
+  panel(g,2,48,123,284);panel(g,128,48,161,284);panel(g,292,48,196,284);
+  text(g,"Categories",15,62,INK);text(g,"Abilities ("+filtered.size()+")",140,62,INK);
+  text(g,(filtered.isEmpty()?0:offset+1)+" / "+filtered.size(),184,311,MUTED);
+  if(filtered.isEmpty()){wrap(g,"No abilities match your search.",307,82,165,MUTED);return;}
+  var a=AbilityCatalog.ARTS[art];UiArt.icon(g,305,65,30,a.icon());
+  wrap(g,a.name(),342,67,132,INK);text(g,a.category(),342,93,0xFFBB99EB);line(g,307,111,165);
+  panel(g,306,123,169,75);UiArt.icon(g,368,137,47,a.icon());
+  text(g,"Description",306,210,INK);wrap(g,a.description(),306,226,166,MUTED);
+  text(g,"Power preview",307,279,0xFFD6B576);
  }
  private void skills(GuiGraphics g){
-  text(g,"DIVINE SKILL TREE",156,78,0xFF9CCEFF);DivineFrame.divider(g,left+155,top+88,237);
+  panel(g,2,48,123,284);panel(g,128,48,360,284);
+  text(g,"Mastery",15,64,INK);wrap(g,TRACKS[branch]+" / Tier "+(tier+1),15,91,100,0xFFCBAAFF);
+  wrap(g,"Select a node to inspect it. Mastery progression is not available yet.",15,126,100,MUTED);
+  text(g,"Divine Skill Tree",147,65,INK);line(g,147,83,317);
   for(int i=0;i<4;i++){
-   int cx=180+i*63;
-   g.fill(left+cx,top+128,left+cx+2,top+255,0xFF386EA9);
-   for(int j=0;j<4;j++){
-    int cy=140+j*34,glow=i==skill?0xFF9AE7FF:0xFF6E93D0;
-    DivineGlyph.icon(g,left+cx-9,top+cy-7,19,(i+j)%ARTS.length,i==skill&&j==skillTier);
-   }
+   text(g,TRACKS[i],141+i*80,98,INK);
+   g.fill(162+i*80,143,163+i*80,259,0xFF6979AB);
   }
-  text(g,TRACKS[skill]+" mastery / Tier "+(skillTier+1),157,280,0xFFB3D4ED);
+  text(g,TRACKS[branch]+" mastery / Tier "+(tier+1),149,293,INK);
+  text(g,"Not unlocked",149,310,MUTED);
+ }
+ private void magic(GuiGraphics g){
+  panel(g,2,48,123,284);panel(g,128,48,360,284);
+  text(g,"Elements",16,64,INK);text(g,ELEMENTS[element]+" Magic",146,65,INK);line(g,147,84,320);
+  DivineFrame.jewel(g,310,162,System.currentTimeMillis()/50,new int[]{0xFFFF986A,0xFF60CAFF,0xFF8CE1C5,0xFFE7BD78,0xFFFFE4AC,0xFFB393F4}[element]);
+  wrap(g,"Explore the "+ELEMENTS[element].toLowerCase(Locale.ROOT)+" school. Spells, mastery and casting will appear here when magic gameplay is implemented.",153,229,302,MUTED);
+  text(g,"No spells unlocked",153,294,0xFFC9ACF1);
  }
  private void species(GuiGraphics g){
-  text(g,"DIVINE EVOLUTION",158,88,0xFF9AD9FF);highlight(g,159,118,228,121);
-  text(g,"Human  >  Demigod  >  Divine",171,151,0xFFE4EBFF);
-  text(g,"Evolution gameplay coming later",157,272,0xFF9ABDDC);
+  panel(g,2,48,486,284);text(g,"Divine Evolution",20,65,INK);text(g,"Current species: Human",20,85,MUTED);
+  String[] names={"Human","Demigod","Minor God","Major God","Olympian","Protogenos"};
+  for(int i=0;i<6;i++){
+   int x=22+(i%3)*155,y=123+(i/3)*75;panel(g,x,y,137,55);text(g,names[i],x+12,y+12,INK);text(g,i==0?"Current":"Locked",x+12,y+31,i==0?0xFF9EE9D5:MUTED);
+  }
+  wrap(g,"Evolution requirements and the final Jaycee branch will be connected when progression gameplay is implemented.",24,282,437,MUTED);
  }
  private void quests(GuiGraphics g){
-  text(g,"QUEST JOURNAL",155,88,0xFF9AD9FF);
-  String[] names={"Awakening","Essence of Existence","The First Ascension","A New Reality"};
-  for(int i=0;i<names.length;i++){highlight(g,151,116+i*38,250,34);text(g,names[i],161,129+i*38,0xFFE6F3FF);}
+  panel(g,2,48,188,284);panel(g,195,48,293,284);text(g,"Quest Journal",16,64,INK);
+  String[] titles={"Awakening","Essence of Existence","First Ascension"};text(g,titles[quest],212,67,INK);line(g,212,87,255);
+  if(quest==0){wrap(g,"Consume three Jayce's Essences to awaken the interface.",213,108,247,MUTED);text(g,"Complete: 3 / 3 essences",213,163,0xFF98E7CC);text(g,"Reward: Divine menu access",213,184,INK);}
+  else {wrap(g,"This chapter is planned. Objectives and rewards will be added with gameplay progression.",213,109,247,MUTED);text(g,"Not available yet",213,182,0xFFD9B87F);}
  }
- @Override public boolean mouseClicked(double mx,double my,int button){
-  if(tab==2 && button==0){
-   int x=(int)mx-left,y=(int)my-top;
-   for(int i=0;i<4;i++)for(int j=0;j<4;j++){
-    if(Math.abs(x-(180+i*63))<=13&&Math.abs(y-(140+j*34))<=14){
-     skill=i;skillTier=j;return true;
-    }
-   }
-  }
-  return super.mouseClicked(mx,my,button);
- }
- @Override public boolean mouseScrolled(double mx,double my,double dx,double dy){
-  if(dy!=0 && Screen.hasAltDown()){page=Math.floorMod(page+(dy<0?1:-1),10);return true;}
-  return super.mouseScrolled(mx,my,dx,dy);
+ private double x(double x){return (x-originX)/scale-140;}private double y(double y){return (y-originY)/scale;}
+ @Override public boolean mouseClicked(double x,double y,int b){return super.mouseClicked(x(x),y(y),b);}
+ @Override public boolean mouseReleased(double x,double y,int b){return super.mouseReleased(x(x),y(y),b);}
+ @Override public boolean mouseDragged(double x,double y,int b,double dx,double dy){return super.mouseDragged(x(x),y(y),b,dx/scale,dy/scale);}
+ @Override public void mouseMoved(double x,double y){super.mouseMoved(x(x),y(y));}
+ @Override public boolean mouseScrolled(double x,double y,double dx,double dy){
+  if(dy!=0&&Screen.hasAltDown()){changePage(dy<0?1:-1);return true;}
+  if(tab==1&&x(x)>=128&&x(x)<290){offset=Math.max(0,Math.min(Math.max(0,filtered.size()-7),offset+(dy<0?1:-1)));filter();return true;}
+  return super.mouseScrolled(x(x),y(y),dx,dy);
  }
  @Override public boolean isPauseScreen(){return false;}
 }

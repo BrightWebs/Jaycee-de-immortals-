@@ -15,6 +15,8 @@
 - Status layout: left profile, level/EXP bar and stats; central luminous seal; right titles, racial trait and six elemental affinity rows.
 - Shared ability loadout tray: four slots and ten pages accessible from all six tabs via Loadout. Keep it collapsed by default to preserve the reference proportions; swapping tabs must not reset equipped preview abilities or page.
 - Ability/skill nodes: real widget hitboxes, selectable states and live descriptions, not painted-on buttons. Unimplemented gameplay content must show honest placeholder text.
+- Shared visual treatment: illustrated ability rows, glowing diamond skill nodes, inset detail cards and central seals use the same silver-blue fantasy language as Status.
+- Magic, Species and Quests: selectable preview collections must update the featured emblem and details, retain selection across tabs, and remain explicitly disconnected from gameplay progression.
 - Follow-up: an in-game HUD can reuse the menu's four-slot loadout visual language; it is not part of this UI scaffold.
 
 ## Unlock and testing

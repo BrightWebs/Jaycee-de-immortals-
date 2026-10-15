@@ -1,6 +1,5 @@
 package com.brightwebs.jaycee.client.view;
 
-import com.brightwebs.jaycee.client.DivineGlyph;
 import com.brightwebs.jaycee.client.JayceeScreen;
 import com.brightwebs.jaycee.client.model.PreviewData;
 import com.brightwebs.jaycee.client.model.PreviewData.Ability;
@@ -20,14 +19,14 @@ public final class AbilitiesView implements TabView {
    String c=PreviewData.CATEGORIES.get(i);
    s.button(c,22,142+i*42,112,33,()->{
     category=c;offset=0;selected=filtered().getFirst();s.rebuild();
-   }).selected(category.equals(c));
+   }).selected(category.equals(c)).illustrated(i);
   }
   List<Ability> list=filtered();
   for(int i=offset;i<Math.min(list.size(),offset+VISIBLE_ROWS);i++){
    Ability ability=list.get(i);
    s.button(ability.name(),158,142+(i-offset)*42,234,33,()->{
     selected=ability;s.rebuild();
-   }).selected(ability.equals(selected));
+   }).selected(ability.equals(selected)).illustrated(PreviewData.ABILITIES.indexOf(ability)%6);
   }
   var up=s.button("^",338,435,24,22,()->shift(s,-1));up.active=offset>0;
   var down=s.button("v",368,435,24,22,()->shift(s,1));down.active=offset+VISIBLE_ROWS<list.size();
@@ -44,12 +43,13 @@ public final class AbilitiesView implements TabView {
  @Override public void render(JayceeScreen s,GuiGraphics g,int mx,int my){
   s.panel(g,12,102,130,365,"Categories");
   s.panel(g,146,102,258,365,"Divine Arts");
-  s.panel(g,412,102,216,365,"Ability Details");
-  DivineGlyph.icon(g,430,145,30,PreviewData.ABILITIES.indexOf(selected),true);
-  s.text(g,selected.name(),470,154,146);
-  s.text(g,selected.category()+" / MP "+selected.mana(),430,198,184);
-  s.wrapped(g,selected.description(),430,235,180);
-  s.wrapped(g,"Sample only. Equip changes this screen's preview loadout, not gameplay.",430,339,180);
+  s.panel(g,412,102,216,211,"Selected Art");
+  ViewArt.emblem(g,520,190,47,PreviewData.ABILITIES.indexOf(selected)%6);
+  s.largeText(g,selected.name(),430,250,180,1.05f,0xFFCEE9FF);
+  s.coloredText(g,selected.category()+" / MP "+selected.mana(),430,280,184,0xFF8DB6DF);
+  ViewArt.note(s,g,"Description",selected.description(),412,321,216,94);
+  s.coloredText(g,"Preview only / no effects",158,408,234,0xFF7D96B4);
+  s.coloredText(g,"Assigns to preview loadout",430,469,180,0xFF7D96B4);
   s.text(g,(offset+1)+"-"+Math.min(filtered().size(),offset+VISIBLE_ROWS)+" / "+filtered().size(),158,442,166);
  }
 }

@@ -1,6 +1,7 @@
 package com.brightwebs.jaycee.client;
 
 import com.brightwebs.jaycee.client.model.PreviewData.Ability;
+import com.brightwebs.jaycee.client.model.JournalData;
 import com.brightwebs.jaycee.client.view.*;
 import com.brightwebs.jaycee.client.widget.OrnateButton;
 import net.minecraft.client.gui.GuiGraphics;
@@ -11,9 +12,7 @@ import net.minecraft.network.chat.Component;
 public final class JayceeScreen extends Screen {
  private static final String[] TABS={"Status","Abilities","Skills","Magic","Species","Quests"};
  private final TabView[] views={new StatusView(),new AbilitiesView(),new SkillsView(),
-  new PlaceholderView("Magic","The arcane library awaits your first spell."),
-  new PlaceholderView("Species","Human > Demigod > Divine\n\nSample evolution path"),
-  new PlaceholderView("Quests","Awakening\nEssence of Existence\nThe First Ascension")};
+  new JournalView(JournalData.MAGIC),new JournalView(JournalData.SPECIES),new JournalView(JournalData.QUESTS)};
  private final Ability[][] loadout=new Ability[10][4];
  private static final int DESIGN_WIDTH=640,DESIGN_HEIGHT=500;
  private int tab,page,slot;

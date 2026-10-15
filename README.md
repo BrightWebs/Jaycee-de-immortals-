@@ -38,9 +38,11 @@ Join a world and press **M** (rebind under Options → Controls → Jaycee). Esc
 ## UI preview and customization
 
 - **Status:** compact live skin portrait and player name, race/title/faction labels, level/EXP bar and core stats on the left; a glowing magical seal in the center; titles, racial trait and six elemental affinities on the right. The **3D / Face** toggle switches the portrait to the animated player model. Health, vanilla level and experience progress are live; RPG stats, traits and affinities are explicitly sample data.
-- **Abilities:** category filtering, six visible list rows, wheel scrolling over the list or arrow buttons, selected details and an **Equip preview** button.
-- **Skills:** four mastery columns, four selectable tiers, and a details panel.
-- **Magic / Species / Quests:** distinct placeholder panels.
+- **Abilities:** illustrated category and ability rows, six visible rows with wheel/arrow scrolling, a glowing selected-art emblem, inset description card and **Equip preview** button.
+- **Skills:** four mastery columns with connected diamond-shaped symbol nodes, four selectable tiers, a mastery seal, and inset requirement/effect cards. Hover/focus tooltips identify each node's branch and tier.
+- **Magic:** six selectable elemental entries, a grimoire seal, spell notes and sample affinity/mana information.
+- **Species:** selectable lineage stages, an ascension emblem and preview racial traits/requirements.
+- **Quests:** a selectable journal, featured chronicle emblem, objective and sample reward cards. These are not accepted or tracked quests.
 - **Loadout** opens a collapsible tray with four selectable slots and ten pages (`<` / `>` or Alt + scroll). **Equip preview** assigns to the selected slot/page and opens the tray so the result is visible. Close the tray to resume panel interactions. It survives tab switches and resizing, but resets when the screen closes. It is not synchronized, saved, or connected to gameplay powers.
 
 Source organization (under `src/main/java/com/brightwebs/jaycee/`):
@@ -49,6 +51,8 @@ Source organization (under `src/main/java/com/brightwebs/jaycee/`):
 - `client/JayceeScreen.java`: icon navigation, collapsible loadout state and a 640 × 500 logical layout; rendering and pointer input share the same scale.
 - `client/view/`: independent tab panels implementing `TabView`.
 - `client/widget/OrnateButton.java`: shared hover, selected, focus, tooltip and disabled visuals.
+- `client/view/ViewArt.java`: shared featured emblems, inset notes and preview meters.
+- `client/view/JournalView.java` and `client/model/JournalData.java`: reusable illustrated collection layout and immutable sample entries for Magic, Species and Quests. Each tab keeps its own selection. Collections contain one to six entries, matching the visible list capacity.
 - `client/widget/StatusSymbols.java`: compact heart/star/sword/shield/boot/clover and elemental silhouettes for the Status rows.
 - `client/model/PreviewData.java`: replaceable UI-only records and sample values.
 - `client/DivineFrame.java` and `client/DivineGlyph.java`: centralized procedural panels, ornamental borders, magical seal and recognizable navigation icons. No external UI textures are required; the portrait uses the player's loaded Minecraft skin.
@@ -59,8 +63,8 @@ For final art, replace drawing inside the frame/glyph helpers with resource-loca
 
 The supplied Status mockup (`df5d9c15-68d6-4f26-a806-bcb9b23ba011`) guides the separate tab strip and main frame, left profile/stat stack, central luminous emblem and right inset cards. Its black presentation background, explanatory callout boxes and arrows are annotations, not in-game controls, and are intentionally omitted. Names and values use the current player or marked preview data rather than copying fixed screenshot text.
 
-The other two attachment URLs were supplied but their images were not visible in this session. Abilities and Skills retain their working interactions and share the redesigned frame/icon language; they are not claimed to reproduce those unseen references. Procedural art and Minecraft's default font are an approximation, not a pixel-identical recreation.
+The other attachment URLs were supplied but their images were not visible in this session. All six tabs now extrapolate the visible Status artwork's dark glass, blue-silver ornament, glowing symbols and left/center/right hierarchy. Abilities and Skills retain their working interactions; Magic, Species and Quests use illustrated selectable preview collections rather than empty panels. These are not claimed to reproduce unseen layouts. Procedural art and Minecraft's default font are an approximation, not a pixel-identical recreation.
 
 ## Manual acceptance checks
 
-Build validation does not establish in-game fidelity. In a dev client, check M in a new world without essences, all six icon tabs, portrait Face/3D modes, every category, list scrolling and endpoints, skill node details, opening/closing the loadout, equip/page persistence, long labels, Escape, and resize at multiple GUI scales (including a window smaller than the design size). While the tray is open, covered view controls must not respond. Check that M does not replace chat/inventory screens. Start a dedicated dev server to verify client-only isolation. Compare Status screenshots to the supplied reference; obtain the other two images before claiming their layouts match.
+Build validation does not establish in-game fidelity. In a dev client, check M in a new world without essences, all six icon tabs, portrait Face/3D modes, every category, list scrolling and endpoints, skill node details/tooltips, every Magic/Species/Quests entry, selection persistence across tab changes, opening/closing the loadout, equip/page persistence, long labels, Escape, and resize at multiple GUI scales (including a window smaller than the design size). Use Tab and Enter/Space to exercise illustrated rows and diamond nodes. While the tray is open, covered view controls must not respond. Check that M does not replace chat/inventory screens. Start a dedicated dev server to verify client-only isolation. Compare Status screenshots to the supplied reference; obtain the other images before claiming their layouts match.

@@ -75,12 +75,12 @@ public class JayceeScreen extends Screen {
    equip=button("Equip to selected slot",307,298,170,25,()->setArt(art));filter();
   }else if(tab==2){
    for(int b=0;b<4;b++)for(int t=0;t<4;t++){
-    final int bb=b,tt=t;var n=button(""+(t+1),149+b*80,120+t*40,27,27,()->{branch=bb;tier=tt;rebuild();});n.icon=(b+t)%10;n.compact=true;n.selected=b==branch&&t==tier;
+    final int bb=b,tt=t;var n=button(""+(t+1),144+b*105,185+t*20,27,19,()->{branch=bb;tier=tt;rebuild();});n.icon=(b+t)%10;n.compact=true;n.selected=b==branch&&t==tier;
    }
   }else if(tab==3){
-   for(int i=0;i<6;i++){final int e=i;var b=button(ELEMENTS[i],14,85+i*32,102,27,()->{element=e;rebuild();});b.selected=element==i;}
+   for(int i=0;i<6;i++){final int e=i;var b=button(ELEMENTS[i],15,87+i*38,93,32,()->{element=e;rebuild();});b.selected=element==i;}
    String[] schools={"Divine","Arcane","Elemental","Spatial","Temporal","Reality","Spirit","Healing","Summoning","Forbidden"};
-   for(int i=0;i<schools.length;i++){final int n=i;var b=button(schools[i],128,87+i*23,133,21,()->{magicSchool=n;rebuild();});b.selected=magicSchool==i;}
+   for(int i=0;i<schools.length;i++){final int n=i;var b=button(schools[i],124,87+i*23,139,21,()->{magicSchool=n;rebuild();});b.selected=magicSchool==i;}
   }else if(tab==4){
    String[] races={"Human","Elf","Demon","Dragon","Angel","Beastkin","Undead","Primordial","Custom"};
    for(int i=0;i<races.length;i++){final int chosen=i;var b=button(races[i],14,87+i*25,106,23,()->{speciesChoice=chosen;rebuild();});b.selected=speciesChoice==i;}
@@ -90,8 +90,8 @@ public class JayceeScreen extends Screen {
   }
  }
  private void updateSelection(){rebuild();}
- private void rebuild(){clearWidgets();init();}
- private int[] loadout(){var p=Minecraft.getInstance().player;return p==null?new int[40]:JayceeNetwork.slots(p);}
+ private void rebuild(){clearWidgets();setFocused(null);init();}
+ private int[] loadout(){var p=Minecraft.getInstance().player;if(p!=null)return JayceeNetwork.slots(p);int[] empty=new int[40];java.util.Arrays.fill(empty,-1);return empty;}
  private void changePage(int n){setPage(Math.floorMod(page+n,10));}
  private void setPage(int p){page=p;send(-1,-1);rebuild();}
  private void setArt(int a){send(slot,a);rebuild();}
@@ -107,7 +107,7 @@ public class JayceeScreen extends Screen {
    var a=AbilityCatalog.ARTS[i];
    if((category==0||a.category().equals(AbilityCatalog.CATEGORIES[category]))&&a.name().toLowerCase(Locale.ROOT).contains(query.toLowerCase(Locale.ROOT)))filtered.add(i);
   }
-  if(!filtered.isEmpty()&&!filtered.contains(art))art=filtered.get(0);
+  if(filtered.isEmpty())art=-1;\n  else if(!filtered.contains(art))art=filtered.get(0);
   for(int i=0;i<rows.size();i++){
    var b=rows.get(i);int n=offset+i;b.visible=n<filtered.size();b.active=b.visible;
    if(b.visible){int id=filtered.get(n);b.setMessage(Component.literal(AbilityCatalog.ARTS[id].name()));b.icon=id;b.selected=id==art;}
@@ -198,7 +198,7 @@ public class JayceeScreen extends Screen {
   text(g,"Categories",15,62,INK);text(g,"Abilities ("+filtered.size()+")",140,62,INK);
   text(g,(filtered.isEmpty()?0:offset+1)+" / "+filtered.size(),184,311,MUTED);
   if(filtered.isEmpty()){wrap(g,"No abilities match your search.",307,82,165,MUTED);return;}
-  var a=AbilityCatalog.ARTS[art];UiArt.icon(g,305,65,30,a.icon());
+  if(art<0||art>=AbilityCatalog.ARTS.length)return;\n  var a=AbilityCatalog.ARTS[art];UiArt.icon(g,305,65,30,a.icon());
   wrap(g,a.name(),342,67,132,INK);text(g,a.category(),342,93,0xFFBB99EB);line(g,307,111,165);
   panel(g,306,123,169,75);UiArt.icon(g,368,137,47,a.icon());
   text(g,"Description",306,210,INK);wrap(g,a.description(),306,226,166,MUTED);

@@ -19,7 +19,7 @@ public class JayceeScreen extends Screen {
  private static final String[] TABS={"Status","Abilities","Skills","Magic","Species","Quests","Sovereign"};
  private static final String[] TRACKS={"Body","Spirit","Divine","Utility"};
  private static final String[] ELEMENTS={"Fire","Water","Wind","Earth","Light","Dark"};
- private int tab,page,slot,art,category,offset,branch,tier,element,quest,speciesChoice,nexus,editorStep,root,delivery,effect,alignment;\n private boolean editorOpen=false;\n private final String[] sections={"Dashboard","Ability Library","Essence & Followers","Divine Seats","Spirits","Passives","Inhibitor","Realm Builder"};\n private final String[] roots={"Reality","Fire","Water","Storm","Void","Nature"};\n private final String[] deliveries={"Self","Ray","Touch","Projectile","Beam","Area"};\n private final String[] effects={"Damage","Healing","Teleport","Status","Summon","Soul"};\n private final String[] alignments={"Pure","Dark","Crimson"};
+ private int tab,page,slot,art,category,offset,branch,tier,element,quest,speciesChoice,magicSchool,nexus,editorStep,root,delivery,effect,alignment;\n private boolean editorOpen=false;\n private final String[] sections={"Dashboard","Ability Library","Essence & Followers","Divine Seats","Spirits","Passives","Inhibitor","Realm Builder"};\n private final String[] roots={"Reality","Fire","Water","Storm","Void","Nature"};\n private final String[] deliveries={"Self","Ray","Touch","Projectile","Beam","Area"};\n private final String[] effects={"Damage","Healing","Teleport","Status","Summon","Soul"};\n private final String[] alignments={"Pure","Dark","Crimson"};
  private double originX,originY,scale=1;
  private String query="";
  private EditBox search;
@@ -61,7 +61,7 @@ public class JayceeScreen extends Screen {
     final int bb=b,tt=t;var n=button(""+(t+1),149+b*80,120+t*40,27,27,()->{branch=bb;tier=tt;rebuild();});n.icon=(b+t)%10;n.compact=true;n.selected=b==branch&&t==tier;
    }
   }else if(tab==3){
-   for(int i=0;i<6;i++){final int e=i;var b=button(ELEMENTS[i],14,85+i*32,102,27,()->{element=e;rebuild();});b.selected=element==i;}
+   for(int i=0;i<6;i++){final int e=i;var b=button(ELEMENTS[i],14,85+i*32,102,27,()->{element=e;rebuild();});b.selected=element==i;}\n   String[] schools={"Divine","Arcane","Elemental","Spatial","Temporal","Reality","Spirit","Healing","Summoning","Forbidden"};\n   for(int i=0;i<schools.length;i++){final int n=i;var b=button(schools[i],128,87+i*23,133,21,()->{magicSchool=n;rebuild();});b.selected=magicSchool==i;}
   }else if(tab==4){\n   String[] races={"Human","Elf","Demon","Dragon","Angel","Beastkin","Undead","Primordial","Custom"};\n   for(int i=0;i<races.length;i++){final int chosen=i;var b=button(races[i],14,87+i*25,106,23,()->{speciesChoice=chosen;rebuild();});b.selected=speciesChoice==i;}\n  }else if(tab==5){
    String[] names={"Awakening","Essence of Existence","First Ascension"};
    for(int i=0;i<3;i++){final int q=i;var b=button(names[i],15,88+i*40,166,33,()->{quest=q;rebuild();});b.selected=quest==i;}
@@ -219,7 +219,7 @@ public class JayceeScreen extends Screen {
    text(g,schools[i],146,y+5,i==element?0xFFFFDBA2:INK);
   }
   DivineFrame.jewel(g,375,156,System.currentTimeMillis()/40,new int[]{0xFFFF986A,0xFF60CAFF,0xFF8CE1C5,0xFFE7BD78,0xFFFFE4AC,0xFFB393F4}[element]);
-  text(g,ELEMENTS[element]+" Magic",328,214,0xFFFFDBAB);
+  text(g,font.plainSubstrByWidth(schools[magicSchool],115)+" Magic",311,214,0xFFFFDBAB);
   wrap(g,"Magic from higher essence. Develop magical affinities and spell mastery across your divine journey.",293,232,169,MUTED);
   text(g,"Mastery Level",299,280,INK);
   g.fill(291,297,458,304,0xFF193958);

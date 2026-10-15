@@ -2,9 +2,9 @@ package com.brightwebs.jaycee.client;
 import net.minecraft.client.gui.GuiGraphics;
 
 /** Procedural per-ability glyphs. No screenshot textures or fake static UI. */
-final class DivineGlyph {
+public final class DivineGlyph {
  private static final int[] COLORS={0xFFCB5CFF,0xFFF4CD82,0xFF75C6FF,0xFFF77667,0xFF7DF7A6,0xFF8CC8FF};
- static void icon(GuiGraphics g,int x,int y,int size,int id,boolean selected){
+ public static void icon(GuiGraphics g,int x,int y,int size,int id,boolean selected){
   int col=COLORS[Math.floorMod(id,COLORS.length)];
   g.fill(x-1,y-1,x+size+1,y+size+1,selected?0xFFB8E7FF:0xFF355D9A);
   g.fill(x,y,x+size,y+size,0xFF100E2D);

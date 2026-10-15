@@ -3,14 +3,14 @@ import net.minecraft.client.gui.GuiGraphics;
 
 /** Nine-slice-like procedural sapphire ornament drawn independently of all controls/text.
  * All values are in GUI pixels and remain crisp at Minecraft's integer UI scales. */
-final class DivineFrame {
+public final class DivineFrame {
  static final int LIGHT=0xFF9BDFFF, EDGE=0xFF548DCC, DARK=0xFF081528, GOLD=0xFFF3CF82;
  static void rect(GuiGraphics g,int x,int y,int w,int h,int c){g.fill(x,y,x+w,y+h,c);}
  static void line(GuiGraphics g,int x,int y,int w,int h,int c){if(w>0&&h>0)g.fill(x,y,x+w,y+h,c);}
  static void gem(GuiGraphics g,int cx,int cy,int size,int c){
   for(int d=-size;d<=size;d++)line(g,cx-(size-Math.abs(d)),cy+d,2*(size-Math.abs(d))+1,1,c);
  }
- static void frame(GuiGraphics g,int x,int y,int w,int h,boolean active){
+ public static void frame(GuiGraphics g,int x,int y,int w,int h,boolean active){
   if(w<12||h<12)return;
   int c=active?LIGHT:EDGE;
   rect(g,x+4,y+2,w-8,h-4,0xEC071328);
@@ -50,7 +50,7 @@ final class DivineFrame {
   }
  }
  /** Fine gold/silver side flourishes framing the player without obscuring the live model. */
- static void portrait(GuiGraphics g,int x,int y,int w,int h){
+ public static void portrait(GuiGraphics g,int x,int y,int w,int h){
   frame(g,x,y,w,h,true);
   line(g,x+7,y+11,1,h-22,0x9979BDF2);
   line(g,x+w-8,y+11,1,h-22,0x9979BDF2);
@@ -61,7 +61,7 @@ final class DivineFrame {
    line(g,x+w-22-i*2,y+12+i*2,10,1,0x7775AFE1);
   }
  }
- static void divider(GuiGraphics g,int x,int y,int w){
+ public static void divider(GuiGraphics g,int x,int y,int w){
   line(g,x,y,w,1,0xFF365C90);gem(g,x+w/2,y,2,0xFF86C3F5);
  }
  static void jewel(GuiGraphics g,int cx,int cy,long ticks,int color){

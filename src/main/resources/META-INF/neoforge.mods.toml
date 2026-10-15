@@ -5,7 +5,7 @@ license="MIT"
 modId="${mod_id}"
 version="${mod_version}"
 displayName="${mod_name}"
-description='''A fantasy GUI unlocked by consuming three Jayce Essences.'''
+description='''An Immortals-themed RPG interface. Press M during gameplay to open.'''
 [[dependencies.jaycee]]
 modId="neoforge"
 type="required"

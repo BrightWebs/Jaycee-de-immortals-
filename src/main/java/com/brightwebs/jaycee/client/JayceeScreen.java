@@ -39,7 +39,7 @@ public class JayceeScreen extends Screen {
   text(g,"JAYCEE",18,56,0xFFF2F8FF);
   var player=Minecraft.getInstance().player;
   text(g,player==null?"Player":font.plainSubstrByWidth(player.getName().getString(),105),16,73,0xFF9BDAFF);
-  text(g,"SUPREME EXISTENCE",14,91,0xFF8CC7FF);
+  text(g,"DIVINE INITIATE",14,91,0xFF8CC7FF);
   for(int i=0;i<3;i++){int y=135+i*31;int color=i==0?0xFFE96888:i==1?0xFF52B7EE:0xFFAE8CFF;
    text(g,new String[]{"HEALTH","MANA","SOUL HP"}[i],15,y,color);
    g.fill(left+15,top+y+14,left+119,top+y+21,0xFF203B5A);
@@ -60,7 +60,7 @@ public class JayceeScreen extends Screen {
   if(Minecraft.getInstance().player!=null)
    InventoryScreen.renderEntityInInventoryFollowsMouse(g,left+205,top+115,left+350,top+250,43,0f,245f,130f,Minecraft.getInstance().player);
   text(g,"PLAYER MODEL",213,266,0xFFE3EFFA);
-  text(g,"Player skin updates automatically",155,283,0xFF88B4DD);
+  text(g,"Race  Human  |  Rank  Unawakened",155,282,0xFF88B4DD);
  }
  private void abilities(GuiGraphics g){
   text(g,tab==1?"DIVINE ARTS":"ARCANE LIBRARY",151,78,0xFF91CFFE);DivineFrame.divider(g,left+154,top+86,237);

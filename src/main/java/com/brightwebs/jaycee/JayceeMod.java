@@ -33,7 +33,23 @@ public final class JayceeMod {
   var old=e.getOriginal().getPersistentData();var data=e.getEntity().getPersistentData();
   data.putInt("JayceeConsumed",old.getInt("JayceeConsumed"));data.putInt("JayceePage",old.getInt("JayceePage"));data.putIntArray("JayceeSlots",JayceeNetwork.slots(e.getOriginal()));
  }
- private void commands(RegisterCommandsEvent event){event.getDispatcher().register(Commands.literal("jayceeessence").requires(s->s.hasPermission(2)).executes(c->{ServerPlayer p=c.getSource().getPlayerOrException();p.getInventory().add(new ItemStack(ESSENCE.get(),3));c.getSource().sendSuccess(()->Component.literal("Received 3 Jayce's Essences"),false);return 1;}));}
+ private void commands(RegisterCommandsEvent event){
+  event.getDispatcher().register(Commands.literal("jayceeessence")
+   .requires(source->source.hasPermission(2)).executes(context->{
+    ServerPlayer player=context.getSource().getPlayerOrException();
+    player.getInventory().add(new ItemStack(ESSENCE.get(),3));
+    context.getSource().sendSuccess(()->Component.literal("Received 3 Jayce's Essences"),false);
+    return 1;
+   }));
+  event.getDispatcher().register(Commands.literal("jayceestatus").executes(context->{
+   ServerPlayer player=context.getSource().getPlayerOrException();
+   int count=player.getPersistentData().getInt("JayceeConsumed");
+   context.getSource().sendSuccess(()->Component.literal(
+    "Jaycee Essence "+count+" / 3; UI "+(unlocked(player)?"unlocked":"locked")+
+    "; Essence update: HOLD RIGHT-CLICK TO EAT (2026-10-15)"),false);
+   return 1;
+  }));
+ }
  public static boolean unlocked(Player p){return p.getPersistentData().getInt("JayceeConsumed")>=3;}
  public static final class Essence extends Item {
   public Essence(Properties properties){super(properties);}

@@ -8,6 +8,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.server.level.ServerPlayer;
@@ -33,10 +35,39 @@ public final class JayceeMod {
  public static boolean unlocked(Player p){return p.getPersistentData().getInt("JayceeConsumed")>=3;}
  public static final class Essence extends Item {
   public Essence(Properties properties){super(properties);}
+  /**
+   * Consume instantly from either right-click in air or right-click against a block.
+   * The interaction is handled on the server; the client receives its updated count.
+   */
+  private static void absorb(Level level,Player player,InteractionHand hand){
+   if(level.isClientSide)return;
+   ItemStack stack=player.getItemInHand(hand);
+   if(stack.isEmpty())return;
+   int current=player.getPersistentData().getInt("JayceeConsumed");
+   if(current>=3){
+    player.displayClientMessage(Component.literal("Your Jaycee interface is already awakened. Press M."),true);
+    return;
+   }
+   int next=current+1;
+   player.getPersistentData().putInt("JayceeConsumed",next);
+   if(!player.getAbilities().instabuild)stack.shrink(1);
+   if(player instanceof ServerPlayer serverPlayer){
+    FirstJayceeAwakening.onEssenceAbsorbed(serverPlayer);
+    JayceeNetwork.sync(serverPlayer);
+   }
+   player.displayClientMessage(Component.literal(next==3?
+    "Jaycee awakened! Press M to open your interface.":
+    "Jayce's Essence absorbed: "+next+" / 3"),true);
+  }
   @Override public InteractionResultHolder<ItemStack> use(Level level,Player player,InteractionHand hand){
-    ItemStack stack=player.getItemInHand(hand);
-    if(!level.isClientSide){int n=Math.min(3,player.getPersistentData().getInt("JayceeConsumed")+1);player.getPersistentData().putInt("JayceeConsumed",n);if(!player.getAbilities().instabuild)stack.shrink(1);if(player instanceof ServerPlayer p){FirstJayceeAwakening.onEssenceAbsorbed(p);JayceeNetwork.sync(p);}player.displayClientMessage(Component.literal(n==3?"Jaycee UI unlocked. Press M.":"Essence absorbed: "+n+" / 3"),true);}
-    return InteractionResultHolder.sidedSuccess(stack,level.isClientSide);
+   absorb(level,player,hand);
+   return InteractionResultHolder.sidedSuccess(player.getItemInHand(hand),level.isClientSide);
+  }
+  @Override public InteractionResult useOn(UseOnContext context){
+   Player player=context.getPlayer();
+   if(player==null)return InteractionResult.PASS;
+   absorb(context.getLevel(),player,context.getHand());
+   return InteractionResult.sidedSuccess(context.getLevel().isClientSide);
   }
  }
 }

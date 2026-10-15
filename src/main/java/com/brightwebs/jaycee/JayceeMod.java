@@ -6,6 +6,8 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -35,39 +37,39 @@ public final class JayceeMod {
  public static boolean unlocked(Player p){return p.getPersistentData().getInt("JayceeConsumed")>=3;}
  public static final class Essence extends Item {
   public Essence(Properties properties){super(properties);}
-  /**
-   * Consume instantly from either right-click in air or right-click against a block.
-   * The interaction is handled on the server; the client receives its updated count.
-   */
-  private static void absorb(Level level,Player player,InteractionHand hand){
-   if(level.isClientSide)return;
-   ItemStack stack=player.getItemInHand(hand);
-   if(stack.isEmpty())return;
-   int current=player.getPersistentData().getInt("JayceeConsumed");
-   if(current>=3){
-    player.displayClientMessage(Component.literal("Your Jaycee interface is already awakened. Press M."),true);
-    return;
-   }
-   int next=current+1;
-   player.getPersistentData().putInt("JayceeConsumed",next);
-   if(!player.getAbilities().instabuild)stack.shrink(1);
-   if(player instanceof ServerPlayer serverPlayer){
-    FirstJayceeAwakening.onEssenceAbsorbed(serverPlayer);
-    JayceeNetwork.sync(serverPlayer);
-   }
-   player.displayClientMessage(Component.literal(next==3?
-    "Jaycee awakened! Press M to open your interface.":
-    "Jayce's Essence absorbed: "+next+" / 3"),true);
-  }
+  // A genuine hold-right-click consumable. No food/hunger requirement.
+  @Override public UseAnim getUseAnimation(ItemStack stack){return UseAnim.EAT;}
+  @Override public int getUseDuration(ItemStack stack,LivingEntity entity){return 24;}
   @Override public InteractionResultHolder<ItemStack> use(Level level,Player player,InteractionHand hand){
-   absorb(level,player,hand);
-   return InteractionResultHolder.sidedSuccess(player.getItemInHand(hand),level.isClientSide);
+   ItemStack stack=player.getItemInHand(hand);
+   if(player.getPersistentData().getInt("JayceeConsumed")>=3){
+    if(!level.isClientSide)player.displayClientMessage(
+     Component.literal("Jaycee is already awakened. Press M."),true);
+    return InteractionResultHolder.sidedSuccess(stack,level.isClientSide);
+   }
+   player.startUsingItem(hand);
+   return InteractionResultHolder.consume(stack);
   }
   @Override public InteractionResult useOn(UseOnContext context){
    Player player=context.getPlayer();
    if(player==null)return InteractionResult.PASS;
-   absorb(context.getLevel(),player,context.getHand());
+   use(context.getLevel(),player,context.getHand());
    return InteractionResult.sidedSuccess(context.getLevel().isClientSide);
+  }
+  @Override public ItemStack finishUsingItem(ItemStack stack,Level level,LivingEntity entity){
+   if(level.isClientSide||!(entity instanceof ServerPlayer player))return stack;
+   int count=player.getPersistentData().getInt("JayceeConsumed");
+   if(count>=3)return stack;
+   // Server grants the exclusive first-consumer advancement on actual absorption.
+   FirstJayceeAwakening.onEssenceAbsorbed(player);
+   int next=count+1;
+   player.getPersistentData().putInt("JayceeConsumed",next);
+   if(!player.getAbilities().instabuild)stack.shrink(1);
+   JayceeNetwork.sync(player);
+   player.displayClientMessage(Component.literal(next==3?
+    "Jaycee awakened! Press M to open the interface.":
+    "Jayce's Essence absorbed: "+next+" / 3"),true);
+   return stack;
   }
  }
 }

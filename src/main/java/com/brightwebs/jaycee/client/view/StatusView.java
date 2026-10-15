@@ -2,6 +2,8 @@ package com.brightwebs.jaycee.client.view;
 
 import com.brightwebs.jaycee.client.DivineFrame;
 import com.brightwebs.jaycee.client.DivineGlyph;
+import com.brightwebs.jaycee.client.GreatSageEnergyCore;
+import com.brightwebs.jaycee.client.model.EnergyCoreMotion.State;
 import com.brightwebs.jaycee.client.JayceeScreen;
 import com.brightwebs.jaycee.client.model.PreviewData;
 import com.brightwebs.jaycee.client.widget.StatusSymbols;
@@ -12,6 +14,10 @@ import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 /** Reference layout: compact profile/stats, free-floating seal, and inset detail cards. */
 public final class StatusView implements TabView {
  private boolean fullModel;
+ private final GreatSageEnergyCore energyCore=new GreatSageEnergyCore();
+ private int lastLevel=-1;
+ /** Integration hook for future client-side learning, ultimate and awakening notifications. */
+ public GreatSageEnergyCore energyCore(){return energyCore;}
  @Override public void init(JayceeScreen s){
   s.button(fullModel?"Face":"3D",84,182,26,18,()->{fullModel=!fullModel;s.rebuild();});
  }
@@ -51,7 +57,18 @@ public final class StatusView implements TabView {
    s.coloredText(g,stat.name(),53,y,120,0xFFB5C7DF);
    s.rightText(g,stat.value(),255,y,0xFF9EC4EE);
   }
-  DivineFrame.sigil(g,357,231,82,player==null?0:player.tickCount);
+  DivineFrame.sigilFrame(g,357,231,82,player==null?0:player.tickCount);
+  if(player!=null){
+   if(lastLevel>=0&&player.experienceLevel>lastLevel)energyCore.trigger(State.LEVEL_UP);
+   lastLevel=player.experienceLevel;
+  }
+  energyCore.setAnalyzing(Math.hypot(mx-357,my-231)<43);
+  energyCore.setQuality(switch(Minecraft.getInstance().options.particles().get()){
+   case MINIMAL -> GreatSageEnergyCore.Quality.LOW;
+   case DECREASED -> GreatSageEnergyCore.Quality.MEDIUM;
+   default -> GreatSageEnergyCore.Quality.HIGH;
+  });
+  energyCore.render(g,357,231,43);
   s.panel(g,458,102,160,59,"Titles");
   s.coloredText(g,"- No Title Equipped -",471,139,135,0xFF97A7BF);
   s.panel(g,458,170,160,105,"Racial Trait");

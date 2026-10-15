@@ -25,7 +25,7 @@ Minecraft 1.21.1 / Java 21 / NeoForge 21.1.x.
 
 1. Open this repository's **Actions** tab and select **Build NeoForge 1.21.1**. Choose a **successful run for the UI pull request's latest commit**, not an older run from another branch. PR builds run automatically; **Run workflow** can also build a selected branch manually.
    - If GitHub shows **Action required** or **Workflows awaiting approval**, a repository maintainer must use **Approve and run** on the pull request before the build can start. There is no downloadable artifact until that approved build succeeds.
-2. Under **Artifacts**, download `jaycee-neoforge-1.21.1` (GitHub sign-in required). Extract the ZIP to get `jaycee-0.1.2.jar` (smaller UI and padded headings, including the prior blur fix). The ZIP and GitHub's source-code downloads are not installable mods.
+2. Under **Artifacts**, download `jaycee-neoforge-1.21.1` (GitHub sign-in required). Extract the ZIP to get `jaycee-0.1.3.jar` (animated Status energy core, including the earlier size/header/blur fixes). The ZIP and GitHub's source-code downloads are not installable mods.
 3. Install **NeoForge 21.1.172** for **Minecraft 1.21.1**, launch that profile once, then close the game. Use Java 21; Forge and Fabric are not compatible loaders for this JAR.
 4. Put the extracted JAR into the **mods** folder of that profile's game directory. Remove older Jaycee JARs so only one version is installed.
 5. Launch the NeoForge profile, confirm **Jaycee Di Immortales** appears in **Mods**, and enter a test world. Press **M** to open the UI immediately—no essence is needed. If M conflicts with another mod, rebind it under **Options → Controls → Key Binds → Jaycee**.
@@ -47,6 +47,20 @@ Remove older Jaycee JARs before installing the replacement. With menu background
 The interface is 14% smaller than 0.1.1 at the same window size and GUI scale, leaving more room around the centered window. The shared panel header has a solid navy backing, 20-pixel horizontal text inset, and a divider below the text so ornamental corners cannot run through headings such as **Stats**, **Titles**, or **Racial Trait**. All tabs use this heading treatment. Artwork and the logical 640 × 500 layout remain unchanged.
 
 Compare the overall footprint, heading clearance, ability scrolling, skill-node selection, journal entries, loadout controls and Face/3D portraits at multiple GUI scales. Drawing, mouse input and portrait bounds all use the same reduced scale. [Tensura: Reincarnated](https://www.curseforge.com/minecraft/mc-mods/tensura-reincarnated) is a general RPG-interface reference, not a source of copied assets or an exact sizing specification.
+
+### Great Sage-inspired energy core (0.1.3)
+
+Only the Status seal's old flame is replaced. The existing blue rings stay at `(357, 231)` with radius 82 in the 640 × 500 design space. `GreatSageEnergyCore` draws inside radius 43, wholly inside the inner ring, without changing the surrounding panels, buttons or layout. All curve centers are mathematically bounded to 92% of the drawable radius; thin-line halos fit inside the remaining margin, so containment does not depend on a scissor rectangle interacting with scaled GUI poses.
+
+Hundreds of separate curves deform in independent planes, with layered translucent subpixel strands, depth-dependent brightness, traveling light pulses, breathing ellipses, occasional turbulence and a pale radiant center. Periodic spatial color waves close cleanly at each loop seam and simultaneously blend sapphire/ice blue, cyan, white, violet, purple, gold, emerald and soft crimson. Geometry and color use monotonic elapsed time, not frame counters or a rotating texture. Only the formation is multicolored; rings retain their original blue treatment.
+
+**Performance:** Minecraft's **Video Settings → Particles** selects core quality: All = 224 strands × 40 segments, Decreased = 144 × 32, Minimal = 64 × 24. Standard batched translucent GUI quads provide bright thin lines plus soft halos without changing global blending or invoking the background blur shader. Reduce quality on slower GPUs.
+
+**States and integration:** Idle is automatic; hovering inside the core smoothly enters Analyzing. An observed vanilla level increase while Status is open triggers a three-second golden Level Up pulse (for example, `/experience add @s 1 levels` with cheats enabled). `JayceeScreen.energyCore()` exposes the live renderer for client-thread event notifications. Its `trigger(EnergyCoreMotion.State)` supports LEARNING (gold convergence/re-expansion), LEVEL_UP, ULTIMATE (extra turbulence/complexity), and AWAKENING (five-second white-gold surge); `setAnalyzing(boolean)` controls continuous analysis. Events crossfade against live baseline curves and return to idle/analysis. Hover analysis and quality are managed by Status each frame.
+
+Learning/ultimate/awakening are rendering hooks, **not newly implemented gameplay powers**, and are not fired by merely selecting a preview skill or consuming an unsynchronized client essence counter. The renderer can also be reused independently via `render(graphics, centerX, centerY, radius)` and `setQuality(Quality)`. Motion/color mathematics live in the Minecraft-independent `client/model/EnergyCoreMotion.java`.
+
+**Test:** Keep Status open for at least a minute; check that individual loops change shape and different regions carry different moving colors. Hover/unhover the center, trigger a vanilla level increase, compare all particle qualities, resize/change GUI scale, toggle Face/3D, open the loadout and switch every tab. Rings, stats and elemental panels must not change color or be overlapped. The energy core uses no static image, eyes, faces or added symbolic imagery. In-game appearance and frame-time still require client testing; mathematical checks alone do not establish reference fidelity.
 
 ## Run in development
 

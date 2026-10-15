@@ -22,6 +22,7 @@ public final class JayceeScreen extends Screen {
  private int originX,originY;
 
  public JayceeScreen(){super(Component.literal("Jaycee : Di Immortales"));}
+ public GreatSageEnergyCore energyCore(){return ((StatusView)views[0]).energyCore();}
  @Override protected void init(){
   scale=UI_SIZE*Math.min(1f,Math.min(width/(float)DESIGN_WIDTH,height/(float)DESIGN_HEIGHT));
   originX=(int)((width-DESIGN_WIDTH*scale)/2);originY=(int)((height-DESIGN_HEIGHT*scale)/2);

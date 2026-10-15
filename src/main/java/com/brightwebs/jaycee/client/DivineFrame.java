@@ -70,6 +70,11 @@ public final class DivineFrame {
  }
  /** Animated seal; scanline rings and capped detail keep even large radii below 2,000 fills. */
  public static void sigil(GuiGraphics g,int cx,int cy,int radius,long ticks){
+  sigilFrame(g,cx,cy,radius,ticks);
+  if(radius>=6)flame(g,cx,cy,Math.min(radius*.53,48),(ticks%24000L)*Math.PI/1200.0);
+ }
+ /** The same seal without its flame, for independently rendered Status energy. */
+ public static void sigilFrame(GuiGraphics g,int cx,int cy,int radius,long ticks){
   if(radius<6)return;
   // Detail is capped independently of the requested size: large seals retain fine broken arcs.
   int detail=Math.min(radius,64);
@@ -108,7 +113,6 @@ public final class DivineFrame {
    int dx=(int)Math.round(Math.cos(a)*2),dy=(int)Math.round(Math.sin(a)*2);
    stroke(g,xx-dx,yy-dy,xx+dx,yy+dy,0xBB8AB7CA);
   }
-  flame(g,cx,cy,Math.min(radius*.53,48),turn);
  }
  private static void ring(GuiGraphics g,int cx,int cy,int radius,double scale,int detail,int color){
   int r=Math.max(1,(int)Math.round(radius*scale));

@@ -11,7 +11,7 @@ public class JayceeScreen extends Screen {
  private static final String[] CATS={"All","Offense","Defense","Support","Movement","Reality"};
  private static final String[] ARTS={"Reality Severance","Celestial Guard","Divine Pulse","Temporal Step","Soul Restore","Aether Flight"};
  private static final String[] TRACKS={"Body","Spirit","Divine","Utility"};
- private int tab=0,page=0,selected=0,category=0,art=0,skill=0;
+ private int tab=0,page=0,selected=0,category=0,art=0,skill=0,skillTier=0;
  private int left,top;
  public JayceeScreen(){super(Component.literal("Jaycee : Di Immortales"));}
  private void button(String label,int x,int y,int w,int h,Runnable r){addRenderableWidget(new OrnateButton(label,left+x,top+y,w,h,r));}
@@ -49,7 +49,7 @@ public class JayceeScreen extends Screen {
   text(g,TABS[tab].toUpperCase(),154,58,0xFFE5F4FF);
   text(g,"EQUIPMENT",427,52,0xFFE0F1FF);DivineFrame.divider(g,left+423,top+79,82);
   text(g,"PAGE "+(page+1)+"/10",449,65,0xFF9CD4FF);
-  for(int i=0;i<4;i++){int xx=419+(i%2)*43,yy=99+(i/2)*52;highlight(g,xx,yy,41,41);if(i==selected)g.fill(left+xx+7,top+yy+31,left+xx+33,top+yy+33,0xFFA3E9FF);}
+  for(int i=0;i<4;i++){int xx=419+(i%2)*43,yy=99+(i/2)*52;highlight(g,xx,yy,41,41);DivineGlyph.icon(g,left+xx+8,top+yy+8,25,(page*4+i)%ARTS.length,i==selected);if(i==selected)g.fill(left+xx+7,top+yy+35,left+xx+33,top+yy+37,0xFFA3E9FF);}
   text(g,"Alt + scroll",422,257,0xFF90BBE8);
   if(tab==0)status(g);else if(tab==1||tab==3)abilities(g);else if(tab==2)skills(g);else if(tab==4)species(g);else quests(g);
   super.render(g,mx,my,dt);
@@ -60,14 +60,14 @@ public class JayceeScreen extends Screen {
   if(Minecraft.getInstance().player!=null)
    InventoryScreen.renderEntityInInventoryFollowsMouse(g,left+205,top+115,left+350,top+250,43,0f,245f,130f,Minecraft.getInstance().player);
   text(g,"PLAYER MODEL",213,266,0xFFE3EFFA);
-  text(g,"Race  Human  |  Rank  Unawakened",155,282,0xFF88B4DD);
+  text(g,"Rank: Initiate     Essence: "+(Minecraft.getInstance().player==null?"?":Minecraft.getInstance().player.experienceLevel)+" Lv",155,282,0xFF88B4DD);
  }
  private void abilities(GuiGraphics g){
   text(g,tab==1?"DIVINE ARTS":"ARCANE LIBRARY",151,78,0xFF91CFFE);DivineFrame.divider(g,left+154,top+86,237);
-  for(int i=0;i<CATS.length;i++)if(i==category)highlight(g,147,88+i*30,101,29);
-  for(int i=0;i<ARTS.length;i++)if(i==art)highlight(g,249,90+i*29,155,28);
+  for(int i=0;i<CATS.length;i++){if(i==category)highlight(g,147,88+i*30,101,29);DivineGlyph.icon(g,left+149,top+93+i*30,14,i,i==category);}
+  for(int i=0;i<ARTS.length;i++){if(i==art)highlight(g,249,90+i*29,155,28);DivineGlyph.icon(g,left+251,top+95+i*29,14,i,i==art);}
   highlight(g,153,274,250,23);
-  text(g,font.plainSubstrByWidth(ARTS[art]+" - Select a slot to prepare",235),163,281,0xFFE0EFFF);
+  text(g,font.plainSubstrByWidth(ARTS[art]+"  |  UI preview",235),163,281,0xFFE0EFFF);
  }
  private void skills(GuiGraphics g){
   text(g,"DIVINE SKILL TREE",156,78,0xFF9CCEFF);DivineFrame.divider(g,left+155,top+88,237);
@@ -76,10 +76,10 @@ public class JayceeScreen extends Screen {
    g.fill(left+cx,top+128,left+cx+2,top+255,0xFF386EA9);
    for(int j=0;j<4;j++){
     int cy=140+j*34,glow=i==skill?0xFF9AE7FF:0xFF6E93D0;
-    for(int d=0;d<6;d++){int half=5-Math.abs(d-5);g.fill(left+cx-half,top+cy+d,left+cx+half+1,top+cy+d+1,glow);}
+    DivineGlyph.icon(g,left+cx-9,top+cy-7,19,(i+j)%ARTS.length,i==skill&&j==skillTier);
    }
   }
-  text(g,"Select a branch to inspect its path",157,280,0xFFB3D4ED);
+  text(g,TRACKS[skill]+" mastery / Tier "+(skillTier+1),157,280,0xFFB3D4ED);
  }
  private void species(GuiGraphics g){
   text(g,"DIVINE EVOLUTION",158,88,0xFF9AD9FF);highlight(g,159,118,228,121);
@@ -90,6 +90,17 @@ public class JayceeScreen extends Screen {
   text(g,"QUEST JOURNAL",155,88,0xFF9AD9FF);
   String[] names={"Awakening","Essence of Existence","The First Ascension","A New Reality"};
   for(int i=0;i<names.length;i++){highlight(g,151,116+i*38,250,34);text(g,names[i],161,129+i*38,0xFFE6F3FF);}
+ }
+ @Override public boolean mouseClicked(double mx,double my,int button){
+  if(tab==2 && button==0){
+   int x=(int)mx-left,y=(int)my-top;
+   for(int i=0;i<4;i++)for(int j=0;j<4;j++){
+    if(Math.abs(x-(180+i*63))<=13&&Math.abs(y-(140+j*34))<=14){
+     skill=i;skillTier=j;return true;
+    }
+   }
+  }
+  return super.mouseClicked(mx,my,button);
  }
  @Override public boolean mouseScrolled(double mx,double my,double dx,double dy){
   if(dy!=0 && Screen.hasAltDown()){page=Math.floorMod(page+(dy<0?1:-1),10);return true;}

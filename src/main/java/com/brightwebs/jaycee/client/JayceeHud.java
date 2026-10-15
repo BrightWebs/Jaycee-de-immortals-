@@ -23,9 +23,10 @@ import java.util.function.IntFunction;
 public final class JayceeHud {
     private static final ResourceLocation LAYER = ResourceLocation.fromNamespaceAndPath(JayceeMod.ID, "gameplay_hud");
     private static final int RESOURCE_WIDTH = 188, RESOURCE_HEIGHT = 58;
-    private static final int SLOT_WIDTH = 86, SLOT_HEIGHT = 38, STACK_HEIGHT = 158;
+    private static final int SLOT_WIDTH = 86, SLOT_HEIGHT = 38, STACK_HEIGHT = 170;
     private static HudMotion hp = new HudMotion(), sp = new HudMotion(), mana = new HudMotion();
     private static final long[] lastCooldown = new long[4];
+    private static final long[] lastCastTick = new long[4];
     private static final double[] activation = new double[4], ready = new double[4];
     private static final String[] lastAbility = {"", "", "", ""};
     private static IntFunction<Component> keyLabels = slot -> Component.literal("—");
@@ -68,6 +69,7 @@ public final class JayceeHud {
             mana = new HudMotion();
             java.util.Arrays.fill(lastAbility, "");
             java.util.Arrays.fill(lastCooldown, 0);
+            java.util.Arrays.fill(lastCastTick, 0);
             java.util.Arrays.fill(activation, 0);
             java.util.Arrays.fill(ready, 0);
             lastFrame = 0;
@@ -92,8 +94,11 @@ public final class JayceeHud {
             graphics.pose().scale(scale, scale, 1);
             drawResources(graphics, resources.x(), resources.y(), state);
             healthBarRendered = true;
+            String page = "PAGE " + (state.page() + 1) + "/" + PlayerState.PAGES;
+            graphics.drawString(mc.font, page,
+                    abilities.x() + (SLOT_WIDTH - mc.font.width(page)) / 2, abilities.y(), 0xFFC4B6D9, true);
             for (int slot = 0; slot < 4; slot++) {
-                drawSlot(graphics, abilities.x(), abilities.y() + slot * 40, slot, state, seconds);
+                drawSlot(graphics, abilities.x(), abilities.y() + 12 + slot * 40, slot, state, seconds);
             }
         } finally {
             graphics.pose().popPose();
@@ -106,14 +111,18 @@ public final class JayceeHud {
         PlayerPortrait.render(graphics, mc.player, x + 5, y + 7, 44, state.portrait3d());
         drawBar(graphics, x + 55, y + 5, hp, "HP", mc.player.getHealth(), mc.player.getMaxHealth(), 0xFFD14759, true);
         drawBar(graphics, x + 55, y + 22, sp, "SP", state.soul(), state.maxSoul(), 0xFFA454DC, false);
-        drawBar(graphics, x + 55, y + 39, mana, "MP", state.mana(), state.maxMana(), 0xFF398DDE, false);
+        String regeneration = String.format(java.util.Locale.ROOT, "%.2f", state.manaRegen())
+                .replaceAll("\\.?0+$", "");
+        drawBar(graphics, x + 55, y + 39, mana, "MP +" + regeneration + "/s",
+                state.mana(), state.maxMana(), 0xFF398DDE, false);
     }
 
     private static void drawBar(GuiGraphics graphics, int x, int y, HudMotion motion, String label,
                                 double current, double maximum, int color, boolean trail) {
         var font = Minecraft.getInstance().font;
-        graphics.drawString(font, label, x, y, color, false);
-        String value = (int) Math.ceil(current) + "/" + (int) Math.ceil(maximum);
+        String value = amount(current) + "/" + amount(maximum);
+        graphics.drawString(font, font.plainSubstrByWidth(label, Math.max(0, 122 - font.width(value))),
+                x, y, color, false);
         graphics.drawString(font, value, x + 126 - font.width(value), y, 0xFFE8E4F0, false);
         int top = y + 10;
         graphics.fill(x, top, x + 126, top + 4, 0xFF211D30);
@@ -131,13 +140,16 @@ public final class JayceeHud {
         AbilityCatalog.Art art = AbilityCatalog.find(id);
         long cooldown = state.cooldownRemaining(id, mc.level.getGameTime());
         if (id.equals(lastAbility[slot])) {
-            if (cooldown > lastCooldown[slot]) activation[slot] = 1;
+            if (id.equals(state.lastActivationId()) && state.lastActivationTick() > lastCastTick[slot]) {
+                activation[slot] = 1;
+            }
             if (cooldown == 0 && lastCooldown[slot] > 0) ready[slot] = 1;
         } else {
             activation[slot] = ready[slot] = 0;
         }
         lastAbility[slot] = id;
         lastCooldown[slot] = cooldown;
+        lastCastTick[slot] = state.lastActivationTick();
         activation[slot] = Math.max(0, activation[slot] - seconds * 2.5);
         ready[slot] = Math.max(0, ready[slot] - seconds * 1.8);
         int border = blend(0xFF514D6B, 0xFF8CCCB4, ready[slot]);
@@ -159,12 +171,19 @@ public final class JayceeHud {
         graphics.drawString(mc.font, status, x + 29, y + 4, cooldown > 0 ? 0xFFC1A7E8 : 0xFF9BCCB8, false);
         String mode = art.modes().isEmpty() ? "—" : art.modes().get(Math.clamp(state.mode(state.page(), slot), 0, art.modes().size() - 1));
         graphics.drawString(mc.font, mc.font.plainSubstrByWidth(mode, SLOT_WIDTH - 31), x + 29, y + 16, 0xFFE0D7EF, false);
-        graphics.drawString(mc.font, mc.font.plainSubstrByWidth(art.name(), SLOT_WIDTH - 31), x + 29, y + 27, 0xFF9C94AC, false);
+        String cost = java.math.BigDecimal.valueOf(art.manaCost()).stripTrailingZeros().toPlainString() + " MP";
+        graphics.drawString(mc.font, mc.font.plainSubstrByWidth(cost, SLOT_WIDTH - 31), x + 29, y + 27, 0xFF8BB9EB, false);
     }
 
     private static void panel(GuiGraphics graphics, int x, int y, int width, int height, int border) {
         graphics.fill(x, y, x + width, y + height, border);
         graphics.fill(x + 1, y + 1, x + width - 1, y + height - 1, 0xCE151221);
+    }
+
+    private static String amount(double value) {
+        if (value >= 1_000_000) return String.format(java.util.Locale.ROOT, "%.1fm", value / 1_000_000).replace(".0m", "m");
+        if (value >= 10_000) return String.format(java.util.Locale.ROOT, "%.1fk", value / 1000).replace(".0k", "k");
+        return Integer.toString((int) Math.ceil(value));
     }
 
     private static int blend(int base, int highlight, double amount) {

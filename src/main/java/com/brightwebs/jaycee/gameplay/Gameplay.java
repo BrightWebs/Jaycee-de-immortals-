@@ -167,6 +167,34 @@ public final class Gameplay {
         return resistance;
     }
 
+    /** Sets max SP to 1..1,000,000 and clamps current SP/barrier without filling either pool. */
+    public static void setMaxSoul(ServerPlayer player, double maximum) {
+        if (!Double.isFinite(maximum)) throw new IllegalArgumentException("Maximum SP must be finite");
+        var state = PlayerState.get(player);
+        var data = PlayerState.read(player);
+        double max = PlayerState.maximum(maximum);
+        data.putDouble("MaxSoul", max);
+        data.putDouble("Soul", PlayerState.bounded(state.soul(), max));
+        data.putDouble("Barrier", PlayerState.bounded(state.barrier(), max));
+        PlayerState.save(player, data);
+        GameplayNetwork.sync(player);
+    }
+
+    /** Configures only the saved standalone pool; external adapters are never mutated. */
+    public static void configureStandaloneMana(ServerPlayer player, double maximum, double regenPerSecond) {
+        if (!Double.isFinite(maximum) || !Double.isFinite(regenPerSecond)) {
+            throw new IllegalArgumentException("Maximum mana and regeneration must be finite");
+        }
+        var state = PlayerState.get(player);
+        var data = PlayerState.read(player);
+        double max = PlayerState.maximum(maximum);
+        data.putDouble("MaxMana", max);
+        data.putDouble("Mana", PlayerState.bounded(state.mana(), max));
+        data.putDouble("ManaRegen", PlayerState.bounded(regenPerSecond, 10000));
+        PlayerState.save(player, data);
+        GameplayNetwork.sync(player);
+    }
+
     private static void applyExhaustion(ServerPlayer player) {
         player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 0, false, false));
         player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 60, 0, false, false));

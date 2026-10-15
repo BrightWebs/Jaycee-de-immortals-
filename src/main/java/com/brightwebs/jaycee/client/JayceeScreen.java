@@ -135,23 +135,30 @@ public class JayceeScreen extends Screen {
   line(g,15,266,106);wrap(g,"Divine interface awakened",15,282,105,0xFF9BC9F3);
  }
  private void status(GuiGraphics g,int mx,int my){
-  panel(g,2,48,486,284);var p=Minecraft.getInstance().player;if(p==null)return;
-  text(g,font.plainSubstrByWidth(p.getName().getString(),180),24,64,INK);
-  text(g,"Race: Human",24,80,MUTED);text(g,"Title: None equipped",24,94,MUTED);
-  panel(g,18,112,138,157);
-  InventoryScreen.renderEntityInInventoryFollowsMouse(g,24,119,150,259,49,0f,mx,my,p);
-  text(g,"Lv. "+p.experienceLevel,31,281,0xFF98D3FF);
-  g.fill(26,302,147,307,0xFF243853);g.fill(26,302,26+(int)(121*p.experienceProgress),307,0xFF66BFFF);
-  DivineFrame.jewel(g,254,149,System.currentTimeMillis()/50,0xFF7FBFFF);
-  text(g,"JAYCEE",232,202,INK);text(g,"Di Immortales",211,216,MUTED);
-  panel(g,171,239,167,79);text(g,"Core Stats",183,249,INK);
-  text(g,String.format(Locale.ROOT,"Health   %.0f / %.0f",p.getHealth(),p.getMaxHealth()),183,265,0xFFFF9AB4);
-  text(g,"Armor    "+p.getArmorValue(),183,280,MUTED);
-  text(g,"Mana     Not unlocked",183,295,MUTED);
-  panel(g,350,62,125,65);text(g,"Titles",361,74,INK);wrap(g,"No title equipped",361,94,102,MUTED);
-  panel(g,350,135,125,66);text(g,"Racial Traits",361,146,INK);wrap(g,"No racial traits unlocked.",361,165,101,MUTED);
-  panel(g,350,208,125,109);text(g,"Elemental Affinity",360,219,INK);
-  for(int i=0;i<6;i++)text(g,ELEMENTS[i]+"    --",365,236+i*12,MUTED);
+  panel(g,2,48,486,284);
+  var p=Minecraft.getInstance().player;if(p==null)return;
+  text(g,"Status Overview",195,59,0xFFCDEEFF);
+  line(g,14,76,458);
+  DivineFrame.portrait(g,13,84,213,230);
+  // The model is the real local player, not a pasted character screenshot.
+  InventoryScreen.renderEntityInInventoryFollowsMouse(g,30,95,215,294,59,0f,mx,my,p);
+  panel(g,231,85,242,135);
+  String[] labels={"Title","Rank","Race","Essence","Alignment","World","Playtime"};
+  String[] values={"None equipped","Human","Human","Not available","Neutral",
+    p.level().dimension().location().getPath(), "In progress"};
+  for(int i=0;i<labels.length;i++){
+   int y=96+i*17;
+   text(g,labels[i],242,y,0xFF92BDD9);
+   text(g,font.plainSubstrByWidth(values[i],134),326,y,INK);
+  }
+  panel(g,231,228,242,87);
+  text(g,"Unique Traits",296,236,0xFFBFE6FF);
+  line(g,245,251,214);
+  String[] traits={"Flight and divine movement","Existence manipulation","Reality / creation / destruction"};
+  for(int i=0;i<traits.length;i++){
+   DivineFrame.gem(g,250,263+i*15,2,i==0?0xFFE6CD88:0xFF7FB8F4);
+   text(g,traits[i],261,259+i*15,0xFFCBD9F5);
+  }
  }
  private void abilities(GuiGraphics g){
   panel(g,2,48,123,284);panel(g,128,48,161,284);panel(g,292,48,196,284);
@@ -165,23 +172,49 @@ public class JayceeScreen extends Screen {
   text(g,"Power preview",307,279,0xFFD6B576);
  }
  private void skills(GuiGraphics g){
-  panel(g,2,48,123,284);panel(g,128,48,360,284);
-  text(g,"Mastery",15,64,INK);wrap(g,TRACKS[branch]+" / Tier "+(tier+1),15,91,100,0xFFCBAAFF);
-  wrap(g,"Select a node to inspect it. Mastery progression is not available yet.",15,126,100,MUTED);
-  text(g,"Divine Skill Tree",147,65,INK);line(g,147,83,317);
-  for(int i=0;i<4;i++){
-   text(g,TRACKS[i],141+i*80,98,INK);
-   g.fill(162+i*80,143,163+i*80,259,0xFF6979AB);
+  panel(g,2,48,486,284);
+  text(g,"Skill Tree",224,60,INK);
+  panel(g,13,84,462,195);
+  int[] colors={0xFFFF827E,0xFFC18AFF,0xFFEAC27D,0xFF58E1DC};
+  int[] xx={68,173,281,392};
+  DivineFrame.jewel(g,235,111,System.currentTimeMillis()/50,0xFF9BDAFF);
+  for(int col=0;col<4;col++){
+   int cx=xx[col],color=colors[col];
+   g.fill(235,120,cx+1,121,0xFF385D94);
+   g.fill(cx,120,cx+1,151,color);
+   DivineFrame.gem(g,cx,156,11,color);
+   text(g,TRACKS[col],cx-18,178,color);
+   for(int tierIndex=0;tierIndex<3;tierIndex++){
+    int nx=cx-23+tierIndex*23;
+    g.fill(cx,188,nx+1,189,0xAA4764A4);
+    g.fill(nx,189,nx+1,214,0xAA4764A4);
+    DivineFrame.gem(g,nx,219,7,color);
+   }
+   g.fill(cx,227,cx+1,245,0xFF56729F);
+   DivineFrame.gem(g,cx,250,5,color);
   }
-  text(g,TRACKS[branch]+" mastery / Tier "+(tier+1),149,293,INK);
-  text(g,"Not unlocked",149,310,MUTED);
+  text(g,"ALL      PASSIVE      COMBAT      MOVEMENT      DIVINE      SPIRITUAL",25,290,MUTED);
+  text(g,"Selected: "+TRACKS[branch]+" / Tier "+(tier+1)+"   |   Mastery locked",24,308,INK);
  }
  private void magic(GuiGraphics g){
-  panel(g,2,48,123,284);panel(g,128,48,360,284);
-  text(g,"Elements",16,64,INK);text(g,ELEMENTS[element]+" Magic",146,65,INK);line(g,147,84,320);
-  DivineFrame.jewel(g,310,162,System.currentTimeMillis()/50,new int[]{0xFFFF986A,0xFF60CAFF,0xFF8CE1C5,0xFFE7BD78,0xFFFFE4AC,0xFFB393F4}[element]);
-  wrap(g,"Explore the "+ELEMENTS[element].toLowerCase(Locale.ROOT)+" school. Spells, mastery and casting will appear here when magic gameplay is implemented.",153,229,302,MUTED);
-  text(g,"No spells unlocked",153,294,0xFFC9ACF1);
+  panel(g,2,48,486,284);
+  text(g,"Magic Library",212,60,INK);
+  panel(g,11,78,102,241);
+  panel(g,117,78,152,241);
+  panel(g,274,78,202,241);
+  String[] schools={"Divine Magic","Arcane Magic","Elemental Magic","Spatial Magic","Temporal Magic","Reality Magic","Spirit Magic","Healing Magic","Summoning Magic","Forbidden Magic"};
+  for(int i=0;i<schools.length;i++){
+   int y=87+i*23;
+   UiArt.icon(g,125,y,16,i);
+   text(g,schools[i],146,y+5,i==element?0xFFFFDBA2:INK);
+  }
+  DivineFrame.jewel(g,375,156,System.currentTimeMillis()/40,new int[]{0xFFFF986A,0xFF60CAFF,0xFF8CE1C5,0xFFE7BD78,0xFFFFE4AC,0xFFB393F4}[element]);
+  text(g,ELEMENTS[element]+" Magic",328,214,0xFFFFDBAB);
+  wrap(g,"Magic from higher essence. Develop magical affinities and spell mastery across your divine journey.",293,232,169,MUTED);
+  text(g,"Mastery Level",299,280,INK);
+  g.fill(291,297,458,304,0xFF193958);
+  g.fill(291,297,299,304,0xFF83D7FF);
+  text(g,"Unavailable",392,309,MUTED);
  }
  private void species(GuiGraphics g){
   panel(g,2,48,486,284);text(g,"Divine Evolution",20,65,INK);text(g,"Current species: Human",20,85,MUTED);

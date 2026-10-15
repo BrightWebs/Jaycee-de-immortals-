@@ -40,7 +40,7 @@ public class JayceeScreen extends Screen {
   scale=Math.min(1.0,Math.min((width-12.0)/W,(height-12.0)/H));
   originX=(width-W*scale)/2;originY=(height-H*scale)/2;
   for(int i=0;i<TABS.length;i++){
-   final int t=i;var b=button(TABS[i],45+i*74,7,72,31,()->{tab=t;rebuild();});b.selected=tab==i;b.tabIcon=i;
+   final int t=i;var b=button(TABS[i],45+i*74,7,72,31,()->{tab=t;rebuild();});b.selected=tab==i;b.tabIcon=i<6?i:-1;
   }
   button("x",568,12,24,23,this::onClose);
   button("<",500,79,20,20,()->changePage(-1));button(">",574,79,20,20,()->changePage(1));

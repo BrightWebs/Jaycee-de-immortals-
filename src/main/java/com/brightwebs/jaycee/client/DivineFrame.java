@@ -37,6 +37,30 @@ final class DivineFrame {
    line(g,x+12,y+h-9,w-24,1,0x665DAAFF);
   }
  }
+ /** Recessed illuminated ribbon and symmetric filigree; labels/widgets draw separately. */
+ static void ribbon(GuiGraphics g,int x,int y,int w,int h){
+  rect(g,x+6,y+2,w-12,h-4,0xCA0C2445);
+  line(g,x+10,y+1,w-20,1,0xFF5186BD);
+  line(g,x+10,y+h-2,w-20,1,0xFF3D6A9B);
+  gem(g,x+9,y+h/2,3,0xFF8FCCF1);
+  gem(g,x+w-10,y+h/2,3,0xFF8FCCF1);
+  for(int k=0;k<3;k++){
+   line(g,x+14+k*3,y+4+k,7,1,0x88649CD2);
+   line(g,x+w-21-k*3,y+4+k,7,1,0x88649CD2);
+  }
+ }
+ /** Fine gold/silver side flourishes framing the player without obscuring the live model. */
+ static void portrait(GuiGraphics g,int x,int y,int w,int h){
+  frame(g,x,y,w,h,true);
+  line(g,x+7,y+11,1,h-22,0x9979BDF2);
+  line(g,x+w-8,y+11,1,h-22,0x9979BDF2);
+  gem(g,x+w/2,y+6,4,GOLD);
+  gem(g,x+w/2,y+h-7,4,GOLD);
+  for(int i=0;i<4;i++){
+   line(g,x+12+i*2,y+12+i*2,10,1,0x7775AFE1);
+   line(g,x+w-22-i*2,y+12+i*2,10,1,0x7775AFE1);
+  }
+ }
  static void divider(GuiGraphics g,int x,int y,int w){
   line(g,x,y,w,1,0xFF365C90);gem(g,x+w/2,y,2,0xFF86C3F5);
  }

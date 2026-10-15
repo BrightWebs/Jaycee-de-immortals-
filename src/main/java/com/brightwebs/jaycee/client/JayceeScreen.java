@@ -61,11 +61,11 @@ public class JayceeScreen extends Screen {
   // The actual world player's 3D skin + equipped armor. No fixed Steve texture.
   if(player!=null)InventoryScreen.renderEntityInInventoryFollowsMouse(
    g,left+18,top+133,left+122,top+247,38,0f,224f,123f,player);
-  text(g,"LIVE PLAYER MODEL",17,268,0xFF9ED2FA);
+  text(g,"LIVE PLAYER MODEL",17,268,0xFF9ED2FA);\n  DivineFrame.divider(g,left+19,top+285,101);
   text(g,"STATUS OVERVIEW",155,83,0xFF8FCFFF);
   DivineFrame.divider(g,left+156,top+98,235);
   highlight(g,153,106,246,167);
-  text(g,"ADVENTURER PROFILE",173,119,0xFFE5F5FF);
+  text(g,"ADVENTURER PROFILE",173,119,0xFFE5F5FF);\n  DivineFrame.divider(g,left+171,top+132,201);
   if(player!=null)text(g,font.plainSubstrByWidth(player.getName().getString(),184),172,139,0xFF8DD7FF);
   String[] stats={"HEALTH","MANA","SOUL"};
   int[] colors={0xFFE96F91,0xFF67C2FF,0xFFA58AFF};

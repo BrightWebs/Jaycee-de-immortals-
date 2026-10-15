@@ -28,15 +28,7 @@ public class JayceeScreen extends Screen {
   }
  }
  private void rebuild(){clearWidgets();init();}
- private void box(GuiGraphics g,int x,int y,int w,int h,boolean bright){
-  int edge=bright?0xFF9EEBFF:0xFF4274AA;
-  g.fill(x+4,y+4,x+w-4,y+h-4,0xE40A1A32);
-  g.fill(x+6,y+6,x+w-6,y+h-6,0x751A3555);
-  g.fill(x+5,y,x+w-5,y+1,edge);g.fill(x+5,y+h-1,x+w-5,y+h,edge);
-  g.fill(x,y+5,x+1,y+h-5,edge);g.fill(x+w-1,y+5,x+w,y+h-5,edge);
-  for(int i=0;i<5;i++){g.fill(x+5-i,y+i,x+6-i,y+i+1,edge);g.fill(x+w-6+i,y+i,x+w-5+i,y+i+1,edge);}
-  g.fill(x+7,y+4,x+Math.min(w-7,26),y+5,0xFF85C8FF);
- }
+ private void box(GuiGraphics g,int x,int y,int w,int h,boolean bright){DivineFrame.frame(g,x,y,w,h,bright);}
  private void text(GuiGraphics g,String s,int x,int y,int color){g.drawString(font,s,left+x,top+y,color,false);}
  private void highlight(GuiGraphics g,int x,int y,int w,int h){box(g,left+x,top+y,w,h,true);}
  @Override public void render(GuiGraphics g,int mx,int my,float dt){
@@ -55,7 +47,7 @@ public class JayceeScreen extends Screen {
    if(i==0)g.fill(left+16,top+y+15,left+16+(int)(102*Math.max(0,Math.min(1,ratio))),top+y+20,color);
   }
   text(g,TABS[tab].toUpperCase(),154,58,0xFFE5F4FF);
-  text(g,"EQUIPMENT",427,52,0xFFE0F1FF);
+  text(g,"EQUIPMENT",427,52,0xFFE0F1FF);DivineFrame.divider(g,left+423,top+79,82);
   text(g,"PAGE "+(page+1)+"/10",449,65,0xFF9CD4FF);
   for(int i=0;i<4;i++){int xx=419+(i%2)*43,yy=99+(i/2)*52;highlight(g,xx,yy,41,41);if(i==selected)g.fill(left+xx+7,top+yy+31,left+xx+33,top+yy+33,0xFFA3E9FF);}
   text(g,"Alt + scroll",422,257,0xFF90BBE8);
@@ -63,22 +55,22 @@ public class JayceeScreen extends Screen {
   super.render(g,mx,my,dt);
  }
  private void status(GuiGraphics g){
-  text(g,"STATUS OVERVIEW",155,83,0xFF8FCFFF);
-  highlight(g,173,108,208,157);
+  text(g,"STATUS OVERVIEW",155,83,0xFF8FCFFF);DivineFrame.divider(g,left+156,top+98,235);
+  highlight(g,173,108,208,157);DivineFrame.jewel(g,left+278,top+187,System.currentTimeMillis()/50,0xFF64B7FF);
   if(Minecraft.getInstance().player!=null)
    InventoryScreen.renderEntityInInventoryFollowsMouse(g,left+205,top+115,left+350,top+250,43,0f,245f,130f,Minecraft.getInstance().player);
   text(g,"PLAYER MODEL",213,266,0xFFE3EFFA);
   text(g,"Player skin updates automatically",155,283,0xFF88B4DD);
  }
  private void abilities(GuiGraphics g){
-  text(g,tab==1?"DIVINE ARTS":"ARCANE LIBRARY",151,78,0xFF91CFFE);
+  text(g,tab==1?"DIVINE ARTS":"ARCANE LIBRARY",151,78,0xFF91CFFE);DivineFrame.divider(g,left+154,top+86,237);
   for(int i=0;i<CATS.length;i++)if(i==category)highlight(g,147,88+i*30,101,29);
   for(int i=0;i<ARTS.length;i++)if(i==art)highlight(g,249,90+i*29,155,28);
   highlight(g,153,274,250,23);
   text(g,font.plainSubstrByWidth(ARTS[art]+" - Select a slot to prepare",235),163,281,0xFFE0EFFF);
  }
  private void skills(GuiGraphics g){
-  text(g,"DIVINE SKILL TREE",156,78,0xFF9CCEFF);
+  text(g,"DIVINE SKILL TREE",156,78,0xFF9CCEFF);DivineFrame.divider(g,left+155,top+88,237);
   for(int i=0;i<4;i++){
    int cx=180+i*63;
    g.fill(left+cx,top+128,left+cx+2,top+255,0xFF386EA9);

@@ -49,6 +49,30 @@ public final class PhaseOneGameplay {
         d.putLong(PROGRESS, saturatingAdd(d.getLong(PROGRESS), amount));
     }
 
+    public static long essenceBalance(ServerPlayer p) {
+        return Math.max(0L, data(p).getLong(BALANCE));
+    }
+
+    /** Debit is server-side and never alters progression essence or EP. */
+    public static boolean spendEssence(ServerPlayer p, long amount) {
+        if (amount <= 0L) return false;
+        CompoundTag d = data(p);
+        long available = Math.max(0L, d.getLong(BALANCE));
+        if (available < amount) return false;
+        d.putLong(BALANCE, available - amount);
+        return true;
+    }
+
+    /** Recipient owns the credited essence and qualifies for cumulative progression. */
+    public static void creditEssence(ServerPlayer p, long amount) {
+        earn(p, amount);
+    }
+
+    public static long safeAdd(long first, long second) {
+        if (first < 0 || second < 0) throw new IllegalArgumentException("Negative essence");
+        return saturatingAdd(first, second);
+    }
+
     private static long saturatingAdd(long a, long b) {
         return b > Long.MAX_VALUE - a ? Long.MAX_VALUE : a + b;
     }

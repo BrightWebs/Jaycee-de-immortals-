@@ -28,7 +28,7 @@ public final class JayceeMod {
   public Essence(Properties properties){super(properties);}
   @Override public InteractionResultHolder<ItemStack> use(Level level,Player player,InteractionHand hand){
     ItemStack stack=player.getItemInHand(hand);
-    if(!level.isClientSide){int n=Gameplay.absorbEssence(player);if(!player.getAbilities().instabuild)stack.shrink(1);player.displayClientMessage(Component.literal(n==3?"Jaycee UI unlocked. Press M.":"Essence absorbed: "+n+" / 3"),true);}
+    if(!level.isClientSide){int n=Gameplay.absorbEssence(player);stack.shrink(1);player.displayClientMessage(Component.literal(n==3?"Third core consumed. Unique Jaycee role checked. Press M.":"Essence absorbed: "+n+" / 3"),true);}
     return InteractionResultHolder.sidedSuccess(stack,level.isClientSide);
   }
  }

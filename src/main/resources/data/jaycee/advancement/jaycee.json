@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "id": "jaycee:jayces_essence"
+    },
+    "title": {
+      "text": "Jaycee",
+      "color": "light_purple"
+    },
+    "description": {
+      "text": "The one who bears the supreme divine title"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": true
+  },
+  "criteria": {
+    "claimed": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

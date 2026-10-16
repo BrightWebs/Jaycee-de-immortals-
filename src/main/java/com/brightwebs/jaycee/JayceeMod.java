@@ -21,7 +21,7 @@ public final class JayceeMod {
  public static final String ID="jaycee";
  public static final DeferredRegister.Items ITEMS=DeferredRegister.createItems(ID);
  public static final DeferredItem<Item> ESSENCE=ITEMS.register("jayces_essence",()->new Essence(new Item.Properties().stacksTo(16)));
- public JayceeMod(IEventBus bus){ ITEMS.register(bus); NeoForge.EVENT_BUS.addListener(this::commands); PhaseOneGameplay.register(); }
+ public JayceeMod(IEventBus bus){ ITEMS.register(bus); NeoForge.EVENT_BUS.addListener(this::commands); PhaseOneGameplay.register(); DivineBestowal.register(); }
  private void commands(RegisterCommandsEvent event){event.getDispatcher().register(Commands.literal("jayceeessence").requires(s->s.hasPermission(2)).executes(c->{ServerPlayer p=c.getSource().getPlayerOrException();p.getInventory().add(new ItemStack(ESSENCE.get(),3));c.getSource().sendSuccess(()->Component.literal("Received 3 Jayce's Essences"),false);return 1;}));}
  public static boolean unlocked(Player p){return p.getPersistentData().getInt("JayceeConsumed")>=3;}
  public static final class Essence extends Item {

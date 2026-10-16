@@ -19,6 +19,7 @@
 - In-game HUD: four-slot loadout rendered with the same visual design language as the menu, not plain square placeholders.
 
 ## Unlock and testing
+- With cheats/operator level 2, run `/jayceetest` and press M without consuming essences; verify Soul Restore remains usable through the existing equip system. Verify a non-operator and the server console cannot self-grant the identity. Reconnect/respawn and confirm the test flag persists. Run `/jayceetest off`: players with fewer than three consumed essences must be locked again; players who earned the three-essence unlock must stay unlocked. Check that command use never changes HP/SP/mana, EP, cooldowns, loadouts, portrait preference or the approved GUI.
 - Three consumed **Jayce's Essences** unlock the menu per player; persist consumption count and unlock state across relogs.
 - Add an operator-only test command for receiving three essences; test the lock before and after consumption.
 - Verify client/server behavior, resolution handling, model render, tab persistence, mouse and keyboard input, and full resource load using Minecraft 1.21.1, NeoForge 21.1.x, Java 21.

@@ -64,6 +64,8 @@ Standalone mana starts at 100 maximum and regenerates 2/second. SP starts at 100
 
 `/jayceemana` reports selected/effective/available backends; `/jayceemana auto|standalone|<registered-id>` saves a validated choice. Default `auto` prefers a registered, available `irons_spellbooks` adapter, then `ars_nouveau`, then standalone. An unavailable saved backend falls back without deleting the preference. Operators can use `/jayceesp`, `/jayceesp damage <amount>`, and `/jayceesp heal <amount>` on themselves after unlocking to exercise the spiritual hooks.
 
+**Become Jaycee for testing:** with cheats enabled in single-player, or operator permission level 2 on a server, run `/jayceetest`, then press **M**. This gives only the executing player a saved, server-synced **Jaycee test identity** and bypasses the three-essence GUI/ability unlock. `/jayceetest off` removes the test flag without changing earned essence progress. The flag survives reconnect/respawn; non-operators cannot grant or revoke it, and no target-player argument is exposed. It does not change your displayed Human preview, implement an evolution, grant EP, refill resources, reset cooldowns, equip/replace abilities, or enable unfinished powers. It is not a substitute for the still-unresolved canonical Jaycee identity/permission rules.
+
 `gameplay/ManaBackend.java` defines `getCurrent`, `getMax`, `getRegen` (per second) and atomic `consume`. `ManaBackends.register` is the guarded extension point: an optional adapter must reject insufficient funds without mutation, synchronize its owner's resource, and leave regeneration to that owner. Only one resolved backend is displayed and charged; Jaycee must never regenerate an external resource itself.
 
 ### Verified upstream APIs and remaining blockers

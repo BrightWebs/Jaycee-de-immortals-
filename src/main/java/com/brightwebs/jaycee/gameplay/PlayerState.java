@@ -53,7 +53,9 @@ public final class PlayerState {
     public int page() { return Math.clamp(data.getInt("Page"), 0, PAGES - 1); }
     public boolean portrait3d() { return data.getBoolean("Portrait3d"); }
     public int consumed() { return Math.clamp(data.getInt("Consumed"), 0, 3); }
-    public boolean unlocked() { return consumed() >= 3; }
+    /** Operator-granted test identity, not a completed race evolution or EP qualification. */
+    public boolean jayceeTest() { return data.getBoolean("JayceeTest"); }
+    public boolean unlocked() { return consumed() >= 3 || jayceeTest(); }
     /** Server world time when this snapshot was sent; client world time advances the displayed countdown. */
     public long serverTick() { return data.getLong("ServerTick"); }
     public String lastActivationId() { return data.getString("LastActivationId"); }

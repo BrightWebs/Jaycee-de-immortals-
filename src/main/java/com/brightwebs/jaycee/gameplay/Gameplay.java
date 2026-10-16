@@ -39,6 +39,11 @@ public final class Gameplay {
     }
 
     private static void commands(RegisterCommandsEvent event) {
+        event.getDispatcher().register(Commands.literal("jayceetest")
+            .requires(source -> source.hasPermission(2))
+            .executes(context -> setJayceeTest(context.getSource().getPlayerOrException(), true))
+            .then(Commands.literal("off")
+                .executes(context -> setJayceeTest(context.getSource().getPlayerOrException(), false))));
         event.getDispatcher().register(Commands.literal("jayceemana")
             .executes(context -> {
                 var player = context.getSource().getPlayerOrException();
@@ -96,6 +101,18 @@ public final class Gameplay {
                     })));
         }
         event.getDispatcher().register(spiritual);
+    }
+
+    private static int setJayceeTest(ServerPlayer player, boolean enabled) {
+        var data = PlayerState.read(player);
+        if (enabled) data.putBoolean("JayceeTest", true);
+        else data.remove("JayceeTest");
+        PlayerState.save(player, data);
+        GameplayNetwork.sync(player);
+        player.displayClientMessage(Component.literal(enabled
+            ? "Jaycee test identity enabled. Press M to open Sapphire. This is not EP progression or a race evolution; unfinished powers remain unavailable."
+            : "Jaycee test identity disabled. Your earned essence unlock, resources and loadouts are unchanged."), false);
+        return 1;
     }
 
     public static int absorbEssence(Player player) {

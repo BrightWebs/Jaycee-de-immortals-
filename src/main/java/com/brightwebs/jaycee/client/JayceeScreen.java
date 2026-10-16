@@ -20,17 +20,16 @@ import java.util.Map;
 public class JayceeScreen extends Screen {
  private static final String[] TABS={"Status","Abilities","Skills","Magic","Quests"};
  private static final String[] CATS={"All","Offense","Defense","Support","Movement","Reality"};
- private static final String[] TRACKS={"Body","Spirit","Divine","Utility"};
  private static final int INK=0xFFB6CCDD, BLUE=0xFF91C4F4, MUTED=0xFF788DAB;
  private final Map<Button,String> hints=new LinkedHashMap<>();
  private final Button[] slots=new Button[PlayerState.SLOTS], pages=new Button[PlayerState.PAGES];
  private SapphireLayout layout;
- private int tab,selected,category,skill,skillTier;
+ private int tab,selected,category;
+ private final SkillMagicBrowser skillsBrowser=new SkillMagicBrowser(false,()->selected),magicBrowser=new SkillMagicBrowser(true,()->selected);
  private int art=-1;
  private Button portraitButton;
  private Button selectedArtButton,selectedCategoryButton,selectedSkillButton;
  private boolean speciesOpen;
- private final AbilityBrowser abilityBrowser=new AbilityBrowser(index->art=index);
 
  public JayceeScreen(){super(Component.literal("Jaycee : Di Immortales"));}
  private PlayerState state(){return PlayerState.get(Minecraft.getInstance().player);}
@@ -70,7 +69,10 @@ public class JayceeScreen extends Screen {
    var b=SapphireLayout.slot(i);
    slots[i]=button("Slot "+(i+1),b.x(),b.y(),b.width(),b.height(),2,()->{
     selected=s;
-    if(art>=0)GameplayActions.equip(state().page(),s,AbilityCatalog.ALL.get(art).id());
+    if(tab==2||tab==3){
+     String browserSelectedId=browser().equippableSelection();
+     if(browserSelectedId!=null)GameplayActions.equip(state().page(),s,browserSelectedId);
+    }else if(art>=0)GameplayActions.equip(state().page(),s,AbilityCatalog.ALL.get(art).id());
    },null);
    button("Remove "+(i+1),554+(i%2)*69,321+(i/2)*24,65,20,0,
     ()->GameplayActions.equip(state().page(),s,""),"Clear slot "+(i+1)+" on the current page");
@@ -88,8 +90,6 @@ public class JayceeScreen extends Screen {
     "Open species and evolution details. Human is a preview, not saved progression.");
    if(speciesOpen)button("Back to Status",160,370,195,24,0,()->{speciesOpen=false;rebuild();},null);
   }else if(tab==1){
-   abilityBrowser.mount(widget->addRenderableWidget(widget));
-  }else if(tab==3){
    for(int i=0;i<CATS.length;i++){
     final int c=i;
     var b=button(CATS[i],18,105+i*38,98,28,0,()->{category=c;rebuild();},"Category preview; filtering and progression are unavailable");
@@ -103,17 +103,7 @@ public class JayceeScreen extends Screen {
       (ability.implemented()?"Requires Sapphire unlock.":"Preview only; cannot activate."));
     if(i==art)selectedArtButton=b;
    }
-  }else if(tab==2){
-   for(int i=0;i<TRACKS.length;i++){
-    final int branch=i;
-    button(TRACKS[i],32+i*122,108,110,26,0,()->{skill=branch;rebuild();},"Skill tree preview only");
-    for(int j=0;j<4;j++){
-     final int tier=j;
-     var b=button("Tier "+(j+1),44+i*122,156+j*49,86,29,0,()->{skill=branch;skillTier=tier;rebuild();},"Preview; no mastery awarded");
-     if(i==skill&&j==skillTier)selectedSkillButton=b;
-    }
-   }
-  }
+  }else if(tab==2||tab==3)browser().init(widget->addRenderableWidget(widget));
  }
  private void rebuild(){clearWidgets();init();}
  private void right(GuiGraphics g,String s,int x,int y,int width,int color){
@@ -154,9 +144,8 @@ public class JayceeScreen extends Screen {
   panel(g,544,68,156,352,"Equip Page");
   UiText.line(g,"Page "+(snapshot.page()+1)+" / 10",579,124,82,.8f,INK,true);
   if(tab==0)status(g,snapshot,dt);
-  else if(tab==1)abilityBrowser.render(g,snapshot,selected);
-  else if(tab==3)abilities(g);
-  else if(tab==2)skills(g);
+  else if(tab==1)abilities(g);
+  else if(tab==2||tab==3)browser().render(g);
   else quests(g);
   super.render(g,lx,ly,dt);
   for(int i=0;i<TABS.length;i++){
@@ -164,8 +153,9 @@ public class JayceeScreen extends Screen {
    var b=SapphireLayout.tabLabel(i);
    UiText.line(g,TABS[i],b.x(),b.y(),b.width(),1f,INK,true);
   }
-  if(tab==3)for(int i=0;i<AbilityCatalog.ALL.size();i++)
+  if(tab==1)for(int i=0;i<AbilityCatalog.ALL.size();i++)
    AbilityIcons.render(g,AbilityCatalog.ALL.get(i),152,115+i*43,14,i==art);
+  if(tab==2||tab==3){browser().renderRows(g);browser().renderOutput(g);}
   equipment(g,snapshot);
   g.pose().popPose();
   // Entity rendering uses screen-space scissoring and lighting, not the scaled UI pose.
@@ -181,11 +171,13 @@ public class JayceeScreen extends Screen {
    hints.put(portraitButton,"Showing "+(snapshot.portrait3d()?"3D":"Face")+" portrait. Switch to "+
     (snapshot.portrait3d()?"Face":"3D")+"; shared with the gameplay HUD.");
   }
+  String browserSelectedId=tab==2||tab==3?browser().equippableSelection():null;
   for(int i=0;i<slots.length;i++){
    var equipped=AbilityCatalog.find(snapshot.ability(snapshot.page(),i));
    slots[i].setMessage(Component.literal("Slot "+(i+1)+": "+(equipped==null?"Empty":equipped.name()+
     (equipped.implemented()?", "+equipped.modes().get(snapshot.mode(snapshot.page(),i)):", preview only"))+
-    (art>=0?". Equip selected "+AbilityCatalog.ALL.get(art).name():". Select an ability first")+
+    (tab==2||tab==3?(browserSelectedId==null?". Select an unlocked equippable entry first":". Equip selected "+AbilityCatalog.find(browserSelectedId).name()):
+     art>=0?". Equip selected "+AbilityCatalog.ALL.get(art).name():". Select an ability first")+
     ". Key: "+JayceeClient.ABILITY_KEYS[i].getTranslatedKeyMessage().getString()));
   }
   for(int i=0;i<pages.length;i++)pages[i].setMessage(Component.literal(""+(i+1)));
@@ -262,11 +254,7 @@ public class JayceeScreen extends Screen {
   label(g,tab==1?"Abilities":"Magic",26,86,484,INK);
   paragraph(g,"Select an art, then an equipment slot. Preview arts cannot activate.",36,376,464,24,MUTED);
  }
- private void skills(GuiGraphics g){
-  label(g,"Skills - preview only",26,86,484,INK);
-  for(int i=0;i<4;i++)g.fill(86+i*122,139,87+i*122,330,0xFF354F6A);
-  paragraph(g,TRACKS[skill]+" / Tier "+(skillTier+1)+" - mastery progression unavailable",36,376,464,24,MUTED);
- }
+ private SkillMagicBrowser browser(){return tab==3?magicBrowser:skillsBrowser;}
  private void species(GuiGraphics g){
   panel(g,20,178,496,179,"Species / Evolution");
   label(g,"Human  >  Demigod  >  Divine",44,221,448,INK);
@@ -275,24 +263,33 @@ public class JayceeScreen extends Screen {
   paragraph(g,"EP is separate from HP, SP and mana.",44,310,448,24,MUTED);
  }
  private void quests(GuiGraphics g){
-  label(g,"Quests - preview only",26,86,484,INK);
-  String[] names={"Awakening","Essence of Existence","The First Ascension","A New Reality"};
-  for(int i=0;i<names.length;i++)panel(g,20,110+i*62,496,52,names[i]);
-  paragraph(g,"Quest tracking and rewards are not implemented.",36,376,464,24,MUTED);
+  DivineFrame.sapphire(g,76,158,384,166,false);
+  g.fill(89,171,447,172,0xFF91A9CD);
+  g.fill(89,310,447,311,0xFF9E82C4);
+  UiText.line(g,"QUEST SYSTEM",96,191,344,1.15f,INK,true);
+  UiText.line(g,"WORK IN PROGRESS",96,229,344,1f,0xFFBC97DC,true);
+  UiText.line(g,"The divine quest system is currently under development.",90,268,356,.8f,MUTED,true);
  }
  private static String number(double value){return String.format(Locale.ROOT,"%.0f",value);}
  private void tooltips(GuiGraphics g,int x,int y,int mx,int my,PlayerState snapshot){
-  if(tab==1){
-   var lines=abilityBrowser.tooltip(x,y);
-   if(!lines.isEmpty()){tooltip(g,lines,mx,my);return;}
-  }
   // Pointer targets take precedence over retained keyboard focus.
   for(int pass=0;pass<2;pass++){
+   if((tab==2||tab==3)&&pass==0){
+    String hint=browser().tooltip(x,y,false);
+    if(hint!=null){tooltip(g,List.of(Component.literal(hint)),mx,my);return;}
+   }
    for(int i=0;i<slots.length;i++)if(pass==0?SapphireLayout.slot(i).contains(x,y):slots[i].isFocused()){
     var equipped=AbilityCatalog.find(snapshot.ability(snapshot.page(),i));
     if(equipped!=null){
      int mode=snapshot.mode(snapshot.page(),i);
      long ticks=snapshot.cooldownRemaining(equipped.id(),Minecraft.getInstance().level.getGameTime());
+     var intrinsic=com.brightwebs.jaycee.gameplay.SkillDefinitions.find(equipped.id());
+     if(intrinsic!=null&&intrinsic.intrinsic()){
+      tooltip(g,AbilityIcons.tooltip(Component.literal(equipped.name()),Component.literal(intrinsic.description()),
+       Component.literal("Activation mana: "+intrinsic.activationMana(snapshot)+" | Upkeep: up to "+intrinsic.upkeepMana(snapshot)+"/s"),
+       Component.literal(equipped.modes().get(mode)+" | Alt-click: switch mode | Right-click: remove"),ticks),mx,my);
+      return;
+     }
      tooltip(g,AbilityIcons.tooltip(Component.literal(equipped.name()),
       Component.literal(equipped.implemented()?(mode==1?"Fortify: +30 spiritual barrier":"Restore: +30 SP; requires missing SP"):"Preview only - no gameplay effect"),
       Component.literal("Mana: "+equipped.manaCost()+" | Right-click: remove"),
@@ -307,6 +304,10 @@ public class JayceeScreen extends Screen {
     if(pass==0?(x>=b.getX()&&x<b.getX()+b.getWidth()&&y>=b.getY()&&y<b.getY()+b.getHeight()):b.isFocused()){
      tooltip(g,List.of(Component.literal(entry.getValue())),mx,my);return;
     }
+   }
+   if((tab==2||tab==3)&&pass==1){
+    String hint=browser().tooltip(x,y,true);
+    if(hint!=null){tooltip(g,List.of(Component.literal(hint)),mx,my);return;}
    }
    if(pass==0&&tab==0&&!speciesOpen&&x>=382&&x<516&&y>=85&&y<402){
     tooltip(g,List.of(Component.literal("Titles, race and affinities: unavailable / preview; not live progression")),mx,my);return;
@@ -331,12 +332,11 @@ public class JayceeScreen extends Screen {
  }
  @Override public boolean mouseScrolled(double mx,double my,double dx,double dy){
   if(dy!=0&&Screen.hasAltDown()){GameplayActions.pageDelta(dy<0?1:-1);return true;}
-  if(tab==1&&abilityBrowser.scroll(layout.localX(mx),layout.localY(my),dy))return true;
+  if((tab==2||tab==3)&&browser().scroll(layout.localX(mx),layout.localY(my),dy))return true;
   return super.mouseScrolled(layout.localX(mx),layout.localY(my),dx,dy);
  }
  @Override public boolean keyPressed(int key,int scan,int modifiers){
-  if(tab==1&&getFocused() instanceof net.minecraft.client.gui.components.AbstractWidget widget
-   &&abilityBrowser.key(key,widget))return true;
+  if((tab==2||tab==3)&&browser().keyPressed(key))return true;
   return super.keyPressed(key,scan,modifiers);
  }
  @Override public boolean isPauseScreen(){return false;}

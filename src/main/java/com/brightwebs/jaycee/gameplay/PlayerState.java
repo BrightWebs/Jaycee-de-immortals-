@@ -68,6 +68,7 @@ public final class PlayerState {
         if (!validSlot(page, slot)) return 0;
         var art = AbilityCatalog.find(ability(page, slot));
         if (art == null || art.modes().isEmpty()) return 0;
+        if (SkillDefinitions.intrinsic(art.id())) return skillMode(art.id());
         return Math.clamp(data.getCompound("Modes").getInt(key(page, slot)), 0, art.modes().size() - 1);
     }
     public long cooldownRemaining(String id, long gameTime) {
@@ -75,6 +76,66 @@ public final class PlayerState {
         return expiry > gameTime ? expiry - gameTime : 0;
     }
     public long cooldownExpiry(String id) { return data.getCompound("Cooldowns").getLong(id); }
+    public long skillXp(String id) { return SkillMath.capXp(skill(id).getLong("Xp"), skillMaxLevel(), skillXpPerLevel()); }
+    public int skillLevel(String id) {
+        return SkillMath.level(skillXp(id), skillMaxLevel(), skillXpPerLevel());
+    }
+    public int skillMaxLevel() { return Math.clamp(data.getInt("SkillMaxLevel") == 0 ? 10 : data.getInt("SkillMaxLevel"), 1, 100); }
+    public int skillXpPerLevel() { return Math.clamp(data.getInt("SkillXpPerLevel") == 0 ? 100 : data.getInt("SkillXpPerLevel"), 1, 1000000); }
+    public int skillModeLevelStep() { return Math.clamp(data.getInt("SkillModeLevelStep") == 0 ? 3 : data.getInt("SkillModeLevelStep"), 1, 100); }
+    public boolean skillExplicitGrant(String id) { return SkillDefinitions.intrinsic(id) && skill(id).getBoolean("Granted"); }
+    public boolean skillGranted(String id) {
+        var definition = SkillDefinitions.find(id);
+        return definition != null && (!definition.intrinsic() || skillExplicitGrant(id) || jayceeTest());
+    }
+    public boolean skillEnabled(String id) { return skillGranted(id) && skill(id).getBoolean("Enabled"); }
+    public int skillOutput(String id) {
+        var value = skill(id);
+        return value.contains("Output") ? Math.clamp(value.getInt("Output"), 0, 100) : 100;
+    }
+    public int skillMode(String id) {
+        var d = SkillDefinitions.find(id);
+        int mode = skill(id).getInt("Mode");
+        return d != null && mode >= 0 && mode < d.modes().size()
+            && (!SkillDefinitions.PERCEPTION.equals(id)
+                || SkillMath.modeUnlocked(mode, d.modes().size(), skillLevel(id), skillModeLevelStep())) ? mode : 0;
+    }
+    public String skillStyle(String id) {
+        var d = SkillDefinitions.find(id);
+        int index = skill(id).getInt("Style");
+        return d == null || d.styles().isEmpty() ? "" : d.styles().get(Math.clamp(index, 0, d.styles().size() - 1));
+    }
+    public double activeDrain() { return bounded(data.getDouble("SkillDrain"), 10000); }
+    public double skillActivationMana(String id) {
+        if (SkillDefinitions.REGEN.equals(id)) return 0;
+        return SkillDefinitions.intrinsic(id) ? tuning("Activation", 2) : SkillDefinitions.RESTORE.equals(id) ? 20 : 0;
+    }
+    public double skillUpkeepMana(String id) {
+        return switch (id) {
+            case SkillDefinitions.SPEED -> tuning("SpeedDrain", 2);
+            case SkillDefinitions.FLIGHT -> tuning("FlightDrain", 4);
+            case SkillDefinitions.PERCEPTION -> tuning("PerceptionDrain", 2);
+            case SkillDefinitions.REGEN -> tuning("RegenDrain", 3);
+            case SkillDefinitions.RESISTANCE -> tuning("ResistanceDrain", 3);
+            default -> 0;
+        };
+    }
+    public String skillEffectSummary(String id) {
+        return switch (id) {
+            case SkillDefinitions.SPEED -> "Up to +" + Math.round(tuning("SpeedBonus", 1) * 100) + "% movement speed";
+            case SkillDefinitions.FLIGHT -> "Flying speed up to " + tuning("FlightSpeed", 0.08) + "; Hover / forward Cruise";
+            case SkillDefinitions.PERCEPTION -> "Visible targets within " + tuning("Range", 24) + " blocks; Living mode at level " + skillModeLevelStep();
+            case SkillDefinitions.REGEN -> "Up to " + tuning("Heal", 1) + " missing health / second";
+            case SkillDefinitions.RESISTANCE -> "Up to " + Math.round(tuning("Resistance", 0.25) * 100) + "% damage reduction";
+            case SkillDefinitions.RESTORE -> "20 mana, 200 ticks; +30 SP or barrier";
+            default -> "Sprint distance / effective hostile hits";
+        };
+    }
+    private double tuning(String key, double fallback) {
+        var tuning = data.getCompound("SkillTuning");
+        return tuning.contains(key, Tag.TAG_ANY_NUMERIC) ? bounded(tuning.getDouble(key), 10000) : fallback;
+    }
+    private CompoundTag skill(String id) { return data.getCompound("Skills").getCompound(id); }
     static String key(int page, int slot) { return page + "_" + slot; }
     static boolean validSlot(int page, int slot) { return page >= 0 && page < PAGES && slot >= 0 && slot < SLOTS; }
     static double maximum(double value) { return Double.isFinite(value) ? Math.clamp(value, 1, 1_000_000) : 100; }

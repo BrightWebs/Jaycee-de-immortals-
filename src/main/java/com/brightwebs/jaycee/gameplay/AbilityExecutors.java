@@ -15,12 +15,38 @@ final class AbilityExecutors {
                 cast -> cast.state.barrier() < cast.state.maxBarrier(),
                 cast -> cast.data.putDouble("Barrier", Math.min(cast.state.maxBarrier(), cast.state.barrier() + 30)))
         ));
-    private static final AbilityEngine<Cast> ENGINE = new AbilityEngine<>(List.of(SOUL_RESTORE));
+    private static AbilityEngine<Cast> engine() {
+        var definitions = new java.util.ArrayList<AbilityEngine.Definition<Cast>>();
+        definitions.add(SOUL_RESTORE);
+        for (var skill : SkillDefinitions.ALL) {
+            if (!skill.intrinsic()) continue;
+            var modes = new java.util.ArrayList<AbilityEngine.Mode<Cast>>();
+            for (int index = 0; index < skill.modes().size(); index++) {
+                final int mode = index;
+                modes.add(new AbilityEngine.Mode<>(skill.modes().get(index), skill.activationMana(), 20,
+                    cast -> SkillRuntime.canActivate(cast.player, cast.state, skill.id(), mode),
+                    cast -> {
+                        SkillRuntime.setEnabled(cast.data, skill.id(), true);
+                        SkillRuntime.configureMode(cast.data, skill.id(), mode);
+                    }));
+            }
+            definitions.add(new AbilityEngine.Definition<>(skill.id(), modes));
+        }
+        return new AbilityEngine<>(definitions);
+    }
 
     private AbilityExecutors() {}
 
     static AbilityEngine.Result activate(ServerPlayer player, PlayerState state, String id, int mode, long now) {
-        return ENGINE.activate(id, mode, now, new Cast(player, state, now));
+        if (SkillDefinitions.intrinsic(id) && state.skillEnabled(id)) {
+            var data = PlayerState.read(player);
+            SkillRuntime.setEnabled(data, id, false);
+            PlayerState.save(player, data);
+            SkillRuntime.stop(player, id);
+            GameplayNetwork.sync(player);
+            return AbilityEngine.Result.ACTIVATED;
+        }
+        return engine().activate(id, mode, now, new Cast(player, state, now));
     }
 
     static final class Cast implements AbilityEngine.Context {
@@ -42,6 +68,10 @@ final class AbilityExecutors {
         public long cooldownExpiry(String abilityId) { return state.cooldownExpiry(abilityId); }
 
         public boolean consumeMana(double amount) {
+            if (amount == 0) {
+                data = PlayerState.read(player);
+                return true;
+            }
             var mana = ManaBackends.resolve(player).mana();
             try {
                 if (mana.getCurrent() < amount || !mana.consume(amount)) return false;
@@ -59,6 +89,7 @@ final class AbilityExecutors {
             data.putLong("LastActivationTick", now);
             data.putInt("LastActivationMode", mode);
             PlayerState.save(player, data);
+            SkillRuntime.effectiveCast(player, abilityId);
             GameplayNetwork.sync(player);
         }
     }

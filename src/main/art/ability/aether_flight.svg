@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 256 256">
+ <defs>
+  <radialGradient id="halo"><stop stop-color="#a6c6ff" stop-opacity=".45"/><stop offset="1" stop-color="#20233e" stop-opacity="0"/></radialGradient>
+  <linearGradient id="feathers" x2=".5" y2="1"><stop stop-color="#f3f1ff"/><stop offset=".5" stop-color="#a9c3ed"/><stop offset="1" stop-color="#7875b5"/></linearGradient>
+ </defs>
+ <circle cx="128" cy="127" r="103" fill="url(#halo)"/>
+ <path d="M119 152 Q105 109 80 94 Q47 73 32 37 Q27 93 48 120 L36 112 Q46 149 72 157 L56 155 Q75 180 102 177 L91 183 Q114 186 123 166Z" fill="url(#feathers)" stroke="#e1eaff" stroke-width="3" stroke-linejoin="round"/>
+ <path d="M137 152 Q151 109 176 94 Q209 73 224 37 Q229 93 208 120 L220 112 Q210 149 184 157 L200 155 Q181 180 154 177 L165 183 Q142 186 133 166Z" fill="url(#feathers)" stroke="#e1eaff" stroke-width="3" stroke-linejoin="round"/>
+ <path d="M112 149 Q73 127 44 67 M105 158 Q75 148 53 122 M102 167 Q79 163 67 154 M144 149 Q183 127 212 67 M151 158 Q181 148 203 122 M154 167 Q177 163 189 154" fill="none" stroke="#6476b2" stroke-width="3"/>
+ <path d="M128 104 L140 146 133 173 128 196 123 173 116 146Z" fill="#e7d6aa" stroke="#fff1d6" stroke-width="3"/>
+ <path d="M128 116 L133 146 128 162 123 146Z" fill="#b3e6f0"/>
+ <path d="M77 201 Q128 218 179 201 M93 218 Q128 228 163 218" fill="none" stroke="#87c9e0" stroke-width="4" stroke-linecap="round"/>
+ <path d="M128 32 L132 45 145 49 132 53 128 66 124 53 111 49 124 45Z M83 57 L86 64 93 67 86 70 83 77 80 70 73 67 80 64Z M173 57 L176 64 183 67 176 70 173 77 170 70 163 67 170 64Z" fill="#f3deab"/>
+</svg>

@@ -30,6 +30,7 @@ public class JayceeScreen extends Screen {
  private Button portraitButton;
  private Button selectedArtButton,selectedCategoryButton,selectedSkillButton;
  private boolean speciesOpen;
+ private final AbilityBrowser abilityBrowser=new AbilityBrowser(index->art=index);
 
  public JayceeScreen(){super(Component.literal("Jaycee : Di Immortales"));}
  private PlayerState state(){return PlayerState.get(Minecraft.getInstance().player);}
@@ -86,7 +87,9 @@ public class JayceeScreen extends Screen {
    button("Race: Human",106,117,151,18,0,()->{speciesOpen=!speciesOpen;rebuild();},
     "Open species and evolution details. Human is a preview, not saved progression.");
    if(speciesOpen)button("Back to Status",160,370,195,24,0,()->{speciesOpen=false;rebuild();},null);
-  }else if(tab==1||tab==3){
+  }else if(tab==1){
+   abilityBrowser.mount(widget->addRenderableWidget(widget));
+  }else if(tab==3){
    for(int i=0;i<CATS.length;i++){
     final int c=i;
     var b=button(CATS[i],18,105+i*38,98,28,0,()->{category=c;rebuild();},"Category preview; filtering and progression are unavailable");
@@ -151,7 +154,8 @@ public class JayceeScreen extends Screen {
   panel(g,544,68,156,352,"Equip Page");
   UiText.line(g,"Page "+(snapshot.page()+1)+" / 10",579,124,82,.8f,INK,true);
   if(tab==0)status(g,snapshot,dt);
-  else if(tab==1||tab==3)abilities(g);
+  else if(tab==1)abilityBrowser.render(g,snapshot,selected);
+  else if(tab==3)abilities(g);
   else if(tab==2)skills(g);
   else quests(g);
   super.render(g,lx,ly,dt);
@@ -160,7 +164,7 @@ public class JayceeScreen extends Screen {
    var b=SapphireLayout.tabLabel(i);
    UiText.line(g,TABS[i],b.x(),b.y(),b.width(),1f,INK,true);
   }
-  if(tab==1||tab==3)for(int i=0;i<AbilityCatalog.ALL.size();i++)
+  if(tab==3)for(int i=0;i<AbilityCatalog.ALL.size();i++)
    AbilityIcons.render(g,AbilityCatalog.ALL.get(i),152,115+i*43,14,i==art);
   equipment(g,snapshot);
   g.pose().popPose();
@@ -278,6 +282,10 @@ public class JayceeScreen extends Screen {
  }
  private static String number(double value){return String.format(Locale.ROOT,"%.0f",value);}
  private void tooltips(GuiGraphics g,int x,int y,int mx,int my,PlayerState snapshot){
+  if(tab==1){
+   var lines=abilityBrowser.tooltip(x,y);
+   if(!lines.isEmpty()){tooltip(g,lines,mx,my);return;}
+  }
   // Pointer targets take precedence over retained keyboard focus.
   for(int pass=0;pass<2;pass++){
    for(int i=0;i<slots.length;i++)if(pass==0?SapphireLayout.slot(i).contains(x,y):slots[i].isFocused()){
@@ -323,7 +331,13 @@ public class JayceeScreen extends Screen {
  }
  @Override public boolean mouseScrolled(double mx,double my,double dx,double dy){
   if(dy!=0&&Screen.hasAltDown()){GameplayActions.pageDelta(dy<0?1:-1);return true;}
+  if(tab==1&&abilityBrowser.scroll(layout.localX(mx),layout.localY(my),dy))return true;
   return super.mouseScrolled(layout.localX(mx),layout.localY(my),dx,dy);
+ }
+ @Override public boolean keyPressed(int key,int scan,int modifiers){
+  if(tab==1&&getFocused() instanceof net.minecraft.client.gui.components.AbstractWidget widget
+   &&abilityBrowser.key(key,widget))return true;
+  return super.keyPressed(key,scan,modifiers);
  }
  @Override public boolean isPauseScreen(){return false;}
 }

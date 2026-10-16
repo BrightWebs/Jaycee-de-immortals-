@@ -93,7 +93,9 @@ Shared icon rendering is used by the ability list, equipment slots and gameplay 
 | `jaycee:soul_restore` | `assets/jaycee/textures/ability/soul_restore.png` |
 | `jaycee:aether_flight` | `assets/jaycee/textures/ability/aether_flight.png` |
 
-Use square PNGs; resources reload with F3+T. Missing textures log once per resource reload and use the existing procedural glyphs, not unrelated spell art. `hud.iconDirectory` permits an alternate pack directory. **Artwork TODO:** `BrightWebs/ModResources` returned 404 during repository-content access; provide access or upload the icon ZIP to replace all six placeholders. No supplied artwork was available to copy.
+Six original illustrations now occupy these paths: a blade splitting a rift, a celestial shield, an expanding divine shockwave, time-echoed boots, hands cupping a restored soul, and paired aether wings. They are new vector artwork, not copied assets or claims that the five preview powers work. Editable SVGs and transparent 1024/64/32 PNG exports live in `src/main/art/ability`; the shipped menu textures are 256×256. To reproduce an export with the standard `rsvg-convert` tool, use `rsvg-convert -w 256 -h 256 <source.svg> -o <output.png>`. The 292 design concepts still lack finished artwork; these six illustrations do not substitute for their per-ability briefs.
+
+Resources reload with F3+T. Missing textures still log once per resource reload and use the existing procedural fallback for legacy arts, not unrelated spell art. `hud.iconDirectory` permits an alternate pack directory. `BrightWebs/ModResources` previously returned 404; none of its artwork is claimed integrated. In-game art review/approval remains pending.
 
 ## Build and validation status
 

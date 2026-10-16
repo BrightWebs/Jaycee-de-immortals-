@@ -154,6 +154,7 @@ public final class Gameplay {
         PlayerState.save(player, data);
         if (consumed >= 3 && player instanceof ServerPlayer p) {
             com.brightwebs.jaycee.gameplay.divine.DivinityService.unlockRestore(p);
+            com.brightwebs.jaycee.gameplay.divine.DivinityService.checkCoreAwakening(p);
         }
         if (player instanceof ServerPlayer serverPlayer) GameplayNetwork.sync(serverPlayer);
         return consumed;

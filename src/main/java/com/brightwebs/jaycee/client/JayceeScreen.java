@@ -25,6 +25,7 @@ public class JayceeScreen extends Screen {
  private static final String[] CATS={"All","Offense","Defense","Support","Movement","Reality"};
  private static final int INK=0xFFB6CCDD, BLUE=0xFF91C4F4, MUTED=0xFF788DAB;
  private final Map<Button,String> hints=new LinkedHashMap<>();
+ private final Map<Button,String> statusMetrics=new LinkedHashMap<>();
  private final Button[] slots=new Button[PlayerState.SLOTS], pages=new Button[PlayerState.PAGES];
  private SapphireLayout layout;
  private int tab,selected,category;
@@ -68,6 +69,7 @@ public class JayceeScreen extends Screen {
  @Override protected void init(){
   layout=new SapphireLayout(width,height);
   hints.clear();
+  statusMetrics.clear();
   selectedArtButton=null;selectedCategoryButton=null;selectedSkillButton=null;
   for(int i=0;i<tabs().length;i++){
    final int t=i;
@@ -111,7 +113,19 @@ public class JayceeScreen extends Screen {
    if(!speciesOpen){
     traitsFocus=statusFocus(390,174,118,46,"Trait");
     affinitiesFocus=statusFocus(390,270,118,120,"Elemental Affinity");
+    metricFocus(24,180,96,23,"Level");
+    var gradeBadge=MobBestowalUi.GRADE_BADGE;
+    metricFocus(gradeBadge.x(),gradeBadge.y(),gradeBadge.width(),gradeBadge.height(),"Grade");
+    metricFocus(106,105,154,12,"Rank");
+    metricFocus(242,382,126,11,"Essence");
+    metricFocus(242,394,126,11,"EP");
+    metricFocus(43,297,169,12,"Mana");
    }
+   if(Minecraft.getInstance().hitResult instanceof net.minecraft.world.phys.EntityHitResult hit&&
+      (hit.getEntity() instanceof net.minecraft.world.entity.player.Player||hit.getEntity() instanceof net.minecraft.world.entity.Mob)&&
+      hit.getEntity()!=Minecraft.getInstance().player)
+    button("Bestowal",242,314,126,22,0,()->Minecraft.getInstance().setScreen(new DivineBondsScreen(true)),
+     "Inspect the targeted recipient through the server profile request. Opening spends nothing.");
   }else if(tab==1&&ordinary)abilityBrowser.init(widget->addRenderableWidget(widget));
   else if(tab==1){
    for(int i=0;i<CATS.length;i++){
@@ -135,6 +149,10 @@ public class JayceeScreen extends Screen {
     if(isFocused())g.fill(getX()-2,getY(),getX()-1,getY()+height,BLUE);
    }
   });
+ }
+ private void metricFocus(int x,int y,int w,int h,String metric){
+  var focus=statusFocus(x,y,w,h,metric);
+  statusMetrics.put(focus,metric);
  }
  private void rebuild(){clearWidgets();init();}
  private void right(GuiGraphics g,String s,int x,int y,int width,int color){
@@ -207,6 +225,22 @@ public class JayceeScreen extends Screen {
   tooltips(g,lx,ly,mx,my,snapshot);
  }
  private void updateNarration(PlayerState snapshot){
+  for(var entry:statusMetrics.entrySet()){
+   String metric=entry.getValue();
+   String value=switch(metric){
+    case "Level" -> snapshot.divinity().contains("DivineLevel")?snapshot.divinity().getInt("DivineLevel")+
+     "; Essence progress "+snapshot.divinity().getLong("LevelProgress")+" / "+snapshot.divinity().getLong("LevelRequired"):"Unavailable";
+    case "Grade" -> snapshot.divinity().getString("Grade");
+    case "Rank" -> snapshot.divinity().getString("Rank").replace('_',' ');
+    case "Essence" -> snapshot.divinity().getLong("Essence")+" reserve; "+snapshot.divinity().getLong("EarnedEssence")+" lifetime earned";
+    case "EP" -> ""+snapshot.divinity().getLong("Ep");
+    default -> number(snapshot.mana())+" / "+number(snapshot.maxMana());
+   };
+   String hint=metric+": "+(value.isEmpty()?"Unavailable":value)+
+    (metric.equals("Rank")&&snapshot.supreme()?"; Authority: Supreme Existence":"")+". "+MobBestowalUi.metricHint(metric);
+   entry.getKey().setMessage(Component.literal(hint));
+   hints.put(entry.getKey(),hint);
+  }
   if(portraitButton!=null){
    portraitButton.setMessage(Component.literal(snapshot.portrait3d()?"Face":"3D"));
    hints.put(portraitButton,"Showing "+(snapshot.portrait3d()?"3D":"Face")+" portrait. Switch to "+
@@ -252,19 +286,28 @@ public class JayceeScreen extends Screen {
   DivineFrame.gem(g,59,161,3,ordinary?accent:DivineFrame.GOLD);
   if(!snapshot.portrait3d())PlayerPortrait.render(g,player,32,101,52,false);
   UiText.line(g,player.getGameProfile().getName(),110,94,150,1.15f,INK,false);
-  String rank=snapshot.supreme()?"Jaycee":snapshot.divinity().getString("Rank").replace('_',' ');
-  label(g,"Rank: "+(rank.isEmpty()?"Unavailable":rank),110,108,150,accent);
+  String rank=snapshot.divinity().getString("Rank").replace('_',' ');
+  label(g,MobBestowalUi.standing(snapshot.supreme(),rank),110,108,150,accent);
   String title=StatusData.title(snapshot);
   label(g,"Title: "+(title.isEmpty()?"None":title),110,140,150,INK);
   String affiliation=patrons.isEmpty()?snapshot.divinity().getCompound("PatronProfile").getString("Username"):
    String.join(", ",patrons.stream().map(PatronTheme.Theme::name).toList());
   label(g,"Patron: "+(affiliation.isEmpty()?"None":affiliation),110,156,150,INK);
   if(speciesOpen){species(g);return;}
-  UiText.line(g,"Lv. "+player.experienceLevel,24,184,190,1.6f,accent,false);
+  var divine=snapshot.divinity();
+  UiText.line(g,divine.contains("DivineLevel")?"Lv. "+divine.getInt("DivineLevel"):"Lv. —",24,184,96,1.6f,accent,false);
+  var gradeBadge=MobBestowalUi.GRADE_BADGE;
+  int gradeColor=MobBestowalUi.gradeColor(divine.getString("Grade"));
+  DivineFrame.sapphire(g,gradeBadge.x(),gradeBadge.y(),gradeBadge.width(),gradeBadge.height(),false);
+  DivineFrame.gem(g,gradeBadge.x()+9,gradeBadge.y()+9,3,gradeColor);
+  DivineFrame.gem(g,gradeBadge.x()+9,gradeBadge.y()+9,2,DivineFrame.DARK);
+  UiText.line(g,"Grade "+(divine.getString("Grade").isEmpty()?"—":divine.getString("Grade")),
+   gradeBadge.x()+18,gradeBadge.y()+6,gradeBadge.width()-24,.8f,gradeColor,false);
+  UiText.line(g,"ESSENCE PROGRESS",24,204,188,.65f,MUTED,false);
   g.fill(23,213,214,223,0xFF030F1B);
-  g.fill(24,214,24+(int)(188*Math.clamp(player.experienceProgress,0,1)),222,accent);
-  right(g,(int)(player.experienceProgress*player.getXpNeededForNextLevel())+" / "+
-   player.getXpNeededForNextLevel()+" EXP",212,230,188,INK);
+  g.fill(24,214,24+(int)(188*MobBestowalUi.progress(divine.getLong("LevelProgress"),divine.getLong("LevelRequired"))),222,accent);
+  right(g,divine.getLong("LevelRequired")>0?divine.getLong("LevelProgress")+" / "+divine.getLong("LevelRequired"):
+   "Progress unavailable",212,230,188,INK);
   panel(g,18,250,208,152,"Stats");
   statusAccent(g,18,250,208,accent);
   String[] labels={"HP","MP","SP","Attack","Defense","Speed","Luck"};
@@ -299,10 +342,12 @@ public class JayceeScreen extends Screen {
    PatronTheme.relevant(patrons.getFirst(),e.id(),e.name())?0:1)).toList();
   affinityHeight=entries(g,affinities,390,270,118,120,affinityScroll,"No unlocked affinities.",affinitiesFocus);
   affinityScroll=Math.clamp(affinityScroll,0,Math.max(0,affinityHeight-120));
-  paragraph(g,snapshot.playerMenuPreview()?"Player layout preview; your real permissions remain active.":
+  paragraph(g,snapshot.supreme()?"Authority: Supreme Existence"+(snapshot.playerMenuPreview()?". Player layout preview.":""):
+   snapshot.playerMenuPreview()?"Player layout preview; your real permissions remain active.":
    ordinary?(patrons.isEmpty()?"Unblessed / no active deity lineage.":String.join(" / ",patrons.stream().map(PatronTheme.Theme::name).toList())):
-   "Traits / evolution: see race",242,344,126,38,MUTED);
-  label(g,"Level / EXP: Minecraft",242,387,126,MUTED);
+   "Traits / evolution: see race",242,344,126,32,MUTED);
+  label(g,"Essence: "+divine.getLong("Essence"),242,382,126,MUTED);
+  label(g,"EP: "+divine.getLong("Ep"),242,394,126,MUTED);
  }
  private void statusAccent(GuiGraphics g,int x,int y,int w,int color){
   if(!ordinary)return;

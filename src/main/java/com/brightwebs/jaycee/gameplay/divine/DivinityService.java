@@ -20,7 +20,6 @@ public final class DivinityService {
     public static void register() {
         ModList.get().getModContainerById("jaycee").orElseThrow()
             .registerConfig(ModConfig.Type.SERVER, DivinityConfig.SPEC, "jaycee-divinity-server.toml");
-        NeoForge.EVENT_BUS.addListener(DivinityService::commands);
         MobDivinityService.register();
     }
     public static DivinityModel model(ServerPlayer p) { return DivinitySavedData.get(p.server).model; }
@@ -70,12 +69,34 @@ public final class DivinityService {
     public static void adminGrant(ServerPlayer p, String id, boolean granted) {
         var data = DivinitySavedData.get(p.server); data.model.adminGrant(p.getUUID(), id, granted, now()); data.setDirty();
     }
+    /** Called only by the operator-gated command branch, never by gameplay payloads. */
+    public static void commandEdit(ServerPlayer target, String operation, String value, long amount) {
+        var data = DivinitySavedData.get(target.server);
+        var model = data.model;
+        var id = target.getUUID();
+        switch (operation) {
+            case "essence_add" -> model.adminAddEssence(id, amount, now());
+            case "essence_set" -> model.adminSetEssence(id, amount, now());
+            case "ep_set" -> model.adminSetEp(id, amount, now());
+            case "level_set" -> model.adminSetLevel(id, Math.toIntExact(amount), now());
+            case "grade_recalc" -> model.progression(id);
+            case "patron_grant", "patron_revoke" -> model.adminNpc(id, value, operation.equals("patron_grant"), now());
+            case "ability_grant", "ability_revoke" -> model.adminGrant(id, value, operation.equals("ability_grant"), now());
+            default -> throw new IllegalArgumentException("Unknown administrative edit");
+        }
+        data.setDirty();
+        for (var player : target.server.getPlayerList().getPlayers()) {
+            SkillRuntime.invalidate(player);
+            GameplayNetwork.sync(player);
+        }
+    }
     public static CompoundTag ownMirror(ServerPlayer p) {
         var m = model(p);
         try { m.profile(p.getUUID()); }
         catch (IllegalArgumentException e) { m.join(p.getUUID(), p.getGameProfile().getName()); }
         var tag = view(m.view(p.getUUID(), p.getUUID()));
         var own = m.profile(p.getUUID());
+        progression(tag, m, p.getUUID());
         tag.putLong("EpCap", m.epCap(own)); tag.putLong("EssenceCap", m.essenceCap(own));
         tag.putLong("EssenceRegen", m.supreme(p.getUUID()) ? m.config().regenPerSecond() : 0);
         tag.putBoolean("ChallengeEligible", m.challengeEligible(p.getUUID()));
@@ -88,16 +109,16 @@ public final class DivinityService {
         if (session.profileResponse != null) tag.putUUID("ProfileResponse", session.profileResponse);
         tag.putString("Result", session.result);
         var nearby = new ListTag();
-        nearby(p).forEach(target -> nearby.add(view(m.view(id, target.getUUID()))));
+        nearby(p).forEach(target -> nearby.add(personalizedView(m, id, target.getUUID())));
         tag.put("Nearby", nearby);
         if (session.target != null) {
-            try { tag.put("Target", view(m.view(id, session.target))); } catch (IllegalArgumentException ignored) { session.target = null; }
+            try { tag.put("Target", personalizedView(m, id, session.target)); } catch (IllegalArgumentException ignored) { session.target = null; }
         }
         var followers = new ListTag();
         if (m.supreme(id) || m.profile(id).rank().ordinal() >= DivinityModel.Rank.MINOR_GOD.ordinal())
-            m.followers(id).stream().limit(200).forEach(f -> followers.add(view(m.view(id, f.id()))));
+            m.followers(id).stream()            .limit(200).forEach(f -> followers.add(personalizedView(m, id, f.id())));
         tag.put("Followers", followers);
-        if (m.profile(id).patron() != null) tag.put("PatronProfile", view(m.view(id, m.profile(id).patron())));
+        if (m.profile(id).patron() != null) tag.put("PatronProfile", personalizedView(m, id, m.profile(id).patron()));
         var pending = new ListTag();
         for (var o : m.pending(id)) {
             var t = new CompoundTag(); var s = o.proposal();
@@ -117,7 +138,7 @@ public final class DivinityService {
         if (m.supreme(id)) {
             var petitions = new ListTag();
             m.image().profiles().stream().filter(v -> v.release() == DivinityModel.Release.PETITIONED)
-                .limit(40).forEach(v -> petitions.add(view(m.view(id, v.id()))));
+                .limit(40).forEach(v -> petitions.add(personalizedView(m, id, v.id())));
             tag.put("Petitions", petitions);
         }
         if (session.draft != null && session.draftExpiry > now()) {
@@ -144,6 +165,19 @@ public final class DivinityService {
         var patrons = new ListTag(); v.npcPatrons().stream().sorted().forEach(n -> patrons.add(StringTag.valueOf(n))); t.put("Npc", patrons);
         var grants = new CompoundTag(); v.grants().forEach(grants::putString); t.put("Grants", grants);
         return t;
+    }
+    private static CompoundTag personalizedView(DivinityModel model, UUID viewer, UUID target) {
+        var tag = view(model.view(viewer, target));
+        if (viewer.equals(target) || model.supreme(viewer)) progression(tag, model, target);
+        return tag;
+    }
+    static void progression(CompoundTag tag, DivinityModel model, UUID id) {
+        var progress = model.progression(id);
+        tag.putLong("EarnedEssence", progress.earned());
+        tag.putInt("DivineLevel", progress.level());
+        tag.putString("Grade", progress.grade());
+        tag.putLong("LevelProgress", progress.intoLevel());
+        tag.putLong("LevelRequired", progress.nextCost());
     }
     private static String publicName(DivinityModel.View v) {
         return v.divineName().isEmpty() ? v.username() : v.divineName();
@@ -188,6 +222,11 @@ public final class DivinityService {
                     session.profileResponse = r.nonce();
                 }
                 case "refresh" -> {}
+                case "clear" -> {
+                    session.draft = null; session.draftId = null;
+                    m.clearMobQuote(p.getUUID());
+                    session.result = "Bestowal canceled. No resources spent.";
+                }
                 case "select" -> {
                     MobDivinityService.clear(p, session);
                     var target = p.server.getPlayerList().getPlayer(r.target());
@@ -220,9 +259,9 @@ public final class DivinityService {
                         + ", name " + (s.name().isEmpty() ? "unchanged" : s.name()) + ", bind " + s.bind()
                         + ". Press N to inspect, or ").append(Component.literal("[ACCEPT]")
                         .withStyle(style -> style.withColor(net.minecraft.ChatFormatting.GREEN)
-                            .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/divineoffer accept " + offer.id()))))
+                            .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/jc essence accept " + offer.id()))))
                         .append(" ").append(Component.literal("[DECLINE]").withStyle(style -> style
-                            .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/divineoffer decline " + offer.id())))));
+                            .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/jc essence decline " + offer.id())))));
                 }
                 case "accept" -> {
                     var offer = m.pending(p.getUUID()).stream().filter(o -> o.id().equals(r.nonce())).findFirst()
@@ -259,7 +298,7 @@ public final class DivinityService {
                 && PlayerState.get(donor).skillLevel(proposal.ability()) < 1)
             throw new IllegalArgumentException("Master at least level 1 before bestowing this power");
     }
-    private static void commands(RegisterCommandsEvent event) {
+    public static void registerDebug(com.mojang.brigadier.builder.LiteralArgumentBuilder<net.minecraft.commands.CommandSourceStack> debug) {
         var authority = Commands.literal("jayceeauthority").requires(s -> s.hasPermission(2));
         authority.then(Commands.literal("claim").executes(c -> run(c.getSource().getPlayerOrException(), () -> {
             var p = c.getSource().getPlayerOrException(); var d = DivinitySavedData.get(p.server);
@@ -275,7 +314,7 @@ public final class DivinityService {
             var d = DivinitySavedData.get(c.getSource().getServer()); d.model.assignAuthority(null, true, now()); d.setDirty();
             c.getSource().getServer().getPlayerList().getPlayers().forEach(GameplayNetwork::sync); return 1;
         }));
-        event.getDispatcher().register(authority);
+        debug.then(authority);
         var admin = Commands.literal("divineadmin").requires(s -> s.hasPermission(2));
         for (String op : List.of("ep", "essence")) admin.then(Commands.literal(op)
             .then(Commands.argument("player", EntityArgument.player())
@@ -299,15 +338,7 @@ public final class DivinityService {
                     AbilityCatalog.registered().stream().filter(AbilityCatalog.Art::implemented).map(AbilityCatalog.Art::id), b))
                 .executes(c -> { var p = EntityArgument.getPlayer(c, "player");
                     return run(p, () -> model(p).adminGrant(p.getUUID(), StringArgumentType.getString(c, "ability"), op.equals("grant"), now())); }))));
-        event.getDispatcher().register(admin);
-        var offer = Commands.literal("divineoffer");
-        for (String op : List.of("accept", "decline", "cancel")) offer.then(Commands.literal(op)
-            .then(Commands.argument("id", StringArgumentType.word()).executes(c -> {
-                var p = c.getSource().getPlayerOrException();
-                return run(p, () -> handle(p, new DivinityNetwork.Request(op, DivinityNetwork.NONE,
-                    UUID.fromString(StringArgumentType.getString(c, "id")), 0, "", "", false)));
-            })));
-        event.getDispatcher().register(offer);
+        debug.then(admin);
     }
     @FunctionalInterface private interface Command { void run() throws com.mojang.brigadier.exceptions.CommandSyntaxException; }
     private static int run(ServerPlayer p, Command command) {

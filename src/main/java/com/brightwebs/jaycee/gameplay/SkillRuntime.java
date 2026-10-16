@@ -138,8 +138,10 @@ public final class SkillRuntime {
                 stop(player, id);
             } else {
                 if (!s.skillGranted(id)) return false;
-                if (!s.skillEnabled(id))
+                if (!s.skillEnabled(id)) {
                     AbilityExecutors.activate(player, s, id, s.skillMode(id), player.serverLevel().getGameTime());
+                    if (!PlayerState.get(player).skillEnabled(id)) return false;
+                }
             }
             GameplayNetwork.sync(player);
             return true;

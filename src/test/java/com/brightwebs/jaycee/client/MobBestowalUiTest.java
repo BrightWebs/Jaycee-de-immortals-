@@ -126,6 +126,87 @@ public final class MobBestowalUiTest {
         check(MobBestowalUi.bindingAllowed(false, true, false), "Binding restriction does not block unbound gifts");
         check(MobBestowalUi.bindingAllowed(true, true, true), "Server-compatible binding remains available");
         check(MobBestowalUi.bindingAllowed(true, false, false), "Absent optional binding flag leaves final decision to server");
+        check(MobBestowalUi.playerTitle("", "Account").equals("Account"), "Player suggestion falls back to account username");
+        check(MobBestowalUi.playerTitle("Divine", "Account").equals("Divine"), "Player suggestion prefers bestowed Divine Name");
+        check(MobBestowalUi.networkName("Cow", "Cow").isEmpty(), "Unnamed mob's suggested species is never a rename by default");
+        check(MobBestowalUi.networkName("  Cow  ", "Cow").isEmpty(), "Whitespace does not silently turn an unchanged suggestion into a rename");
+        check(MobBestowalUi.networkName("Companion", "Cow").equals("Companion"), "Edited suggestion becomes an explicit optional rename");
+        check(MobBestowalUi.networkName("", "Cow").isEmpty(), "Clearing the suggestion keeps the existing name");
+        var recipientName = new MobBestowalUi.RecipientName();
+        check(!recipientName.select(null, true, "Cow"), "Absent target cannot populate a name");
+        check(recipientName.select(target, true, "Cow"), "Genuinely new mob receives its suggestion");
+        check(recipientName.suggestion().equals("Cow"), "Suggestion retains localized original type");
+        check(!recipientName.select(target, true, "Updated server name"), "Refreshing same recipient cannot overwrite edited draft");
+        check(recipientName.networkName("Companion").equals("Companion"), "Refresh preserves the user's explicit rename");
+        check(recipientName.select(freshNonce, false, "Account"), "Changing recipient refreshes the suggestion");
+        check(recipientName.networkName("Account").isEmpty(), "Unchanged player suggestion also keeps the existing name");
+        recipientName.clear();
+        check(recipientName.select(freshNonce, false, "Account"), "Cancel clears recipient identity for the next genuine selection");
+        String longSuggestion = "A".repeat(70);
+        check(recipientName.select(target, true, longSuggestion), "Long existing custom name can still be selected");
+        check(recipientName.suggestion().length() == 48, "Displayed suggestion fits the network input limit");
+        check(recipientName.networkName(recipientName.suggestion()).isEmpty(), "Truncated display of an existing long name never forces a rename");
+        check(MobBestowalUi.adjustAmount(0, -1) == 0, "Decrement clamps at zero");
+        check(MobBestowalUi.adjustAmount(0, 1) == 1, "Increment adds one");
+        check(MobBestowalUi.adjustAmount(100, -1) == 99, "Decrement preserves ordinary amounts");
+        check(MobBestowalUi.adjustAmount(Long.MAX_VALUE, 1) == Long.MAX_VALUE, "Increment never overflows the long ledger");
+        check(MobBestowalUi.adjustAmount(Long.MAX_VALUE - 1, 1) == Long.MAX_VALUE, "Largest representable amount is editable");
+        check(MobBestowalUi.adjustAmount(10, Long.MAX_VALUE) == Long.MAX_VALUE, "Larger positive increments saturate safely");
+        check(MobBestowalUi.adjustAmount(10, Long.MIN_VALUE) == 0, "Extreme negative increment cannot wrap into a positive balance");
+        check(MobBestowalUi.adjustAmount(-1, 1) == 1, "Invalid or empty input can recover through plus");
+        for (var field : List.of(MobBestowalUi.PLAYER_AMOUNT, MobBestowalUi.MOB_AMOUNT)) {
+            var decrease = MobBestowalUi.decrease(field); var increase = MobBestowalUi.increase(field);
+            var panel = field.equals(MobBestowalUi.MOB_AMOUNT) ? MobBestowalUi.CENTER : new MobBestowalUi.Rect(258,85,424,307);
+            inside(field, panel); inside(decrease, panel); inside(increase, panel);
+            check(decrease.x() + decrease.width() < field.x(), "Minus hitbox cannot cover numeric text input");
+            check(field.x() + field.width() < increase.x(), "Plus hitbox cannot cover numeric text input");
+            check(decrease.y() == increase.y() && decrease.height() == 22, "Increment controls retain compact ornamental button height");
+            check(decrease.y() + decrease.height() < (field.equals(MobBestowalUi.MOB_AMOUNT) ? 303 : 182),
+                "Increment controls do not cover the next form row");
+        }
+        check(MobBestowalUi.progress(25, 100) == .25, "Essence bar uses real synced threshold progress");
+        check(MobBestowalUi.progress(-1, 100) == 0, "Negative input cannot draw outside bar");
+        check(MobBestowalUi.progress(101, 100) == 1, "Excess progress clamps to the unchanged bar width");
+        check(MobBestowalUi.progress(Long.MAX_VALUE / 2, Long.MAX_VALUE) > .49, "Long ledger progress does not truncate or overflow");
+        check(MobBestowalUi.progress(100, 0) == 0, "Unavailable threshold does not fabricate full progress");
+        check(MobBestowalUi.progress(100, -1) == 0, "Invalid threshold does not reverse the progress fill");
+        for (String metric : List.of("Level", "Grade", "Rank", "Essence", "EP", "Mana"))
+            check(!MobBestowalUi.metricHint(metric).isBlank(), "Each independent status metric has its own narrated tooltip");
+        check(MobBestowalUi.metricHint("Level").contains("not Minecraft XP"), "Level narration explicitly excludes vanilla XP");
+        check(MobBestowalUi.metricHint("Grade").contains("Supreme Existence"), "Grade narration distinguishes unique authority");
+        check(MobBestowalUi.metricHint("EP").contains("never spent"), "Permanent EP is not presented as bestowal currency");
+        check(MobBestowalUi.standing(true, "MORTAL").equals("Authority: Supreme Existence"),
+            "Unique authority is never presented as merely Mortal rank");
+        check(MobBestowalUi.standing(false, "MINOR GOD").equals("Rank: MINOR GOD"), "Ordinary rank remains the synced divine standing");
+        check(MobBestowalUi.standing(false, "").equals("Rank: Unavailable"), "Absent rank is not invented");
+        var gradeBadge = MobBestowalUi.GRADE_BADGE;
+        check(gradeBadge.x() == 124 && gradeBadge.y() == 184 && gradeBadge.width() == 90 && gradeBadge.height() == 18,
+            "Small Grade badge stays beside the original Level without shifting its anchor");
+        check(gradeBadge.x() + gradeBadge.width() == 214 && gradeBadge.y() + gradeBadge.height() < 213,
+            "Grade frame never overlaps or changes the exact original progress rectangle");
+        var gradePalette = new java.util.HashSet<Integer>();
+        for (String grade : List.of("F", "E", "D", "C", "B", "A", "S", "SS", "SSS")) {
+            int color = MobBestowalUi.gradeColor(grade);
+            check(color >>> 24 == 255, "Grade palette remains opaque and legible on original navy");
+            check(gradePalette.add(color), "Grade badges have distinct restrained cosmetic accents");
+        }
+        check(MobBestowalUi.gradeColor("") == MobBestowalUi.gradeColor("Unavailable"), "Unspecified Grade uses a neutral accent, not a fake tier");
+        var pendingTarget = new MobBestowalUi.InitialTarget(target);
+        check(pendingTarget.pending(), "Cached profiles cannot initialize a targeted screen before its nonce response");
+        pendingTarget.userChose();
+        check(!pendingTarget.pending(), "Explicit nearby choice wins over pending contextual request");
+        for (String kind : List.of("player", "mob")) {
+            var transactionReview = new MobBestowalUi.QuoteReview();
+            transactionReview.requested(oldNonce); transactionReview.receive(freshNonce, true);
+            check(transactionReview.matches(freshNonce, true), kind + " quote needs a new requested server nonce");
+            transactionReview.changed();
+            transactionReview.receive(freshNonce, true);
+            check(!transactionReview.matches(freshNonce, true), kind + " edit then revert never restores old quote authorization");
+            transactionReview.requested(freshNonce); transactionReview.changed();
+            UUID delayedNonce = new UUID(0, 99);
+            transactionReview.receive(delayedNonce, true);
+            check(!transactionReview.matches(delayedNonce, true), kind + " late quote after target or terms change remains invalid");
+        }
         System.out.println("MobBestowalUiTest: " + checks + " checks passed");
     }
     private static void inside(MobBestowalUi.Rect inner, MobBestowalUi.Rect outer) {

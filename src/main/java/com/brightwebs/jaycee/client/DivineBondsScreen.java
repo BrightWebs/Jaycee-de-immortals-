@@ -33,6 +33,8 @@ final class DivineBondsScreen extends Screen {
     private int tab, offset, detailOffset, decision;
     private UUID selection;
     private String amount = "0", name = "", ability = "";
+    private final MobBestowalUi.RecipientName recipientName = new MobBestowalUi.RecipientName();
+    private boolean awaitingClear;
     private boolean bind, confirmed, requested;
     private EditBox amountBox, nameBox;
     private Button detailsNarration;
@@ -42,10 +44,11 @@ final class DivineBondsScreen extends Screen {
     private UUID mobLifetimeNonce;
     private long lastServerRemaining = Long.MIN_VALUE;
     private final MobBestowalUi.QuoteReview mobReview = new MobBestowalUi.QuoteReview();
+    private final MobBestowalUi.QuoteReview playerReview = new MobBestowalUi.QuoteReview();
     private final MobBestowalUi.QuoteLifetime mobQuoteLifetime = new MobBestowalUi.QuoteLifetime();
     private int powerOffset, mobInfoOffset, dominionFilter;
     private String inspectedPower = "";
-    private Button mobInfoNarration, mobQuoteNarration;
+    private Button mobInfoNarration, mobQuoteNarration, playerQuoteNarration;
 
     DivineBondsScreen(boolean targeted) {
         super(Component.literal("Divine Ascension · Bonds"));
@@ -66,6 +69,7 @@ final class DivineBondsScreen extends Screen {
         DivinityNetwork.send(op, target, nonce, 0, value, "", flag);
     }
     private void switchTab(int page) {
+        if (tab == 1) cancelDraft();
         tab = page; selection = null; offset = 0; detailOffset = 0; confirmed = false;
         clearWidgets(); init();
     }
@@ -73,7 +77,7 @@ final class DivineBondsScreen extends Screen {
         layout = new SapphireLayout(width, height);
         controls.clear();
         detailsNarration = null;
-        mobInfoNarration = null; mobQuoteNarration = null;
+        mobInfoNarration = null; mobQuoteNarration = null; playerQuoteNarration = null;
         if (!requested) {
             if (targeted) {
                 initialTarget = new MobBestowalUi.InitialTarget(UUID.randomUUID());
@@ -85,8 +89,10 @@ final class DivineBondsScreen extends Screen {
             final int index = i;
             button(12 + i * 113, 9, 109, () -> TABS[index], () -> switchTab(index), () -> true);
         }
-        button(20, 53, 142, () -> "Back to menu", () ->
-            Minecraft.getInstance().setScreen(new JayceeScreen(SapphireLayout.ordinaryMenu(state().supreme(),state().playerMenuPreview()))), () -> true);
+        button(20, 53, 142, () -> "Back to menu", () -> {
+            if (tab == 1) cancelDraft();
+            Minecraft.getInstance().setScreen(new JayceeScreen(SapphireLayout.ordinaryMenu(state().supreme(),state().playerMenuPreview())));
+        }, () -> true);
         button(170, 53, 96, () -> "Refresh", () -> DivinityNetwork.request("refresh"), () -> true);
         if (tab == 1) {
             button(280, 53, 174, () -> (mobs ? "" : "◆ ") + "Players", () -> chooseCategory(false), () -> true);
@@ -107,6 +113,10 @@ final class DivineBondsScreen extends Screen {
                 button(22, 108 + i * 32, 216, () -> rowLabel(index), () -> {
                     var row = row(index);
                     if (row == null) return;
+                    if (tab == 1) {
+                        if (initialTarget != null) initialTarget.userChose();
+                        awaitingClear = false; invalidateMobQuote(); prefillRecipient(row, false);
+                    }
                     selection = id(row); detailOffset = 0; confirmed = false;
                     if ((tab == 1 || tab == 3 || tab == 4) && !isMob(row))
                         request("select", selection, null, "", false);
@@ -118,23 +128,30 @@ final class DivineBondsScreen extends Screen {
         if (tab == 1 && mobs) {
             initMobBestowal();
         } else if (tab == 1) {
-            amountBox = new EditBox(font, 276, 158, 384, 16, Component.literal("Essence to transfer, not EP"));
+            var amountBounds = MobBestowalUi.PLAYER_AMOUNT;
+            amountBox = new EditBox(font, amountBounds.x(), amountBounds.y(), amountBounds.width(), amountBounds.height(), Component.literal("Essence to transfer, not EP"));
             amountBox.setMaxLength(19); amountBox.setValue(amount);
             amountBox.setFilter(s -> s.matches("[0-9]*"));
-            amountBox.setResponder(s -> amount = s); addRenderableWidget(amountBox);
+            amountBox.setResponder(s -> { amount = s; invalidateMobQuote(); }); addRenderableWidget(amountBox);
+            amountControls(amountBounds);
             button(274, 194, 388, () -> "Power: " + (ability.isEmpty() ? "None" : abilityName(ability)),
                 this::cyclePower, this::canBestow);
-            nameBox = new EditBox(font, 276, 230, 384, 16, Component.literal("Proposed Divine Name; account name never changes"));
+            nameBox = new EditBox(font, 276, 230, 384, 16, Component.literal("Optional Divine Name; unchanged suggestion keeps the current name; account name never changes"));
             nameBox.setMaxLength(48); nameBox.setValue(name);
-            nameBox.setResponder(s -> name = s); addRenderableWidget(nameBox);
+            nameBox.setResponder(s -> { name = s; invalidateMobQuote(); }); addRenderableWidget(nameBox);
             button(274, 256, 388, () -> "Invite subordinate bond: " + (bind ? "YES — requires consent" : "NO"),
-                () -> bind = !bind, this::canBestow);
+                () -> { bind = !bind; invalidateMobQuote(); }, this::canBestow);
             button(274, 283, 388, () -> "Request server quote — spends nothing", () -> {
                 var target = data().getCompound("Target");
-                DivinityNetwork.send("quote", id(target), null, parsedAmount(), ability, name, bind);
+                playerReview.requested(id(data().getCompound("Quote")));
+                DivinityNetwork.send("quote", id(target), null, parsedAmount(), ability, networkName(), bind);
             }, () -> canBestow() && parsedAmount() >= 0);
-            button(274, 367, 388, this::sendLabel, () ->
-                request("send", null, id(data().getCompound("Quote")), "", false), this::quoteMatches);
+            button(274, 367, 188, this::sendLabel, () -> {
+                if (!quoteMatches()) return;
+                request("send", null, playerReview.nonce(), "", false); invalidateMobQuote();
+            }, this::quoteMatches);
+            button(474, 367, 188, () -> "Cancel", this::cancelDraft, () -> true);
+            playerQuoteNarration = narrative(new MobBestowalUi.Rect(274, 310, 388, 52));
         } else if (tab == 2) {
             button(274, 337, 188, () -> "Accept selected offer: " + String.join(". ", body()), () ->
                 request("accept", null, selection, "", false), () ->
@@ -180,7 +197,8 @@ final class DivineBondsScreen extends Screen {
     private void chooseCategory(boolean mob) {
         if (initialTarget != null) initialTarget.userChose();
         if (mobs == mob) return;
-        mobs = mob; selection = mob && !data().getCompound("MobTarget").isEmpty() ? id(data().getCompound("MobTarget")) : null;
+        cancelDraft();
+        mobs = mob; selection = null;
         offset = 0; detailOffset = 0; powerOffset = 0; mobInfoOffset = 0;
         amount = "0"; name = ""; ability = ""; inspectedPower = ""; bind = false;
         invalidateMobQuote(); clearWidgets(); init();
@@ -190,8 +208,10 @@ final class DivineBondsScreen extends Screen {
                 !initialTarget.receive(data().getUUID("ProfileResponse"))) return;
         if (tab == 1) {
             boolean mob = data().getString("TargetKind").equals("mob");
+            var target = data().getCompound(mob ? "MobTarget" : "Target");
+            selection = target.hasUUID("Id") ? id(target) : null;
             if (mobs != mob) {
-                mobs = mob; selection = mob ? id(data().getCompound("MobTarget")) : null;
+                mobs = mob;
                 clearWidgets(); init();
             }
         }
@@ -209,10 +229,46 @@ final class DivineBondsScreen extends Screen {
         return MobBestowalUi.eligibilityReason(p.getString("EligibilityReason"), p.getString("Reason"));
     }
     private void invalidateMobQuote() {
-        mobReview.changed(); confirmed = false;
+        mobReview.changed(); playerReview.changed(); confirmed = false;
+    }
+    private String networkName() { return recipientName.networkName(name); }
+    private void prefillRecipient(CompoundTag target, boolean mob) {
+        if (!target.hasUUID("Id")) return;
+        String suggestion = mob ? MobBestowalUi.mobTitle(target.getString("DivineName"), target.getString("CustomName"), localizedOriginal(target)) :
+            MobBestowalUi.playerTitle(target.getString("DivineName"), target.getString("Username"));
+        if (!recipientName.select(id(target), mob, suggestion)) return;
+        name = recipientName.suggestion();
+        if (nameBox != null) nameBox.setValue(name);
+        invalidateMobQuote();
+    }
+    private void receiveRecipient() {
+        if (awaitingClear) {
+            if (data().getCompound("Quote").isEmpty() && data().getCompound("MobQuote").isEmpty()) awaitingClear = false;
+            return;
+        }
+        if (initialTarget != null && initialTarget.pending()) return;
+        var target = data().getCompound(mobs ? "MobTarget" : "Target");
+        if (selection != null && id(target).equals(selection)) prefillRecipient(target, mobs);
+    }
+    private void cancelDraft() {
+        if (initialTarget != null) initialTarget.userChose();
+        DivinityNetwork.request("clear");
+        awaitingClear = true; selection = null; recipientName.clear();
+        amount = "0"; name = ""; ability = ""; inspectedPower = ""; bind = false;
+        invalidateMobQuote();
+        if (amountBox != null) amountBox.setValue(amount);
+        if (nameBox != null) nameBox.setValue(name);
+    }
+    private void amountControls(MobBestowalUi.Rect amount) {
+        var decrease = MobBestowalUi.decrease(amount); var increase = MobBestowalUi.increase(amount);
+        button(decrease.x(), decrease.y(), decrease.width(), () -> "−", () -> adjustAmount(-1), () -> parsedAmount() > 0);
+        button(increase.x(), increase.y(), increase.width(), () -> "+", () -> adjustAmount(1), () -> parsedAmount() < Long.MAX_VALUE);
+    }
+    private void adjustAmount(long delta) {
+        amountBox.setValue(Long.toString(MobBestowalUi.adjustAmount(parsedAmount(), delta)));
     }
     private MobBestowalUi.Terms mobTerms() {
-        return new MobBestowalUi.Terms(id(data().getCompound("MobTarget")), parsedAmount(), ability, name, bind);
+        return new MobBestowalUi.Terms(id(data().getCompound("MobTarget")), parsedAmount(), ability, networkName(), bind);
     }
     private boolean mobQuoteTermsMatch() {
         var q = data().getCompound("MobQuote");
@@ -259,7 +315,7 @@ final class DivineBondsScreen extends Screen {
         var t = data().getCompound("MobTarget");
         boolean powerAllowed = ability.isEmpty() || mobPowers().stream().anyMatch(p ->
             p.getString("Id").equals(ability) && p.getBoolean("Compatible"));
-        return !t.isEmpty() && id(t).equals(selection) && t.getString("Status").equals("active") && !t.getBoolean("TerminalRemoval") &&
+        return !awaitingClear && !t.isEmpty() && id(t).equals(selection) && t.getString("Status").equals("active") && !t.getBoolean("TerminalRemoval") &&
             (!t.contains("Eligible") || t.getBoolean("Eligible")) &&
             MobBestowalUi.bindingAllowed(bind, t.contains("BindingCompatible"), t.getBoolean("BindingCompatible")) &&
             (state().supreme() || data().getBoolean("Bestow")) && parsedAmount() >= 0 &&
@@ -287,6 +343,8 @@ final class DivineBondsScreen extends Screen {
                     ". " + mobStatus(r) + ". " + r.getString("Dimension");
             }, () -> {
                 var r = row(index); if (r == null) return;
+                if (initialTarget != null) initialTarget.userChose();
+                awaitingClear = false; prefillRecipient(r, true);
                 selection = id(r); mobInfoOffset = 0; powerOffset = 0; detailOffset = 0;
                 ability = ""; inspectedPower = ""; invalidateMobQuote();
                 request("mob_select", selection, null, "", false);
@@ -294,12 +352,14 @@ final class DivineBondsScreen extends Screen {
         }
         button(20, 367, 90, () -> "Previous", () -> offset = Math.max(0, offset - 7), () -> offset > 0);
         button(116, 367, 92, () -> "Next", () -> offset += 7, () -> offset + 7 < records().size());
-        nameBox = new EditBox(font, 234, 243, 222, 16, Component.literal("Mob Divine Name; original identity preserved"));
+        nameBox = new EditBox(font, 234, 243, 222, 16, Component.literal("Optional mob Divine Name; unchanged suggestion keeps the current name, including an unnamed mob"));
         nameBox.setMaxLength(48); nameBox.setValue(name);
         nameBox.setResponder(s -> { name = s; invalidateMobQuote(); }); addRenderableWidget(nameBox);
-        amountBox = new EditBox(font, 234, 279, 222, 16, Component.literal("Essence to transfer, not EP"));
+        var amountBounds = MobBestowalUi.MOB_AMOUNT;
+        amountBox = new EditBox(font, amountBounds.x(), amountBounds.y(), amountBounds.width(), amountBounds.height(), Component.literal("Essence to transfer, not EP"));
         amountBox.setMaxLength(19); amountBox.setValue(amount); amountBox.setFilter(s -> s.matches("[0-9]*"));
         amountBox.setResponder(s -> { amount = s; invalidateMobQuote(); }); addRenderableWidget(amountBox);
+        amountControls(amountBounds);
         button(232, 303, 228, () -> "Subordinate bond: " + (bind ? "YES" : "NO"), () -> {
             bind = !bind; invalidateMobQuote();
         }, () -> !data().getCompound("MobTarget").isEmpty());
@@ -319,13 +379,13 @@ final class DivineBondsScreen extends Screen {
         }
         button(486, 337, 192, () -> "Request server quote", () -> {
             confirmed = false; mobReview.requested(id(data().getCompound("MobQuote")));
-            DivinityNetwork.send("mob_quote", selection, null, parsedAmount(), ability, name, bind);
+            DivinityNetwork.send("mob_quote", selection, null, parsedAmount(), ability, networkName(), bind);
         }, this::canMobBestow);
-        button(486, 365, 192, () -> confirmed && mobQuoteMatches() ? "Confirm mob bestowal" : "Review quote → confirm", () -> {
+        button(486, 365, 92, () -> "Bless · confirm", () -> {
             if (!mobQuoteMatches()) return;
-            if (!confirmed) { confirmed = true; return; }
             request("mob_confirm", null, mobReview.nonce(), "", false); invalidateMobQuote();
         }, this::mobQuoteMatches);
+        button(586, 365, 92, () -> "Cancel", this::cancelDraft, () -> true);
         mobInfoNarration = narrative(MobBestowalUi.INFO);
         mobQuoteNarration = narrative(MobBestowalUi.QUOTE_TEXT);
     }
@@ -364,25 +424,23 @@ final class DivineBondsScreen extends Screen {
     }
     private boolean canBestow() {
         var d = data(); var t = d.getCompound("Target");
-        return !t.isEmpty() && !t.getBoolean("Hidden") && !id(t).equals(self()) &&
+        return !awaitingClear && !t.isEmpty() && id(t).equals(selection) && !t.getBoolean("Hidden") && !id(t).equals(self()) &&
             (state().supreme() || d.getBoolean("Bestow")) && parsedAmount() >= 0 && parsedAmount() <= d.getLong("Essence");
     }
     private long parsedAmount() {
         try { return Long.parseLong(amount); } catch (NumberFormatException e) { return -1; }
     }
-    private boolean quoteMatches() {
+    private boolean playerQuoteTermsMatch() {
         var q = data().getCompound("Quote"); var t = data().getCompound("Target");
         return canBestow() && q.hasUUID("Id") && q.hasUUID("Target") && q.getUUID("Target").equals(id(t))
             && q.getLong("Amount") == parsedAmount() && q.getString("Ability").equals(ability)
-            && q.getString("Name").equals(name.strip()) && q.getBoolean("Bind") == bind;
+            && q.getString("Name").equals(networkName()) && q.getBoolean("Bind") == bind;
+    }
+    private boolean quoteMatches() {
+        return playerReview.matches(id(data().getCompound("Quote")), playerQuoteTermsMatch());
     }
     private String sendLabel() {
-        if (!quoteMatches()) return "Send reviewed offer — request a matching quote first";
-        var q = data().getCompound("Quote");
-        return "Send offer to " + data().getCompound("Target").getString("Username") + ": " + q.getLong("Amount") +
-            " Essence; burned fee " + q.getLong("Fee") + "; total debit " + q.getLong("Total") +
-            "; power " + (ability.isEmpty() ? "none" : abilityName(ability)) + "; Divine Name " +
-            (name.isBlank() ? "unchanged" : name) + "; subordinate bond " + bind + ". Recipient must accept.";
+        return "Bless · send offer";
     }
     private boolean canDecideRelease() {
         var p = selected();
@@ -394,6 +452,7 @@ final class DivineBondsScreen extends Screen {
         AbilityCatalog.registered().stream().filter(a -> state().supreme() ||
             data().getCompound("Grants").contains(a.id())).filter(AbilityCatalog.Art::implemented).forEach(a -> ids.add(a.id()));
         ability = ids.get((ids.indexOf(ability) + 1) % ids.size());
+        invalidateMobQuote();
     }
     private String abilityName(String id) {
         var art = AbilityCatalog.find(id); return art == null ? id : art.name();
@@ -407,7 +466,13 @@ final class DivineBondsScreen extends Screen {
         lines.add("UUID: " + id(p));
         if (p.getBoolean("Hidden")) { lines.add("Jaycee's true profile is concealed. No private statistics were sent."); return lines; }
         lines.add("Divine Name: " + (p.getString("DivineName").isEmpty() ? "Not bestowed" : p.getString("DivineName")));
-        lines.add(p.getBoolean("Supreme") ? "Authority: unique server-assigned Jaycee" : "Rank: " + p.getString("Rank"));
+        lines.add("Rank: " + p.getString("Rank").replace('_', ' '));
+        if (p.getBoolean("Supreme")) lines.add("Authority: Supreme Existence — unique server-assigned Jaycee");
+        if (p.contains("DivineLevel")) {
+            lines.add("Divine Level: " + p.getInt("DivineLevel") + "; Grade: " + p.getString("Grade"));
+            lines.add("Earned Essence: " + p.getLong("EarnedEssence") + "; next level: " +
+                p.getLong("LevelProgress") + " / " + p.getLong("LevelRequired"));
+        }
         lines.add("EP: " + p.getLong("Ep") + " — permanent power");
         lines.add("Essence: " + p.getLong("Essence") + " — transferable reserve");
         lines.add("Patron: " + (p.hasUUID("Patron") ? p.getUUID("Patron") : "None"));
@@ -438,6 +503,10 @@ final class DivineBondsScreen extends Screen {
             p.getString("MasterName").isEmpty() ? "None" : p.getString("MasterName")));
         lines.add("Patron: " + (p.hasUUID("Patron") ? p.getUUID("Patron") : "None"));
         lines.add("Essence: " + p.getLong("Essence") + "; received: " + p.getLong("Received"));
+        if (p.contains("EarnedEssence")) lines.add("Lifetime earned Essence: " + p.getLong("EarnedEssence"));
+        if (p.contains("DivineLevel")) lines.add("Divine Level: " + p.getInt("DivineLevel"));
+        if (p.contains("Grade")) lines.add("Grade: " + p.getString("Grade"));
+        if (!p.getString("ProgressionReason").isBlank()) lines.add("Progression: " + p.getString("ProgressionReason"));
         lines.add("Subordinate: " + p.getBoolean("Subordinate"));
         lines.add("Granted powers: " + (p.getCompound("Grants").isEmpty() ? "None" :
             String.join(", ", p.getCompound("Grants").getAllKeys().stream().sorted().map(this::abilityName).toList())));
@@ -475,15 +544,14 @@ final class DivineBondsScreen extends Screen {
             lines.add("Burned fee: " + q.getLong("Fee") + "; total debit: " + q.getLong("Total"));
             lines.add("Your balance after" + (q.getBoolean("BalanceAfterMinimum") ? " (minimum)" : "") + ": " + q.getLong("BalanceAfter"));
             lines.add("Recipient Essence after: " + q.getLong("RecipientAfter"));
-            lines.add("Name: " + (name.isBlank() ? "Unchanged" : name.strip()) + "; subordinate bond: " + bind);
+            lines.add("Name: " + (networkName().isEmpty() ? "Unchanged" : networkName()) + "; subordinate bond: " + bind);
             if (!q.getString("Effect").isEmpty()) lines.add("Quoted effect: " + q.getString("Effect"));
             if (!q.getString("Requirements").isEmpty()) lines.add("Quoted requirements: " + q.getString("Requirements"));
             lines.add(q.contains("RemainingMillis") ? "Quote remaining: " +
                 (mobQuoteLifetime.remaining(net.minecraft.Util.getMillis()) / 1000) + " seconds (server TTL)." :
                 "Server expiry: " + q.getLong("Expires") + " epoch ms; no client clock assumption.");
             lines.add("Server rechecks expiry and every requirement before spending.");
-            lines.add(confirmed ? "Confirmation armed for this exact quote. Click Confirm mob bestowal to execute." :
-                "Click Review quote, then Confirm mob bestowal. A quote spends nothing.");
+            lines.add("After reviewing this exact quote, Bless confirms once. Cancel discards the draft without spending.");
         } else lines.add("No matching reviewed quote. Changes invalidate confirmation; request a new server quote.");
         if (!(state().supreme() || data().getBoolean("Bestow")))
             lines.add("Requires Minor God+ bestowal privileges or unique Jaycee authority.");
@@ -497,7 +565,7 @@ final class DivineBondsScreen extends Screen {
             var lines = profileLines(data());
             lines.add("Essence maximum: " + data().getLong("EssenceCap") + "; refill " + data().getLong("EssenceRegen") + "/second while online.");
             lines.add("EP cap: " + data().getLong("EpCap") + ". Cap field and ordinary fees are provisional server tuning, not settled canon.");
-            lines.add("Mana is independent. Bestowal never deducts EP. /jayceetest is not sovereign authority.");
+            lines.add("Mana is independent. Bestowal never deducts EP. /jc debug jayceetest is not sovereign authority.");
             return lines;
         }
         if (tab == 5) {
@@ -538,7 +606,12 @@ final class DivineBondsScreen extends Screen {
         if (Minecraft.getInstance().player == null) return;
         snapshot = state().divinity();
         receiveInitialTarget();
+        if (tab == 1) receiveRecipient();
         if (tab == 1 && mobs) receiveMobQuote();
+        else if (tab == 1) {
+            var q = data().getCompound("Quote");
+            playerReview.receive(q.hasUUID("Id") ? id(q) : null, playerQuoteTermsMatch());
+        }
         int x = (int)Math.floor(layout.localX(mx)), y = (int)Math.floor(layout.localY(my));
         for (var c : controls) {
             c.button.setMessage(Component.literal(c.text.get())); c.button.active = c.enabled.getAsBoolean();
@@ -550,6 +623,7 @@ final class DivineBondsScreen extends Screen {
         if (mobQuoteNarration != null) mobQuoteNarration.setMessage(Component.literal(
             (bind ? "" : MobBestowalUi.DESPAWN_TEXT + " ") + String.join(". ", mobQuoteLines()) +
                 ". Scroll here or Page Up and Down to review transaction."));
+        if (playerQuoteNarration != null) playerQuoteNarration.setMessage(Component.literal(String.join(". ", playerQuoteSummary())));
         if (tab == 1) { amountBox.active = true; nameBox.active = true; }
         g.pose().pushPose(); g.pose().translate(layout.left, layout.top, 0);
         g.pose().scale((float)layout.scale, (float)layout.scale, 1);
@@ -599,17 +673,20 @@ final class DivineBondsScreen extends Screen {
         UiText.line(g, target.isEmpty() ? "Opening never transfers resources." : "UUID: " + id(target), 274, 122, 388, .7f, MUTED, false);
         UiText.line(g, "Transfer Essence (not EP) · available " + data().getLong("Essence"), 274, 145, 388, .8f, INK, false);
         UiText.line(g, "Owned, implemented power — none is allowed", 274, 182, 388, .8f, MUTED, false);
-        UiText.line(g, "Proposed Divine Name — account identity unchanged", 274, 218, 388, .8f, MUTED, false);
+        UiText.line(g, "Optional name · unchanged suggestion keeps current name", 274, 218, 388, .8f, MUTED, false);
+        var summary = playerQuoteSummary();
+        for (int i = 0; i < summary.size(); i++) UiText.line(g, summary.get(i), 274, 310 + i * 13, 388, .75f, INK, false);
+    }
+    private List<String> playerQuoteSummary() {
         var quote = data().getCompound("Quote");
-        String[] summary = quoteMatches() ? new String[]{
+        return quoteMatches() ? List.of(
             "Reviewed: " + quote.getLong("Amount") + " Essence · fee burned " + quote.getLong("Fee"),
             "Total debit " + quote.getLong("Total") + " · balance after " + quote.getLong("BalanceAfter"),
-            "Name: " + (name.isBlank() ? "Unchanged" : name) + " · bond " + bind,
-            "Recipient must accept nearby; decline/timeout costs nothing."} :
-            new String[]{"No matching quote. Choose target, edit terms, then request a quote.",
+            "Name: " + (networkName().isEmpty() ? "Unchanged" : networkName()) + " · bond " + bind,
+            "Bless sends an offer; the recipient must accept. Cancel spends nothing.") :
+            List.of("No matching quote. Choose target, edit terms, then request a quote.",
                 "Fees/caps are provisional server tuning. EP is never charged.",
-                state().supreme() || data().getBoolean("Bestow") ? "A quote spends nothing." : "Bestowal requires Minor God+ privileges or unique Jaycee authority."};
-        for (int i = 0; i < summary.length; i++) UiText.line(g, summary[i], 274, 310 + i * 13, 388, .75f, INK, false);
+                state().supreme() || data().getBoolean("Bestow") ? "A quote spends nothing." : "Bestowal requires Minor God+ privileges or unique Jaycee authority.");
     }
     private int wrapped(GuiGraphics g, List<String> text, MobBestowalUi.Rect r, int scroll) {
         var lines = new ArrayList<net.minecraft.util.FormattedCharSequence>();
@@ -642,9 +719,6 @@ final class DivineBondsScreen extends Screen {
             InventoryScreen.renderEntityInInventoryFollowsMouse(g, r.x() + 3, r.y() + 3,
                 r.x() + r.width() - 3, r.y() + r.height() - 3, scale, .0625f, mx, my, entity);
         } else {
-            int cx = r.x() + r.width() / 2, cy = r.y() + r.height() / 2;
-            DivineFrame.gem(g, cx, cy - 12, Math.max(2, Math.min(6, r.width() / 10)), MUTED);
-            g.fill(cx - 7, cy - 3, cx + 7, cy + 13, 0x665C718E);
             if (r.height() > 50)
                 UiText.paragraph(g, "Live preview unavailable", r.x() + 5, r.y() + r.height() - 26,
                     r.width() - 10, 24, .65f, MUTED);
@@ -664,7 +738,7 @@ final class DivineBondsScreen extends Screen {
         renderMobPreview(g, waiting ? new CompoundTag() : target, MobBestowalUi.PREVIEW, mx, my);
         mobInfoOffset = wrapped(g, waiting ? List.of("Waiting for selected mob's server profile.") : mobProfileLines(target),
             MobBestowalUi.INFO, mobInfoOffset);
-        UiText.line(g, "Divine Name · original identity retained", 234, 232, 222, .73f, MUTED, false);
+        UiText.line(g, "Optional name · unchanged = keep", 234, 232, 222, .73f, MUTED, false);
         UiText.line(g, "Essence, not EP · available " + data().getLong("Essence"), 234, 267, 222, .75f, INK, false);
         UiText.line(g, "Owned powers · scroll · selected: " + (ability.isEmpty() ? "None" : abilityName(ability)),
             234, 331, 222, .7f, MUTED, false);
@@ -742,4 +816,8 @@ final class DivineBondsScreen extends Screen {
         return super.keyPressed(key, scan, modifiers);
     }
     @Override public boolean isPauseScreen() { return false; }
+    @Override public void onClose() {
+        if (tab == 1) cancelDraft();
+        super.onClose();
+    }
 }

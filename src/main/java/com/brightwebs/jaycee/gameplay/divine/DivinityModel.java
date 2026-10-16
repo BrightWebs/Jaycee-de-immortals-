@@ -8,8 +8,15 @@ public final class DivinityModel {
     public enum Rank { MORTAL, BLESSED, DEMIGOD, MINOR_GOD, MAJOR_GOD, OLYMPIAN }
     public enum Release { REQUESTED, DENIED, PETITIONED }
     public record Config(long epCap, long essenceCap, long supremeCap, long regenPerSecond,
-                         long minimumFee, int feePercent, long powerFee, long offerMillis, double distance) {
+                         long minimumFee, int feePercent, long powerFee, long offerMillis, double distance,
+                         EssenceProgression.Tuning progression) {
+        public Config(long epCap, long essenceCap, long supremeCap, long regenPerSecond,
+                      long minimumFee, int feePercent, long powerFee, long offerMillis, double distance) {
+            this(epCap, essenceCap, supremeCap, regenPerSecond, minimumFee, feePercent, powerFee,
+                offerMillis, distance, EssenceProgression.Tuning.defaults());
+        }
         public Config {
+            Objects.requireNonNull(progression);
             if (epCap < 1 || essenceCap < 1 || supremeCap < 1 || regenPerSecond < 0
                     || minimumFee < 1 || feePercent < 1 || powerFee < 1 || offerMillis < 1000
                     || !Double.isFinite(distance) || distance < 1 || distance > 32)
@@ -41,13 +48,28 @@ public final class DivinityModel {
     public record View(UUID id, String originalName, String username, String divineName, Rank rank,
                        Long ep, Long essence, boolean supreme, boolean capLift, boolean bestow,
                        UUID patron, Set<String> npcPatrons, Map<String, String> grants, Release release) {}
-    public record Image(UUID authority, List<Profile> profiles, List<Offer> offers, List<Audit> audit, int carry) {}
+    public record Image(UUID authority, List<Profile> profiles, List<Offer> offers, List<Audit> audit, int carry,
+                        Map<UUID, ProgressState> progress) {
+        public Image(UUID authority, List<Profile> profiles, List<Offer> offers, List<Audit> audit, int carry) {
+            this(authority, profiles, offers, audit, carry, Map.of());
+        }
+        public Image { progress = Map.copyOf(progress); }
+    }
     public static final Set<String> NPC_PATRONS = Set.of("zeus", "poseidon", "hades", "athena",
         "ares", "apollo", "artemis", "hermes", "hephaestus", "aphrodite", "demeter", "dionysus",
         "hera", "hestia", "hecate", "eris", "nemesis", "kronos", "gaia", "ouranos", "nyx", "chaos");
     private final Config config;
     private final Set<String> abilities;
     private final Map<UUID, Profile> profiles = new LinkedHashMap<>();
+    /** awardable is minted reserve eligible to reward its first recipient; received gifts never replenish it. */
+    public record ProgressState(long earned, long awardable) {
+        public ProgressState {
+            if (earned < 0 || awardable < 0) throw new IllegalArgumentException("Negative progression");
+        }
+    }
+    private static final ProgressState NO_PROGRESS = new ProgressState(0, 0);
+    private final Map<UUID, ProgressState> playerProgress = new LinkedHashMap<>();
+    private final Map<UUID, ProgressState> mobProgress = new LinkedHashMap<>();
     private final Map<UUID, Offer> offers = new LinkedHashMap<>();
     private final Deque<Audit> audit = new ArrayDeque<>();
     private UUID authority;
@@ -76,7 +98,31 @@ public final class DivinityModel {
     private final Map<UUID, String> terminalMobs = new HashMap<>();
     public List<MobProfile> mobs() { return List.copyOf(mobs.values()); }
     public MobProfile mob(UUID id) { return mobs.get(id); }
+    public long earned(UUID id) { profile(id); return playerProgress.getOrDefault(id, NO_PROGRESS).earned(); }
+    public EssenceProgression.Progress progression(UUID id) {
+        var p = profile(id);
+        return EssenceProgression.player(earned(id), p.capLift() || supreme(id), config.progression());
+    }
+    public EssenceProgression.MobProgress mobProgression(UUID id) {
+        var p = mobs.get(id);
+        if (p == null) throw new IllegalArgumentException("Mob has no stored ledger entry");
+        return EssenceProgression.mob(p.type(), mobProgress.getOrDefault(id, NO_PROGRESS).earned(), p.ep());
+    }
+    public Map<UUID, ProgressState> playerProgressStates() { return Map.copyOf(playerProgress); }
+    public Map<UUID, ProgressState> mobProgressStates() { return Map.copyOf(mobProgress); }
+    /** Missing/legacy entries intentionally start at zero, never inferred from balances, received, or vanilla XP. */
+    public void restoreProgress(Map<UUID, ProgressState> players, Map<UUID, ProgressState> creatures) {
+        playerProgress.clear(); mobProgress.clear();
+        players.forEach((id, state) -> {
+            if (profiles.containsKey(id)) playerProgress.put(id,
+                new ProgressState(state.earned(), Math.min(profile(id).essence(), state.awardable())));
+        });
+        creatures.forEach((id, state) -> {
+            if (mobs.containsKey(id)) mobProgress.put(id, new ProgressState(state.earned(), 0));
+        });
+    }
     public void restoreMobs(Collection<MobProfile> values) {
+        mobProgress.clear();
         mobs.clear(); values.forEach(p -> mobs.put(p.id(), p)); mobQuotes.clear();
         liveMobs.clear(); terminalMobs.clear();
     }
@@ -162,7 +208,8 @@ public final class DivinityModel {
         if (s.amount() == 0 && s.ability().isEmpty() && s.name().isEmpty() && !s.bind())
             fail("Choose Essence, an owned power, a name, or binding");
         if (s.bind() && recipient.master() != null) fail("Mob already has a divine master");
-        if (!s.bind() && !supreme(donor.id()) && !donor.id().equals(recipient.master()))
+        if (!s.bind() && !supreme(donor.id()) && !donor.id().equals(recipient.master())
+                && (recipient.master() != null || !s.ability().isEmpty() || !s.name().isEmpty()))
             fail("Bind a new subordinate explicitly, or select your own subordinate");
         if (!s.ability().isEmpty() && (!owns(donor.id(), s.ability()) || recipient.grants().containsKey(s.ability())))
             fail("Power must be owned, implemented, and not already granted");
@@ -209,9 +256,13 @@ public final class DivinityModel {
             q.recipientAfter(), Math.addExact(before.received(), s.amount()),
             s.bind() ? donorId : before.master(), grants, "active");
         var donor = currentDonor;
+        long qualifying = qualifyingGift(donorId, s.amount(), q.fee());
+        var progressAfter = receivedProgress(mobProgress.getOrDefault(after.id(), NO_PROGRESS), qualifying);
+        spendProgress(donorId, q.total());
         put(donor, donor.divineName(), donor.rank(), donor.ep(), donor.essence() - q.total(), donor.capLift(), donor.bestow(),
             donor.patron(), donor.npcPatrons(), donor.grants(), donor.release());
         mobs.put(after.id(), after);
+        mobProgress.put(after.id(), progressAfter);
         liveMobs.put(after.id(), context);
         log(now, donorId, after.id(), "Mob bestowal " + q.id() + "; Essence " + s.amount() + "; burned fee " + q.fee());
         return after;
@@ -284,9 +335,32 @@ public final class DivinityModel {
         if (value < 0) fail("Balance cannot be negative");
         var p = profile(id);
         if (value > (ep ? epCap(p) : essenceCap(p))) fail("Balance exceeds current cap");
+        // An operator cannot mint transferable progression rewards, including by resetting a reserve.
+        if (!ep) playerProgress.put(id, new ProgressState(earned(id), 0));
         put(p, p.divineName, p.rank, ep ? value : p.ep, ep ? p.essence : value,
             p.capLift, p.bestow, p.patron, p.npcPatrons, p.grants, p.release);
         log(now, id, id, "Operator testing " + (ep ? "EP" : "Essence") + ": " + value);
+    }
+    public void adminSetEssence(UUID id, long value, long now) { adminBalance(id, false, value, now); }
+    public void adminAddEssence(UUID id, long amount, long now) {
+        if (amount < 0) fail("Essence addition cannot be negative");
+        long value = exact(BigInteger.valueOf(profile(id).essence()).add(BigInteger.valueOf(amount)));
+        var before = playerProgress.getOrDefault(id, NO_PROGRESS);
+        adminBalance(id, false, value, now);
+        playerProgress.put(id, before);
+    }
+    public void adminSetEp(UUID id, long value, long now) { adminBalance(id, true, value, now); }
+    public void adminSetEarned(UUID id, long value, long now) {
+        if (value < 0) fail("Earned Essence cannot be negative");
+        profile(id);
+        playerProgress.put(id, new ProgressState(value, playerProgress.getOrDefault(id, NO_PROGRESS).awardable()));
+        log(now, id, id, "Operator set lifetime earned Essence: " + value);
+    }
+    public void adminSetLevel(UUID id, int level, long now) {
+        final long value;
+        try { value = EssenceProgression.earnedForLevel(level, config.progression()); }
+        catch (ArithmeticException e) { throw new IllegalArgumentException("Level exceeds supported earned Essence range"); }
+        adminSetEarned(id, value, now);
     }
     public void adminNpc(UUID id, String npc, boolean add, long now) {
         if (!NPC_PATRONS.contains(npc)) fail("Unsupported patron metadata");
@@ -296,12 +370,17 @@ public final class DivinityModel {
         log(now, id, id, "Operator testing NPC lineage " + npc + ": " + add + "; no offering powers assigned");
     }
     /** Server award hooks; caps constrain new credits, never erase historical EP. */
-    public long awardEp(UUID id, long amount) { return credit(id, amount, true); }
-    public long creditEssence(UUID id, long amount) { return credit(id, amount, false); }
-    private long credit(UUID id, long amount, boolean ep) {
+    public long awardEp(UUID id, long amount) { return credit(id, amount, true, false); }
+    public long creditEssence(UUID id, long amount) { return credit(id, amount, false, true); }
+    private long credit(UUID id, long amount, boolean ep, boolean earns) {
         if (amount < 0) fail("Credit cannot be negative");
         var p = profile(id); long old = ep ? p.ep : p.essence;
         long added = Math.min(amount, Math.max(0, (ep ? epCap(p) : essenceCap(p)) - old));
+        if (!ep) {
+            var progress = playerProgress.getOrDefault(id, NO_PROGRESS);
+            playerProgress.put(id, new ProgressState(earns ? saturatingAdd(progress.earned(), added) : progress.earned(),
+                Math.addExact(progress.awardable(), added)));
+        }
         put(p, p.divineName, p.rank, ep ? old + added : p.ep, ep ? p.essence : old + added,
             p.capLift, p.bestow, p.patron, p.npcPatrons, p.grants, p.release);
         return added;
@@ -313,7 +392,7 @@ public final class DivinityModel {
         long whole = config.regenPerSecond / 20;
         carry += (int)(config.regenPerSecond % 20);
         if (carry >= 20) { whole++; carry -= 20; }
-        creditEssence(authority, whole);
+        credit(authority, whole, false, false);
     }
     public long establishmentFee(long essence) {
         if (essence < 0) fail("Negative Essence");
@@ -331,7 +410,8 @@ public final class DivinityModel {
         if (proposal.bind) {
             if (recipient.patron != null) fail("Recipient must be released before accepting a new patron");
             if (cycle(donor.id, recipient.id)) fail("This bond would create a patron cycle");
-        } else if (!supreme(donor.id) && !donor.id.equals(recipient.patron)) {
+        } else if (!supreme(donor.id) && !donor.id.equals(recipient.patron)
+                && (!proposal.ability.isEmpty() || !proposal.name.isEmpty())) {
             fail("Invite a new follower explicitly, or select your existing follower");
         }
         if (!proposal.ability.isEmpty()) {
@@ -380,12 +460,16 @@ public final class DivinityModel {
         if (!s.ability.isEmpty()) grants.put(s.ability, donor.id.toString());
         // Every possible validation and overflow check precedes either balance mutation.
         long balance = Math.addExact(recipient.essence, s.amount);
+        var progressAfter = receivedProgress(playerProgress.getOrDefault(recipientId, NO_PROGRESS),
+            qualifyingGift(donor.id, s.amount, fee));
+        spendProgress(donor.id, debit);
         put(donor, donor.divineName, donor.rank, donor.ep, donor.essence - debit, donor.capLift, donor.bestow,
             donor.patron, donor.npcPatrons, donor.grants, donor.release);
         put(recipient, s.name.isEmpty() ? recipient.divineName : s.name,
             s.bind && recipient.rank == Rank.MORTAL ? Rank.BLESSED : recipient.rank,
             recipient.ep, balance, recipient.capLift, recipient.bestow,
             s.bind ? donor.id : recipient.patron, recipient.npcPatrons, grants, recipient.release);
+        playerProgress.put(recipientId, progressAfter);
         offers.remove(offerId);
         log(now, donor.id, recipientId, "Accepted " + offerId + "; transferred " + s.amount
             + " Essence; fee burned " + fee + "; power " + s.ability + "; binding " + s.bind);
@@ -461,12 +545,15 @@ public final class DivinityModel {
     public List<Offer> pending(UUID id) { return offers.values().stream().filter(o ->
         o.proposal.donor.equals(id) || o.proposal.recipient.equals(id)).toList(); }
     public List<Audit> history(UUID id) { return audit.stream().filter(a -> supreme(id) || id.equals(a.actor) || id.equals(a.target)).toList(); }
-    public Image image() { return new Image(authority, List.copyOf(profiles.values()), List.copyOf(offers.values()), List.copyOf(audit), carry); }
+    public Image image() { return new Image(authority, List.copyOf(profiles.values()), List.copyOf(offers.values()), List.copyOf(audit), carry,
+        playerProgressStates()); }
     public void restore(Image image, long now) {
         profiles.clear(); offers.clear(); audit.clear();
+        playerProgress.clear(); mobProgress.clear();
         mobQuotes.clear();
         liveMobs.clear();
         for (var p : image.profiles) profiles.put(p.id, p);
+        restoreProgress(image.progress(), Map.of());
         authority = profiles.containsKey(image.authority) ? image.authority : null;
         carry = Math.clamp(image.carry, 0, 19);
         image.audit.stream().skip(Math.max(0, image.audit.size() - 256)).forEach(audit::addLast);
@@ -478,6 +565,24 @@ public final class DivinityModel {
     }
     private static long exact(BigInteger value) {
         try { return value.longValueExact(); } catch (ArithmeticException e) { throw new IllegalArgumentException("Quote exceeds supported balance range"); }
+    }
+    private static long saturatingAdd(long value, long amount) {
+        return value + Math.min(amount, Long.MAX_VALUE - value);
+    }
+    private static ProgressState receivedProgress(ProgressState before, long qualifying) {
+        return new ProgressState(saturatingAdd(before.earned(), qualifying), before.awardable());
+    }
+    private long qualifyingGift(UUID donor, long amount, long fee) {
+        long awardable = playerProgress.getOrDefault(donor, NO_PROGRESS).awardable();
+        long nonAwardable = profile(donor).essence() - awardable;
+        long nonAwardableAfterFee = Math.max(0, nonAwardable - fee);
+        return Math.max(0, amount - nonAwardableAfterFee);
+    }
+    private void spendProgress(UUID donor, long debit) {
+        var state = playerProgress.getOrDefault(donor, NO_PROGRESS);
+        long nonAwardable = profile(donor).essence() - state.awardable();
+        long qualifyingSpent = Math.max(0, debit - nonAwardable);
+        playerProgress.put(donor, new ProgressState(state.earned(), state.awardable() - qualifyingSpent));
     }
     private static void fail(String message) { throw new IllegalArgumentException(message); }
     private void log(long now, UUID actor, UUID target, String text) {

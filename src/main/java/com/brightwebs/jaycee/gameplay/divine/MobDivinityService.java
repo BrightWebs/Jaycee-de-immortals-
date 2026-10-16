@@ -114,6 +114,7 @@ final class MobDivinityService {
         var model = DivinityService.model(viewer); var live = loaded(viewer.server, profile.id());
         if (live != null && !context(live).type().equals(profile.type())) live = null;
         var t = MobDivinityTags.write(profile);
+        progression(t, model, profile);
         t.putInt("EntityId", live != null && profile.status().equals("active") ? live.getId() : -1);
         if (live != null && live.isAlive() && profile.status().equals("active")) {
             t.putFloat("Health", live.getHealth()); t.putFloat("MaxHealth", live.getMaxHealth());
@@ -205,11 +206,24 @@ final class MobDivinityService {
     private static void mirror(Mob mob, DivinityModel.MobProfile profile) {
         var tag = MobDivinityTags.write(profile);
         if (mob.getServer() != null) {
-            var removal = DivinitySavedData.get(mob.getServer()).model.mobRemoval(profile.id());
+            var model = DivinitySavedData.get(mob.getServer()).model;
+            progression(tag, model, profile);
+            var removal = model.mobRemoval(profile.id());
             tag.putBoolean("TerminalRemoval", !removal.isEmpty()); tag.putString("RemovalReason", removal);
         }
         mob.getPersistentData().put(MIRROR, tag);
         if (!profile.divineName().isEmpty()) mob.setCustomName(Component.literal(profile.divineName()));
+    }
+    private static void progression(CompoundTag tag, DivinityModel model, DivinityModel.MobProfile profile) {
+        var progress = model.mob(profile.id()) == null ? EssenceProgression.mob(profile.type(), 0, profile.ep())
+            : model.mobProgression(profile.id());
+        tag.putLong("EarnedEssence", progress.earned());
+        if (progress.grade() != null) tag.putString("Grade", progress.grade());
+        if (progress.level() != null) tag.putInt("DivineLevel", progress.level());
+        if (progress.evolutionEligible() != null) tag.putBoolean("EvolutionEligible", progress.evolutionEligible());
+        tag.putBoolean("SpeciesProgressionSupported", progress.supported());
+        tag.putString("ProgressionPolicy", progress.policy());
+        tag.putString("ProgressionReason", progress.unavailableReason());
     }
     private static void update(Mob mob, String status) {
         if (mob.level().isClientSide() || mob.getServer() == null) return;

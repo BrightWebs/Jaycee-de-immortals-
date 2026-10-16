@@ -305,7 +305,8 @@ public final class DivinityModelTest {
         var model = ordinary(tuning());
         unchanged(model, () -> offer(model, invitation(DONOR, DONOR)), "Self bestowal rejected");
         unchanged(model, () -> offer(model, proposal(DONOR, FOLLOWER, 0, "", "", false)), "Empty request rejected");
-        unchanged(model, () -> offer(model, proposal(DONOR, FOLLOWER, 1, "", "", false)), "New follower must explicitly consent to binding");
+        check(model.quote(proposal(DONOR, FOLLOWER, 1, "", "", false)) == 0,
+            "A permitted donor can offer pure Essence without forcing a bond");
         for (var rank : List.of(Rank.MORTAL, Rank.BLESSED, Rank.DEMIGOD)) {
             model.adminRank(OTHER, rank, NOW);
             unchanged(model, () -> offer(model, invitation(OTHER, FOLLOWER)), "Below-Minor-God rank cannot bestow");

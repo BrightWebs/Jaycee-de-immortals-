@@ -16,7 +16,6 @@ import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
@@ -35,12 +34,13 @@ public final class Gameplay {
         bus.addListener(Gameplay::respawn);
         bus.addListener(Gameplay::dimension);
         bus.addListener(Gameplay::tick);
-        bus.addListener(Gameplay::commands);
+        bus.addListener(JayceeCommands::register);
         SkillRuntime.register();
         com.brightwebs.jaycee.gameplay.divine.DivinityService.register();
+        com.brightwebs.jaycee.gameplay.divine.DivineAppraisal.register();
     }
 
-    private static void commands(RegisterCommandsEvent event) {
+    static void debugCommands(com.mojang.brigadier.builder.LiteralArgumentBuilder<net.minecraft.commands.CommandSourceStack> debug) {
         var skills = Commands.literal("jayceeskill").requires(source -> source.hasPermission(2));
         for (String operation : java.util.List.of("grant", "revoke")) {
             skills.then(Commands.literal(operation).then(Commands.argument("id", StringArgumentType.greedyString())
@@ -49,18 +49,19 @@ public final class Gameplay {
                 .executes(context -> SkillRuntime.grant(context.getSource().getPlayerOrException(),
                     StringArgumentType.getString(context, "id"), operation.equals("grant")))));
         }
-        event.getDispatcher().register(skills);
-        event.getDispatcher().register(Commands.literal("jayceeplayertest")
+        debug.then(skills);
+        debug.then(Commands.literal("jayceeplayertest")
             .requires(source -> source.hasPermission(2))
             .executes(context -> setPlayerMenuPreview(context.getSource().getPlayerOrException(), true))
             .then(Commands.literal("off")
                 .executes(context -> setPlayerMenuPreview(context.getSource().getPlayerOrException(), false))));
-        event.getDispatcher().register(Commands.literal("jayceetest")
+        debug.then(Commands.literal("jayceetest")
             .requires(source -> source.hasPermission(2))
             .executes(context -> setJayceeTest(context.getSource().getPlayerOrException(), true))
             .then(Commands.literal("off")
                 .executes(context -> setJayceeTest(context.getSource().getPlayerOrException(), false))));
-        event.getDispatcher().register(Commands.literal("jayceemana")
+        debug.then(Commands.literal("jayceemana")
+            .requires(source -> source.hasPermission(2))
             .executes(context -> {
                 var player = context.getSource().getPlayerOrException();
                 var state = PlayerState.get(player);
@@ -117,7 +118,7 @@ public final class Gameplay {
                         return 1;
                     })));
         }
-        event.getDispatcher().register(spiritual);
+        debug.then(spiritual);
     }
 
     private static int setPlayerMenuPreview(ServerPlayer player, boolean enabled) {
@@ -404,15 +405,15 @@ public final class Gameplay {
         GameplayNetwork.sync(player);
     }
 
-    private static void activate(ServerPlayer player, PlayerState state, int slot, long now) {
-        if (!PlayerState.validSlot(state.page(), slot) || state.soul() <= 0) return;
+    static AbilityEngine.Result activate(ServerPlayer player, PlayerState state, int slot, long now) {
+        if (!PlayerState.validSlot(state.page(), slot) || state.soul() <= 0) return AbilityEngine.Result.RESTRICTED;
         var art = AbilityCatalog.find(state.ability(state.page(), slot));
-        if (art == null || !state.abilityOwned(art.id())) return;
-        if (SkillDefinitions.intrinsic(art.id()) && !state.skillGranted(art.id())) return;
+        if (art == null || !state.abilityOwned(art.id())) return AbilityEngine.Result.RESTRICTED;
+        if (SkillDefinitions.intrinsic(art.id()) && !state.skillGranted(art.id())) return AbilityEngine.Result.RESTRICTED;
         if (!art.implemented()) {
             player.displayClientMessage(Component.literal(art.name() + " is a preview; no resources spent."), true);
-            return;
+            return AbilityEngine.Result.UNKNOWN_ABILITY;
         }
-        AbilityExecutors.activate(player, state, art.id(), state.mode(state.page(), slot), now);
+        return AbilityExecutors.activate(player, state, art.id(), state.mode(state.page(), slot), now);
     }
 }

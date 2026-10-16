@@ -71,12 +71,18 @@ public final class DivinitySavedData extends SavedData {
             if (t.hasUUID("Id")) removals.put(t.getUUID("Id"), t.getString("Reason"));
         }
         data.model.restoreMobRemovals(removals);
+        // v3 balances and mob received counters contain gifts/admin values with no provenance.
+        // Migration deliberately starts lifetime earned and awardable reserves at zero.
+        if (tag.getInt("Version") >= 4)
+            data.model.restoreProgress(readProgress(tag, "PlayerProgress"), readProgress(tag, "MobProgress"));
         data.setDirty();
         return data;
     }
     @Override public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
         var image = model.image();
-        tag.putInt("Version", 3);
+        tag.putInt("Version", 4);
+        tag.put("PlayerProgress", writeProgress(model.playerProgressStates()));
+        tag.put("MobProgress", writeProgress(model.mobProgressStates()));
         var mobs = new ListTag(); model.mobs().forEach(p -> mobs.add(MobDivinityTags.write(p)));
         tag.put("Mobs", mobs);
         var removals = new ListTag();
@@ -117,5 +123,23 @@ public final class DivinitySavedData extends SavedData {
         }
         tag.put("Audit", audit);
         return tag;
+    }
+    private static Map<UUID, DivinityModel.ProgressState> readProgress(CompoundTag tag, String key) {
+        var values = new HashMap<UUID, DivinityModel.ProgressState>();
+        for (Tag value : tag.getList(key, Tag.TAG_COMPOUND)) {
+            var entry = (CompoundTag)value;
+            if (entry.hasUUID("Id")) values.put(entry.getUUID("Id"),
+                new DivinityModel.ProgressState(Math.max(0, entry.getLong("Earned")), Math.max(0, entry.getLong("Awardable"))));
+        }
+        return values;
+    }
+    private static ListTag writeProgress(Map<UUID, DivinityModel.ProgressState> states) {
+        var values = new ListTag();
+        states.forEach((id, state) -> {
+            var entry = new CompoundTag();
+            entry.putUUID("Id", id); entry.putLong("Earned", state.earned()); entry.putLong("Awardable", state.awardable());
+            values.add(entry);
+        });
+        return values;
     }
 }

@@ -14,6 +14,13 @@ tasks.register('engineTest', JavaExec) {
     javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
 }
 tasks.named('check') { dependsOn tasks.named('engineTest') }
+tasks.register('jayceeCommandsTest', JavaExec) {
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.brightwebs.jaycee.gameplay.JayceeCommandsTest'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+}
+tasks.named('check') { dependsOn tasks.named('jayceeCommandsTest') }
 tasks.register('skillTest', JavaExec) {
     dependsOn tasks.named('testClasses')
     classpath = sourceSets.test.runtimeClasspath
@@ -49,6 +56,16 @@ tasks.register('mobBestowalUiTest', JavaExec) {
     javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
 }
 tasks.named('check') { dependsOn tasks.named('mobBestowalUiTest') }
+['EssenceProgressionTest', 'EssenceRewardBudgetTest'].each { suite ->
+    def taskName = suite.uncapitalize()
+    tasks.register(taskName, JavaExec) {
+        dependsOn tasks.named('testClasses')
+        classpath = sourceSets.test.runtimeClasspath
+        mainClass = "com.brightwebs.jaycee.gameplay.divine.${suite}"
+        javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+    }
+    tasks.named('check') { dependsOn tasks.named(taskName) }
+}
 tasks.register('statusDataTest', JavaExec) {
     dependsOn tasks.named('testClasses')
     classpath = sourceSets.test.runtimeClasspath

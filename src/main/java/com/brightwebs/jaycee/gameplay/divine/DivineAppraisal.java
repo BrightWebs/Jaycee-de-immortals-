@@ -15,7 +15,7 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
-import net.neoforged.neoforge.event.entity.living.MobSpawnEvent;
+import net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 
@@ -107,7 +107,7 @@ public final class DivineAppraisal {
             if (actual > 0) p.displayClientMessage(Component.literal("+" + actual + " earned Essence"), true);
         }
     }
-    private static void spawn(MobSpawnEvent.FinalizeSpawn event) {
+    private static void spawn(FinalizeSpawnEvent event) {
         event.getEntity().getPersistentData().putBoolean("JayceeArtificialSpawn",
             !java.util.Set.of("NATURAL", "CHUNK_GENERATION", "PATROL").contains(event.getSpawnType().name()));
     }

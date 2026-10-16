@@ -28,6 +28,7 @@ public final class DivinityService {
         var data = DivinitySavedData.get(p.server);
         data.model.join(p.getUUID(), p.getGameProfile().getName());
         unlockRestore(p);
+        checkCoreAwakening(p);
         // Migrate trusted pre-ledger operator grants without treating JayceeTest as authority.
         var legacy = p.getPersistentData().getCompound(PlayerState.TAG);
         if (!legacy.getBoolean("DivinityMigrated")) {
@@ -49,6 +50,39 @@ public final class DivinityService {
             data.setDirty();
         }
     }
+    /**
+     * Claims the unique world-level Jaycee role on the third core.
+     * Server operators never obtain this role just by being operators.
+     * Optional UUID override: -Djaycee.owner_uuid=<uuid>
+     */
+    public static void checkCoreAwakening(ServerPlayer p) {
+        if (PlayerState.get(p).consumed() < 3) return;
+        var d = DivinitySavedData.get(p.server);
+        String configured = System.getProperty("jaycee.owner_uuid", "").trim();
+        boolean designated = false;
+        if (!configured.isEmpty()) {
+            try { designated = java.util.UUID.fromString(configured).equals(p.getUUID()); }
+            catch (IllegalArgumentException ignored) {}
+        }
+        try {
+            if (designated && !d.model.supreme(p.getUUID())) {
+                d.model.assignAuthority(p.getUUID(), true, now());
+                d.setDirty();
+            } else if (d.model.authority() == null) {
+                d.model.assignAuthority(p.getUUID(), false, now());
+                d.setDirty();
+            }
+            if (d.model.supreme(p.getUUID())) {
+                var entry = p.server.getAdvancements().get(
+                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("jaycee", "jaycee"));
+                if (entry != null && !p.getAdvancements().getOrStartProgress(entry).isDone())
+                    p.getAdvancements().award(entry, "claimed");
+            }
+        } catch (IllegalArgumentException ex) {
+            p.sendSystemMessage(Component.literal("Jaycee claim unavailable: " + ex.getMessage()));
+        }
+    }
+
     public static void logout(ServerPlayer p) {
         var data = DivinitySavedData.get(p.server); data.model.disconnect(p.getUUID(), now());
         data.sessions.remove(p.getUUID()); data.setDirty();

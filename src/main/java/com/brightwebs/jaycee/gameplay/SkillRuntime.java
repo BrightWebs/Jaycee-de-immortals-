@@ -174,6 +174,7 @@ public final class SkillRuntime {
             if (!granted) entry.putBoolean("Enabled", false);
         });
         PlayerState.save(player, data);
+        com.brightwebs.jaycee.gameplay.divine.DivinityService.adminGrant(player, id, granted);
         configurationChanged(player, id);
         GameplayNetwork.sync(player);
         player.displayClientMessage(Component.literal((granted ? "Granted " : "Revoked ") + id
@@ -187,7 +188,7 @@ public final class SkillRuntime {
         SESSIONS.remove(player.getUUID());
     }
 
-    static void invalidate(ServerPlayer player) {
+    public static void invalidate(ServerPlayer player) {
         var runtime = SESSIONS.get(player.getUUID());
         if (runtime != null) {
             runtime.paid.clear();

@@ -37,6 +37,7 @@ public final class Gameplay {
         bus.addListener(Gameplay::tick);
         bus.addListener(Gameplay::commands);
         SkillRuntime.register();
+        com.brightwebs.jaycee.gameplay.divine.DivinityService.register();
     }
 
     private static void commands(RegisterCommandsEvent event) {
@@ -133,6 +134,11 @@ public final class Gameplay {
         int consumed = Math.min(3, PlayerState.get(player).consumed() + 1);
         data.putInt("Consumed", consumed);
         PlayerState.save(player, data);
+        if (consumed >= 3 && player instanceof ServerPlayer p) {
+            var saved = com.brightwebs.jaycee.gameplay.divine.DivinitySavedData.get(p.server);
+            saved.model.migrateRestore(p.getUUID(), SkillDefinitions.RESTORE, System.currentTimeMillis());
+            saved.setDirty();
+        }
         if (player instanceof ServerPlayer serverPlayer) GameplayNetwork.sync(serverPlayer);
         return consumed;
     }
@@ -231,6 +237,7 @@ public final class Gameplay {
 
     private static void login(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
+            com.brightwebs.jaycee.gameplay.divine.DivinityService.join(player);
             PlayerState.save(player, PlayerState.read(player));
             SkillRuntime.login(player);
             GameplayNetwork.sync(player);
@@ -238,7 +245,10 @@ public final class Gameplay {
     }
 
     private static void logout(PlayerEvent.PlayerLoggedOutEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) SkillRuntime.suspend(player);
+        if (event.getEntity() instanceof ServerPlayer player) {
+            SkillRuntime.suspend(player);
+            com.brightwebs.jaycee.gameplay.divine.DivinityService.logout(player);
+        }
         ACTION_RATES.remove(event.getEntity().getUUID());
     }
 
@@ -263,6 +273,7 @@ public final class Gameplay {
 
     private static void tick(PlayerTickEvent.Post event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        com.brightwebs.jaycee.gameplay.divine.DivinityService.tick(player);
         if (player.tickCount % 20 != 0) {
             SkillRuntime.tick(player);
             return;
@@ -303,7 +314,7 @@ public final class Gameplay {
             return;
         }
         var state = PlayerState.get(player);
-        if (!state.unlocked() || !player.isAlive() || player.isSpectator()) return;
+        if (!player.isAlive() || player.isSpectator()) return;
         var data = PlayerState.read(player);
         String intrinsicConfiguration = "";
         switch (action.action()) {
@@ -325,7 +336,7 @@ public final class Gameplay {
             }
             case "equip" -> {
                 if (!PlayerState.validSlot(action.first(), action.second())
-                        || (!action.value().isEmpty() && AbilityCatalog.find(action.value()) == null)
+                        || (!action.value().isEmpty() && !state.abilityOwned(action.value()))
                         || !SkillMath.permission(SkillDefinitions.intrinsic(action.value()),
                             state.skillGranted(action.value()))) return;
                 var abilities = data.getCompound("Abilities");
@@ -341,7 +352,7 @@ public final class Gameplay {
                 var art = AbilityCatalog.find(state.ability(action.first(), action.second()));
                 int mode;
                 try { mode = Integer.parseInt(action.value()); } catch (NumberFormatException ignored) { return; }
-                if (art == null || mode < 0 || mode >= art.modes().size()
+                if (art == null || !state.abilityOwned(art.id()) || mode < 0 || mode >= art.modes().size()
                         || !SkillRuntime.modeAllowed(state, art.id(), mode)) return;
                 var modes = data.getCompound("Modes");
                 modes.putInt(PlayerState.key(action.first(), action.second()), mode);
@@ -354,7 +365,7 @@ public final class Gameplay {
             case "cycle_mode" -> {
                 if (!PlayerState.validSlot(action.first(), action.second())) return;
                 var art = AbilityCatalog.find(state.ability(action.first(), action.second()));
-                if (art == null || art.modes().isEmpty()
+                if (art == null || !state.abilityOwned(art.id()) || art.modes().isEmpty()
                         || !SkillMath.permission(SkillDefinitions.intrinsic(art.id()), state.skillGranted(art.id()))) return;
                 var modes = data.getCompound("Modes");
                 int step = SkillDefinitions.PERCEPTION.equals(art.id()) ? SkillConfig.MODE_LEVEL_STEP.get() : 0;
@@ -381,7 +392,7 @@ public final class Gameplay {
     private static void activate(ServerPlayer player, PlayerState state, int slot, long now) {
         if (!PlayerState.validSlot(state.page(), slot) || state.soul() <= 0) return;
         var art = AbilityCatalog.find(state.ability(state.page(), slot));
-        if (art == null) return;
+        if (art == null || !state.abilityOwned(art.id())) return;
         if (SkillDefinitions.intrinsic(art.id()) && !state.skillGranted(art.id())) return;
         if (!art.implemented()) {
             player.displayClientMessage(Component.literal(art.name() + " is a preview; no resources spent."), true);

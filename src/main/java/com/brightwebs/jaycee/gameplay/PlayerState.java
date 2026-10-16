@@ -30,6 +30,8 @@ public final class PlayerState {
         if (!data.contains("Portrait3d")) data.putBoolean("Portrait3d", true);
         if (!data.contains("Backend")) data.putString("Backend", ManaBackends.AUTO);
         if (!data.contains("Consumed")) data.putInt("Consumed", Math.clamp(root.getInt("JayceeConsumed"), 0, 3));
+        if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer)
+            data.put("Divinity", com.brightwebs.jaycee.gameplay.divine.DivinityService.ownMirror(serverPlayer));
         return data;
     }
 
@@ -55,7 +57,18 @@ public final class PlayerState {
     public int consumed() { return Math.clamp(data.getInt("Consumed"), 0, 3); }
     /** Operator-granted test identity, not a completed race evolution or EP qualification. */
     public boolean jayceeTest() { return data.getBoolean("JayceeTest"); }
-    public boolean unlocked() { return consumed() >= 3 || jayceeTest(); }
+    public boolean unlocked() { return consumed() >= 3 || jayceeTest() || supreme()
+        || !divinity().getCompound("Grants").isEmpty() || (!divinity().getString("Rank").isEmpty()
+            && !divinity().getString("Rank").equals("MORTAL")); }
+    public CompoundTag divinity() { return data.getCompound("Divinity").copy(); }
+    public boolean supreme() { return data.getCompound("Divinity").getBoolean("Supreme"); }
+    public boolean abilityOwned(String id) {
+        var art = AbilityCatalog.find(id);
+        return art != null && art.implemented() && (supreme() || jayceeTest()
+            || data.getCompound("Divinity").getCompound("Grants").contains(id)
+            || (SkillDefinitions.RESTORE.equals(id) && consumed() >= 3)
+            || (!data.getBoolean("DivinityMigrated") && SkillDefinitions.intrinsic(id) && skillExplicitGrant(id)));
+    }
     /** Server world time when this snapshot was sent; client world time advances the displayed countdown. */
     public long serverTick() { return data.getLong("ServerTick"); }
     public String lastActivationId() { return data.getString("LastActivationId"); }
@@ -86,7 +99,7 @@ public final class PlayerState {
     public boolean skillExplicitGrant(String id) { return SkillDefinitions.intrinsic(id) && skill(id).getBoolean("Granted"); }
     public boolean skillGranted(String id) {
         var definition = SkillDefinitions.find(id);
-        return definition != null && (!definition.intrinsic() || skillExplicitGrant(id) || jayceeTest());
+        return definition != null && (SkillDefinitions.PHYSICAL.equals(id) || abilityOwned(id));
     }
     public boolean skillEnabled(String id) { return skillGranted(id) && skill(id).getBoolean("Enabled"); }
     public int skillOutput(String id) {

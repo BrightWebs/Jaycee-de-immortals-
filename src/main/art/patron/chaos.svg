@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 256 256">
+ <defs><linearGradient id="rift" x2="1" y2="1"><stop stop-color="#c5e4f5"/><stop offset=".5" stop-color="#b48bd9"/><stop offset="1" stop-color="#56668e"/></linearGradient></defs>
+ <circle cx="128" cy="128" r="104" fill="#11182e" fill-opacity=".6" stroke="#7e769b" stroke-width="2"/><circle cx="128" cy="128" r="97" fill="none" stroke="#bdb4d4"/>
+ <path d="M128 13 135 26 128 39 121 26Z M128 217 135 230 128 243 121 230Z M13 128 26 121 39 128 26 135Z M217 128 230 121 243 128 230 135Z" fill="#a9a2c6"/>
+ <path d="M56 79 47 106 52 116 M200 79 209 106 204 116 M60 184 85 207 108 212 M196 184 171 207 148 212" fill="none" stroke="#777599" stroke-width="3"/>
+ <path d="M128 48 Q187 46 200 103 Q209 155 165 185 Q123 213 79 178 Q43 151 56 103 Q68 66 107 66 Q76 79 75 114 Q72 151 103 163 Q143 181 163 144 Q180 111 153 92 Q125 72 102 99 Q86 119 104 139 Q89 98 128 99 Q164 103 146 138 Q133 157 112 145 Q145 163 162 137 Q187 94 144 74 Q109 57 78 87 Q88 57 128 48Z" fill="url(#rift)" stroke="#ccbadf" stroke-width="2"/>
+ <path d="M128 96 Q153 98 158 120 Q162 148 133 157 Q106 165 96 139 Q84 111 110 100Z" fill="#090e22"/>
+ <path d="M102 63 119 54 M176 81 186 98 M194 130 187 151 M144 189 127 190 M65 145 72 161" fill="none" stroke="#e5d4f1" stroke-width="2" stroke-linecap="round"/>
+ <path d="M63 62 73 57 69 75Z M185 53 198 65 185 70Z M197 173 204 183 190 194Z M57 183 69 192 57 199Z" fill="#8f8fb9" stroke="#c5bfde"/>
+ <g fill="#c0d2eb"><circle cx="152" cy="44" r="2"/><circle cx="48" cy="127" r="2"/><circle cx="160" cy="207" r="2"/><circle cx="209" cy="145" r="2"/></g>
+</svg>

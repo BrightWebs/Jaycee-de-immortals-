@@ -4,6 +4,11 @@ package com.brightwebs.jaycee.client;
 final class SapphireLayout {
  static final int WIDTH=700, HEIGHT=420;
  static boolean ordinaryMenu(boolean supreme,boolean preview){return !supreme||preview;}
+ static final Bounds TRAIT_CARD=new Bounds(382,142,134,88),AFFINITY_CARD=new Bounds(382,238,134,164);
+ static int statusScrollTarget(double x,double y){return TRAIT_CARD.contains(x,y)?1:AFFINITY_CARD.contains(x,y)?2:0;}
+ static int scrollOffset(int offset,int delta,int content,int visible){
+  return (int)Math.clamp((long)offset+delta,0,Math.max(0,content-visible));
+ }
  record Bounds(int x,int y,int width,int height){
   boolean contains(double px,double py){return px>=x&&py>=y&&px<x+width&&py<y+height;}
  }

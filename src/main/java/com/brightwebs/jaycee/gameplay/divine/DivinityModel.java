@@ -42,7 +42,9 @@ public final class DivinityModel {
                        Long ep, Long essence, boolean supreme, boolean capLift, boolean bestow,
                        UUID patron, Set<String> npcPatrons, Map<String, String> grants, Release release) {}
     public record Image(UUID authority, List<Profile> profiles, List<Offer> offers, List<Audit> audit, int carry) {}
-    public static final Set<String> NPC_PATRONS = Set.of("zeus", "poseidon", "hades", "athena");
+    public static final Set<String> NPC_PATRONS = Set.of("zeus", "poseidon", "hades", "athena",
+        "ares", "apollo", "artemis", "hermes", "hephaestus", "aphrodite", "demeter", "dionysus",
+        "hera", "hestia", "hecate", "eris", "nemesis", "kronos", "gaia", "ouranos", "nyx", "chaos");
     private final Config config;
     private final Set<String> abilities;
     private final Map<UUID, Profile> profiles = new LinkedHashMap<>();

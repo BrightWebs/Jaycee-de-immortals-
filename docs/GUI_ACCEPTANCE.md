@@ -39,6 +39,16 @@
 ## Source of truth
 Actual supplied artwork is required to establish exact geometry and colors. If those images are missing, don't invent a supposedly exact recreation.
 
+## Shared Status / patron acceptance (in-game verification pending)
+- Compare ordinary and Jaycee Status side by side: the same renderer must retain portrait and Face/3D toggle, username/rank/race control, title/patron, Minecraft level/EXP, Stats, Titles, Trait and Elemental Affinity positions. Live HP/MP/SP, attack/armor/movement/luck must update without granting progression.
+- Preview one lineage with operator metadata (`/divineadmin npc_add <player> zeus`), then Poseidon, Hades and Gaia individually. Confirm distinct crest subject, navy background and own accent; no automatically acquired affinity or power. All 22 supported visual IDs must have their own transparent artwork. These metadata commands do not implement offerings.
+- With multiple current lineages, check neutral colors, recognizable orbiting symbols and no adjacent-card overlap, including all 22 metadata IDs. Remove a lineage and confirm it disappears; reverting to one must produce a stationary emblem. No particle entities or gameplay ticks are involved.
+- Enable `hud.reducedStatusMotion` or Hide Lightning Flashes; all decorative pulse/orbit movement must stop while symbols remain visible.
+- Verify Trait replaces the old label for both roles. Explicitly granted intrinsic traits show their real name/icon/description/mastery. Test-only unlocks must not masquerade as acquired traits. Real server-stored affinity/title entries must persist through reconnect and death; patron identity alone must not produce level-zero affinity grants.
+- Populate enough acquired entries to exceed both card heights; independently scroll to the last wrapped description and mastery progress. Wheel over Trait must not move affinities or the Equip Page, even while Alt is held. Check clipping, focus/narration and Page Up/Down at GUI scales 1–4.
+- Verify no HP/MP resource label remains below the Equip instructions on any tab. Four slots, ten pages, assignment/removal, right-click removal and Alt mode/page bindings otherwise remain unchanged.
+- Exact Zeus-mockup comparison is blocked until that image is supplied. The original main image hash is `b606cc8e12a19936a4336775a73bfe0fc07b206b`; no Minecraft render/visual approval is claimed by source-level tests.
+
 ## HUD/resource regression checklist (not yet runtime-verified)
 - Text-spacing pass: verify all five navigation labels share the same pixel font size and baseline, centered below their icons. Check focused/hovered tabs too.
 - Inspect Status headings, player names, largest resource/attribute values, racial-trait text, affinity rows, species descriptions and Back to Status. Confirm no text touches corner filigree or dividers; read long descriptions as wrapped text rather than a squeezed font.

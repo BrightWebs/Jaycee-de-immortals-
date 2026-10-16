@@ -3,6 +3,8 @@ package com.brightwebs.jaycee.client;
 import com.brightwebs.jaycee.gameplay.AbilityCatalog;
 import com.brightwebs.jaycee.gameplay.GameplayActions;
 import com.brightwebs.jaycee.gameplay.PlayerState;
+import com.brightwebs.jaycee.gameplay.StatusData;
+import com.brightwebs.jaycee.config.HudConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -29,6 +31,8 @@ public class JayceeScreen extends Screen {
  private final SkillMagicBrowser skillsBrowser=new SkillMagicBrowser(false,()->selected),magicBrowser=new SkillMagicBrowser(true,()->selected);
  private int art=-1;
  private Button portraitButton;
+ private Button traitsFocus,affinitiesFocus;
+ private int traitScroll,affinityScroll,traitHeight,affinityHeight;
  private Button selectedArtButton,selectedCategoryButton,selectedSkillButton;
  private boolean speciesOpen;
  private final boolean ordinary;
@@ -97,17 +101,17 @@ public class JayceeScreen extends Screen {
    pages[i]=button(""+(i+1),b.x(),b.y(),b.width(),b.height(),0,()->GameplayActions.page(p),"Select saved page "+(i+1));
   }
   portraitButton=null;
-  if(tab==0&&ordinary){
-   button("Divine Bonds",30,345,210,24,0,()->Minecraft.getInstance().setScreen(new DivineBondsScreen(false)),
-    "Manage consent-based offers, patron bonds and release requests");
-   button("Bestowal / Offers (N)",270,345,230,24,0,()->Minecraft.getInstance().setScreen(new DivineBondsScreen(true)),
-    "Inspect a nearby player or incoming offers. Opening spends nothing.");
-  }else if(tab==0){
+  traitsFocus=null;affinitiesFocus=null;
+  if(tab==0){
    portraitButton=button("Face",68,153,28,14,0,()->GameplayActions.portrait(!state().portrait3d()),
     "Switch Face / 3D portrait; shared with the gameplay HUD");
    button("Race: Human",106,117,151,18,0,()->{speciesOpen=!speciesOpen;rebuild();},
     "Open species and evolution details. Human is a preview, not saved progression.");
    if(speciesOpen)button("Back to Status",160,370,195,24,0,()->{speciesOpen=false;rebuild();},null);
+   if(!speciesOpen){
+    traitsFocus=statusFocus(390,174,118,46,"Trait");
+    affinitiesFocus=statusFocus(390,270,118,120,"Elemental Affinity");
+   }
   }else if(tab==1&&ordinary)abilityBrowser.init(widget->addRenderableWidget(widget));
   else if(tab==1){
    for(int i=0;i<CATS.length;i++){
@@ -124,6 +128,13 @@ public class JayceeScreen extends Screen {
     if(i==art)selectedArtButton=b;
    }
   }else if(tab==2||tab==3)browser().init(widget->addRenderableWidget(widget));
+ }
+ private Button statusFocus(int x,int y,int w,int h,String name){
+  return addRenderableWidget(new Button(x,y,w,h,Component.literal(name),b->{},narration->narration.get()){
+   @Override protected void renderWidget(GuiGraphics g,int mx,int my,float dt){
+    if(isFocused())g.fill(getX()-2,getY(),getX()-1,getY()+height,BLUE);
+   }
+  });
  }
  private void rebuild(){clearWidgets();init();}
  private void right(GuiGraphics g,String s,int x,int y,int width,int color){
@@ -167,7 +178,7 @@ public class JayceeScreen extends Screen {
   }
   panel(g,544,68,156,352,"Equip Page");
   UiText.line(g,"Page "+(snapshot.page()+1)+" / 10",579,124,82,.8f,INK,true);
-  if(tab==0){if(ordinary)ascensionStatus(g,snapshot);else status(g,snapshot,dt);}
+  if(tab==0)status(g,snapshot,dt);
   else if(tab==1){if(ordinary)abilityBrowser.render(g);else abilities(g);}
   else if(tab==2||tab==3)browser().render(g);
   else quests(g);
@@ -177,6 +188,11 @@ public class JayceeScreen extends Screen {
    var b=SapphireLayout.tabLabel(i,ordinary);
    UiText.line(g,tabs()[i],b.x(),b.y(),b.width(),ordinary?.8f:1f,INK,true);
   }
+  if(tab==0&&ordinary){
+   var theme=PatronTheme.palette(PatronTheme.retained(StatusData.patrons(snapshot)));
+   g.fill(18,54,10+tabStep()-12,55,theme.accent());
+   DivineFrame.gem(g,10+(tabStep()-4)/2,9,2,theme.secondary());
+  }
   if(tab==1&&!ordinary)for(int i=0;i<AbilityCatalog.ALL.size();i++)
    AbilityIcons.render(g,AbilityCatalog.ALL.get(i),152,115+i*43,14,i==art);
   if(tab==1&&ordinary){abilityBrowser.renderRows(g);abilityBrowser.renderOutput(g);}
@@ -184,7 +200,7 @@ public class JayceeScreen extends Screen {
   equipment(g,snapshot);
   g.pose().popPose();
   // Entity rendering uses screen-space scissoring and lighting, not the scaled UI pose.
-  if(tab==0&&!ordinary&&snapshot.portrait3d()){
+  if(tab==0&&snapshot.portrait3d()){
    InventoryScreen.renderEntityInInventoryFollowsMouse(g,layout.screenX(24),layout.screenY(96),
     layout.screenX(91),layout.screenY(154),layout.size(29),0f,mx,my,Minecraft.getInstance().player);
   }
@@ -225,24 +241,32 @@ public class JayceeScreen extends Screen {
   var page=SapphireLayout.pageSelector(snapshot.page());
   g.fill(page.x(),312,page.x()+page.width(),314,0xFFB08BDD);
   paragraph(g,"Select an unlocked ability, then click a slot.",559,371,126,24,INK);
-  label(g,"MP "+number(snapshot.mana()),568,399,108,INK);
  }
  private void status(GuiGraphics g,PlayerState snapshot,float dt){
   var player=Minecraft.getInstance().player;
+  var patrons=PatronTheme.retained(StatusData.patrons(snapshot));
+  var theme=ordinary?PatronTheme.palette(patrons):PatronTheme.NEUTRAL;
+  int accent=theme.accent();
   DivineFrame.sapphire(g,20,88,78,78,false);
-  DivineFrame.gem(g,59,92,3,DivineFrame.GOLD);
-  DivineFrame.gem(g,59,161,3,DivineFrame.GOLD);
+  DivineFrame.gem(g,59,92,3,ordinary?accent:DivineFrame.GOLD);
+  DivineFrame.gem(g,59,161,3,ordinary?accent:DivineFrame.GOLD);
   if(!snapshot.portrait3d())PlayerPortrait.render(g,player,32,101,52,false);
-  UiText.line(g,player.getName().getString(),110,94,150,1.15f,INK,false);
-  label(g,"Title: None",110,140,150,INK);
-  label(g,"Faction: None",110,156,150,INK);
+  UiText.line(g,player.getGameProfile().getName(),110,94,150,1.15f,INK,false);
+  String rank=snapshot.supreme()?"Jaycee":snapshot.divinity().getString("Rank").replace('_',' ');
+  label(g,"Rank: "+(rank.isEmpty()?"Unavailable":rank),110,108,150,accent);
+  String title=StatusData.title(snapshot);
+  label(g,"Title: "+(title.isEmpty()?"None":title),110,140,150,INK);
+  String affiliation=patrons.isEmpty()?snapshot.divinity().getCompound("PatronProfile").getString("Username"):
+   String.join(", ",patrons.stream().map(PatronTheme.Theme::name).toList());
+  label(g,"Patron: "+(affiliation.isEmpty()?"None":affiliation),110,156,150,INK);
   if(speciesOpen){species(g);return;}
-  UiText.line(g,"Lv. "+player.experienceLevel,24,184,190,1.6f,BLUE,false);
+  UiText.line(g,"Lv. "+player.experienceLevel,24,184,190,1.6f,accent,false);
   g.fill(23,213,214,223,0xFF030F1B);
-  g.fill(24,214,24+(int)(188*Math.clamp(player.experienceProgress,0,1)),222,0xFF6CA6CF);
+  g.fill(24,214,24+(int)(188*Math.clamp(player.experienceProgress,0,1)),222,accent);
   right(g,(int)(player.experienceProgress*player.getXpNeededForNextLevel())+" / "+
    player.getXpNeededForNextLevel()+" EXP",212,230,188,INK);
   panel(g,18,250,208,152,"Stats");
+  statusAccent(g,18,250,208,accent);
   String[] labels={"HP","MP","SP","Attack","Defense","Speed","Luck"};
   String[] values={number(player.getHealth())+" / "+number(player.getMaxHealth()),
    number(snapshot.mana())+" / "+number(snapshot.maxMana()),number(snapshot.soul())+" / "+number(snapshot.maxSoul()),
@@ -253,48 +277,77 @@ public class JayceeScreen extends Screen {
   for(int i=0;i<labels.length;i++){
    int y=282+i*15;
    DivineFrame.gem(g,32,y+3,2,colors[i]);
-   label(g,labels[i],43,y,52,INK);right(g,values[i],212,y,106,BLUE);
+   label(g,labels[i],43,y,52,INK);right(g,values[i],212,y,106,accent);
    if(i<6)g.fill(27,y+12,216,y+13,0xFF293C50);
   }
-  DivineFrame.orbit(g,300,194,Minecraft.getInstance().level.getGameTime()+dt);
+  boolean reduced=HudConfig.REDUCED_STATUS_MOTION.get()||Minecraft.getInstance().options.hideLightningFlash().get();
+  double ticks=Minecraft.getInstance().level.getGameTime()+dt;
+  if(ordinary)PatronEmblem.render(g,patrons,ticks,reduced);
+  else DivineFrame.orbit(g,300,194,reduced?0:ticks);
   panel(g,382,85,134,50,"Titles");
-  UiText.line(g,"- No Title Equipped -",406,119,86,.8f,INK,true);
-  panel(g,382,142,134,88,"Racial Trait");
-  label(g,"None",416,181,76,INK);
-  DivineFrame.tabIcon(g,399,183,1,false);
-  paragraph(g,"No racial traits unlocked.",406,198,86,22,INK);
+  statusAccent(g,382,85,134,accent);
+  UiText.line(g,title.isEmpty()?"No Title Equipped":title,396,119,106,.8f,INK,true);
+  panel(g,382,142,134,88,"Trait");
+  statusAccent(g,382,142,134,accent);
+  var traits=StatusData.traits(snapshot);
+  traitHeight=entries(g,traits,390,174,118,46,traitScroll,"No unlocked traits.",traitsFocus);
+  traitScroll=Math.clamp(traitScroll,0,Math.max(0,traitHeight-46));
   panel(g,382,238,134,164,"Elemental Affinity");
-  String[] elements={"Fire","Water","Wind","Earth","Light","Dark"};
-  int[] colors2={0xFFEF6478,0xFF56B6FA,0xFF8CD8AC,0xFFEAB963,0xFFF9DF8C,0xFFAD7CF0};
-  for(int i=0;i<elements.length;i++){
-   int y=272+i*21;
-   DivineFrame.gem(g,396,y+3,3,colors2[i]);
-   label(g,elements[i],405,y,60,INK);right(g,"N/A",499,y,28,MUTED);
-   if(i<5)g.fill(392,y+14,506,y+15,0xFF293C50);
+  statusAccent(g,382,238,134,accent);
+  var affinities=StatusData.affinities(snapshot);
+  if(patrons.size()==1)affinities=affinities.stream().sorted(java.util.Comparator.comparingInt(e->
+   PatronTheme.relevant(patrons.getFirst(),e.id(),e.name())?0:1)).toList();
+  affinityHeight=entries(g,affinities,390,270,118,120,affinityScroll,"No unlocked affinities.",affinitiesFocus);
+  affinityScroll=Math.clamp(affinityScroll,0,Math.max(0,affinityHeight-120));
+  paragraph(g,snapshot.playerMenuPreview()?"Player layout preview; your real permissions remain active.":
+   ordinary?(patrons.isEmpty()?"Unblessed / no active deity lineage.":String.join(" / ",patrons.stream().map(PatronTheme.Theme::name).toList())):
+   "Traits / evolution: see race",242,344,126,38,MUTED);
+  label(g,"Level / EXP: Minecraft",242,387,126,MUTED);
+ }
+ private void statusAccent(GuiGraphics g,int x,int y,int w,int color){
+  if(!ordinary)return;
+  g.fill(x+12,y+26,x+w-12,y+27,color);
+  DivineFrame.gem(g,x+w/2,y+3,2,color);
+ }
+ private int entries(GuiGraphics g,List<StatusData.Entry> entries,int x,int y,int w,int h,int scroll,String empty,Button focus){
+  if(focus!=null)focus.setMessage(Component.literal(entries.isEmpty()?empty:String.join(". ",entries.stream().map(e->
+   e.name()+". "+e.description()+(e.level()<0?"":". Level "+e.level())+
+   (e.required()>0?". Progress "+e.progress()+" / "+e.required():"")).toList())+". Scroll with mouse wheel or Page Up / Down."));
+  g.enableScissor(x,y,x+w,y+h);
+  int cursor=y-Math.max(0,scroll);
+  if(entries.isEmpty())paragraph(g,empty,x+4,y+3,w-8,h-4,MUTED);
+  for(var entry:entries){
+   int top=cursor;
+   var texture=net.minecraft.resources.ResourceLocation.tryParse(entry.icon());
+   if(texture!=null&&Minecraft.getInstance().getResourceManager().getResource(texture).isPresent())
+    g.blit(texture,x+2,cursor+1,0,0,14,14,14,14);
+   else DivineFrame.gem(g,x+8,cursor+7,3,MUTED);
+   label(g,entry.name(),x+20,cursor,w-24,INK);cursor+=11;
+   if(entry.level()>=0){label(g,"Lv. "+entry.level(),x+20,cursor,w-24,BLUE);cursor+=11;}
+   for(var line:font.split(Component.literal(entry.description()),(int)((w-8)/.8f))){
+    g.pose().pushPose();g.pose().translate(x+4,cursor,0);g.pose().scale(.8f,.8f,1);
+    g.drawString(font,line,0,0,INK,false);g.pose().popPose();cursor+=10;
+   }
+   if(entry.required()>0){
+    label(g,entry.progress()+" / "+entry.required(),x+4,cursor,w-8,MUTED);cursor+=11;
+    g.fill(x+4,cursor,x+w-4,cursor+2,0xFF293C50);
+    g.fill(x+4,cursor,x+4+(int)((w-8)*Math.clamp(entry.progress()/(double)entry.required(),0,1)),cursor+2,BLUE);
+    cursor+=5;
+   }
+   cursor=Math.max(cursor,top+18)+6;
   }
-  paragraph(g,"Traits / evolution: preview",242,360,126,22,MUTED);
-  label(g,"Stats and EXP: live",242,387,126,MUTED);
+  g.disableScissor();
+  int content=cursor-y+Math.max(0,scroll);
+  if(content>h){
+   int max=content-h,thumb=Math.max(6,h*h/content);
+   int sy=y+(int)((h-thumb)*Math.min(scroll,max)/(double)max);
+   g.fill(x+w-2,sy,x+w-1,sy+thumb,BLUE);
+  }
+  return content;
  }
  private void abilities(GuiGraphics g){
   label(g,tab==1?"Abilities":"Magic",26,86,484,INK);
   paragraph(g,"Select an art, then an equipment slot. Preview arts cannot activate.",36,376,464,24,MUTED);
- }
- private void ascensionStatus(GuiGraphics g,PlayerState snapshot){
-  var d=snapshot.divinity();
-  panel(g,18,85,500,245,"Divine Ascension");
-  String account=Minecraft.getInstance().player.getGameProfile().getName();
-  String divine=d.getString("DivineName");
-  String[] lines={"Account: "+account,"Divine Name: "+(divine.isEmpty()?"Not bestowed":divine),
-   "Rank: "+d.getString("Rank"),"EP (permanent power): "+d.getLong("Ep"),
-   "Essence (transferable): "+d.getLong("Essence")+" / "+d.getLong("EssenceCap"),
-   "Mana (ability fuel): "+number(snapshot.mana())+" / "+number(snapshot.maxMana()),
-   "Patron bond: "+(d.hasUUID("Patron")?"Active; inspect Divine Bonds":"None"),
-   "Cap policy: "+(d.getBoolean("CapLift")?"Jaycee-authorized lift":"Provisional server configuration"),
-   snapshot.jayceeTest()?"Test access enabled; not supreme Jaycee authority.":"Powers require an earned or explicit server grant."};
-  for(int i=0;i<lines.length;i++)label(g,lines[i],42,124+i*20,452,INK);
-  paragraph(g,snapshot.playerMenuPreview()?
-   "PLAYER MENU PREVIEW: your real authority, powers and balances remain active. Not another player's profile.":
-   "Casting spends mana, never EP. NPC offerings and natural divine promotion are not implemented.",30,380,470,26,MUTED);
  }
  private SkillMagicBrowser browser(){return tab==3?magicBrowser:skillsBrowser;}
  private void species(GuiGraphics g){
@@ -351,8 +404,24 @@ public class JayceeScreen extends Screen {
     String hint=(tab==1?abilityBrowser:browser()).tooltip(x,y,true);
     if(hint!=null){tooltip(g,List.of(Component.literal(hint)),mx,my);return;}
    }
-   if(pass==0&&tab==0&&!ordinary&&!speciesOpen&&x>=382&&x<516&&y>=85&&y<402){
-    tooltip(g,List.of(Component.literal("Titles, race and affinities: unavailable / preview; not live progression")),mx,my);return;
+   if(tab==0&&!speciesOpen){
+    if(pass==0&&x>=106&&x<260&&y>=140&&y<168){
+     var patrons=PatronTheme.retained(StatusData.patrons(snapshot));
+     String affiliation=patrons.isEmpty()?snapshot.divinity().getCompound("PatronProfile").getString("Username"):
+      String.join(", ",patrons.stream().map(PatronTheme.Theme::name).toList());
+     tooltip(g,List.of(Component.literal("Title: "+(StatusData.title(snapshot).isEmpty()?"None":StatusData.title(snapshot))),
+      Component.literal("Patron: "+(affiliation.isEmpty()?"None":affiliation))),mx,my);return;
+    }
+    if(pass==0&&x>=382&&x<516&&y>=85&&y<135){
+     String title=StatusData.title(snapshot);
+     tooltip(g,List.of(Component.literal(title.isEmpty()?"No Title Equipped. Title management is unfinished.":title)),mx,my);return;
+    }
+    if((pass==0&&x>=390&&x<508&&y>=174&&y<220)||(pass==1&&traitsFocus!=null&&traitsFocus.isFocused())){
+     tooltip(g,List.of(Component.literal("Trait: scroll this card or focus and use Page Up / Down.")),mx,my);return;
+    }
+    if((pass==0&&x>=390&&x<508&&y>=270&&y<390)||(pass==1&&affinitiesFocus!=null&&affinitiesFocus.isFocused())){
+     tooltip(g,List.of(Component.literal("Only unlocked affinities. Scroll this card or focus and use Page Up / Down.")),mx,my);return;
+    }
    }
   }
  }
@@ -373,12 +442,26 @@ public class JayceeScreen extends Screen {
   return super.mouseDragged(layout.localX(mx),layout.localY(my),button,dx/layout.scale,dy/layout.scale);
  }
  @Override public boolean mouseScrolled(double mx,double my,double dx,double dy){
+  if(tab==0&&!speciesOpen&&dy!=0){
+   double x=layout.localX(mx),y=layout.localY(my);
+   if(SapphireLayout.statusScrollTarget(x,y)==1){
+    traitScroll=SapphireLayout.scrollOffset(traitScroll,dy<0?12:-12,traitHeight,46);return true;
+   }
+   if(SapphireLayout.statusScrollTarget(x,y)==2){
+    affinityScroll=SapphireLayout.scrollOffset(affinityScroll,dy<0?12:-12,affinityHeight,120);return true;
+   }
+  }
   if(dy!=0&&Screen.hasAltDown()){GameplayActions.pageDelta(dy<0?1:-1);return true;}
   if((tab==2||tab==3)&&browser().scroll(layout.localX(mx),layout.localY(my),dy))return true;
   if(ordinary&&tab==1&&abilityBrowser.scroll(layout.localX(mx),layout.localY(my),dy))return true;
   return super.mouseScrolled(layout.localX(mx),layout.localY(my),dx,dy);
  }
  @Override public boolean keyPressed(int key,int scan,int modifiers){
+  if(tab==0&&!speciesOpen&&(key==org.lwjgl.glfw.GLFW.GLFW_KEY_PAGE_UP||key==org.lwjgl.glfw.GLFW.GLFW_KEY_PAGE_DOWN)){
+   int delta=key==org.lwjgl.glfw.GLFW.GLFW_KEY_PAGE_DOWN?36:-36;
+   if(traitsFocus!=null&&traitsFocus.isFocused()){traitScroll=Math.clamp(traitScroll+delta,0,Math.max(0,traitHeight-46));return true;}
+   if(affinitiesFocus!=null&&affinitiesFocus.isFocused()){affinityScroll=Math.clamp(affinityScroll+delta,0,Math.max(0,affinityHeight-120));return true;}
+  }
   if((tab==2||tab==3)&&browser().keyPressed(key))return true;
   if(ordinary&&tab==1&&abilityBrowser.keyPressed(key))return true;
   return super.keyPressed(key,scan,modifiers);

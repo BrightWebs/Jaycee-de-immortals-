@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 256 256">
+ <defs><linearGradient id="plume" x2=".6" y2="1"><stop stop-color="#91e5d1"/><stop offset=".5" stop-color="#3d8caa"/><stop offset="1" stop-color="#514780"/></linearGradient></defs>
+ <circle cx="128" cy="128" r="104" fill="#151d39" fill-opacity=".62" stroke="#ac9261" stroke-width="2"/><circle cx="128" cy="128" r="97" fill="none" stroke="#e5cb8e"/>
+ <path d="M128 13 135 26 128 39 121 26Z M128 217 135 230 128 243 121 230Z M13 128 26 121 39 128 26 135Z M217 128 230 121 243 128 230 135Z" fill="#d9b875"/>
+ <path d="M54 80 Q37 118 52 160 M202 80 Q219 118 204 160 M61 188 Q82 210 109 212 M195 188 Q174 210 147 212" fill="none" stroke="#ab9267" stroke-width="3"/>
+ <g fill="url(#plume)" stroke="#a2d3bd" stroke-width="1.5">
+ <path d="M125 163 Q98 93 111 58 Q128 33 145 58 Q158 93 131 163Z"/>
+ <path d="M116 163 Q68 127 69 83 Q74 58 96 74 Q120 97 124 161Z M132 161 Q136 97 160 74 Q182 58 187 83 Q188 127 140 163Z"/>
+ <path d="M114 172 Q58 159 48 119 Q46 98 69 108 Q103 124 121 167Z M135 167 Q153 124 187 108 Q210 98 208 119 Q198 159 142 172Z"/>
+ </g>
+ <g fill="#d0b769" stroke="#f4d99e" stroke-width="1.5"><ellipse cx="128" cy="74" rx="12" ry="18"/><ellipse cx="88" cy="94" rx="10" ry="16" transform="rotate(-24 88 94)"/><ellipse cx="168" cy="94" rx="10" ry="16" transform="rotate(24 168 94)"/><ellipse cx="65" cy="125" rx="9" ry="14" transform="rotate(-40 65 125)"/><ellipse cx="191" cy="125" rx="9" ry="14" transform="rotate(40 191 125)"/></g>
+ <g fill="#24436b"><ellipse cx="128" cy="75" rx="6" ry="10"/><ellipse cx="88" cy="95" rx="5" ry="8"/><ellipse cx="168" cy="95" rx="5" ry="8"/><circle cx="65" cy="126" r="5"/><circle cx="191" cy="126" r="5"/></g>
+ <path d="M128 155 Q109 145 111 133 Q113 119 126 123 L140 127 150 131 138 135 Q131 143 141 158 Q152 176 138 194 L128 208 118 194 Q104 175 116 164Z" fill="#6fa4ce" stroke="#d6d7bf" stroke-width="2"/>
+ <circle cx="125" cy="130" r="2.5" fill="#101d39"/>
+ <path d="M119 121 116 111 M125 121 126 109 M131 123 136 113 M117 170 Q128 178 140 169" stroke="#e2c67d" stroke-width="2"/>
+</svg>

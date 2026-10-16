@@ -9,6 +9,7 @@ public final class HudConfig {
     public static final ModConfigSpec SPEC;
     public static final ModConfigSpec.BooleanValue ENABLED;
     public static final ModConfigSpec.BooleanValue SHOW_VANILLA_HEARTS;
+    public static final ModConfigSpec.BooleanValue REDUCED_STATUS_MOTION;
     public static final ModConfigSpec.EnumValue<Anchor> RESOURCE_ANCHOR;
     public static final ModConfigSpec.EnumValue<Anchor> ABILITY_ANCHOR;
     public static final ModConfigSpec.IntValue RESOURCE_X, RESOURCE_Y, ABILITY_X, ABILITY_Y;
@@ -20,6 +21,8 @@ public final class HudConfig {
         builder.push("hud");
         ENABLED = builder.define("enabled", true);
         SHOW_VANILLA_HEARTS = builder.define("showVanillaHearts", false);
+        REDUCED_STATUS_MOTION = builder.comment("Static Status patron symbols and sigil; disables decorative pulsing/orbits.")
+                .define("reducedStatusMotion", false);
         RESOURCE_ANCHOR = builder.defineEnum("resourceAnchor", Anchor.TOP_LEFT);
         ABILITY_ANCHOR = builder.defineEnum("abilityAnchor", Anchor.MIDDLE_RIGHT);
         RESOURCE_X = builder.defineInRange("resourceOffsetX", 8, -4096, 4096);

@@ -118,7 +118,7 @@ public class JayceeScreen extends Screen {
     metricFocus(gradeBadge.x(),gradeBadge.y(),gradeBadge.width(),gradeBadge.height(),"Grade");
     metricFocus(106,105,154,12,"Rank");
     metricFocus(242,382,126,11,"Essence");
-    metricFocus(242,394,126,11,"EP");
+
     metricFocus(43,297,169,12,"Mana");
    }
    if(Minecraft.getInstance().hitResult instanceof net.minecraft.world.phys.EntityHitResult hit&&
@@ -233,7 +233,7 @@ public class JayceeScreen extends Screen {
     case "Grade" -> snapshot.divinity().getString("Grade");
     case "Rank" -> snapshot.divinity().getString("Rank").replace('_',' ');
     case "Essence" -> snapshot.divinity().getLong("Essence")+" reserve; "+snapshot.divinity().getLong("EarnedEssence")+" lifetime earned";
-    case "EP" -> ""+snapshot.divinity().getLong("Ep");
+
     default -> number(snapshot.mana())+" / "+number(snapshot.maxMana());
    };
    String hint=metric+": "+(value.isEmpty()?"Unavailable":value)+
@@ -347,7 +347,7 @@ public class JayceeScreen extends Screen {
    ordinary?(patrons.isEmpty()?"Unblessed / no active deity lineage.":String.join(" / ",patrons.stream().map(PatronTheme.Theme::name).toList())):
    "Traits / evolution: see race",242,344,126,32,MUTED);
   label(g,"Essence: "+divine.getLong("Essence"),242,382,126,MUTED);
-  label(g,"EP: "+divine.getLong("Ep"),242,394,126,MUTED);
+
  }
  private void statusAccent(GuiGraphics g,int x,int y,int w,int color){
   if(!ordinary)return;
@@ -399,8 +399,8 @@ public class JayceeScreen extends Screen {
   panel(g,20,178,496,179,"Species / Evolution");
   label(g,"Human  >  Demigod  >  Divine",44,221,448,INK);
   paragraph(g,"Design preview only; no live race or evolution data is available.",44,246,448,24,MUTED);
-  paragraph(g,"Jaycee's 3-billion EP requirement is not implemented progression.",44,278,448,24,MUTED);
-  paragraph(g,"EP is separate from HP, SP and mana.",44,310,448,24,MUTED);
+  paragraph(g,"Divine power progresses through earned Essence.",44,278,448,24,MUTED);
+  paragraph(g,"Essence progression is separate from HP, SP and mana.",44,310,448,24,MUTED);
  }
  private void quests(GuiGraphics g){
   DivineFrame.sapphire(g,76,158,384,166,false);

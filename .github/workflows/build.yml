@@ -1,7 +1,7 @@
 name: Build NeoForge 1.21.1
 on:
   push:
-    branches: [main, "integration/**"]
+    branches: [main, "integration/**", "fix/**"]
   pull_request:
   workflow_dispatch:
 jobs:

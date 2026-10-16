@@ -129,7 +129,7 @@ final class DivineBondsScreen extends Screen {
             initMobBestowal();
         } else if (tab == 1) {
             var amountBounds = MobBestowalUi.PLAYER_AMOUNT;
-            amountBox = new EditBox(font, amountBounds.x(), amountBounds.y(), amountBounds.width(), amountBounds.height(), Component.literal("Essence to transfer, not EP"));
+            amountBox = new EditBox(font, amountBounds.x(), amountBounds.y(), amountBounds.width(), amountBounds.height(), Component.literal("Essence to transfer"));
             amountBox.setMaxLength(19); amountBox.setValue(amount);
             amountBox.setFilter(s -> s.matches("[0-9]*"));
             amountBox.setResponder(s -> { amount = s; invalidateMobQuote(); }); addRenderableWidget(amountBox);
@@ -356,7 +356,7 @@ final class DivineBondsScreen extends Screen {
         nameBox.setMaxLength(48); nameBox.setValue(name);
         nameBox.setResponder(s -> { name = s; invalidateMobQuote(); }); addRenderableWidget(nameBox);
         var amountBounds = MobBestowalUi.MOB_AMOUNT;
-        amountBox = new EditBox(font, amountBounds.x(), amountBounds.y(), amountBounds.width(), amountBounds.height(), Component.literal("Essence to transfer, not EP"));
+        amountBox = new EditBox(font, amountBounds.x(), amountBounds.y(), amountBounds.width(), amountBounds.height(), Component.literal("Essence to transfer"));
         amountBox.setMaxLength(19); amountBox.setValue(amount); amountBox.setFilter(s -> s.matches("[0-9]*"));
         amountBox.setResponder(s -> { amount = s; invalidateMobQuote(); }); addRenderableWidget(amountBox);
         amountControls(amountBounds);
@@ -473,7 +473,7 @@ final class DivineBondsScreen extends Screen {
             lines.add("Earned Essence: " + p.getLong("EarnedEssence") + "; next level: " +
                 p.getLong("LevelProgress") + " / " + p.getLong("LevelRequired"));
         }
-        lines.add("EP: " + p.getLong("Ep") + " — permanent power");
+
         lines.add("Essence: " + p.getLong("Essence") + " — transferable reserve");
         lines.add("Patron: " + (p.hasUUID("Patron") ? p.getUUID("Patron") : "None"));
         lines.add("Release request: " + (p.getString("Release").isEmpty() ? "None" : p.getString("Release")));
@@ -497,7 +497,7 @@ final class DivineBondsScreen extends Screen {
         if (!mobEligibility(p).isEmpty()) lines.add("Eligibility: " + mobEligibility(p));
         lines.add(MobBestowalUi.healthLabel(p.getString("Status"), p.getBoolean("TerminalRemoval")) +
             ": " + p.getFloat("Health") + " / " + p.getFloat("MaxHealth"));
-        lines.add("EP: " + p.getLong("Ep") + " — not consumed");
+
         lines.add("Rank: " + p.getString("Rank"));
         lines.add("Master: " + (p.getBoolean("MasterHidden") ? "Concealed" :
             p.getString("MasterName").isEmpty() ? "None" : p.getString("MasterName")));
@@ -519,7 +519,7 @@ final class DivineBondsScreen extends Screen {
         var t = data().getCompound("MobTarget"); var p = inspectedMobPower();
         if (selection != null && !id(t).equals(selection)) return List.of(
             "Waiting for selected mob's server profile and compatible power list.",
-            "No resources are spent by selecting a mob. EP conversion and evolution rules are unavailable.");
+            "Selecting a mob costs no Essence; evolution uses separate rules.");
         lines.add(t.isEmpty() ? "Select a mob first." : "Recipient: " + title(t));
         if (!mobEligibility(t).isEmpty()) lines.add("Eligibility: " + mobEligibility(t));
         String bindingReason = t.getString("BindingReason");
@@ -555,7 +555,7 @@ final class DivineBondsScreen extends Screen {
         } else lines.add("No matching reviewed quote. Changes invalidate confirmation; request a new server quote.");
         if (!(state().supreme() || data().getBoolean("Bestow")))
             lines.add("Requires Minor God+ bestowal privileges or unique Jaycee authority.");
-        lines.add("EP is never consumed. No EP conversion or evolution rules are available.");
+        lines.add("Essence gifting does not automatically evolve the target.");
         lines.add("No client-created powers or levels. Unsupported entities/powers are not universally compatible.");
         lines.add("Resource development: unavailable — no offering or evolution action is implemented.");
         return lines;
@@ -564,7 +564,7 @@ final class DivineBondsScreen extends Screen {
         if (tab == 0) {
             var lines = profileLines(data());
             lines.add("Essence maximum: " + data().getLong("EssenceCap") + "; refill " + data().getLong("EssenceRegen") + "/second while online.");
-            lines.add("EP cap: " + data().getLong("EpCap") + ". Cap field and ordinary fees are provisional server tuning, not settled canon.");
+
             lines.add("Mana is independent. Bestowal never deducts EP. /jc debug jayceetest is not sovereign authority.");
             return lines;
         }
@@ -583,7 +583,7 @@ final class DivineBondsScreen extends Screen {
             lines.add("Proposed Divine Name: " + (o.getString("Name").isEmpty() ? "Unchanged" : o.getString("Name")));
             lines.add("Subordinate binding: " + (o.getBoolean("Bind") ? "YES — acceptance creates a patron bond" : "NO"));
             lines.add("Expires at epoch milliseconds: " + o.getLong("Expires"));
-            lines.add("Accept rechecks funds, ownership, mastery, proximity and visibility. One acceptance only. No EP or mana is spent.");
+            lines.add("Accept rechecks funds, ownership, mastery, proximity and visibility. One acceptance only. Mana is not spent.");
             return lines;
         }
         var lines = profileLines(selected());
@@ -596,7 +596,7 @@ final class DivineBondsScreen extends Screen {
         if (tab == 4 && isMob(selected())) {
             lines.add("Mob record only. Player adjudication, consent and release operations do not apply.");
             lines.add("Resource development unavailable. No client or server chunk loading is requested.");
-        } else if (tab == 4) lines.add(state().supreme() ? "Confirm decisions explicitly. Cap revocation never erases earned EP." :
+        } else if (tab == 4) lines.add(state().supreme() ? "Confirm decisions explicitly. Cap revocation never erases earned Essence." :
             "Dominion adjudication is restricted to the unique Jaycee authority.");
         return lines;
     }
@@ -671,7 +671,7 @@ final class DivineBondsScreen extends Screen {
         var target = data().getCompound("Target");
         UiText.line(g, target.isEmpty() ? "No target — choose a nearby player" : "Account: " + target.getString("Username"), 274, 102, 388, .9f, INK, false);
         UiText.line(g, target.isEmpty() ? "Opening never transfers resources." : "UUID: " + id(target), 274, 122, 388, .7f, MUTED, false);
-        UiText.line(g, "Transfer Essence (not EP) · available " + data().getLong("Essence"), 274, 145, 388, .8f, INK, false);
+        UiText.line(g, "Transfer Essence · available " + data().getLong("Essence"), 274, 145, 388, .8f, INK, false);
         UiText.line(g, "Owned, implemented power — none is allowed", 274, 182, 388, .8f, MUTED, false);
         UiText.line(g, "Optional name · unchanged suggestion keeps current name", 274, 218, 388, .8f, MUTED, false);
         var summary = playerQuoteSummary();
@@ -685,7 +685,7 @@ final class DivineBondsScreen extends Screen {
             "Name: " + (networkName().isEmpty() ? "Unchanged" : networkName()) + " · bond " + bind,
             "Bless sends an offer; the recipient must accept. Cancel spends nothing.") :
             List.of("No matching quote. Choose target, edit terms, then request a quote.",
-                "Fees/caps are provisional server tuning. EP is never charged.",
+                "Fees/caps are provisional server tuning. Essence costs are reviewed first.",
                 state().supreme() || data().getBoolean("Bestow") ? "A quote spends nothing." : "Bestowal requires Minor God+ privileges or unique Jaycee authority.");
     }
     private int wrapped(GuiGraphics g, List<String> text, MobBestowalUi.Rect r, int scroll) {
@@ -739,7 +739,7 @@ final class DivineBondsScreen extends Screen {
         mobInfoOffset = wrapped(g, waiting ? List.of("Waiting for selected mob's server profile.") : mobProfileLines(target),
             MobBestowalUi.INFO, mobInfoOffset);
         UiText.line(g, "Optional name · unchanged = keep", 234, 232, 222, .73f, MUTED, false);
-        UiText.line(g, "Essence, not EP · available " + data().getLong("Essence"), 234, 267, 222, .75f, INK, false);
+        UiText.line(g, "Essence · available " + data().getLong("Essence"), 234, 267, 222, .75f, INK, false);
         UiText.line(g, "Owned powers · scroll · selected: " + (ability.isEmpty() ? "None" : abilityName(ability)),
             234, 331, 222, .7f, MUTED, false);
         if (!bind) {

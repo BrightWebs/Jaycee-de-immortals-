@@ -16,5 +16,5 @@ public class JayceeClient {
  public static final KeyMapping OPEN=new KeyMapping("key.jaycee.open",InputConstants.Type.KEYSYM,GLFW.GLFW_KEY_M,"key.categories.jaycee");
  @SubscribeEvent public static void register(RegisterKeyMappingsEvent e){e.register(OPEN);e.register(BESTOW);}
  @EventBusSubscriber(modid=JayceeMod.ID,value=net.neoforged.api.distmarker.Dist.CLIENT)
- public static class Tick { @SubscribeEvent public static void tick(ClientTickEvent.Post e){while(BESTOW.consumeClick()) DivineBestowalScreen.openForTarget();while(OPEN.consumeClick()){Minecraft mc=Minecraft.getInstance();if(mc.player!=null){if(JayceeMod.unlocked(mc.player))mc.setScreen(new JayceeScreen());else mc.player.displayClientMessage(net.minecraft.network.chat.Component.literal("Consume 3 Jayce's Essences to unlock"),true);}}}}
+ public static class Tick { @SubscribeEvent public static void tick(ClientTickEvent.Post e){while(BESTOW.consumeClick()) DivineBestowalScreen.openForTarget();while(OPEN.consumeClick()){Minecraft mc=Minecraft.getInstance();if(mc.player!=null){mc.setScreen(new JayceeScreen());}}}}
 }

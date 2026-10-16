@@ -21,6 +21,7 @@ public final class DivinityService {
         ModList.get().getModContainerById("jaycee").orElseThrow()
             .registerConfig(ModConfig.Type.SERVER, DivinityConfig.SPEC, "jaycee-divinity-server.toml");
         NeoForge.EVENT_BUS.addListener(DivinityService::commands);
+        MobDivinityService.register();
     }
     public static DivinityModel model(ServerPlayer p) { return DivinitySavedData.get(p.server).model; }
     private static long now() { return System.currentTimeMillis(); }
@@ -84,6 +85,7 @@ public final class DivinityService {
         var data = DivinitySavedData.get(p.server); var m = data.model; var id = p.getUUID();
         CompoundTag tag = ownMirror(p);
         var session = data.session(id);
+        if (session.profileResponse != null) tag.putUUID("ProfileResponse", session.profileResponse);
         tag.putString("Result", session.result);
         var nearby = new ListTag();
         nearby(p).forEach(target -> nearby.add(view(m.view(id, target.getUUID()))));
@@ -127,6 +129,7 @@ public final class DivinityService {
             draft.putBoolean("Bind", session.draft.bind()); draft.putUUID("Target", session.draft.recipient());
             tag.put("Quote", draft);
         }
+        MobDivinityService.snapshot(p, tag, session);
         return tag;
     }
     private static CompoundTag view(DivinityModel.View v) {
@@ -152,12 +155,16 @@ public final class DivinityService {
             && from.hasLineOfSight(to) && to.hasLineOfSight(from);
     }
     private static List<ServerPlayer> nearby(ServerPlayer p) {
-        return p.server.getPlayerList().getPlayers().stream().filter(t -> reachable(p, t))
-            .sorted(Comparator.comparingDouble(p::distanceToSqr)).limit(20).toList();
+        return playerCandidates(p).stream().limit(20).toList();
     }
-    private static ServerPlayer lookingAt(ServerPlayer p) {
+    private static List<ServerPlayer> playerCandidates(ServerPlayer p) {
+        return p.server.getPlayerList().getPlayers().stream().filter(t -> reachable(p, t))
+            .sorted(Comparator.comparingDouble(p::distanceToSqr)).toList();
+    }
+    private static net.minecraft.world.entity.LivingEntity lookingAt(ServerPlayer p) {
         Vec3 eye = p.getEyePosition(), end = eye.add(p.getLookAngle().scale(model(p).config().distance()));
-        return nearby(p).stream().filter(t -> t.getBoundingBox().inflate(0.2).clip(eye, end).isPresent())
+        return java.util.stream.Stream.concat(playerCandidates(p).stream(), MobDivinityService.candidates(p).stream())
+            .filter(t -> t.getBoundingBox().inflate(0.2).clip(eye, end).isPresent())
             .min(Comparator.comparingDouble(t -> t.getBoundingBox().inflate(0.2).clip(eye, end).orElse(end).distanceToSqr(eye)))
             .orElse(null);
     }
@@ -169,14 +176,20 @@ public final class DivinityService {
         try {
             if (r.amount() < 0 || r.ability().length() > 128 || !DivinityModel.validName(r.name()))
                 throw new IllegalArgumentException("Invalid bestowal input");
-            switch (r.operation()) {
+            if (!MobDivinityService.handle(p, r, session)) switch (r.operation()) {
                 case "profile" -> {
+                    MobDivinityService.clear(p, session);
                     var target = lookingAt(p);
-                    session.target = target == null ? null : target.getUUID();
-                    session.result = target == null ? "Choose a nearby player. No automatic transfer." : "Target profile requested. No resources spent.";
+                    if (target instanceof ServerPlayer) session.target = target.getUUID();
+                    else if (target != null) session.mobTarget = target.getUUID();
+                    session.result = target == null ? "Choose a nearby player or mob. No automatic transfer." : "Target profile requested. No resources spent.";
+                    if (target instanceof net.minecraft.world.entity.Mob mob && !MobPowerAdapters.eligibility(mob).isEmpty())
+                        session.result = MobPowerAdapters.eligibility(mob) + ". Inspection only; no resources spent.";
+                    session.profileResponse = r.nonce();
                 }
                 case "refresh" -> {}
                 case "select" -> {
+                    MobDivinityService.clear(p, session);
                     var target = p.server.getPlayerList().getPlayer(r.target());
                     if (!reachable(p, target) && !m.followers(p.getUUID()).stream().anyMatch(f -> f.id().equals(r.target()))
                             && !(m.supreme(p.getUUID()) && m.profile(r.target()).release() == DivinityModel.Release.PETITIONED))

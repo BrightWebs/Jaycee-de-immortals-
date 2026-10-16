@@ -52,6 +52,174 @@ public final class DivinityModel {
     private final Deque<Audit> audit = new ArrayDeque<>();
     private UUID authority;
     private int carry;
+    public record MobContext(UUID id, String type, String dimension, int entityId, UUID tameOwner) {}
+    public record MobProfile(UUID id, String type, String dimension, String original, String customName,
+                             String divineName, float health, float maxHealth, long ep, long essence,
+                             long received, UUID master, Map<String, String> grants, String status) {
+        public MobProfile {
+            Objects.requireNonNull(id); Objects.requireNonNull(type); Objects.requireNonNull(dimension);
+            grants = Map.copyOf(grants);
+            if (ep < 0 || essence < 0 || received < 0 || !validName(divineName)
+                    || !Set.of("active", "unloaded", "deceased", "removed").contains(status))
+                throw new IllegalArgumentException("Invalid mob profile");
+        }
+    }
+    public record MobQuote(UUID id, Proposal proposal, MobContext context, MobProfile before,
+                           Profile donorBefore, boolean supreme, long fee, long expires) {
+        public long total() { return Math.addExact(fee, proposal.amount()); }
+        public long balanceAfter() { return donorBefore.essence() - total(); }
+        public long recipientAfter() { return Math.addExact(before.essence(), proposal.amount()); }
+    }
+    private final Map<UUID, MobProfile> mobs = new LinkedHashMap<>();
+    private final Map<UUID, MobQuote> mobQuotes = new HashMap<>();
+    private final Map<UUID, MobContext> liveMobs = new HashMap<>();
+    private final Map<UUID, String> terminalMobs = new HashMap<>();
+    public List<MobProfile> mobs() { return List.copyOf(mobs.values()); }
+    public MobProfile mob(UUID id) { return mobs.get(id); }
+    public void restoreMobs(Collection<MobProfile> values) {
+        mobs.clear(); values.forEach(p -> mobs.put(p.id(), p)); mobQuotes.clear();
+        liveMobs.clear(); terminalMobs.clear();
+    }
+    public Map<UUID, String> mobRemovals() { return Map.copyOf(terminalMobs); }
+    public String mobRemoval(UUID id) { return terminalMobs.getOrDefault(id, ""); }
+    public void restoreMobRemovals(Map<UUID, String> removals) {
+        terminalMobs.clear();
+        removals.forEach((id, reason) -> {
+            var p = mobs.get(id);
+            if (p != null) {
+                terminalMobs.put(id, reason);
+                mobs.put(id, mobStatus(p, reason.equals("KILLED") ? "deceased" : "removed"));
+            }
+        });
+    }
+    private static MobProfile mobStatus(MobProfile p, String status) {
+        return new MobProfile(p.id(), p.type(), p.dimension(), p.original(), p.customName(), p.divineName(),
+            p.health(), p.maxHealth(), p.ep(), p.essence(), p.received(), p.master(), p.grants(), status);
+    }
+    public void joinMob(MobProfile observed, MobContext context) {
+        var old = mobs.get(observed.id());
+        if (old == null || Set.of("deceased", "removed").contains(old.status()) || terminalMobs.containsKey(old.id())
+                || !old.id().equals(context.id()) || !old.type().equals(context.type())
+                || !old.type().equals(observed.type()) || !observed.dimension().equals(context.dimension())) return;
+        var previous = liveMobs.put(old.id(), context);
+        if (previous != null && !sameIncarnation(context, previous))
+            mobQuotes.values().removeIf(q -> q.proposal().recipient().equals(old.id()));
+        applyObservation(old, observed);
+    }
+    public boolean liveMob(MobContext context) { return sameIncarnation(context, liveMobs.get(context.id())); }
+    private static boolean sameIncarnation(MobContext a, MobContext b) {
+        return b != null && a.id().equals(b.id()) && a.type().equals(b.type())
+            && a.dimension().equals(b.dimension()) && a.entityId() == b.entityId();
+    }
+    public boolean observeMob(MobProfile observed, MobContext context) {
+        if (!liveMob(context)) return false;
+        observeMob(observed);
+        return true;
+    }
+    public boolean leaveMob(MobProfile observed, MobContext context, String removalReason, boolean terminal) {
+        if (!liveMob(context)) return false;
+        observeMob(observed);
+        liveMobs.remove(observed.id());
+        mobQuotes.values().removeIf(q -> q.proposal().recipient().equals(observed.id()));
+        if (terminal) {
+            terminalMobs.put(observed.id(), removalReason);
+            mobs.put(observed.id(), mobStatus(mobs.get(observed.id()), removalReason.equals("KILLED") ? "deceased" : "removed"));
+        }
+        return true;
+    }
+    /** Lifecycle observations update existing ledger entries only; inspection never creates one. */
+    public void observeMob(MobProfile observed) {
+        var old = mobs.get(observed.id());
+        if (old == null || !old.type().equals(observed.type())) return;
+        if (!old.dimension().equals(observed.dimension()) || terminalMobs.containsKey(old.id())
+                || Set.of("deceased", "removed").contains(old.status()) && !observed.status().equals(old.status())) return;
+        applyObservation(old, observed);
+    }
+    private void applyObservation(MobProfile old, MobProfile observed) {
+        mobs.put(old.id(), new MobProfile(old.id(), old.type(), observed.dimension(), old.original(),
+            observed.customName(), old.divineName(), observed.health(), observed.maxHealth(), old.ep(),
+            old.essence(), old.received(), old.master(), old.grants(), observed.status()));
+    }
+    public void clearMobQuote(UUID donor) { mobQuotes.remove(donor); }
+    public MobQuote mobQuote(UUID donor, long now) {
+        var q = mobQuotes.get(donor);
+        if (q != null && q.expires() <= now) { mobQuotes.remove(donor); return null; }
+        return q;
+    }
+    public long mobFee(Proposal s, MobProfile recipient, MobContext context, boolean compatible) {
+        var donor = profile(s.donor());
+        if (profiles.containsKey(s.recipient()) || !s.recipient().equals(recipient.id())
+                || !context.id().equals(recipient.id()) || !context.type().equals(recipient.type())
+                || !context.dimension().equals(recipient.dimension()) || !recipient.status().equals("active")
+                || terminalMobs.containsKey(recipient.id()))
+            fail("A live non-player mob in the selected world is required");
+        if (context.tameOwner() != null && !context.tameOwner().equals(donor.id()))
+            fail("Another player's pet requires its owner's consent; mob consent is not implemented");
+        if (!compatible) fail("No safe registered adapter for this mob or power");
+        if (s.bind() && !mobBindingReason(context.type()).isEmpty()) fail(mobBindingReason(context.type()));
+        if (!supreme(donor.id()) && (!donor.bestow() || donor.rank().ordinal() < Rank.MINOR_GOD.ordinal()))
+            fail("Bestowal requires Minor God rank and bestowal privileges");
+        if (s.amount() == 0 && s.ability().isEmpty() && s.name().isEmpty() && !s.bind())
+            fail("Choose Essence, an owned power, a name, or binding");
+        if (s.bind() && recipient.master() != null) fail("Mob already has a divine master");
+        if (!s.bind() && !supreme(donor.id()) && !donor.id().equals(recipient.master()))
+            fail("Bind a new subordinate explicitly, or select your own subordinate");
+        if (!s.ability().isEmpty() && (!owns(donor.id(), s.ability()) || recipient.grants().containsKey(s.ability())))
+            fail("Power must be owned, implemented, and not already granted");
+        long fee = supreme(donor.id()) ? 0 : Math.addExact(s.bind() ? establishmentFee(recipient.essence()) : 0,
+            s.ability().isEmpty() ? 0 : config.powerFee());
+        if (Math.addExact(fee, s.amount()) > donor.essence()) fail("Insufficient Essence including fees");
+        if (s.amount() > Math.max(0, config.essenceCap() - recipient.essence()))
+            fail("Recipient Essence cap would be exceeded");
+        Math.addExact(recipient.received(), s.amount());
+        return fee;
+    }
+    public static String mobBindingReason(String type) {
+        return Set.of("minecraft:wandering_trader", "minecraft:trader_llama").contains(type)
+            ? "Binding unavailable: this species has a separate scripted despawn timer; no verified 1.21.1 persistence adapter is registered. Inspection and unbound gifts remain supported."
+            : "";
+    }
+    public MobQuote quoteMob(Proposal s, MobProfile observed, MobContext context, boolean compatible, long now) {
+        clearMobQuote(s.donor());
+        var stored = mobs.get(s.recipient());
+        var before = stored == null ? observed : stored;
+        long fee = mobFee(s, before, context, compatible);
+        var q = new MobQuote(UUID.randomUUID(), s, context, before, profile(s.donor()), supreme(s.donor()),
+            fee, Math.addExact(now, 30_000));
+        mobQuotes.put(s.donor(), q);
+        return q;
+    }
+    public MobProfile confirmMob(UUID donorId, UUID nonce, MobContext context, boolean reachable,
+                                  boolean compatible, long now) {
+        var q = mobQuotes.remove(donorId); // Every confirmation attempt consumes its nonce.
+        if (q == null || !q.id().equals(nonce) || q.expires() <= now) fail("Mob quote expired or already used");
+        if (!reachable || !q.context().equals(context)) fail("Mob moved, changed owner/world, or is no longer visible");
+        var s = q.proposal(); var before = mobs.getOrDefault(s.recipient(), q.before());
+        var currentDonor = profile(donorId);
+        // Incoming credits cannot worsen the quoted balance floor. Revalidate ownership in
+        // mobFee, not unrelated profile observations, EP awards or presentation names.
+        if (!sameMobTerms(before, q.before()) || currentDonor.essence() < q.donorBefore().essence()
+                || currentDonor.rank() != q.donorBefore().rank() || currentDonor.bestow() != q.donorBefore().bestow()
+                || supreme(donorId) != q.supreme() || mobFee(s, before, context, compatible) != q.fee())
+            fail("Quote terms changed; request a fresh quote");
+        var grants = new HashMap<>(before.grants());
+        if (!s.ability().isEmpty()) grants.put(s.ability(), donorId.toString());
+        var after = new MobProfile(before.id(), before.type(), before.dimension(), before.original(), before.customName(),
+            s.name().isEmpty() ? before.divineName() : s.name(), before.health(), before.maxHealth(), before.ep(),
+            q.recipientAfter(), Math.addExact(before.received(), s.amount()),
+            s.bind() ? donorId : before.master(), grants, "active");
+        var donor = currentDonor;
+        put(donor, donor.divineName(), donor.rank(), donor.ep(), donor.essence() - q.total(), donor.capLift(), donor.bestow(),
+            donor.patron(), donor.npcPatrons(), donor.grants(), donor.release());
+        mobs.put(after.id(), after);
+        liveMobs.put(after.id(), context);
+        log(now, donorId, after.id(), "Mob bestowal " + q.id() + "; Essence " + s.amount() + "; burned fee " + q.fee());
+        return after;
+    }
+    private static boolean sameMobTerms(MobProfile a, MobProfile b) {
+        return a.id().equals(b.id()) && a.type().equals(b.type()) && a.dimension().equals(b.dimension())
+            && a.essence() == b.essence() && Objects.equals(a.master(), b.master()) && a.grants().equals(b.grants());
+    }
     public DivinityModel(Config config, Set<String> abilities) {
         this.config = Objects.requireNonNull(config); this.abilities = Set.copyOf(abilities);
     }
@@ -81,10 +249,16 @@ public final class DivinityModel {
         UUID old = authority;
         authority = id; carry = 0;
         offers.clear();
+        mobQuotes.clear();
         log(now, id, old, "Operator changed unique Jaycee authority; pending offers canceled");
     }
     public boolean owns(UUID id, String ability) {
         return abilities.contains(ability) && (supreme(id) || profile(id).grants.containsKey(ability));
+    }
+    public boolean authorizedMobPower(UUID id, String ability, int masteryLevel) {
+        if (!owns(id, ability)) return false;
+        var donor = profile(id);
+        return supreme(id) || donor.bestow() && donor.rank().ordinal() >= Rank.MINOR_GOD.ordinal() && masteryLevel >= 1;
     }
     public void adminGrant(UUID id, String ability, boolean granted, long now) {
         if (!abilities.contains(ability)) fail("Only implemented registered abilities may be granted");
@@ -226,6 +400,7 @@ public final class DivinityModel {
         for (var o : expired) { offers.remove(o.id); log(now, o.proposal.donor, o.proposal.recipient, "Offer expired " + o.id); }
     }
     public void disconnect(UUID id, long now) {
+        clearMobQuote(id);
         for (var o : List.copyOf(offers.values())) if (o.proposal.donor.equals(id) || o.proposal.recipient.equals(id)) {
             offers.remove(o.id); log(now, id, o.proposal.recipient, "Offer canceled: player offline");
         }
@@ -289,6 +464,8 @@ public final class DivinityModel {
     public Image image() { return new Image(authority, List.copyOf(profiles.values()), List.copyOf(offers.values()), List.copyOf(audit), carry); }
     public void restore(Image image, long now) {
         profiles.clear(); offers.clear(); audit.clear();
+        mobQuotes.clear();
+        liveMobs.clear();
         for (var p : image.profiles) profiles.put(p.id, p);
         authority = profiles.containsKey(image.authority) ? image.authority : null;
         carry = Math.clamp(image.carry, 0, 19);

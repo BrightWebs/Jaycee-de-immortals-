@@ -14,7 +14,8 @@ public final class DivinitySavedData extends SavedData {
         AbilityCatalog.registered().stream().filter(AbilityCatalog.Art::implemented).map(AbilityCatalog.Art::id).collect(Collectors.toSet()));
     final Map<UUID, Session> sessions = new HashMap<>();
     static final class Session {
-        UUID target, draftId;
+        UUID target, mobTarget, draftId;
+        UUID profileResponse;
         DivinityModel.Proposal draft;
         long draftFee, draftExpiry, rateTick;
         int requests;
@@ -57,12 +58,32 @@ public final class DivinitySavedData extends SavedData {
         }
         data.model.restore(new DivinityModel.Image(tag.hasUUID("Authority") ? tag.getUUID("Authority") : null,
             profiles, offers, audit, tag.getInt("Carry")), System.currentTimeMillis());
+        var mobs = new ArrayList<DivinityModel.MobProfile>();
+        for (Tag value : tag.getList("Mobs", Tag.TAG_COMPOUND)) {
+            var t = ((CompoundTag)value).copy();
+            if (!Set.of("deceased", "removed").contains(t.getString("Status"))) t.putString("Status", "unloaded");
+            mobs.add(MobDivinityTags.read(t));
+        }
+        data.model.restoreMobs(mobs);
+        var removals = new HashMap<UUID, String>();
+        for (Tag value : tag.getList("MobRemovals", Tag.TAG_COMPOUND)) {
+            var t = (CompoundTag)value;
+            if (t.hasUUID("Id")) removals.put(t.getUUID("Id"), t.getString("Reason"));
+        }
+        data.model.restoreMobRemovals(removals);
         data.setDirty();
         return data;
     }
     @Override public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
         var image = model.image();
-        tag.putInt("Version", 1);
+        tag.putInt("Version", 3);
+        var mobs = new ListTag(); model.mobs().forEach(p -> mobs.add(MobDivinityTags.write(p)));
+        tag.put("Mobs", mobs);
+        var removals = new ListTag();
+        model.mobRemovals().forEach((id, reason) -> {
+            var t = new CompoundTag(); t.putUUID("Id", id); t.putString("Reason", reason); removals.add(t);
+        });
+        tag.put("MobRemovals", removals);
         if (image.authority() != null) tag.putUUID("Authority", image.authority());
         tag.putInt("Carry", image.carry());
         var profiles = new ListTag();

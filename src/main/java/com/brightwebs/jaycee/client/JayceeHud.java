@@ -95,8 +95,7 @@ public final class JayceeHud {
             drawResources(graphics, resources.x(), resources.y(), state);
             healthBarRendered = true;
             String page = "PAGE " + (state.page() + 1) + "/" + PlayerState.PAGES;
-            graphics.drawString(mc.font, page,
-                    abilities.x() + (SLOT_WIDTH - mc.font.width(page)) / 2, abilities.y(), 0xFFC4B6D9, true);
+            UiText.line(graphics, page, abilities.x()+4, abilities.y(), SLOT_WIDTH-8, 1f, 0xFFC4B6D9, true);
             for (int slot = 0; slot < 4; slot++) {
                 drawSlot(graphics, abilities.x(), abilities.y() + 12 + slot * 40, slot, state, seconds);
             }
@@ -121,9 +120,10 @@ public final class JayceeHud {
                                 double current, double maximum, int color, boolean trail) {
         var font = Minecraft.getInstance().font;
         String value = amount(current) + "/" + amount(maximum);
-        graphics.drawString(font, font.plainSubstrByWidth(label, Math.max(0, 122 - font.width(value))),
-                x, y, color, false);
-        graphics.drawString(font, value, x + 126 - font.width(value), y, 0xFFE8E4F0, false);
+        value=UiText.fit(value,94,1f);
+        int valueWidth=font.width(value);
+        UiText.line(graphics,label,x,y,122-valueWidth,1f,color,false);
+        UiText.line(graphics,value,x+126-valueWidth,y,valueWidth,1f,0xFFE8E4F0,false);
         int top = y + 10;
         graphics.fill(x, top, x + 126, top + 4, 0xFF211D30);
         if (trail) graphics.fill(x, top, x + (int) (126 * motion.trail()), top + 4, 0xFFDBA4A3);
@@ -155,10 +155,10 @@ public final class JayceeHud {
         int border = blend(0xFF514D6B, 0xFF8CCCB4, ready[slot]);
         border = blend(border, 0xFFA97DDD, activation[slot]);
         panel(graphics, x, y, SLOT_WIDTH, SLOT_HEIGHT, border);
-        graphics.drawString(mc.font, keyLabels.apply(slot), x + 4, y + 4, 0xFFE7DFEF, false);
+        UiText.line(graphics,UiText.keyLabel(keyLabels.apply(slot),20),x+4,y+4,20,1f,0xFFE7DFEF,false);
         if (art == null) {
             graphics.fill(x + 5, y + 16, x + 23, y + 17, 0xFF625B78);
-            graphics.drawString(mc.font, "Empty", x + 29, y + 15, 0xFF928A9D, false);
+            UiText.line(graphics,"Empty",x+29,y+15,SLOT_WIDTH-34,1f,0xFF928A9D,false);
             return;
         }
         AbilityIcons.render(graphics, art, x + 5, y + 15, 18, false);
@@ -168,11 +168,11 @@ public final class JayceeHud {
         }
         String status = !art.implemented() ? "Preview" : cooldown > 0
                 ? String.format(java.util.Locale.ROOT, "%.1fs", cooldown / 20.0) : "Ready";
-        graphics.drawString(mc.font, status, x + 29, y + 4, cooldown > 0 ? 0xFFC1A7E8 : 0xFF9BCCB8, false);
+        UiText.line(graphics,status,x+29,y+4,SLOT_WIDTH-34,1f,cooldown>0?0xFFC1A7E8:0xFF9BCCB8,false);
         String mode = art.modes().isEmpty() ? "—" : art.modes().get(Math.clamp(state.mode(state.page(), slot), 0, art.modes().size() - 1));
-        graphics.drawString(mc.font, mc.font.plainSubstrByWidth(mode, SLOT_WIDTH - 31), x + 29, y + 16, 0xFFE0D7EF, false);
+        UiText.line(graphics,mode,x+29,y+16,SLOT_WIDTH-34,1f,0xFFE0D7EF,false);
         String cost = java.math.BigDecimal.valueOf(art.manaCost()).stripTrailingZeros().toPlainString() + " MP";
-        graphics.drawString(mc.font, mc.font.plainSubstrByWidth(cost, SLOT_WIDTH - 31), x + 29, y + 27, 0xFF8BB9EB, false);
+        UiText.line(graphics,cost,x+29,y+26,SLOT_WIDTH-34,1f,0xFF8BB9EB,false);
     }
 
     private static void panel(GuiGraphics graphics, int x, int y, int width, int height, int border) {

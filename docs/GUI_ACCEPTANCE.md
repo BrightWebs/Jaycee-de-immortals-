@@ -28,6 +28,12 @@
 Actual supplied artwork is required to establish exact geometry and colors. If those images are missing, don't invent a supposedly exact recreation.
 
 ## HUD/resource regression checklist (not yet runtime-verified)
+- Text-spacing pass: verify all five navigation labels share the same pixel font size and baseline, centered below their icons. Check focused/hovered tabs too.
+- Inspect Status headings, player names, largest resource/attribute values, racial-trait text, affinity rows, species descriptions and Back to Status. Confirm no text touches corner filigree or dividers; read long descriptions as wrapped text rather than a squeezed font.
+- On Abilities/Magic, inspect every category and art row with resource-pack icons. On Skills, ensure all four tier numbers remain visible. Check every Quest heading and footer.
+- Check equipment in empty, implemented and preview states on all ten pages, including selector **10**. Numbers 1–4 and Empty/Equipped/Preview sit above their frames; names sit below icons with measured ellipsis, and full names/modes/bindings remain in tooltips/narration.
+- Rebind HUD slots to left/right Shift, Control, Alt and mouse buttons. Check compact hotkey labels remain distinguishable, modes/costs stay inside slots, and large mana-regeneration/resource values do not collide. Full binding names are available in Sapphire slot tooltips/narration.
+- Repeat text checks at window sizes 1920×1080, 1438×874, 1280×720, 854×480 and 640×360 with GUI scales 1–4 where Minecraft allows them. Open tooltips near each edge; confirm wrapping stays on-screen. Isolated coordinate checks cover those dimensions, but do not establish rendered readability at very small scales.
 - Start a clean Java 21 / NeoForge 21.1.172 client and a separate dedicated server. Confirm the server never loads client rendering classes.
 - Consume three essences on the server; confirm M opens immediately, then confirm unlock survives death and reconnect.
 - Check all four empty slots at middle-right. Rebind Z/X/C/V and confirm labels and inputs follow the new bindings.

@@ -42,7 +42,13 @@ public class JayceeScreen extends Screen {
     if(style==1){
      if(hover)DivineFrame.sapphire(g,getX(),getY(),width,height,true);
     }else DivineFrame.sapphire(g,getX(),getY(),width,height,hover);
-    if(style==0)center(g,getMessage().getString(),getX()+width/2,getY()+(height-6)/2,active?INK:MUTED);
+    if(style==0){
+     int padding=height>28?24:width<16?1:width<28?2:8;
+     int iconSpace=(tab==1||tab==3)&&getX()==128?18:0;
+     UiText.line(g,getMessage().getString(),getX()+padding+iconSpace,
+      getY()+(height-(int)Math.ceil(font.lineHeight*.8))/2,
+      width-padding*2-iconSpace,.8f,active?INK:MUTED,true);
+    }
    }
   });
   if(hint!=null)hints.put(widget,hint);
@@ -99,26 +105,30 @@ public class JayceeScreen extends Screen {
     button(TRACKS[i],32+i*122,108,110,26,0,()->{skill=branch;rebuild();},"Skill tree preview only");
     for(int j=0;j<4;j++){
      final int tier=j;
-     var b=button("Tier "+(j+1),52+i*122,156+j*49,70,29,0,()->{skill=branch;skillTier=tier;rebuild();},"Preview; no mastery awarded");
+     var b=button("Tier "+(j+1),44+i*122,156+j*49,86,29,0,()->{skill=branch;skillTier=tier;rebuild();},"Preview; no mastery awarded");
      if(i==skill&&j==skillTier)selectedSkillButton=b;
     }
    }
   }
  }
  private void rebuild(){clearWidgets();init();}
- private void text(GuiGraphics g,String s,int x,int y,int color){
-  text(g,s,x,y,color,.8f);
+ private void right(GuiGraphics g,String s,int x,int y,int width,int color){
+  String fitted=UiText.fit(s,width,.8f);
+  label(g,fitted,x-(int)Math.ceil(font.width(fitted)*.8),y,width,color);
  }
- private void text(GuiGraphics g,String s,int x,int y,int color,float size){
-  g.pose().pushPose();g.pose().translate(x,y,0);g.pose().scale(size,size,1);
-  g.drawString(font,s,0,0,color,false);g.pose().popPose();
+ private void label(GuiGraphics g,String s,int x,int y,int width,int color){
+  UiText.line(g,s,x,y,width,.8f,color,false);
  }
- private void right(GuiGraphics g,String s,int x,int y,int color){text(g,s,x-(int)Math.ceil(font.width(s)*.8),y,color);}
- private void center(GuiGraphics g,String s,int x,int y,int color){text(g,s,x-(int)(font.width(s)*.4),y,color);}
+ private void label(GuiGraphics g,String s,SapphireLayout.Bounds b,int color){
+  label(g,s,b.x(),b.y(),b.width(),color);
+ }
+ private void paragraph(GuiGraphics g,String s,int x,int y,int width,int height,int color){
+  UiText.paragraph(g,s,x,y,width,height,.8f,color);
+ }
  private void panel(GuiGraphics g,int x,int y,int w,int h,String title){
   DivineFrame.sapphire(g,x,y,w,h,false);
-  text(g,title,x+16,y+12,INK);
-  DivineFrame.divider(g,x+11,y+24,w-22);
+  label(g,title,x+24,y+12,w-48,INK);
+  DivineFrame.divider(g,x+11,y+26,w-22);
  }
  // Screen.render invokes this after our panels; draw the background only before them.
  @Override public void renderBackground(GuiGraphics g,int mx,int my,float dt){}
@@ -138,7 +148,7 @@ public class JayceeScreen extends Screen {
    if(i>0)g.fill(8+i*103,11,9+i*103,50,0xFF35485E);
   }
   panel(g,544,68,156,352,"Equip Page");
-  center(g,"Page "+(snapshot.page()+1)+" / 10",621,124,INK);
+  UiText.line(g,"Page "+(snapshot.page()+1)+" / 10",579,124,82,.8f,INK,true);
   if(tab==0)status(g,snapshot,dt);
   else if(tab==1||tab==3)abilities(g);
   else if(tab==2)skills(g);
@@ -146,10 +156,11 @@ public class JayceeScreen extends Screen {
   super.render(g,lx,ly,dt);
   for(int i=0;i<TABS.length;i++){
    DivineFrame.tabIcon(g,60+i*103,23,i,i==tab);
-   center(g,TABS[i],60+i*103,43,INK);
+   var b=SapphireLayout.tabLabel(i);
+   UiText.line(g,TABS[i],b.x(),b.y(),b.width(),1f,INK,true);
   }
   if(tab==1||tab==3)for(int i=0;i<AbilityCatalog.ALL.size();i++)
-   AbilityIcons.render(g,AbilityCatalog.ALL.get(i),134,112+i*43,19,i==art);
+   AbilityIcons.render(g,AbilityCatalog.ALL.get(i),152,115+i*43,14,i==art);
   equipment(g,snapshot);
   g.pose().popPose();
   // Entity rendering uses screen-space scissoring and lighting, not the scaled UI pose.
@@ -169,7 +180,8 @@ public class JayceeScreen extends Screen {
    var equipped=AbilityCatalog.find(snapshot.ability(snapshot.page(),i));
    slots[i].setMessage(Component.literal("Slot "+(i+1)+": "+(equipped==null?"Empty":equipped.name()+
     (equipped.implemented()?", "+equipped.modes().get(snapshot.mode(snapshot.page(),i)):", preview only"))+
-    (art>=0?". Equip selected "+AbilityCatalog.ALL.get(art).name():". Select an ability first")));
+    (art>=0?". Equip selected "+AbilityCatalog.ALL.get(art).name():". Select an ability first")+
+    ". Key: "+JayceeClient.ABILITY_KEYS[i].getTranslatedKeyMessage().getString()));
   }
   for(int i=0;i<pages.length;i++)pages[i].setMessage(Component.literal(""+(i+1)));
  }
@@ -178,20 +190,20 @@ public class JayceeScreen extends Screen {
    var b=SapphireLayout.slot(i);
    var equipped=AbilityCatalog.find(snapshot.ability(snapshot.page(),i));
    if(i==selected)DivineFrame.sapphire(g,b.x(),b.y(),b.width(),b.height(),true);
-   text(g,""+(i+1),b.x()+5,b.y()+6,0xFFBC97DC);
+   var number=SapphireLayout.slotNumber(i);
+   UiText.line(g,""+(i+1),number.x(),number.y(),number.width(),1f,0xFFBC97DC,false);
+   label(g,equipped==null?"Empty":equipped.implemented()?"Equipped":"Preview",SapphireLayout.slotState(i),
+    equipped==null?MUTED:INK);
+   var caption=SapphireLayout.slotCaption(i);
    if(equipped!=null){
-    AbilityIcons.render(g,equipped,b.x()+16,b.y()+9,28,i==selected);
-    g.enableScissor(b.x()+4,b.y()+39,b.x()+b.width()-4,b.y()+51);
-    center(g,equipped.name(),b.x()+b.width()/2,b.y()+43,INK);
-    g.disableScissor();
-    if(!equipped.implemented())center(g,"Preview",b.x()+b.width()/2,b.y()+52,MUTED);
-   }else center(g,"Empty",b.x()+b.width()/2,b.y()+43,MUTED);
+    AbilityIcons.render(g,equipped,b.x()+18,b.y()+10,24,i==selected);
+    UiText.line(g,equipped.name(),caption.x(),caption.y(),caption.width(),.8f,INK,true);
+   }else UiText.line(g,"Empty",caption.x(),caption.y(),caption.width(),.8f,MUTED,true);
   }
   int px=554+snapshot.page()*13;
   g.fill(px,312,px+12,314,0xFFB08BDD);
-  text(g,"Select an unlocked ability,",555,373,INK);
-  text(g,"then click a slot.",555,382,INK);
-  text(g,"MP "+number(snapshot.mana()),555,400,INK);
+  paragraph(g,"Select an unlocked ability, then click a slot.",559,371,126,24,INK);
+  label(g,"MP "+number(snapshot.mana()),568,399,108,INK);
  }
  private void status(GuiGraphics g,PlayerState snapshot,float dt){
   var player=Minecraft.getInstance().player;
@@ -199,15 +211,15 @@ public class JayceeScreen extends Screen {
   DivineFrame.gem(g,59,92,3,DivineFrame.GOLD);
   DivineFrame.gem(g,59,161,3,DivineFrame.GOLD);
   if(!snapshot.portrait3d())PlayerPortrait.render(g,player,32,101,52,false);
-  text(g,font.plainSubstrByWidth(player.getName().getString(),140),110,94,INK,1.15f);
-  text(g,"Title: None",110,139,INK);
-  text(g,"Faction: None",110,155,INK);
+  UiText.line(g,player.getName().getString(),110,94,150,1.15f,INK,false);
+  label(g,"Title: None",110,140,150,INK);
+  label(g,"Faction: None",110,156,150,INK);
   if(speciesOpen){species(g);return;}
-  text(g,"Lv. "+player.experienceLevel,22,184,BLUE,1.6f);
+  UiText.line(g,"Lv. "+player.experienceLevel,24,184,190,1.6f,BLUE,false);
   g.fill(23,213,214,223,0xFF030F1B);
   g.fill(24,214,24+(int)(188*Math.clamp(player.experienceProgress,0,1)),222,0xFF6CA6CF);
   right(g,(int)(player.experienceProgress*player.getXpNeededForNextLevel())+" / "+
-   player.getXpNeededForNextLevel()+" EXP",212,230,INK);
+   player.getXpNeededForNextLevel()+" EXP",212,230,188,INK);
   panel(g,18,250,208,152,"Stats");
   String[] labels={"HP","MP","SP","Attack","Defense","Speed","Luck"};
   String[] values={number(player.getHealth())+" / "+number(player.getMaxHealth()),
@@ -217,51 +229,51 @@ public class JayceeScreen extends Screen {
    number(player.getAttributeValue(Attributes.LUCK))};
   int[] colors={0xFFE96389,0xFF95D4B2,0xFFAA9DDD,0xFFB6C8DF,0xFFB6C8DF,0xFF98D8EB,0xFF82D5B5};
   for(int i=0;i<labels.length;i++){
-   int y=285+i*16;
+   int y=282+i*15;
    DivineFrame.gem(g,32,y+3,2,colors[i]);
-   text(g,labels[i],43,y,INK);right(g,values[i],213,y,BLUE);
+   label(g,labels[i],43,y,52,INK);right(g,values[i],212,y,106,BLUE);
    if(i<6)g.fill(27,y+12,216,y+13,0xFF293C50);
   }
   DivineFrame.orbit(g,300,194,Minecraft.getInstance().level.getGameTime()+dt);
   panel(g,382,85,134,50,"Titles");
-  text(g,"- No Title Equipped -",393,117,INK);
+  UiText.line(g,"- No Title Equipped -",406,119,86,.8f,INK,true);
   panel(g,382,142,134,88,"Racial Trait");
-  text(g,"None",416,181,INK);
+  label(g,"None",416,181,76,INK);
   DivineFrame.tabIcon(g,399,183,1,false);
-  text(g,"No racial traits unlocked.",392,207,INK);
+  paragraph(g,"No racial traits unlocked.",406,198,86,22,INK);
   panel(g,382,238,134,164,"Elemental Affinity");
   String[] elements={"Fire","Water","Wind","Earth","Light","Dark"};
   int[] colors2={0xFFEF6478,0xFF56B6FA,0xFF8CD8AC,0xFFEAB963,0xFFF9DF8C,0xFFAD7CF0};
   for(int i=0;i<elements.length;i++){
    int y=272+i*21;
    DivineFrame.gem(g,396,y+3,3,colors2[i]);
-   text(g,elements[i],405,y,INK);right(g,"N/A",505,y,MUTED);
+   label(g,elements[i],405,y,60,INK);right(g,"N/A",499,y,28,MUTED);
    if(i<5)g.fill(392,y+14,506,y+15,0xFF293C50);
   }
-  text(g,"Traits / evolution: preview",242,365,MUTED);
-  text(g,"Stats and EXP: live",242,377,MUTED);
+  paragraph(g,"Traits / evolution: preview",242,360,126,22,MUTED);
+  label(g,"Stats and EXP: live",242,387,126,MUTED);
  }
  private void abilities(GuiGraphics g){
-  text(g,tab==1?"Abilities":"Magic",20,84,INK);
-  text(g,"Select an art, then an equipment slot. Preview arts cannot activate.",20,389,MUTED);
+  label(g,tab==1?"Abilities":"Magic",26,86,484,INK);
+  paragraph(g,"Select an art, then an equipment slot. Preview arts cannot activate.",36,376,464,24,MUTED);
  }
  private void skills(GuiGraphics g){
-  text(g,"Skills - preview only",20,84,INK);
+  label(g,"Skills - preview only",26,86,484,INK);
   for(int i=0;i<4;i++)g.fill(86+i*122,139,87+i*122,330,0xFF354F6A);
-  text(g,TRACKS[skill]+" / Tier "+(skillTier+1)+" - mastery progression unavailable",25,378,MUTED);
+  paragraph(g,TRACKS[skill]+" / Tier "+(skillTier+1)+" - mastery progression unavailable",36,376,464,24,MUTED);
  }
  private void species(GuiGraphics g){
   panel(g,20,178,496,179,"Species / Evolution");
-  text(g,"Human  >  Demigod  >  Divine",42,227,INK);
-  text(g,"Design preview only; no live race or evolution data is available.",42,255,MUTED);
-  text(g,"Jaycee's 3-billion EP requirement is not implemented progression.",42,275,MUTED);
-  text(g,"EP is separate from HP, SP and mana.",42,295,MUTED);
+  label(g,"Human  >  Demigod  >  Divine",44,221,448,INK);
+  paragraph(g,"Design preview only; no live race or evolution data is available.",44,246,448,24,MUTED);
+  paragraph(g,"Jaycee's 3-billion EP requirement is not implemented progression.",44,278,448,24,MUTED);
+  paragraph(g,"EP is separate from HP, SP and mana.",44,310,448,24,MUTED);
  }
  private void quests(GuiGraphics g){
-  text(g,"Quests - preview only",20,84,INK);
+  label(g,"Quests - preview only",26,86,484,INK);
   String[] names={"Awakening","Essence of Existence","The First Ascension","A New Reality"};
   for(int i=0;i<names.length;i++)panel(g,20,110+i*62,496,52,names[i]);
-  text(g,"Quest tracking and rewards are not implemented.",26,384,MUTED);
+  paragraph(g,"Quest tracking and rewards are not implemented.",36,376,464,24,MUTED);
  }
  private static String number(double value){return String.format(Locale.ROOT,"%.0f",value);}
  private void tooltips(GuiGraphics g,int x,int y,int mx,int my,PlayerState snapshot){
@@ -275,8 +287,10 @@ public class JayceeScreen extends Screen {
      tooltip(g,AbilityIcons.tooltip(Component.literal(equipped.name()),
       Component.literal(equipped.implemented()?(mode==1?"Fortify: +30 spiritual barrier":"Restore: +30 SP; requires missing SP"):"Preview only - no gameplay effect"),
       Component.literal("Mana: "+equipped.manaCost()+" | Right-click: remove"),
-      Component.literal(equipped.modes().get(mode)+" | Alt-click: switch mode"),ticks),mx,my);
-    }else tooltip(g,List.of(Component.literal("Empty slot "+(i+1)+" - select an ability, then click here")),mx,my);
+      Component.literal(equipped.modes().get(mode)+" | Alt-click: switch mode | Key: "+
+       JayceeClient.ABILITY_KEYS[i].getTranslatedKeyMessage().getString()),ticks),mx,my);
+    }else tooltip(g,List.of(Component.literal("Empty slot "+(i+1)+" - select an ability, then click here"),
+     Component.literal("Key: "+JayceeClient.ABILITY_KEYS[i].getTranslatedKeyMessage().getString())),mx,my);
     return;
    }
    for(var entry:hints.entrySet()){
@@ -291,8 +305,7 @@ public class JayceeScreen extends Screen {
   }
  }
  private void tooltip(GuiGraphics g,List<Component> lines,int mx,int my){
-  int wrap=Math.max(1,Math.min(260,width-16));
-  g.renderTooltip(font,lines.stream().flatMap(line->font.split(line,wrap).stream()).toList(),mx,my);
+  UiText.tooltip(g,lines,mx,my);
  }
  @Override public boolean mouseClicked(double mx,double my,int button){
   double x=layout.localX(mx),y=layout.localY(my);

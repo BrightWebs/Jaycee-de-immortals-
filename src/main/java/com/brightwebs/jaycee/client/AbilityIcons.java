@@ -77,7 +77,7 @@ public final class AbilityIcons {
     }
 
     public static void renderTooltip(GuiGraphics graphics, List<Component> lines, int mouseX, int mouseY) {
-        graphics.renderComponentTooltip(Minecraft.getInstance().font, lines, mouseX, mouseY);
+        UiText.tooltip(graphics, lines, mouseX, mouseY);
     }
 
     @SubscribeEvent

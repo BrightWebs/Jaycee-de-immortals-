@@ -6,7 +6,11 @@ final class SapphireLayout {
  record Bounds(int x,int y,int width,int height){
   boolean contains(double px,double py){return px>=x&&py>=y&&px<x+width&&py<y+height;}
  }
- static Bounds slot(int slot){return new Bounds(556+(slot%2)*68,158+(slot/2)*68,60,60);}
+ static Bounds slot(int slot){return new Bounds(556+(slot%2)*68,154+(slot/2)*76,60,60);}
+ static Bounds slotNumber(int slot){var b=slot(slot);return new Bounds(b.x()+2,b.y()-11,10,9);}
+ static Bounds slotState(int slot){var b=slot(slot);return new Bounds(b.x()+14,b.y()-10,46,8);}
+ static Bounds slotCaption(int slot){var b=slot(slot);return new Bounds(b.x()+9,b.y()+36,42,8);}
+ static Bounds tabLabel(int tab){return new Bounds(34+tab*103,41,51,9);}
  final double scale;
  final double left,top;
  SapphireLayout(int width,int height){

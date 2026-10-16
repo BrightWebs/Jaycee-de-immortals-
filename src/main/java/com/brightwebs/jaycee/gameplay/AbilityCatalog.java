@@ -12,11 +12,18 @@ public final class AbilityCatalog {
         preview("celestial_guard", "Celestial Guard"),
         preview("divine_pulse", "Divine Pulse"),
         preview("temporal_step", "Temporal Step"),
-        new Art("jaycee:soul_restore", "Soul Restore", icon("soul_restore"), 20, 200, List.of("Restore", "Fortify"), true),
+        soulRestore(),
         preview("aether_flight", "Aether Flight")
     );
 
     private AbilityCatalog() {}
+
+    private static Art soulRestore() {
+        var definition = AbilityExecutors.SOUL_RESTORE;
+        var primary = definition.modes().getFirst();
+        return new Art(definition.id(), "Soul Restore", icon("soul_restore"), primary.manaCost(),
+            primary.cooldownTicks(), definition.modes().stream().map(AbilityEngine.Mode::name).toList(), true);
+    }
 
     private static ResourceLocation icon(String name) {
         return ResourceLocation.fromNamespaceAndPath("jaycee", "textures/ability/" + name + ".png");

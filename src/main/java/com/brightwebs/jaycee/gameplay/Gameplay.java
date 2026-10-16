@@ -324,25 +324,6 @@ public final class Gameplay {
             player.displayClientMessage(Component.literal(art.name() + " is a preview; no resources spent."), true);
             return;
         }
-        int mode = state.mode(state.page(), slot);
-        if (mode < 0 || mode >= art.modes().size() || state.cooldownRemaining(art.id(), now) > 0) return;
-        if ((mode == 0 && state.soul() >= state.maxSoul())
-                || (mode == 1 && state.barrier() >= state.maxBarrier())) return;
-        var mana = ManaBackends.resolve(player).mana();
-        try {
-            if (mana.getCurrent() < art.manaCost() || !mana.consume(art.manaCost())) return;
-        } catch (RuntimeException ignored) { return; }
-        // Read again after consume so standalone mana is not overwritten by an older snapshot.
-        var data = PlayerState.read(player);
-        if (mode == 0) data.putDouble("Soul", Math.min(state.maxSoul(), state.soul() + 30));
-        else data.putDouble("Barrier", Math.min(state.maxBarrier(), state.barrier() + 30));
-        var cooldowns = data.getCompound("Cooldowns");
-        cooldowns.putLong(art.id(), now + art.cooldownTicks());
-        data.put("Cooldowns", cooldowns);
-        data.putString("LastActivationId", art.id());
-        data.putLong("LastActivationTick", now);
-        data.putInt("LastActivationMode", mode);
-        PlayerState.save(player, data);
-        GameplayNetwork.sync(player);
+        AbilityExecutors.activate(player, state, art.id(), state.mode(state.page(), slot), now);
     }
 }

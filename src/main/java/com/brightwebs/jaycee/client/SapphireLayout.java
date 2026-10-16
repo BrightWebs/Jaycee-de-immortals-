@@ -3,6 +3,7 @@ package com.brightwebs.jaycee.client;
 /** Reference-image coordinates shared by rendering, widgets and pointer input. */
 final class SapphireLayout {
  static final int WIDTH=700, HEIGHT=420;
+ static boolean ordinaryMenu(boolean supreme,boolean preview){return !supreme||preview;}
  record Bounds(int x,int y,int width,int height){
   boolean contains(double px,double py){return px>=x&&py>=y&&px<x+width&&py<y+height;}
  }

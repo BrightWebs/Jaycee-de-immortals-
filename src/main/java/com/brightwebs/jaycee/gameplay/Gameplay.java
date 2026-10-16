@@ -50,6 +50,11 @@ public final class Gameplay {
                     StringArgumentType.getString(context, "id"), operation.equals("grant")))));
         }
         event.getDispatcher().register(skills);
+        event.getDispatcher().register(Commands.literal("jayceeplayertest")
+            .requires(source -> source.hasPermission(2))
+            .executes(context -> setPlayerMenuPreview(context.getSource().getPlayerOrException(), true))
+            .then(Commands.literal("off")
+                .executes(context -> setPlayerMenuPreview(context.getSource().getPlayerOrException(), false))));
         event.getDispatcher().register(Commands.literal("jayceetest")
             .requires(source -> source.hasPermission(2))
             .executes(context -> setJayceeTest(context.getSource().getPlayerOrException(), true))
@@ -113,6 +118,18 @@ public final class Gameplay {
                     })));
         }
         event.getDispatcher().register(spiritual);
+    }
+
+    private static int setPlayerMenuPreview(ServerPlayer player, boolean enabled) {
+        var data = PlayerState.read(player);
+        if (enabled) data.putBoolean("PlayerMenuPreview", true);
+        else data.remove("PlayerMenuPreview");
+        PlayerState.save(player, data);
+        GameplayNetwork.sync(player);
+        player.displayClientMessage(Component.literal(enabled
+            ? "Player menu preview enabled. Press M to inspect Divine Ascension. Your real authority, grants and balances remain active; this is not another player's profile."
+            : "Player menu preview disabled. Press M to open your role's normal menu."), false);
+        return 1;
     }
 
     private static int setJayceeTest(ServerPlayer player, boolean enabled) {

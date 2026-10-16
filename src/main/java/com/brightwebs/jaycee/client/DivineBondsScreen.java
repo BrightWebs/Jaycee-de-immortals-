@@ -68,7 +68,7 @@ final class DivineBondsScreen extends Screen {
             button(12 + i * 113, 9, 109, () -> TABS[index], () -> switchTab(index), () -> true);
         }
         button(20, 53, 142, () -> "Back to menu", () ->
-            Minecraft.getInstance().setScreen(new JayceeScreen(!state().supreme())), () -> true);
+            Minecraft.getInstance().setScreen(new JayceeScreen(SapphireLayout.ordinaryMenu(state().supreme(),state().playerMenuPreview()))), () -> true);
         button(170, 53, 96, () -> "Refresh", () -> DivinityNetwork.request("refresh"), () -> true);
         if (tab > 0 && tab < 5) {
             for (int i = 0; i < 7; i++) {

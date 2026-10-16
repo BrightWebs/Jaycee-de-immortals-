@@ -151,8 +151,9 @@ public class JayceeScreen extends Screen {
   if(Minecraft.getInstance().player==null)return;
   int lx=(int)Math.floor(layout.localX(mx)),ly=(int)Math.floor(layout.localY(my));
   var snapshot=state();
-  if(ordinary==snapshot.supreme()){
-   Minecraft.getInstance().setScreen(new JayceeScreen(!snapshot.supreme()));return;
+  boolean showOrdinary=SapphireLayout.ordinaryMenu(snapshot.supreme(),snapshot.playerMenuPreview());
+  if(ordinary!=showOrdinary){
+   Minecraft.getInstance().setScreen(new JayceeScreen(showOrdinary));return;
   }
   updateNarration(snapshot);
   g.pose().pushPose();
@@ -291,7 +292,9 @@ public class JayceeScreen extends Screen {
    "Cap policy: "+(d.getBoolean("CapLift")?"Jaycee-authorized lift":"Provisional server configuration"),
    snapshot.jayceeTest()?"Test access enabled; not supreme Jaycee authority.":"Powers require an earned or explicit server grant."};
   for(int i=0;i<lines.length;i++)label(g,lines[i],42,124+i*20,452,INK);
-  paragraph(g,"Casting spends mana, never EP. NPC offerings and natural divine promotion are not implemented.",30,380,470,26,MUTED);
+  paragraph(g,snapshot.playerMenuPreview()?
+   "PLAYER MENU PREVIEW: your real authority, powers and balances remain active. Not another player's profile.":
+   "Casting spends mana, never EP. NPC offerings and natural divine promotion are not implemented.",30,380,470,26,MUTED);
  }
  private SkillMagicBrowser browser(){return tab==3?magicBrowser:skillsBrowser;}
  private void species(GuiGraphics g){

@@ -3,6 +3,10 @@ package com.brightwebs.jaycee.client;
 public final class SkillMagicLayoutTest {
     private static int checks;
     public static void main(String[] args) {
+        check(!SapphireLayout.ordinaryMenu(true, false), "Jaycee normally sees approved Sapphire");
+        check(SapphireLayout.ordinaryMenu(true, true), "Jaycee can preview ordinary navigation without losing authority");
+        check(SapphireLayout.ordinaryMenu(false, false), "Ordinary players keep Divine Ascension");
+        check(SapphireLayout.ordinaryMenu(false, true), "Preview never grants sovereign navigation");
         for (boolean ordinary : new boolean[]{false, true}) {
             int total = ordinary ? 6 : 5;
             for (int tab = 0; tab < total; tab++) {

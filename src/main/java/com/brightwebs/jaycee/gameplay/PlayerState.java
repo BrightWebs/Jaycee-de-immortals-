@@ -57,6 +57,7 @@ public final class PlayerState {
     public int consumed() { return Math.clamp(data.getInt("Consumed"), 0, 3); }
     /** Operator-granted test identity, not a completed race evolution or EP qualification. */
     public boolean jayceeTest() { return data.getBoolean("JayceeTest"); }
+    public boolean playerMenuPreview() { return data.getBoolean("PlayerMenuPreview"); }
     public boolean unlocked() { return consumed() >= 3 || jayceeTest() || supreme()
         || !divinity().getCompound("Grants").isEmpty() || (!divinity().getString("Rank").isEmpty()
             && !divinity().getString("Rank").equals("MORTAL")); }

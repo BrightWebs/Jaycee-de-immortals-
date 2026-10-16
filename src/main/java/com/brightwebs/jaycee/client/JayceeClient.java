@@ -31,7 +31,8 @@ public class JayceeClient {
    Minecraft mc=Minecraft.getInstance();
    while(OPEN.consumeClick()){
     if(mc.player!=null&&mc.screen==null){
-     mc.setScreen(new JayceeScreen(!PlayerState.get(mc.player).supreme()));
+     var state=PlayerState.get(mc.player);
+     mc.setScreen(new JayceeScreen(SapphireLayout.ordinaryMenu(state.supreme(),state.playerMenuPreview())));
     }
    }
    while(BESTOW.consumeClick()){

@@ -10,10 +10,6 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.event.RegisterCommandsEvent;
-import net.neoforged.neoforge.common.NeoForge;
-import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import com.brightwebs.jaycee.gameplay.Gameplay;
 import com.brightwebs.jaycee.gameplay.PlayerState;
@@ -26,8 +22,7 @@ public final class JayceeMod {
  public static final String ID="jaycee";
  public static final DeferredRegister.Items ITEMS=DeferredRegister.createItems(ID);
  public static final DeferredItem<Item> ESSENCE=ITEMS.register("jayces_essence",()->new Essence(new Item.Properties().stacksTo(16)));
- public JayceeMod(IEventBus bus,ModContainer container){ ITEMS.register(bus); Gameplay.register(bus); container.registerConfig(ModConfig.Type.CLIENT,HudConfig.SPEC); NeoForge.EVENT_BUS.addListener(this::commands); }
- private void commands(RegisterCommandsEvent event){event.getDispatcher().register(Commands.literal("jayceeessence").requires(s->s.hasPermission(2)).executes(c->{ServerPlayer p=c.getSource().getPlayerOrException();p.getInventory().add(new ItemStack(ESSENCE.get(),3));c.getSource().sendSuccess(()->Component.literal("Received 3 Jayce's Essences"),false);return 1;}));}
+ public JayceeMod(IEventBus bus,ModContainer container){ ITEMS.register(bus); Gameplay.register(bus); container.registerConfig(ModConfig.Type.CLIENT,HudConfig.SPEC); }
  public static boolean unlocked(Player p){return PlayerState.get(p).unlocked();}
  public static final class Essence extends Item {
   public Essence(Properties properties){super(properties);}

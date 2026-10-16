@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 256 256">
+ <defs><linearGradient id="apple" x2=".8" y2="1"><stop stop-color="#fff0ac"/><stop offset=".45" stop-color="#d8ac4f"/><stop offset="1" stop-color="#a15a54"/></linearGradient></defs>
+ <circle cx="128" cy="128" r="104" fill="#251a32" fill-opacity=".62" stroke="#a47685" stroke-width="2"/><circle cx="128" cy="128" r="97" fill="none" stroke="#d8b7a7"/>
+ <path d="M128 13 135 26 128 39 121 26Z M128 217 135 230 128 243 121 230Z M13 128 26 121 39 128 26 135Z M217 128 230 121 243 128 230 135Z" fill="#cfaa78"/>
+ <path d="M54 83 44 111 52 122 M202 83 212 111 204 122 M53 170 70 197 108 213 M203 170 186 197 148 213" fill="none" stroke="#a57485" stroke-width="3"/>
+ <path d="M127 93 Q119 65 138 48 M134 67 Q150 45 171 54 Q162 78 136 76" fill="#9aa57a" stroke="#d7ca93" stroke-width="3"/>
+ <path d="M127 91 Q90 72 72 105 Q56 134 79 173 Q100 207 128 190 Q156 207 177 173 Q200 134 184 105 Q166 72 127 91Z" fill="url(#apple)" stroke="#f8d896" stroke-width="3"/>
+ <path d="M128 94 116 120 139 135 120 160 133 188" fill="none" stroke="#6c345e" stroke-width="5" stroke-linejoin="round"/>
+ <path d="M123 120 144 113 M137 136 153 144 M121 160 104 151" fill="none" stroke="#8d4770" stroke-width="2"/>
+ <path d="M89 111 Q79 127 85 143 M96 99 101 97" fill="none" stroke="#fff2be" stroke-width="4" stroke-linecap="round"/>
+ <path d="M53 65 63 72 59 85 48 77Z M202 174 211 181 205 194 195 186Z M179 62 188 58 193 68 184 74Z" fill="#c9829d" stroke="#f0bdc9"/>
+</svg>

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 256 256">
+ <defs><radialGradient id="grape" cx=".3" cy=".25"><stop stop-color="#dfb0f3"/><stop offset=".5" stop-color="#a16ac4"/><stop offset="1" stop-color="#513d82"/></radialGradient></defs>
+ <circle cx="128" cy="128" r="104" fill="#1b1b37" fill-opacity=".62" stroke="#96845d" stroke-width="2"/><circle cx="128" cy="128" r="97" fill="none" stroke="#d1ba8e"/>
+ <path d="M128 13 135 26 128 39 121 26Z M128 217 135 230 128 243 121 230Z M13 128 26 121 39 128 26 135Z M217 128 230 121 243 128 230 135Z" fill="#c9ae76"/>
+ <path d="M57 79 Q35 122 55 168 M199 79 Q221 122 201 168 M63 189 Q85 210 109 212 M193 189 Q171 210 147 212" fill="none" stroke="#a58a65" stroke-width="3"/>
+ <path d="M128 109 Q123 74 145 49 M139 66 Q163 45 168 62 Q173 77 157 78 Q146 78 153 68" fill="none" stroke="#cbb17e" stroke-width="4" stroke-linecap="round"/>
+ <path d="M128 91 112 63 99 70 83 56 85 78 62 83 80 97 73 110 102 109 115 123Z M137 94 155 84 168 91 191 77 186 99 200 109 177 117 178 134 153 123Z" fill="#739b78" stroke="#b4cf95" stroke-width="2"/>
+ <path d="M88 80 119 101 M98 80 100 91 M177 99 147 113 M175 112 165 108" stroke="#c6d8a4" stroke-width="2"/>
+ <g fill="url(#grape)" stroke="#d4a1e5" stroke-width="2">
+ <circle cx="103" cy="120" r="16"/><circle cx="131" cy="117" r="16"/><circle cx="158" cy="122" r="16"/>
+ <circle cx="91" cy="145" r="15"/><circle cx="118" cy="144" r="17"/><circle cx="147" cy="147" r="17"/><circle cx="171" cy="146" r="13"/>
+ <circle cx="106" cy="170" r="16"/><circle cx="135" cy="172" r="17"/><circle cx="158" cy="169" r="13"/>
+ <circle cx="120" cy="194" r="14"/><circle cx="145" cy="192" r="12"/><circle cx="133" cy="209" r="10"/>
+ </g>
+ <path d="M98 114 103 112 M126 111 131 109 M113 138 118 136 M130 166 135 164 M115 189 119 187" stroke="#f0d8f5" stroke-width="3" stroke-linecap="round"/>
+</svg>

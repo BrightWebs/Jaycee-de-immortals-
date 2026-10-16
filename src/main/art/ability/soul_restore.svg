@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 256 256">
+ <defs>
+  <radialGradient id="halo"><stop stop-color="#68f9e2" stop-opacity=".55"/><stop offset="1" stop-color="#041c36" stop-opacity="0"/></radialGradient>
+  <linearGradient id="soul" x2=".2" y2="1"><stop stop-color="#fffce0"/><stop offset=".5" stop-color="#baffea"/><stop offset="1" stop-color="#329cc6"/></linearGradient>
+  <linearGradient id="hands" x2="1" y2="1"><stop stop-color="#ecedff"/><stop offset=".5" stop-color="#8cacdc"/><stop offset="1" stop-color="#404d93"/></linearGradient>
+ </defs>
+ <circle cx="128" cy="124" r="103" fill="url(#halo)"/>
+ <path d="M43 160 Q19 99 65 53 M191 53 Q237 99 213 160" fill="none" stroke="#78d1d9" stroke-width="2" opacity=".65"/>
+ <path d="M55 164 L79 198 108 218 M201 164 L177 198 148 218" fill="none" stroke="#d6b87c" stroke-width="3"/>
+ <path d="M47 195 L58 160 Q65 143 71 128 Q76 121 81 131 L77 158 100 176 89 154 Q86 144 94 144 L122 173 Q129 184 124 202 L119 218 87 218 70 202Z" fill="url(#hands)" stroke="#d2e7ff" stroke-width="3" stroke-linejoin="round"/>
+ <path d="M209 195 L198 160 Q191 143 185 128 Q180 121 175 131 L179 158 156 176 167 154 Q170 144 162 144 L134 173 Q127 184 132 202 L137 218 169 218 186 202Z" fill="url(#hands)" stroke="#d2e7ff" stroke-width="3" stroke-linejoin="round"/>
+ <path d="M77 180 Q89 191 109 194 M179 180 Q167 191 147 194" fill="none" stroke="#4a5e9f" stroke-width="3"/>
+ <path d="M128 38 Q153 62 144 76 Q173 90 155 117 Q151 142 128 153 Q103 142 101 120 Q79 99 112 74 Q105 54 128 38Z" fill="url(#soul)" stroke="#e6fff0" stroke-width="3"/>
+ <path d="M128 76 Q114 98 122 107 Q142 108 128 139 Q150 114 138 100 Q122 94 128 76Z" fill="#fffce6"/>
+ <path d="M128 29 V18 M84 70 L73 63 M172 70 L183 63 M88 112 H76 M168 112 H180" stroke="#d9ffe9" stroke-width="4" stroke-linecap="round"/>
+ <path d="M128 158 L132 164 128 170 124 164Z M61 89 L65 95 61 101 57 95Z M195 89 L199 95 195 101 191 95Z" fill="#e8c88e"/>
+</svg>

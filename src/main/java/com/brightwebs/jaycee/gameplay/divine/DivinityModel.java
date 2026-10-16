@@ -1,0 +1,600 @@
+package com.brightwebs.jaycee.gameplay.divine;
+
+import java.math.BigInteger;
+import java.util.*;
+
+/** Single-threaded world aggregate. All mutations validate fully before committing. No Minecraft dependencies. */
+public final class DivinityModel {
+    public enum Rank { MORTAL, BLESSED, DEMIGOD, MINOR_GOD, MAJOR_GOD, OLYMPIAN }
+    public enum Release { REQUESTED, DENIED, PETITIONED }
+    public record Config(long epCap, long essenceCap, long supremeCap, long regenPerSecond,
+                         long minimumFee, int feePercent, long powerFee, long offerMillis, double distance,
+                         EssenceProgression.Tuning progression) {
+        public Config(long epCap, long essenceCap, long supremeCap, long regenPerSecond,
+                      long minimumFee, int feePercent, long powerFee, long offerMillis, double distance) {
+            this(epCap, essenceCap, supremeCap, regenPerSecond, minimumFee, feePercent, powerFee,
+                offerMillis, distance, EssenceProgression.Tuning.defaults());
+        }
+        public Config {
+            Objects.requireNonNull(progression);
+            if (epCap < 1 || essenceCap < 1 || supremeCap < 1 || regenPerSecond < 0
+                    || minimumFee < 1 || feePercent < 1 || powerFee < 1 || offerMillis < 1000
+                    || !Double.isFinite(distance) || distance < 1 || distance > 32)
+                throw new IllegalArgumentException("Invalid divinity tuning");
+        }
+        public static Config defaults() { return new Config(3_000_000, 3_000_000, 2_000_000_000,
+            1_000_000, 100, 125, 100, 120_000, 8); }
+    }
+    public record Profile(UUID id, String originalName, String username, String divineName, Rank rank,
+                          long ep, long essence, boolean capLift, boolean bestow, UUID patron,
+                          Set<String> npcPatrons, Map<String, String> grants, Release release) {
+        public Profile {
+            Objects.requireNonNull(id); Objects.requireNonNull(rank);
+            npcPatrons = Set.copyOf(npcPatrons); grants = Map.copyOf(grants);
+            if (ep < 0 || essence < 0) throw new IllegalArgumentException("Negative balance");
+        }
+        public String displayName() { return divineName.isEmpty() ? username : divineName; }
+    }
+    public record Proposal(UUID donor, UUID recipient, long amount, String ability, String name, boolean bind) {
+        public Proposal {
+            Objects.requireNonNull(donor); Objects.requireNonNull(recipient);
+            Objects.requireNonNull(ability); Objects.requireNonNull(name);
+            if (amount < 0 || ability.length() > 128 || !validName(name))
+                throw new IllegalArgumentException("Use a nonnegative amount and a plain name of at most 48 characters");
+        }
+    }
+    public record Offer(UUID id, Proposal proposal, long fee, long expires) {}
+    public record Audit(long time, UUID actor, UUID target, String text) {}
+    public record View(UUID id, String originalName, String username, String divineName, Rank rank,
+                       Long ep, Long essence, boolean supreme, boolean capLift, boolean bestow,
+                       UUID patron, Set<String> npcPatrons, Map<String, String> grants, Release release) {}
+    public record Image(UUID authority, List<Profile> profiles, List<Offer> offers, List<Audit> audit, int carry,
+                        Map<UUID, ProgressState> progress) {
+        public Image(UUID authority, List<Profile> profiles, List<Offer> offers, List<Audit> audit, int carry) {
+            this(authority, profiles, offers, audit, carry, Map.of());
+        }
+        public Image { progress = Map.copyOf(progress); }
+    }
+    public static final Set<String> NPC_PATRONS = Set.of("zeus", "poseidon", "hades", "athena",
+        "ares", "apollo", "artemis", "hermes", "hephaestus", "aphrodite", "demeter", "dionysus",
+        "hera", "hestia", "hecate", "eris", "nemesis", "kronos", "gaia", "ouranos", "nyx", "chaos");
+    private final Config config;
+    private final Set<String> abilities;
+    private final Map<UUID, Profile> profiles = new LinkedHashMap<>();
+    /** awardable is minted reserve eligible to reward its first recipient; received gifts never replenish it. */
+    public record ProgressState(long earned, long awardable) {
+        public ProgressState {
+            if (earned < 0 || awardable < 0) throw new IllegalArgumentException("Negative progression");
+        }
+    }
+    private static final ProgressState NO_PROGRESS = new ProgressState(0, 0);
+    private final Map<UUID, ProgressState> playerProgress = new LinkedHashMap<>();
+    private final Map<UUID, ProgressState> mobProgress = new LinkedHashMap<>();
+    private final Map<UUID, Offer> offers = new LinkedHashMap<>();
+    private final Deque<Audit> audit = new ArrayDeque<>();
+    private UUID authority;
+    private int carry;
+    public record MobContext(UUID id, String type, String dimension, int entityId, UUID tameOwner) {}
+    public record MobProfile(UUID id, String type, String dimension, String original, String customName,
+                             String divineName, float health, float maxHealth, long ep, long essence,
+                             long received, UUID master, Map<String, String> grants, String status) {
+        public MobProfile {
+            Objects.requireNonNull(id); Objects.requireNonNull(type); Objects.requireNonNull(dimension);
+            grants = Map.copyOf(grants);
+            if (ep < 0 || essence < 0 || received < 0 || !validName(divineName)
+                    || !Set.of("active", "unloaded", "deceased", "removed").contains(status))
+                throw new IllegalArgumentException("Invalid mob profile");
+        }
+    }
+    public record MobQuote(UUID id, Proposal proposal, MobContext context, MobProfile before,
+                           Profile donorBefore, boolean supreme, long fee, long expires) {
+        public long total() { return Math.addExact(fee, proposal.amount()); }
+        public long balanceAfter() { return donorBefore.essence() - total(); }
+        public long recipientAfter() { return Math.addExact(before.essence(), proposal.amount()); }
+    }
+    private final Map<UUID, MobProfile> mobs = new LinkedHashMap<>();
+    private final Map<UUID, MobQuote> mobQuotes = new HashMap<>();
+    private final Map<UUID, MobContext> liveMobs = new HashMap<>();
+    private final Map<UUID, String> terminalMobs = new HashMap<>();
+    public List<MobProfile> mobs() { return List.copyOf(mobs.values()); }
+    public MobProfile mob(UUID id) { return mobs.get(id); }
+    public long earned(UUID id) { profile(id); return playerProgress.getOrDefault(id, NO_PROGRESS).earned(); }
+    public EssenceProgression.Progress progression(UUID id) {
+        var p = profile(id);
+        return EssenceProgression.player(earned(id), p.capLift() || supreme(id), config.progression());
+    }
+    public EssenceProgression.MobProgress mobProgression(UUID id) {
+        var p = mobs.get(id);
+        if (p == null) throw new IllegalArgumentException("Mob has no stored ledger entry");
+        return EssenceProgression.mob(p.type(), mobProgress.getOrDefault(id, NO_PROGRESS).earned(), p.ep());
+    }
+    public Map<UUID, ProgressState> playerProgressStates() { return Map.copyOf(playerProgress); }
+    public Map<UUID, ProgressState> mobProgressStates() { return Map.copyOf(mobProgress); }
+    /** Missing/legacy entries intentionally start at zero, never inferred from balances, received, or vanilla XP. */
+    public void restoreProgress(Map<UUID, ProgressState> players, Map<UUID, ProgressState> creatures) {
+        playerProgress.clear(); mobProgress.clear();
+        players.forEach((id, state) -> {
+            if (profiles.containsKey(id)) playerProgress.put(id,
+                new ProgressState(state.earned(), Math.min(profile(id).essence(), state.awardable())));
+        });
+        creatures.forEach((id, state) -> {
+            if (mobs.containsKey(id)) mobProgress.put(id, new ProgressState(state.earned(), 0));
+        });
+    }
+    public void restoreMobs(Collection<MobProfile> values) {
+        mobProgress.clear();
+        mobs.clear(); values.forEach(p -> mobs.put(p.id(), p)); mobQuotes.clear();
+        liveMobs.clear(); terminalMobs.clear();
+    }
+    public Map<UUID, String> mobRemovals() { return Map.copyOf(terminalMobs); }
+    public String mobRemoval(UUID id) { return terminalMobs.getOrDefault(id, ""); }
+    public void restoreMobRemovals(Map<UUID, String> removals) {
+        terminalMobs.clear();
+        removals.forEach((id, reason) -> {
+            var p = mobs.get(id);
+            if (p != null) {
+                terminalMobs.put(id, reason);
+                mobs.put(id, mobStatus(p, reason.equals("KILLED") ? "deceased" : "removed"));
+            }
+        });
+    }
+    private static MobProfile mobStatus(MobProfile p, String status) {
+        return new MobProfile(p.id(), p.type(), p.dimension(), p.original(), p.customName(), p.divineName(),
+            p.health(), p.maxHealth(), p.ep(), p.essence(), p.received(), p.master(), p.grants(), status);
+    }
+    public void joinMob(MobProfile observed, MobContext context) {
+        var old = mobs.get(observed.id());
+        if (old == null || Set.of("deceased", "removed").contains(old.status()) || terminalMobs.containsKey(old.id())
+                || !old.id().equals(context.id()) || !old.type().equals(context.type())
+                || !old.type().equals(observed.type()) || !observed.dimension().equals(context.dimension())) return;
+        var previous = liveMobs.put(old.id(), context);
+        if (previous != null && !sameIncarnation(context, previous))
+            mobQuotes.values().removeIf(q -> q.proposal().recipient().equals(old.id()));
+        applyObservation(old, observed);
+    }
+    public boolean liveMob(MobContext context) { return sameIncarnation(context, liveMobs.get(context.id())); }
+    private static boolean sameIncarnation(MobContext a, MobContext b) {
+        return b != null && a.id().equals(b.id()) && a.type().equals(b.type())
+            && a.dimension().equals(b.dimension()) && a.entityId() == b.entityId();
+    }
+    public boolean observeMob(MobProfile observed, MobContext context) {
+        if (!liveMob(context)) return false;
+        observeMob(observed);
+        return true;
+    }
+    public boolean leaveMob(MobProfile observed, MobContext context, String removalReason, boolean terminal) {
+        if (!liveMob(context)) return false;
+        observeMob(observed);
+        liveMobs.remove(observed.id());
+        mobQuotes.values().removeIf(q -> q.proposal().recipient().equals(observed.id()));
+        if (terminal) {
+            terminalMobs.put(observed.id(), removalReason);
+            mobs.put(observed.id(), mobStatus(mobs.get(observed.id()), removalReason.equals("KILLED") ? "deceased" : "removed"));
+        }
+        return true;
+    }
+    /** Lifecycle observations update existing ledger entries only; inspection never creates one. */
+    public void observeMob(MobProfile observed) {
+        var old = mobs.get(observed.id());
+        if (old == null || !old.type().equals(observed.type())) return;
+        if (!old.dimension().equals(observed.dimension()) || terminalMobs.containsKey(old.id())
+                || Set.of("deceased", "removed").contains(old.status()) && !observed.status().equals(old.status())) return;
+        applyObservation(old, observed);
+    }
+    private void applyObservation(MobProfile old, MobProfile observed) {
+        mobs.put(old.id(), new MobProfile(old.id(), old.type(), observed.dimension(), old.original(),
+            observed.customName(), old.divineName(), observed.health(), observed.maxHealth(), old.ep(),
+            old.essence(), old.received(), old.master(), old.grants(), observed.status()));
+    }
+    public void clearMobQuote(UUID donor) { mobQuotes.remove(donor); }
+    public MobQuote mobQuote(UUID donor, long now) {
+        var q = mobQuotes.get(donor);
+        if (q != null && q.expires() <= now) { mobQuotes.remove(donor); return null; }
+        return q;
+    }
+    public long mobFee(Proposal s, MobProfile recipient, MobContext context, boolean compatible) {
+        var donor = profile(s.donor());
+        if (profiles.containsKey(s.recipient()) || !s.recipient().equals(recipient.id())
+                || !context.id().equals(recipient.id()) || !context.type().equals(recipient.type())
+                || !context.dimension().equals(recipient.dimension()) || !recipient.status().equals("active")
+                || terminalMobs.containsKey(recipient.id()))
+            fail("A live non-player mob in the selected world is required");
+        if (context.tameOwner() != null && !context.tameOwner().equals(donor.id()))
+            fail("Another player's pet requires its owner's consent; mob consent is not implemented");
+        if (!compatible) fail("No safe registered adapter for this mob or power");
+        if (s.bind() && !mobBindingReason(context.type()).isEmpty()) fail(mobBindingReason(context.type()));
+        if (!supreme(donor.id()) && (!donor.bestow() || donor.rank().ordinal() < Rank.MINOR_GOD.ordinal()))
+            fail("Bestowal requires Minor God rank and bestowal privileges");
+        if (s.amount() == 0 && s.ability().isEmpty() && s.name().isEmpty() && !s.bind())
+            fail("Choose Essence, an owned power, a name, or binding");
+        if (s.bind() && recipient.master() != null) fail("Mob already has a divine master");
+        if (!s.bind() && !supreme(donor.id()) && !donor.id().equals(recipient.master())
+                && (recipient.master() != null || !s.ability().isEmpty() || !s.name().isEmpty()))
+            fail("Bind a new subordinate explicitly, or select your own subordinate");
+        if (!s.ability().isEmpty() && (!owns(donor.id(), s.ability()) || recipient.grants().containsKey(s.ability())))
+            fail("Power must be owned, implemented, and not already granted");
+        long fee = supreme(donor.id()) ? 0 : Math.addExact(s.bind() ? establishmentFee(recipient.essence()) : 0,
+            s.ability().isEmpty() ? 0 : config.powerFee());
+        if (Math.addExact(fee, s.amount()) > donor.essence()) fail("Insufficient Essence including fees");
+        if (s.amount() > Math.max(0, config.essenceCap() - recipient.essence()))
+            fail("Recipient Essence cap would be exceeded");
+        Math.addExact(recipient.received(), s.amount());
+        return fee;
+    }
+    public static String mobBindingReason(String type) {
+        return Set.of("minecraft:wandering_trader", "minecraft:trader_llama").contains(type)
+            ? "Binding unavailable: this species has a separate scripted despawn timer; no verified 1.21.1 persistence adapter is registered. Inspection and unbound gifts remain supported."
+            : "";
+    }
+    public MobQuote quoteMob(Proposal s, MobProfile observed, MobContext context, boolean compatible, long now) {
+        clearMobQuote(s.donor());
+        var stored = mobs.get(s.recipient());
+        var before = stored == null ? observed : stored;
+        long fee = mobFee(s, before, context, compatible);
+        var q = new MobQuote(UUID.randomUUID(), s, context, before, profile(s.donor()), supreme(s.donor()),
+            fee, Math.addExact(now, 30_000));
+        mobQuotes.put(s.donor(), q);
+        return q;
+    }
+    public MobProfile confirmMob(UUID donorId, UUID nonce, MobContext context, boolean reachable,
+                                  boolean compatible, long now) {
+        var q = mobQuotes.remove(donorId); // Every confirmation attempt consumes its nonce.
+        if (q == null || !q.id().equals(nonce) || q.expires() <= now) fail("Mob quote expired or already used");
+        if (!reachable || !q.context().equals(context)) fail("Mob moved, changed owner/world, or is no longer visible");
+        var s = q.proposal(); var before = mobs.getOrDefault(s.recipient(), q.before());
+        var currentDonor = profile(donorId);
+        // Incoming credits cannot worsen the quoted balance floor. Revalidate ownership in
+        // mobFee, not unrelated profile observations, EP awards or presentation names.
+        if (!sameMobTerms(before, q.before()) || currentDonor.essence() < q.donorBefore().essence()
+                || currentDonor.rank() != q.donorBefore().rank() || currentDonor.bestow() != q.donorBefore().bestow()
+                || supreme(donorId) != q.supreme() || mobFee(s, before, context, compatible) != q.fee())
+            fail("Quote terms changed; request a fresh quote");
+        var grants = new HashMap<>(before.grants());
+        if (!s.ability().isEmpty()) grants.put(s.ability(), donorId.toString());
+        var after = new MobProfile(before.id(), before.type(), before.dimension(), before.original(), before.customName(),
+            s.name().isEmpty() ? before.divineName() : s.name(), before.health(), before.maxHealth(), before.ep(),
+            q.recipientAfter(), Math.addExact(before.received(), s.amount()),
+            s.bind() ? donorId : before.master(), grants, "active");
+        var donor = currentDonor;
+        long qualifying = qualifyingGift(donorId, s.amount(), q.fee());
+        var progressAfter = receivedProgress(mobProgress.getOrDefault(after.id(), NO_PROGRESS), qualifying);
+        spendProgress(donorId, q.total());
+        put(donor, donor.divineName(), donor.rank(), donor.ep(), donor.essence() - q.total(), donor.capLift(), donor.bestow(),
+            donor.patron(), donor.npcPatrons(), donor.grants(), donor.release());
+        mobs.put(after.id(), after);
+        mobProgress.put(after.id(), progressAfter);
+        liveMobs.put(after.id(), context);
+        log(now, donorId, after.id(), "Mob bestowal " + q.id() + "; Essence " + s.amount() + "; burned fee " + q.fee());
+        return after;
+    }
+    private static boolean sameMobTerms(MobProfile a, MobProfile b) {
+        return a.id().equals(b.id()) && a.type().equals(b.type()) && a.dimension().equals(b.dimension())
+            && a.essence() == b.essence() && Objects.equals(a.master(), b.master()) && a.grants().equals(b.grants());
+    }
+    public DivinityModel(Config config, Set<String> abilities) {
+        this.config = Objects.requireNonNull(config); this.abilities = Set.copyOf(abilities);
+    }
+    public Config config() { return config; }
+    public boolean supreme(UUID id) { return id != null && id.equals(authority); }
+    public UUID authority() { return authority; }
+    public Profile profile(UUID id) {
+        var result = profiles.get(id);
+        if (result == null) throw new IllegalArgumentException("Player has not joined this world");
+        return result;
+    }
+    public Profile join(UUID id, String username) {
+        if (username == null || username.isEmpty() || username.length() > 16)
+            throw new IllegalArgumentException("Invalid Minecraft profile");
+        var p = profiles.get(id);
+        if (p == null) p = new Profile(id, username, username, "", Rank.MORTAL, 0, 0,
+            false, false, null, Set.of(), Map.of(), null);
+        else p = copy(p, username, p.divineName, p.rank, p.ep, p.essence, p.capLift, p.bestow,
+            p.patron, p.npcPatrons, p.grants, p.release);
+        profiles.put(id, p);
+        return p;
+    }
+    /** Only the server's operator command calls this; test access and client snapshots are not authority. */
+    public void assignAuthority(UUID id, boolean replace, long now) {
+        if (id != null) profile(id);
+        if (authority != null && !replace) fail("Jaycee authority is already assigned");
+        UUID old = authority;
+        authority = id; carry = 0;
+        offers.clear();
+        mobQuotes.clear();
+        log(now, id, old, "Operator changed unique Jaycee authority; pending offers canceled");
+    }
+    public boolean owns(UUID id, String ability) {
+        return abilities.contains(ability) && (supreme(id) || profile(id).grants.containsKey(ability));
+    }
+    public boolean authorizedMobPower(UUID id, String ability, int masteryLevel) {
+        if (!owns(id, ability)) return false;
+        var donor = profile(id);
+        return supreme(id) || donor.bestow() && donor.rank().ordinal() >= Rank.MINOR_GOD.ordinal() && masteryLevel >= 1;
+    }
+    public void adminGrant(UUID id, String ability, boolean granted, long now) {
+        if (!abilities.contains(ability)) fail("Only implemented registered abilities may be granted");
+        var p = profile(id); var grants = new HashMap<>(p.grants);
+        if (granted) grants.put(ability, "operator"); else grants.remove(ability);
+        put(p, p.divineName, p.rank, p.ep, p.essence, p.capLift, p.bestow, p.patron, p.npcPatrons, grants, p.release);
+        log(now, id, id, "Operator " + (granted ? "granted " : "revoked ") + ability);
+    }
+    public void migrateRestore(UUID id, String restore, long now) {
+        if (!profile(id).grants.containsKey(restore)) {
+            adminGrant(id, restore, true, now);
+            var p = profile(id); var grants = new HashMap<>(p.grants); grants.put(restore, "legacy:three_essences");
+            put(p, p.divineName, p.rank, p.ep, p.essence, p.capLift, p.bestow, p.patron, p.npcPatrons, grants, p.release);
+        }
+    }
+    public void adminRank(UUID id, Rank rank, long now) {
+        var p = profile(id);
+        put(p, p.divineName, rank, p.ep, p.essence, p.capLift, rank.ordinal() >= Rank.MINOR_GOD.ordinal(),
+            p.patron, p.npcPatrons, p.grants, p.release);
+        log(now, id, id, "Operator testing rank: " + rank);
+    }
+    public void adminBalance(UUID id, boolean ep, long value, long now) {
+        if (value < 0) fail("Balance cannot be negative");
+        var p = profile(id);
+        if (value > (ep ? epCap(p) : essenceCap(p))) fail("Balance exceeds current cap");
+        // An operator cannot mint transferable progression rewards, including by resetting a reserve.
+        if (!ep) playerProgress.put(id, new ProgressState(earned(id), 0));
+        put(p, p.divineName, p.rank, ep ? value : p.ep, ep ? p.essence : value,
+            p.capLift, p.bestow, p.patron, p.npcPatrons, p.grants, p.release);
+        log(now, id, id, "Operator testing " + (ep ? "EP" : "Essence") + ": " + value);
+    }
+    public void adminSetEssence(UUID id, long value, long now) { adminBalance(id, false, value, now); }
+    public void adminAddEssence(UUID id, long amount, long now) {
+        if (amount < 0) fail("Essence addition cannot be negative");
+        long value = exact(BigInteger.valueOf(profile(id).essence()).add(BigInteger.valueOf(amount)));
+        var before = playerProgress.getOrDefault(id, NO_PROGRESS);
+        adminBalance(id, false, value, now);
+        playerProgress.put(id, before);
+    }
+    public void adminSetEp(UUID id, long value, long now) { adminBalance(id, true, value, now); }
+    public void adminSetEarned(UUID id, long value, long now) {
+        if (value < 0) fail("Earned Essence cannot be negative");
+        profile(id);
+        playerProgress.put(id, new ProgressState(value, playerProgress.getOrDefault(id, NO_PROGRESS).awardable()));
+        log(now, id, id, "Operator set lifetime earned Essence: " + value);
+    }
+    public void adminSetLevel(UUID id, int level, long now) {
+        final long value;
+        try { value = EssenceProgression.earnedForLevel(level, config.progression()); }
+        catch (ArithmeticException e) { throw new IllegalArgumentException("Level exceeds supported earned Essence range"); }
+        adminSetEarned(id, value, now);
+    }
+    public void adminNpc(UUID id, String npc, boolean add, long now) {
+        if (!NPC_PATRONS.contains(npc)) fail("Unsupported patron metadata");
+        var p = profile(id); var patrons = new HashSet<>(p.npcPatrons);
+        if (add) patrons.add(npc); else patrons.remove(npc);
+        put(p, p.divineName, p.rank, p.ep, p.essence, p.capLift, p.bestow, p.patron, patrons, p.grants, p.release);
+        log(now, id, id, "Operator testing NPC lineage " + npc + ": " + add + "; no offering powers assigned");
+    }
+    /** Server award hooks; caps constrain new credits, never erase historical EP. */
+    public long awardEp(UUID id, long amount) { return credit(id, amount, true, false); }
+    public long creditEssence(UUID id, long amount) { return credit(id, amount, false, true); }
+    private long credit(UUID id, long amount, boolean ep, boolean earns) {
+        if (amount < 0) fail("Credit cannot be negative");
+        var p = profile(id); long old = ep ? p.ep : p.essence;
+        long added = Math.min(amount, Math.max(0, (ep ? epCap(p) : essenceCap(p)) - old));
+        if (!ep) {
+            var progress = playerProgress.getOrDefault(id, NO_PROGRESS);
+            playerProgress.put(id, new ProgressState(earns ? saturatingAdd(progress.earned(), added) : progress.earned(),
+                Math.addExact(progress.awardable(), added)));
+        }
+        put(p, p.divineName, p.rank, ep ? old + added : p.ep, ep ? p.essence : old + added,
+            p.capLift, p.bestow, p.patron, p.npcPatrons, p.grants, p.release);
+        return added;
+    }
+    public long epCap(Profile p) { return p.capLift || supreme(p.id) ? Long.MAX_VALUE : config.epCap; }
+    public long essenceCap(Profile p) { return supreme(p.id) ? config.supremeCap : p.capLift ? Long.MAX_VALUE : config.essenceCap; }
+    public void tickRegeneration() {
+        if (authority == null) return;
+        long whole = config.regenPerSecond / 20;
+        carry += (int)(config.regenPerSecond % 20);
+        if (carry >= 20) { whole++; carry -= 20; }
+        credit(authority, whole, false, false);
+    }
+    public long establishmentFee(long essence) {
+        if (essence < 0) fail("Negative Essence");
+        return Math.max(config.minimumFee, exact(BigInteger.valueOf(essence)
+            .multiply(BigInteger.valueOf(config.feePercent)).add(BigInteger.valueOf(99)).divide(BigInteger.valueOf(100))));
+    }
+    public long quote(Proposal proposal) {
+        var donor = profile(proposal.donor); var recipient = profile(proposal.recipient);
+        if (donor.id.equals(recipient.id)) fail("You cannot bestow upon yourself");
+        if (supreme(recipient.id)) fail("Jaycee's true profile cannot be targeted");
+        if (!supreme(donor.id) && (!donor.bestow || donor.rank.ordinal() < Rank.MINOR_GOD.ordinal()))
+            fail("Bestowal requires Minor God rank and bestowal privileges");
+        if (proposal.amount == 0 && proposal.ability.isEmpty() && proposal.name.isEmpty() && !proposal.bind)
+            fail("Choose Essence, an owned power, a name, or an invitation");
+        if (proposal.bind) {
+            if (recipient.patron != null) fail("Recipient must be released before accepting a new patron");
+            if (cycle(donor.id, recipient.id)) fail("This bond would create a patron cycle");
+        } else if (!supreme(donor.id) && !donor.id.equals(recipient.patron)
+                && (!proposal.ability.isEmpty() || !proposal.name.isEmpty())) {
+            fail("Invite a new follower explicitly, or select your existing follower");
+        }
+        if (!proposal.ability.isEmpty()) {
+            if (!abilities.contains(proposal.ability) || !owns(donor.id, proposal.ability))
+                fail("You can only grant implemented powers you own");
+            if (recipient.grants.containsKey(proposal.ability)) fail("Recipient already owns this power");
+        }
+        long fee = supreme(donor.id) ? 0 : exact(BigInteger.valueOf(proposal.bind ? establishmentFee(recipient.essence) : 0)
+            .add(BigInteger.valueOf(proposal.ability.isEmpty() ? 0 : config.powerFee)));
+        long debit = exact(BigInteger.valueOf(fee).add(BigInteger.valueOf(proposal.amount)));
+        if (donor.essence < debit) fail("Insufficient Essence for the transfer plus burned establishment / power fee");
+        if (proposal.amount > Math.max(0, essenceCap(recipient) - recipient.essence)) fail("Recipient Essence cap would be exceeded");
+        return fee;
+    }
+    private boolean cycle(UUID donor, UUID recipient) {
+        Set<UUID> seen = new HashSet<>();
+        while (donor != null) {
+            if (donor.equals(recipient) || !seen.add(donor)) return true;
+            donor = profile(donor).patron;
+        }
+        return false;
+    }
+    public Offer offer(Proposal proposal, long now, boolean reachable) {
+        if (!reachable) fail("Both players must be online, within range and visible");
+        expire(now);
+        if (offers.size() >= 256 || offers.values().stream().filter(o ->
+                o.proposal.donor.equals(proposal.donor) || o.proposal.recipient.equals(proposal.recipient)).count() >= 16)
+            fail("Too many pending offers; resolve an existing offer first");
+        long fee = quote(proposal);
+        var offer = new Offer(UUID.randomUUID(), proposal, fee, Math.addExact(now, config.offerMillis));
+        offers.put(offer.id, offer);
+        log(now, proposal.donor, proposal.recipient, "Offered consent-based bestowal " + offer.id);
+        return offer;
+    }
+    public void accept(UUID recipientId, UUID offerId, long now, boolean reachable) {
+        expire(now);
+        var o = offers.get(offerId);
+        if (o == null || !o.proposal.recipient.equals(recipientId)) fail("Offer no longer exists or is not yours");
+        if (!reachable) fail("Both players must be online, within range and visible");
+        var s = o.proposal;
+        long fee = quote(s);
+        if (fee != o.fee) fail("Eligibility or price changed; request a fresh offer");
+        var donor = profile(s.donor); var recipient = profile(recipientId);
+        long debit = Math.addExact(fee, s.amount);
+        var grants = new HashMap<>(recipient.grants);
+        if (!s.ability.isEmpty()) grants.put(s.ability, donor.id.toString());
+        // Every possible validation and overflow check precedes either balance mutation.
+        long balance = Math.addExact(recipient.essence, s.amount);
+        var progressAfter = receivedProgress(playerProgress.getOrDefault(recipientId, NO_PROGRESS),
+            qualifyingGift(donor.id, s.amount, fee));
+        spendProgress(donor.id, debit);
+        put(donor, donor.divineName, donor.rank, donor.ep, donor.essence - debit, donor.capLift, donor.bestow,
+            donor.patron, donor.npcPatrons, donor.grants, donor.release);
+        put(recipient, s.name.isEmpty() ? recipient.divineName : s.name,
+            s.bind && recipient.rank == Rank.MORTAL ? Rank.BLESSED : recipient.rank,
+            recipient.ep, balance, recipient.capLift, recipient.bestow,
+            s.bind ? donor.id : recipient.patron, recipient.npcPatrons, grants, recipient.release);
+        playerProgress.put(recipientId, progressAfter);
+        offers.remove(offerId);
+        log(now, donor.id, recipientId, "Accepted " + offerId + "; transferred " + s.amount
+            + " Essence; fee burned " + fee + "; power " + s.ability + "; binding " + s.bind);
+    }
+    public void cancel(UUID actor, UUID id, long now) {
+        var o = offers.get(id);
+        if (o == null || (!actor.equals(o.proposal.donor) && !actor.equals(o.proposal.recipient))) fail("Offer is not yours");
+        offers.remove(id); log(now, actor, o.proposal.recipient, "Offer declined / canceled " + id);
+    }
+    public void expire(long now) {
+        var expired = offers.values().stream().filter(o -> o.expires <= now).toList();
+        for (var o : expired) { offers.remove(o.id); log(now, o.proposal.donor, o.proposal.recipient, "Offer expired " + o.id); }
+    }
+    public void disconnect(UUID id, long now) {
+        clearMobQuote(id);
+        for (var o : List.copyOf(offers.values())) if (o.proposal.donor.equals(id) || o.proposal.recipient.equals(id)) {
+            offers.remove(o.id); log(now, id, o.proposal.recipient, "Offer canceled: player offline");
+        }
+    }
+    public void requestRelease(UUID id, long now) {
+        var p = profile(id);
+        if (p.patron == null || p.release != null) fail("No active bond, or a release request already exists");
+        put(p, p.divineName, p.rank, p.ep, p.essence, p.capLift, p.bestow, p.patron, p.npcPatrons, p.grants, Release.REQUESTED);
+        log(now, id, p.patron, "Release requested");
+    }
+    public void decideRelease(UUID actor, UUID id, boolean approve, long now) {
+        var p = profile(id);
+        if (!supreme(actor) && !actor.equals(p.patron)) fail("Only the patron or Jaycee may decide release");
+        if (p.release == null) fail("No pending release request");
+        put(p, p.divineName, p.rank, p.ep, p.essence, p.capLift, p.bestow, approve ? null : p.patron,
+            p.npcPatrons, p.grants, approve ? null : Release.DENIED);
+        log(now, actor, id, approve ? "Release approved" : "Release denied");
+    }
+    public boolean challengeEligible(UUID id) {
+        var p = profile(id);
+        return p.release == Release.DENIED && p.patron != null && p.ep > profile(p.patron).ep && !supreme(p.patron);
+    }
+    public void petition(UUID id, long now) {
+        var p = profile(id);
+        if (p.release != Release.DENIED) fail("A denied release is required before petitioning");
+        put(p, p.divineName, p.rank, p.ep, p.essence, p.capLift, p.bestow, p.patron, p.npcPatrons, p.grants, Release.PETITIONED);
+        log(now, id, authority, "Petition for release; combat / leadership resolution awaits adjudication");
+    }
+    public void adjudicate(UUID actor, UUID id, String operation, long now) {
+        if (!supreme(actor)) fail("Only the assigned Jaycee authority may adjudicate");
+        if (supreme(id)) fail("Use operator authority commands to change Jaycee authority");
+        var p = profile(id);
+        String name = p.divineName; Rank rank = p.rank; boolean cap = p.capLift, bestow = p.bestow;
+        UUID patron = p.patron; Release release = p.release; Map<String, String> grants = p.grants;
+        switch (operation) {
+            case "cap_lift" -> cap = true;
+            case "cap_revoke" -> cap = false;
+            case "revoke_privileges" -> bestow = false;
+            case "demote" -> { rank = Rank.values()[Math.max(0, rank.ordinal() - 1)]; bestow = false; }
+            case "strip" -> { rank = Rank.MORTAL; bestow = false; cap = false; grants = Map.of(); name = ""; }
+            case "release" -> { patron = null; release = null; }
+            default -> fail("Unknown adjudication");
+        }
+        put(p, name, rank, p.ep, p.essence, cap, bestow, patron, p.npcPatrons, grants, release);
+        log(now, actor, id, "Confirmed adjudication: " + operation);
+    }
+    public View view(UUID viewer, UUID target) {
+        var p = profile(target); boolean hidden = supreme(target) && !supreme(viewer);
+        var visibleGrants = new HashMap<String, String>();
+        p.grants.forEach((ability, source) -> {
+            if (viewer.equals(target) || owns(viewer, ability)) visibleGrants.put(ability, source);
+        });
+        return new View(p.id, p.originalName, p.username, hidden ? "" : p.divineName, hidden ? Rank.MORTAL : p.rank,
+            hidden ? null : p.ep, hidden ? null : p.essence, supreme(target), !hidden && p.capLift, !hidden && p.bestow,
+            hidden ? null : p.patron, hidden ? Set.of() : p.npcPatrons, hidden ? Map.of() : Map.copyOf(visibleGrants), hidden ? null : p.release);
+    }
+    public List<Profile> followers(UUID id) { return profiles.values().stream().filter(p -> id.equals(p.patron)).toList(); }
+    public List<Offer> pending(UUID id) { return offers.values().stream().filter(o ->
+        o.proposal.donor.equals(id) || o.proposal.recipient.equals(id)).toList(); }
+    public List<Audit> history(UUID id) { return audit.stream().filter(a -> supreme(id) || id.equals(a.actor) || id.equals(a.target)).toList(); }
+    public Image image() { return new Image(authority, List.copyOf(profiles.values()), List.copyOf(offers.values()), List.copyOf(audit), carry,
+        playerProgressStates()); }
+    public void restore(Image image, long now) {
+        profiles.clear(); offers.clear(); audit.clear();
+        playerProgress.clear(); mobProgress.clear();
+        mobQuotes.clear();
+        liveMobs.clear();
+        for (var p : image.profiles) profiles.put(p.id, p);
+        restoreProgress(image.progress(), Map.of());
+        authority = profiles.containsKey(image.authority) ? image.authority : null;
+        carry = Math.clamp(image.carry, 0, 19);
+        image.audit.stream().skip(Math.max(0, image.audit.size() - 256)).forEach(audit::addLast);
+        for (var o : image.offers) log(now, o.proposal.donor, o.proposal.recipient, "Pending offer canceled on server restart " + o.id);
+    }
+    public static boolean validName(String name) {
+        return name != null && name.length() <= 48 && name.codePoints().noneMatch(c -> Character.isISOControl(c)
+            || c == 0x00a7 || Character.getType(c) == Character.FORMAT);
+    }
+    private static long exact(BigInteger value) {
+        try { return value.longValueExact(); } catch (ArithmeticException e) { throw new IllegalArgumentException("Quote exceeds supported balance range"); }
+    }
+    private static long saturatingAdd(long value, long amount) {
+        return value + Math.min(amount, Long.MAX_VALUE - value);
+    }
+    private static ProgressState receivedProgress(ProgressState before, long qualifying) {
+        return new ProgressState(saturatingAdd(before.earned(), qualifying), before.awardable());
+    }
+    private long qualifyingGift(UUID donor, long amount, long fee) {
+        long awardable = playerProgress.getOrDefault(donor, NO_PROGRESS).awardable();
+        long nonAwardable = profile(donor).essence() - awardable;
+        long nonAwardableAfterFee = Math.max(0, nonAwardable - fee);
+        return Math.max(0, amount - nonAwardableAfterFee);
+    }
+    private void spendProgress(UUID donor, long debit) {
+        var state = playerProgress.getOrDefault(donor, NO_PROGRESS);
+        long nonAwardable = profile(donor).essence() - state.awardable();
+        long qualifyingSpent = Math.max(0, debit - nonAwardable);
+        playerProgress.put(donor, new ProgressState(state.earned(), state.awardable() - qualifyingSpent));
+    }
+    private static void fail(String message) { throw new IllegalArgumentException(message); }
+    private void log(long now, UUID actor, UUID target, String text) {
+        if (audit.size() == 256) audit.removeFirst();
+        audit.addLast(new Audit(now, actor, target, text));
+    }
+    private static Profile copy(Profile p, String username, String name, Rank rank, long ep, long essence,
+                                boolean cap, boolean bestow, UUID patron, Set<String> npc, Map<String, String> grants, Release release) {
+        return new Profile(p.id, p.originalName, username, name, rank, ep, essence, cap, bestow, patron, npc, grants, release);
+    }
+    private void put(Profile p, String name, Rank rank, long ep, long essence, boolean cap, boolean bestow,
+                     UUID patron, Set<String> npc, Map<String, String> grants, Release release) {
+        profiles.put(p.id, copy(p, p.username, name, rank, ep, essence, cap, bestow, patron, npc, grants, release));
+    }
+}

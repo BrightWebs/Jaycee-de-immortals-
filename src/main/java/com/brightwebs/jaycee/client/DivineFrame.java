@@ -83,4 +83,87 @@ final class DivineFrame {
   gem(g,cx,cy,5,0xFFBDEBFF);
   gem(g,cx,cy,2,0xFFF9FEFF);
  }
+ /** The original Sapphire's dark glass, nested chamfers and silver-blue filigree. */
+ static void sapphire(GuiGraphics g,int x,int y,int w,int h,boolean active){
+  int edge=active?0xFFB4DCEC:0xFF6B98AE;
+  int cut=Math.min(8,Math.min(w,h)/3);
+  for(int row=1;row<h-1;row++){
+   int inset=Math.max(1,cut-Math.min(row,h-1-row));
+   line(g,x+inset,y+row,w-2*inset,1,active?0xED173A59:0xED081523);
+  }
+  chamfer(g,x,y,w,h,cut,0xFF355D74);
+  chamfer(g,x+2,y+2,w-4,h-4,Math.max(2,cut-1),edge);
+  if(w>45&&h>28){
+   chamfer(g,x+5,y+5,w-10,h-10,Math.max(2,cut-2),0xFF3E6176);
+   gem(g,x+w/2,y+3,2,edge);gem(g,x+w/2,y+h-4,2,edge);
+   for(int side=0;side<2;side++)for(int end=0;end<2;end++){
+    int cx=side==0?x+11:x+w-12,cy=end==0?y+10:y+h-11;
+    int sx=side==0?1:-1,sy=end==0?1:-1;
+    for(int i=0;i<3;i++){
+     line(g,cx+sx*i*3-(sx<0?5:0),cy+sy*i*2,5,1,edge);
+     line(g,cx+sx*i*3,cy+sy*(i*2+1),1,2,0xFF48788F);
+    }
+    gem(g,cx,cy,1,0xFF9FCBDA);
+   }
+  }
+ }
+ private static void chamfer(GuiGraphics g,int x,int y,int w,int h,int cut,int color){
+  line(g,x+cut,y,w-2*cut,1,color);line(g,x+cut,y+h-1,w-2*cut,1,color);
+  line(g,x,y+cut,1,h-2*cut,color);line(g,x+w-1,y+cut,1,h-2*cut,color);
+  for(int i=1;i<cut;i++){
+   line(g,x+cut-i,y+i,1,1,color);line(g,x+w-cut-1+i,y+i,1,1,color);
+   line(g,x+cut-i,y+h-1-i,1,1,color);line(g,x+w-cut-1+i,y+h-1-i,1,1,color);
+  }
+ }
+ static void tabIcon(GuiGraphics g,int cx,int cy,int id,boolean active){
+  int color=active?0xFFB9E6F5:0xFF85AFBF;
+  if(id==0){
+   chamfer(g,cx-2,cy-8,5,7,1,color);
+   line(g,cx-5,cy+1,11,1,color);line(g,cx-7,cy+5,15,1,color);
+   line(g,cx-5,cy+2,1,3,color);line(g,cx+5,cy+2,1,3,color);
+  }else if(id==1){
+   for(int i=0;i<3;i++)chamfer(g,cx-5+i*3,cy-7+i*2,5,12-i*2,2,color);
+   line(g,cx-6,cy+6,13,1,color);
+  }else if(id==2){
+   line(g,cx,cy-6,1,15,color);line(g,cx-6,cy-4,13,1,color);
+   gem(g,cx,cy-8,2,color);gem(g,cx-7,cy-6,2,color);gem(g,cx+7,cy-6,2,color);
+   line(g,cx-4,cy+7,9,1,color);
+  }else if(id==3){
+   for(int i=0;i<36;i++){
+    double a=i*Math.PI/18;
+    line(g,cx+(int)(Math.cos(a)*7),cy+(int)(Math.sin(a)*7),1,1,color);
+   }
+   gem(g,cx,cy,2,color);line(g,cx-10,cy,4,1,color);line(g,cx+7,cy,4,1,color);
+   line(g,cx,cy-10,1,4,color);line(g,cx,cy+7,1,4,color);
+  }else{
+   chamfer(g,cx-6,cy-7,12,15,1,color);
+   for(int i=0;i<3;i++)line(g,cx-3,cy-3+i*4,6,1,color);
+  }
+ }
+ static void orbit(GuiGraphics g,int cx,int cy,double ticks){
+  double turn=ticks*.004;
+  for(int ring=0;ring<5;ring++){
+   double radius=43+ring*6;
+   for(int i=0;i<180;i++){
+    if((i+ring*7)%45<4)continue;
+    double a=i*Math.PI/90+(ring%2==0?turn:-turn);
+    int x=cx+(int)(Math.cos(a)*radius),y=cy+(int)(Math.sin(a)*radius);
+    line(g,x,y,i%3==0?2:1,1,ring%2==0?0xFF629EB5:0xFF345E79);
+   }
+  }
+  for(int i=0;i<12;i++){
+   double a=i*Math.PI/6+turn*.5;
+   int x=cx+(int)(Math.cos(a)*56),y=cy+(int)(Math.sin(a)*56);
+   gem(g,x,y,i%3==0?2:1,0xFFA1D7E5);
+  }
+  // Counter-rotating elliptical strands retain the reference's luminous orbital eye.
+  for(int strand=0;strand<9;strand++)for(int i=0;i<150;i++){
+   double a=i*Math.PI/75,tilt=turn*(strand%2==0?1:-1)+strand*Math.PI/9;
+   double x=Math.cos(a)*(27+strand*.35),y=Math.sin(a)*(9+strand*.8);
+   int px=cx+(int)(x*Math.cos(tilt)-y*Math.sin(tilt));
+   int py=cy+(int)(x*Math.sin(tilt)+y*Math.cos(tilt));
+   line(g,px,py,1,1,strand%3==0?0xFFDBE4FA:strand%3==1?0xFF9CD6E6:0xFF8BA8E5);
+  }
+  gem(g,cx,cy,4,0xFF183149);gem(g,cx,cy,1,0xFFECFCFF);
+ }
 }

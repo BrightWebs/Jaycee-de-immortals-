@@ -42,6 +42,7 @@ public final class GameplayNetwork {
 
     public static void register(RegisterPayloadHandlersEvent event) {
         var registrar = event.registrar("1");
+        com.brightwebs.jaycee.gameplay.divine.DivinityNetwork.register(registrar);
         registrar.playToClient(State.TYPE, State.CODEC, (payload, context) ->
             PlayerState.save(context.player(), payload.data()));
         registrar.playToServer(Action.TYPE, Action.CODEC, (payload, context) -> {
@@ -57,6 +58,7 @@ public final class GameplayNetwork {
         snapshot.putDouble("Mana", PlayerState.bounded(resolved.mana().getCurrent(), resolved.mana().getMax()));
         snapshot.putDouble("MaxMana", PlayerState.maximum(resolved.mana().getMax()));
         snapshot.putDouble("ManaRegen", PlayerState.bounded(resolved.mana().getRegen(), 10000));
+        snapshot.put("Divinity", com.brightwebs.jaycee.gameplay.divine.DivinityService.snapshot(player));
         PacketDistributor.sendToPlayer(player, new State(snapshot));
     }
 }

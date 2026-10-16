@@ -4,5 +4,82 @@ group = mod_group
 base { archivesName = mod_id }
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 neoForge { version = neo_version; runs { client { client() }; server { server() } }; mods { jaycee { sourceSet sourceSets.main } } }
+neoForge.addModdingDependenciesTo(sourceSets.test)
 repositories { mavenCentral() }
 tasks.withType(ProcessResources).configureEach { def p = [mod_id:mod_id,mod_name:mod_name,mod_version:mod_version]; inputs.properties p; filesMatching('META-INF/neoforge.mods.toml') { expand p } }
+tasks.register('engineTest', JavaExec) {
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.brightwebs.jaycee.gameplay.AbilityEngineTest'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+}
+tasks.named('check') { dependsOn tasks.named('engineTest') }
+tasks.register('jayceeCommandsTest', JavaExec) {
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.brightwebs.jaycee.gameplay.JayceeCommandsTest'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+}
+tasks.named('check') { dependsOn tasks.named('jayceeCommandsTest') }
+tasks.register('skillTest', JavaExec) {
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.brightwebs.jaycee.gameplay.SkillMathTest'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+}
+tasks.named('check') { dependsOn tasks.named('skillTest') }
+tasks.register('divineTest', JavaExec) {
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.brightwebs.jaycee.gameplay.divine.DivinityModelTest'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+}
+tasks.named('check') { dependsOn tasks.named('divineTest') }
+tasks.register('mobDivineTest', JavaExec) {
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.brightwebs.jaycee.gameplay.divine.MobDivinityModelTest'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+}
+tasks.named('check') { dependsOn tasks.named('mobDivineTest') }
+tasks.register('mobDivineTagsTest', JavaExec) {
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.brightwebs.jaycee.gameplay.divine.MobDivinityTagsTest'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+}
+tasks.named('check') { dependsOn tasks.named('mobDivineTagsTest') }
+tasks.register('mobBestowalUiTest', JavaExec) {
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.brightwebs.jaycee.client.MobBestowalUiTest'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+}
+tasks.named('check') { dependsOn tasks.named('mobBestowalUiTest') }
+['EssenceProgressionTest', 'EssenceRewardBudgetTest'].each { suite ->
+    def taskName = suite.uncapitalize()
+    tasks.register(taskName, JavaExec) {
+        dependsOn tasks.named('testClasses')
+        classpath = sourceSets.test.runtimeClasspath
+        mainClass = "com.brightwebs.jaycee.gameplay.divine.${suite}"
+        javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+    }
+    tasks.named('check') { dependsOn tasks.named(taskName) }
+}
+tasks.register('statusDataTest', JavaExec) {
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.brightwebs.jaycee.gameplay.StatusDataTest'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+}
+tasks.named('check') { dependsOn tasks.named('statusDataTest') }
+['SkillMagicBrowserModelTest', 'SkillMagicLayoutTest'].each { suite ->
+    def taskName = suite.uncapitalize()
+    tasks.register(taskName, JavaExec) {
+        dependsOn tasks.named('testClasses')
+        classpath = sourceSets.test.runtimeClasspath
+        mainClass = "com.brightwebs.jaycee.client.${suite}"
+        javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+    }
+    tasks.named('check') { dependsOn tasks.named(taskName) }
+}

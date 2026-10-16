@@ -24,6 +24,7 @@ final class SkillMagicBrowser {
     private static final String[] MAGIC = {"All Magic", "Elemental", "Divine", "Healing", "Defensive",
         "Spatial", "Summoning", "Enchantment", "Patron", "Forbidden Magic"};
     private final boolean magic;
+    private final boolean abilities;
     private final java.util.function.IntSupplier selectedSlot;
     private final SkillMagicBrowserModel model = new SkillMagicBrowserModel();
     private final List<Hint> hints = new ArrayList<>();
@@ -35,16 +36,20 @@ final class SkillMagicBrowser {
     private record Hint(AbstractWidget widget, java.util.function.Supplier<String> text) {}
 
     SkillMagicBrowser(boolean magic, java.util.function.IntSupplier selectedSlot) {
+        this(magic, false, selectedSlot);
+    }
+    SkillMagicBrowser(boolean magic, boolean abilities, java.util.function.IntSupplier selectedSlot) {
         this.magic = magic;
+        this.abilities = abilities;
         this.selectedSlot = selectedSlot;
     }
     private PlayerState state() { return PlayerState.get(Minecraft.getInstance().player); }
-    private String[] categoryNames() { return magic ? MAGIC : SKILLS; }
+    private String[] categoryNames() { return abilities ? new String[]{"All Abilities", "Canon mapping unresolved"} : magic ? MAGIC : SKILLS; }
     void init(Consumer<AbstractWidget> add) {
         hints.clear(); categories.clear(); rows.clear();
         refresh();
         var font = Minecraft.getInstance().font;
-        search = new EditBox(font, 136, 106, 196, 16, Component.literal("Search " + (magic ? "magic" : "skills")));
+        search = new EditBox(font, 136, 106, 196, 16, Component.literal("Search " + (abilities ? "abilities" : magic ? "magic" : "skills")));
         search.setMaxLength(96);
         search.setHint(Component.literal("Search by name"));
         search.setValue(query);
@@ -116,13 +121,15 @@ final class SkillMagicBrowser {
         List<SkillMagicBrowserModel.Entry> entries = new ArrayList<>();
         if (magic) {
             for (var art : AbilityCatalog.registered(s)) {
+                if (!s.supreme() && !s.abilityOwned(art.id())) continue;
                 var d = SkillDefinitions.find(art.id());
                 entries.add(new SkillMagicBrowserModel.Entry(art.id(), art.name(),
-                    art.id().equals(SkillDefinitions.RESTORE) ? List.of("Healing") :
+                    abilities ? List.of("Canon mapping unresolved") : art.id().equals(SkillDefinitions.RESTORE) ? List.of("Healing") :
                         d != null && d.intrinsic() ? List.of("Divine") : List.of(),
                     art.implemented() && granted(art.id(), s), mastered(art.id(), s)));
             }
         } else for (var d : SkillDefinitions.ALL) {
+            if (!s.supreme() && !s.skillGranted(d.id())) continue;
             entries.add(new SkillMagicBrowserModel.Entry(d.id(), d.name(), d.categories(),
                 s.unlocked() && s.skillGranted(d.id()), mastered(d.id(), s)));
         }
@@ -156,7 +163,7 @@ final class SkillMagicBrowser {
         for (var r : List.of(SkillMagicLayout.CATEGORIES, SkillMagicLayout.LIST, SkillMagicLayout.DETAILS))
             DivineFrame.sapphire(g, r.x(), r.y(), r.width(), r.height(), false);
         line(g, "Categories", 22, 94, 96, INK);
-        line(g, magic ? "Magic" : "Skills", 136, 94, 90, INK);
+        line(g, abilities ? "Abilities" : magic ? "Magic" : "Skills", 136, 94, 90, INK);
         line(g, model.visible().size() + " / " + model.count(""), 244, 94, 88, MUTED);
         for (int i = 0; i < categories.size(); i++) {
             String name = categoryNames()[i], key = i == 0 ? "" : name;
@@ -245,7 +252,8 @@ final class SkillMagicBrowser {
                 lines.add("At selected output: up to " + number(d.upkeepMana(s) * s.skillOutput(id) / 100.0) +
                     " mana/s while effective; the footer reports actual total drain.");
                 lines.add("Prerequisite: explicit server grant or /jayceetest authorization. Canonical race / evolution rules unresolved.");
-                lines.add("Origin: " + (s.skillExplicitGrant(id) ? "Explicit server grant; patron unspecified." :
+                String origin=s.divinity().getCompound("Grants").getString(id);
+                lines.add("Origin: " + (s.supreme() ? "Unique Jaycee authority." : !origin.isEmpty() ? origin :
                     s.jayceeTest() ? "Test authorization, not a learned patron grant." : "No intrinsic grant."));
             } else {
                 lines.add("Prerequisite: Sapphire unlock; use-based progression.");
@@ -281,7 +289,7 @@ final class SkillMagicBrowser {
             }
         }
         lines.add("Evolution / fusion requirements: not implemented.");
-        lines.add("Essence: separate blessing economy, unavailable. EP: separate permanent-power economy, unavailable. Neither is mana.");
+        lines.add("Essence: transferable bestowal reserve. EP: permanent power, not casting fuel. Inspect Divine Bonds (N). Natural earning rules remain unresolved.");
         lines.add("Scroll details or focus and use Page Up / Down.");
         detailsFocus.setMessage(Component.literal(SkillMagicBrowserModel.detailNarration(name, status(id, s), lines)));
         var wrapped = new ArrayList<FormattedCharSequence>();

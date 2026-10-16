@@ -139,9 +139,9 @@ public final class DivinityModel {
         if (carry >= 20) { whole++; carry -= 20; }
         creditEssence(authority, whole);
     }
-    public long establishmentFee(long ep) {
-        if (ep < 0) fail("Negative EP");
-        return Math.max(config.minimumFee, exact(BigInteger.valueOf(ep)
+    public long establishmentFee(long essence) {
+        if (essence < 0) fail("Negative Essence");
+        return Math.max(config.minimumFee, exact(BigInteger.valueOf(essence)
             .multiply(BigInteger.valueOf(config.feePercent)).add(BigInteger.valueOf(99)).divide(BigInteger.valueOf(100))));
     }
     public long quote(Proposal proposal) {
@@ -163,7 +163,7 @@ public final class DivinityModel {
                 fail("You can only grant implemented powers you own");
             if (recipient.grants.containsKey(proposal.ability)) fail("Recipient already owns this power");
         }
-        long fee = supreme(donor.id) ? 0 : exact(BigInteger.valueOf(proposal.bind ? establishmentFee(recipient.ep) : 0)
+        long fee = supreme(donor.id) ? 0 : exact(BigInteger.valueOf(proposal.bind ? establishmentFee(recipient.essence) : 0)
             .add(BigInteger.valueOf(proposal.ability.isEmpty() ? 0 : config.powerFee)));
         long debit = exact(BigInteger.valueOf(fee).add(BigInteger.valueOf(proposal.amount)));
         if (donor.essence < debit) fail("Insufficient Essence for the transfer plus burned establishment / power fee");
@@ -272,9 +272,13 @@ public final class DivinityModel {
     }
     public View view(UUID viewer, UUID target) {
         var p = profile(target); boolean hidden = supreme(target) && !supreme(viewer);
+        var visibleGrants = new HashMap<String, String>();
+        p.grants.forEach((ability, source) -> {
+            if (viewer.equals(target) || owns(viewer, ability)) visibleGrants.put(ability, source);
+        });
         return new View(p.id, p.originalName, p.username, hidden ? "" : p.divineName, hidden ? Rank.MORTAL : p.rank,
             hidden ? null : p.ep, hidden ? null : p.essence, supreme(target), !hidden && p.capLift, !hidden && p.bestow,
-            hidden ? null : p.patron, hidden ? Set.of() : p.npcPatrons, hidden ? Map.of() : p.grants, hidden ? null : p.release);
+            hidden ? null : p.patron, hidden ? Set.of() : p.npcPatrons, hidden ? Map.of() : Map.copyOf(visibleGrants), hidden ? null : p.release);
     }
     public List<Profile> followers(UUID id) { return profiles.values().stream().filter(p -> id.equals(p.patron)).toList(); }
     public List<Offer> pending(UUID id) { return offers.values().stream().filter(o ->

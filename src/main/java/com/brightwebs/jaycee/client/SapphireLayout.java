@@ -11,6 +11,8 @@ final class SapphireLayout {
  static Bounds slotState(int slot){var b=slot(slot);return new Bounds(b.x()+14,b.y()-10,46,8);}
  static Bounds slotCaption(int slot){var b=slot(slot);return new Bounds(b.x()+9,b.y()+36,42,8);}
  static Bounds tabLabel(int tab){return new Bounds(34+tab*103,41,51,9);}
+ static Bounds tabButton(int tab,boolean ordinary){int step=ordinary?86:103;return new Bounds(10+tab*step,7,step-4,49);}
+ static Bounds tabLabel(int tab,boolean ordinary){return ordinary?new Bounds(14+tab*86,41,74,9):tabLabel(tab);}
  static Bounds pageSelector(int page){return new Bounds(554+page*13,294,page==9?18:12,17);}
  final double scale;
  final double left,top;

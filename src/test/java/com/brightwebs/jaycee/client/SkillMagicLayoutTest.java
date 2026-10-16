@@ -3,6 +3,19 @@ package com.brightwebs.jaycee.client;
 public final class SkillMagicLayoutTest {
     private static int checks;
     public static void main(String[] args) {
+        for (boolean ordinary : new boolean[]{false, true}) {
+            int total = ordinary ? 6 : 5;
+            for (int tab = 0; tab < total; tab++) {
+                var button = SapphireLayout.tabButton(tab, ordinary);
+                var label = SapphireLayout.tabLabel(tab, ordinary);
+                check(button.x() >= 10 && button.x() + button.width() <= 536, "Navigation stays outside Equip Page");
+                check(button.contains(label.x(), label.y()) &&
+                    button.contains(label.x() + label.width() - 1, label.y() + label.height() - 1), "Labels share tab bounds");
+                if (tab + 1 < total) check(button.x() + button.width() <
+                    SapphireLayout.tabButton(tab + 1, ordinary).x(), "Tab hitboxes do not overlap");
+                if (!ordinary) check(label.equals(SapphireLayout.tabLabel(tab)), "Approved Sapphire label bounds unchanged");
+            }
+        }
         var left = SkillMagicLayout.CATEGORIES;
         var middle = SkillMagicLayout.LIST;
         var right = SkillMagicLayout.DETAILS;

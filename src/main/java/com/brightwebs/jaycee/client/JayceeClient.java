@@ -17,22 +17,25 @@ import org.lwjgl.glfw.GLFW;
 @EventBusSubscriber(modid=JayceeMod.ID,bus=EventBusSubscriber.Bus.MOD,value=net.neoforged.api.distmarker.Dist.CLIENT)
 public class JayceeClient {
  public static final KeyMapping OPEN=new KeyMapping("key.jaycee.open",InputConstants.Type.KEYSYM,GLFW.GLFW_KEY_M,"key.categories.jaycee");
+ public static final KeyMapping BESTOW=new KeyMapping("key.jaycee.bestow",InputConstants.Type.KEYSYM,GLFW.GLFW_KEY_N,"key.categories.jaycee");
  public static final KeyMapping[] ABILITY_KEYS={
   new KeyMapping("key.jaycee.slot1",InputConstants.Type.KEYSYM,GLFW.GLFW_KEY_Z,"key.categories.jaycee"),
   new KeyMapping("key.jaycee.slot2",InputConstants.Type.KEYSYM,GLFW.GLFW_KEY_X,"key.categories.jaycee"),
   new KeyMapping("key.jaycee.slot3",InputConstants.Type.KEYSYM,GLFW.GLFW_KEY_C,"key.categories.jaycee"),
   new KeyMapping("key.jaycee.slot4",InputConstants.Type.KEYSYM,GLFW.GLFW_KEY_V,"key.categories.jaycee")
  };
- @SubscribeEvent public static void register(RegisterKeyMappingsEvent e){e.register(OPEN);for(KeyMapping key:ABILITY_KEYS)e.register(key);JayceeHud.setSlotKeyProvider(slot->ABILITY_KEYS[slot].getTranslatedKeyMessage());}
+ @SubscribeEvent public static void register(RegisterKeyMappingsEvent e){e.register(OPEN);e.register(BESTOW);for(KeyMapping key:ABILITY_KEYS)e.register(key);JayceeHud.setSlotKeyProvider(slot->ABILITY_KEYS[slot].getTranslatedKeyMessage());}
  @EventBusSubscriber(modid=JayceeMod.ID,value=net.neoforged.api.distmarker.Dist.CLIENT)
  public static class Tick {
   @SubscribeEvent public static void tick(ClientTickEvent.Post e){
    Minecraft mc=Minecraft.getInstance();
    while(OPEN.consumeClick()){
     if(mc.player!=null&&mc.screen==null){
-     if(JayceeMod.unlocked(mc.player))mc.setScreen(new JayceeScreen());
-     else mc.player.displayClientMessage(net.minecraft.network.chat.Component.literal("Consume 3 Jayce's Essences to unlock"),true);
+     mc.setScreen(new JayceeScreen(!PlayerState.get(mc.player).supreme()));
     }
+   }
+   while(BESTOW.consumeClick()){
+    if(mc.player!=null&&mc.screen==null)mc.setScreen(new DivineBondsScreen(true));
    }
    for(int slot=0;slot<ABILITY_KEYS.length;slot++)while(ABILITY_KEYS[slot].consumeClick()){
     if(mc.player==null||mc.screen!=null||!JayceeMod.unlocked(mc.player))continue;

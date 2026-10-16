@@ -18,7 +18,8 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 public final class DivinityService {
     private DivinityService() {}
     public static void register() {
-        ModList.get().getModContainerById("jaycee").orElseThrow().registerConfig(ModConfig.Type.SERVER, DivinityConfig.SPEC);
+        ModList.get().getModContainerById("jaycee").orElseThrow()
+            .registerConfig(ModConfig.Type.SERVER, DivinityConfig.SPEC, "jaycee-divinity-server.toml");
         NeoForge.EVENT_BUS.addListener(DivinityService::commands);
     }
     public static DivinityModel model(ServerPlayer p) { return DivinitySavedData.get(p.server).model; }
@@ -26,7 +27,7 @@ public final class DivinityService {
     public static void join(ServerPlayer p) {
         var data = DivinitySavedData.get(p.server);
         data.model.join(p.getUUID(), p.getGameProfile().getName());
-        if (PlayerState.get(p).consumed() >= 3) data.model.migrateRestore(p.getUUID(), SkillDefinitions.RESTORE, now());
+        unlockRestore(p);
         // Migrate trusted pre-ledger operator grants without treating JayceeTest as authority.
         var legacy = p.getPersistentData().getCompound(PlayerState.TAG);
         if (!legacy.getBoolean("DivinityMigrated")) {
@@ -37,6 +38,16 @@ public final class DivinityService {
             p.getPersistentData().put(PlayerState.TAG, legacy);
         }
         data.setDirty();
+    }
+    public static void unlockRestore(ServerPlayer p) {
+        var legacy = p.getPersistentData().getCompound(PlayerState.TAG);
+        if (PlayerState.get(p).consumed() >= 3 && !legacy.getBoolean("DivinityRestoreMigrated")) {
+            var data = DivinitySavedData.get(p.server);
+            data.model.migrateRestore(p.getUUID(), SkillDefinitions.RESTORE, now());
+            legacy.putBoolean("DivinityRestoreMigrated", true);
+            p.getPersistentData().put(PlayerState.TAG, legacy);
+            data.setDirty();
+        }
     }
     public static void logout(ServerPlayer p) {
         var data = DivinitySavedData.get(p.server); data.model.disconnect(p.getUUID(), now());
@@ -89,8 +100,8 @@ public final class DivinityService {
         for (var o : m.pending(id)) {
             var t = new CompoundTag(); var s = o.proposal();
             t.putUUID("Id", o.id()); t.putUUID("Donor", s.donor()); t.putUUID("Recipient", s.recipient());
-            t.putString("DonorName", m.profile(s.donor()).displayName());
-            t.putString("RecipientName", m.profile(s.recipient()).displayName());
+            t.putString("DonorName", publicName(m.view(id, s.donor())));
+            t.putString("RecipientName", publicName(m.view(id, s.recipient())));
             t.putLong("Amount", s.amount()); t.putLong("Fee", o.fee()); t.putLong("Expires", o.expires());
             t.putString("Ability", s.ability()); t.putString("Name", s.name()); t.putBoolean("Bind", s.bind());
             pending.add(t);
@@ -130,6 +141,9 @@ public final class DivinityService {
         var patrons = new ListTag(); v.npcPatrons().stream().sorted().forEach(n -> patrons.add(StringTag.valueOf(n))); t.put("Npc", patrons);
         var grants = new CompoundTag(); v.grants().forEach(grants::putString); t.put("Grants", grants);
         return t;
+    }
+    private static String publicName(DivinityModel.View v) {
+        return v.divineName().isEmpty() ? v.username() : v.divineName();
     }
     private static boolean reachable(ServerPlayer from, ServerPlayer to) {
         return to != null && from != to && from.isAlive() && to.isAlive() && !from.isSpectator() && !to.isSpectator()

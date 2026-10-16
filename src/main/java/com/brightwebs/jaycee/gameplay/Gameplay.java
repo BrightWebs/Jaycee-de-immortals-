@@ -123,7 +123,7 @@ public final class Gameplay {
         SkillRuntime.invalidate(player);
         GameplayNetwork.sync(player);
         player.displayClientMessage(Component.literal(enabled
-            ? "Jaycee test identity enabled. Press M to open Sapphire. This is not EP progression or a race evolution; unfinished powers remain unavailable."
+            ? "Jaycee test access enabled. Press M for Divine Ascension or N for offers. This is not unique Jaycee authority, EP progression or a race evolution."
             : "Jaycee test identity disabled. Your earned essence unlock, resources and loadouts are unchanged."), false);
         return 1;
     }
@@ -135,9 +135,7 @@ public final class Gameplay {
         data.putInt("Consumed", consumed);
         PlayerState.save(player, data);
         if (consumed >= 3 && player instanceof ServerPlayer p) {
-            var saved = com.brightwebs.jaycee.gameplay.divine.DivinitySavedData.get(p.server);
-            saved.model.migrateRestore(p.getUUID(), SkillDefinitions.RESTORE, System.currentTimeMillis());
-            saved.setDirty();
+            com.brightwebs.jaycee.gameplay.divine.DivinityService.unlockRestore(p);
         }
         if (player instanceof ServerPlayer serverPlayer) GameplayNetwork.sync(serverPlayer);
         return consumed;

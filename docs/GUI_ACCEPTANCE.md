@@ -19,11 +19,21 @@
 - In-game HUD: four-slot loadout rendered with the same visual design language as the menu, not plain square placeholders.
 
 ## Unlock and testing
-- With cheats/operator level 2, run `/jayceetest` and press M without consuming essences; verify Soul Restore remains usable through the existing equip system. Verify a non-operator and the server console cannot self-grant the identity. Reconnect/respawn and confirm the test flag persists. Run `/jayceetest off`: players with fewer than three consumed essences must be locked again; players who earned the three-essence unlock must stay unlocked. Check that command use never changes HP/SP/mana, EP, cooldowns, loadouts, portrait preference or the approved GUI.
-- Three consumed **Jayce's Essences** unlock the menu per player; persist consumption count and unlock state across relogs.
+- `/jayceetest` remains operator-only test access, not unique Jaycee authority. M now opens ordinary Divine Ascension even before unlocking powers; verify test access permits existing Soul Restore/intrinsics through the existing equipment system. After `/jayceetest off`, unauthorized powers must be locked, while earned grants remain. Check persistence without changing resources, cooldowns, loadouts or portrait preference.
+- Three consumed **Jayce's Essences** still grant legacy Soul Restore once; persist consumption and the one-time migration marker. Explicitly revoke Restore, reconnect and consume another essence: revocation must not be silently undone.
 - Add an operator-only test command for receiving three essences; test the lock before and after consumption.
 - Verify client/server behavior, resolution handling, model render, tab persistence, mouse and keyboard input, and full resource load using Minecraft 1.21.1, NeoForge 21.1.x, Java 21.
 - A Gradle build passing is not proof of in-game visual fidelity. Do not label a JAR final until both build and in-game GUI checks pass.
+
+## Divine Ascension vertical slice (runtime checks pending)
+- Use `/jayceeauthority claim` as an operator. Only that UUID receives the original five-tab Sapphire composition; another operator must not acquire authority through `/jayceetest` or a repeated claim. Reassign/unassign and confirm menus switch to the appropriate role without resetting equipment.
+- Ordinary navigation is Status / Abilities / Skills / Magic / Divine Bonds / Quests. No Species tab is added; the sovereign race ribbon still opens its existing details. Shared page selectors, right-click removal, Alt-click/Alt-key modes and Alt-wheel must preserve all ten pages.
+- N alone must open the bestowal/offer overlay independently of M. Aim at a visible player within configured range, or choose from Nearby. Opening/selecting/quoting costs nothing. Edit amount, optional power/name and explicit bond invitation; changed terms must disable sending an old quote.
+- With two real clients, inspect the exact offer and Accept/Decline. Check duplicate acceptance, expired/replayed/wrong-recipient IDs, disconnect/restart, changing balances/eligibility, out-of-range/walled targets and full recipient caps. No rejected offer may deduct Essence, change EP/mana or bind/rename anyone. A donation without an invitation must not create fealty.
+- Exercise ordinary Minor God donor fees and Jaycee fee bypass with explicit operator balances. Watch Jaycee's Essence refill after an accepted grant while online. Balances/caps/fee basis are provisional configuration, not verified natural progression.
+- Verify release requests, denial, petition and explicit confirmed adjudication. Revocation/strip must stop access to grants, including migrated Soul Restore, across reconnects. Cap revocation must not delete historical EP/Essence.
+- Inspect personalized network data with two clients: concealed Jaycee divine name/statistics and unauthorized grant records must not appear in target or pending-offer records. Ordinary grants must not imply completed NPC offerings/patron trees.
+- Test keyboard focus/narration, editable Divine Name versus immutable account identity, scrolling long offers/profile/history and smallest supported GUI scales. Compare sovereign Status/Equip against the original image; this source work does not establish rendered fidelity.
 
 ## Source of truth
 Actual supplied artwork is required to establish exact geometry and colors. If those images are missing, don't invent a supposedly exact recreation.

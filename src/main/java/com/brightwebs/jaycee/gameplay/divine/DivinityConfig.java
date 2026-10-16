@@ -12,7 +12,8 @@ public final class DivinityConfig {
         var b = new ModConfigSpec.Builder();
         b.comment("Provisional Divine Ascension tuning, not canon.",
             "EP is permanent power, Essence spendable. No automatic earning or NPC offering recipe.",
-            "Establishment fee = max(minimum, ceil(recipient EP * percent / 100)), burned IN ADDITION to the transfer.",
+            "Provisional establishment fee = max(minimum, ceil(recipient current Essence * percent / 100)), burned IN ADDITION to the transfer.",
+            "The approximately 3-million threshold's exact capped field is unresolved; these independent caps are provisional policy.",
             "Each explicit power also burns powerFee. Jaycee bypasses fees but still pays transferred Essence.",
             "Cap revocation never deletes historical EP or existing Essence; new credits stop at the cap.");
         EP = b.defineInRange("ordinaryEpCap", 3_000_000L, 1L, Long.MAX_VALUE);

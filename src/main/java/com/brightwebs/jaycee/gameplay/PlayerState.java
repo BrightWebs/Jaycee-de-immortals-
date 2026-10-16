@@ -66,7 +66,7 @@ public final class PlayerState {
         var art = AbilityCatalog.find(id);
         return art != null && art.implemented() && (supreme() || jayceeTest()
             || data.getCompound("Divinity").getCompound("Grants").contains(id)
-            || (SkillDefinitions.RESTORE.equals(id) && consumed() >= 3)
+            || (!data.getBoolean("DivinityRestoreMigrated") && SkillDefinitions.RESTORE.equals(id) && consumed() >= 3)
             || (!data.getBoolean("DivinityMigrated") && SkillDefinitions.intrinsic(id) && skillExplicitGrant(id)));
     }
     /** Server world time when this snapshot was sent; client world time advances the displayed countdown. */

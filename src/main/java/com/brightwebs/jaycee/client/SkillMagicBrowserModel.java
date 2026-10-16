@@ -7,6 +7,7 @@ import java.util.LinkedHashSet;
 
 /** Dependency-free filtering and bounded scrolling; no saved gameplay state. */
 final class SkillMagicBrowserModel {
+    static final String SETTING_TIMING = "Nonzero output, mode and style changes take effect at the next paid upkeep. Zero or off stops this power immediately.";
     enum Filter { ALL, UNLOCKED, LOCKED, MASTERED }
     record Entry(String id, String name, List<String> categories, boolean unlocked, boolean mastered) {}
     private List<Entry> entries = List.of();

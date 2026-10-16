@@ -87,12 +87,12 @@ final class SkillMagicBrowser {
             () -> outputHint() + ". Increase output by ten percentage points.");
         mode = button(add, 350, 376, 81, 18, () -> "Mode", this::cycleMode, () -> {
             var d = SkillDefinitions.find(model.selected());
-            return "Current mode: " + (d == null || d.modes().isEmpty() ? "N/A" : d.modes().get(state().skillMode(d.id()))) +
-                ". Cycle unlocked modes without casting.";
+            return "Configured mode: " + (d == null || d.modes().isEmpty() ? "N/A" : d.modes().get(state().skillMode(d.id()))) +
+                ". Cycle unlocked modes without casting. Changes take effect at the next paid upkeep.";
         });
         style = button(add, 435, 376, 81, 18, () -> "Style", this::cycleStyle, () ->
-            "Current flight style: " + (model.selected() == null ? "N/A" : state().skillStyle(model.selected())) +
-                ". Cycle supported styles without casting.");
+            "Configured flight style: " + (model.selected() == null ? "N/A" : state().skillStyle(model.selected())) +
+                ". Cycle supported styles without casting. Changes take effect at the next paid upkeep.");
     }
     private Button button(Consumer<AbstractWidget> add, int x, int y, int w, int h,
                           java.util.function.Supplier<String> text, Runnable action,
@@ -240,7 +240,8 @@ final class SkillMagicBrowser {
             if (d.intrinsic()) {
                 lines.add("Activation mana: " + number(d.activationMana(s)));
                 lines.add("Upkeep: up to " + number(d.upkeepMana(s)) + "/s at 100% effective output.");
-                lines.add("Output: " + s.skillOutput(id) + "%. " + (s.skillEnabled(id) ? "Enabled" : "Disabled"));
+                lines.add("Configured output: " + s.skillOutput(id) + "%. " + (s.skillEnabled(id) ? "Enabled" : "Disabled"));
+                lines.add(SkillMagicBrowserModel.SETTING_TIMING);
                 lines.add("At selected output: up to " + number(d.upkeepMana(s) * s.skillOutput(id) / 100.0) +
                     " mana/s while effective; the footer reports actual total drain.");
                 lines.add("Prerequisite: explicit server grant or /jayceetest authorization. Canonical race / evolution rules unresolved.");
@@ -270,7 +271,7 @@ final class SkillMagicBrowser {
                 lines.add("Modes: " + String.join(", ", art.modes()));
                 int slot = selectedSlot.getAsInt();
                 if (id.equals(s.ability(s.page(), slot))) {
-                    lines.add("Selected slot mode: " + art.modes().get(s.mode(s.page(), slot)));
+                    lines.add("Selected slot configured mode: " + art.modes().get(s.mode(s.page(), slot)));
                 } else lines.add("Selected slot: this spell is not equipped here.");
                 long now = Minecraft.getInstance().level == null ? s.serverTick() : Minecraft.getInstance().level.getGameTime();
                 lines.add("Shared cooldown remaining: " + number(s.cooldownRemaining(id, now) / 20.0) + "s");
@@ -330,8 +331,8 @@ final class SkillMagicBrowser {
     }
     private String outputHint() {
         var d = SkillDefinitions.find(model.selected());
-        return d == null ? "No intrinsic selected" : d.name() + ". Current server-confirmed output: " +
-            state().skillOutput(d.id()) + "%";
+        return d == null ? "No intrinsic selected" : d.name() + ". Server-confirmed configured output: " +
+            state().skillOutput(d.id()) + "%. " + SkillMagicBrowserModel.SETTING_TIMING;
     }
     private void cycleMode() {
         var d = SkillDefinitions.find(model.selected()); if (d == null || d.modes().isEmpty()) return;

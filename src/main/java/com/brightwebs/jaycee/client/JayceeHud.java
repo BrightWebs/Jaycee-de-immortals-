@@ -137,7 +137,7 @@ public final class JayceeHud {
     private static void drawSlot(GuiGraphics graphics, int x, int y, int slot, PlayerState state, double seconds) {
         Minecraft mc = Minecraft.getInstance();
         String id = state.ability(state.page(), slot);
-        AbilityCatalog.Art art = AbilityCatalog.find(id);
+        AbilityCatalog.Art art = AbilityCatalog.find(id, state);
         long cooldown = state.cooldownRemaining(id, mc.level.getGameTime());
         if (id.equals(lastAbility[slot])) {
             if (id.equals(state.lastActivationId()) && state.lastActivationTick() > lastCastTick[slot]) {

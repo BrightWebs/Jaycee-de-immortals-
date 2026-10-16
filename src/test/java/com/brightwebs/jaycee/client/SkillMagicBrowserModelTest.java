@@ -91,6 +91,9 @@ public final class SkillMagicBrowserModelTest {
         check(narration.contains("Requires explicit server grant"), "Narration includes prerequisites");
         check(narration.contains("No patron origin registered"), "Narration includes origin limitations");
         check(narration.endsWith("Page Up and Page Down scroll the full details."), "Narration includes keyboard scrolling");
+        check(SkillMagicBrowserModel.detailNarration("Divine Flight", "Unlocked",
+            List.of(SkillMagicBrowserModel.SETTING_TIMING)).contains(SkillMagicBrowserModel.SETTING_TIMING),
+            "Narration explains paid-boundary settings versus immediate zero/off");
         System.out.println("SkillMagicBrowserModelTest: " + checks + " checks passed");
     }
     private static void check(boolean value, String message) {

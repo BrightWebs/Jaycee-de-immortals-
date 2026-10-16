@@ -624,7 +624,7 @@ final class DivineBondsScreen extends Screen {
         int x = (int)Math.floor(layout.localX(mx)), y = (int)Math.floor(layout.localY(my));
         for (var c : controls) {
             c.button.setMessage(Component.literal(c.text.get())); c.button.active = c.enabled.getAsBoolean();
-            c.button.visible = !(tab == 4 && isMob(selected()) && c.button.getY() >= 337 && c.button.getX() >= 274) && !(tab == 4 && !isMob(selected()) && c.button.getMessage().getString().startsWith("Command:"));
+            c.button.visible = !(tab == 4 && isMob(selected()) && c.button.getX() >= 274 && !c.button.getMessage().getString().startsWith("Command:") && c.button.getY() >= 283) && !(tab == 4 && !isMob(selected()) && c.button.getMessage().getString().startsWith("Command:"));
             // Hide disabled placeholders: empty mob rows should not be drawn as clickable cards.
             if (tab == 1 && mobs && c.button.getX() == 20
                     && c.button.getY() >= 112 && c.button.getY() < 350
@@ -760,7 +760,7 @@ final class DivineBondsScreen extends Screen {
         UiText.line(g, "Blessing review", 486, 96, 192, .75f, palette.accent(), true);
         var target = data().getCompound("MobTarget");
         boolean waiting = selection != null && !id(target).equals(selection);
-        renderMobPreview(g, waiting ? new CompoundTag() : target, MobBestowalUi.PREVIEW, mx, my);
+        renderMobPreview(g, waiting ? selected() : target, MobBestowalUi.PREVIEW, mx, my);
         mobInfoOffset = wrapped(g, waiting ? List.of("Waiting for selected mob's server profile.") : mobProfileLines(target),
             MobBestowalUi.INFO, mobInfoOffset);
         UiText.line(g, "Optional name · unchanged = keep", 234, 232, 222, .73f, MUTED, false);

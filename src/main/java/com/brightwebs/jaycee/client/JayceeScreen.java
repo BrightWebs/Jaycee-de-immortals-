@@ -43,7 +43,7 @@ public class JayceeScreen extends Screen {
      if(hover)DivineFrame.sapphire(g,getX(),getY(),width,height,true);
     }else DivineFrame.sapphire(g,getX(),getY(),width,height,hover);
     if(style==0){
-     int padding=height>28?24:width<16?1:width<28?2:8;
+     int padding=height>28?24:width<16?3:width<=32?4:8;
      int iconSpace=(tab==1||tab==3)&&getX()==128?18:0;
      UiText.line(g,getMessage().getString(),getX()+padding+iconSpace,
       getY()+(height-(int)Math.ceil(font.lineHeight*.8))/2,
@@ -76,11 +76,12 @@ public class JayceeScreen extends Screen {
   }
   for(int i=0;i<PlayerState.PAGES;i++){
    final int p=i;
-   pages[i]=button(""+(i+1),554+i*13,294,12,17,0,()->GameplayActions.page(p),"Select saved page "+(i+1));
+   var b=SapphireLayout.pageSelector(i);
+   pages[i]=button(""+(i+1),b.x(),b.y(),b.width(),b.height(),0,()->GameplayActions.page(p),"Select saved page "+(i+1));
   }
   portraitButton=null;
   if(tab==0){
-   portraitButton=button("Face",72,153,24,14,0,()->GameplayActions.portrait(!state().portrait3d()),
+   portraitButton=button("Face",68,153,28,14,0,()->GameplayActions.portrait(!state().portrait3d()),
     "Switch Face / 3D portrait; shared with the gameplay HUD");
    button("Race: Human",106,117,151,18,0,()->{speciesOpen=!speciesOpen;rebuild();},
     "Open species and evolution details. Human is a preview, not saved progression.");
@@ -200,8 +201,8 @@ public class JayceeScreen extends Screen {
     UiText.line(g,equipped.name(),caption.x(),caption.y(),caption.width(),.8f,INK,true);
    }else UiText.line(g,"Empty",caption.x(),caption.y(),caption.width(),.8f,MUTED,true);
   }
-  int px=554+snapshot.page()*13;
-  g.fill(px,312,px+12,314,0xFFB08BDD);
+  var page=SapphireLayout.pageSelector(snapshot.page());
+  g.fill(page.x(),312,page.x()+page.width(),314,0xFFB08BDD);
   paragraph(g,"Select an unlocked ability, then click a slot.",559,371,126,24,INK);
   label(g,"MP "+number(snapshot.mana()),568,399,108,INK);
  }

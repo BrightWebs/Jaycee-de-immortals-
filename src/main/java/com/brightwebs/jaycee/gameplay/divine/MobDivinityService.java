@@ -65,6 +65,32 @@ final class MobDivinityService {
     static boolean handle(ServerPlayer p, DivinityNetwork.Request r, DivinitySavedData.Session s) {
         var model = DivinityService.model(p);
         switch (r.operation()) {
+            case "mob_order" -> {
+                var profile = model.mob(r.target());
+                if (profile == null || profile.master() == null
+                        || !(profile.master().equals(p.getUUID()) || model.supreme(p.getUUID())))
+                    throw new IllegalArgumentException("Only the bonded mob's master or Jaycee can command it");
+                var mob = loaded(p.server, r.target());
+                if (mob == null || !reachable(p, mob))
+                    throw new IllegalArgumentException("Your subordinate must be alive, loaded and nearby");
+                String order = r.ability().strip().toLowerCase(java.util.Locale.ROOT);
+                if (!java.util.Set.of("follow", "stay", "guard", "attack").contains(order))
+                    throw new IllegalArgumentException("Unknown mob command");
+                mob.getPersistentData().putString("JayceeMobOrder", order);
+                mob.getPersistentData().putUUID("JayceeMobOrderOwner", p.getUUID());
+                if (order.equals("guard") || order.equals("stay"))
+                    mob.getPersistentData().putLong("JayceeMobAnchor", mob.blockPosition().asLong());
+                if (order.equals("stay")) { mob.getNavigation().stop(); mob.setTarget(null); }
+                if (order.equals("attack")) {
+                    var candidates = p.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.monster.Monster.class,
+                        p.getBoundingBox().inflate(14.0), candidate -> candidate.isAlive()
+                            && candidate != mob && p.hasLineOfSight(candidate));
+                    candidates.sort(java.util.Comparator.comparingDouble(p::distanceToSqr));
+                    if (candidates.isEmpty()) throw new IllegalArgumentException("No hostile mob in range to attack");
+                    mob.setTarget(candidates.get(0));
+                }
+                s.result = "Order set: " + order + " for " + mob.getName().getString();
+            }
             case "mob_clear" -> { clear(p, s); s.result = "Selection cleared; no resources spent."; }
             case "mob_select" -> {
                 clear(p, s);
@@ -270,6 +296,24 @@ final class MobDivinityService {
         if (profile == null) return;
         if (!model.liveMob(context(mob))) { MobPowerAdapters.clear(mob); return; }
         MobPowerAdapters.tick(mob, profile);
+        if (profile.master() != null && mob.tickCount % 10 == 0) {
+            var state = mob.getPersistentData();
+            if (profile.master().equals(state.getUUID("JayceeMobOrderOwner"))) {
+                String order = state.getString("JayceeMobOrder");
+                var owner = mob.getServer().getPlayerList().getPlayer(profile.master());
+                if (order.equals("follow") && owner != null && owner.level() == mob.level()) {
+                    if (mob.distanceToSqr(owner) > 12.0) mob.getNavigation().moveTo(owner, 1.15);
+                    else mob.getNavigation().stop();
+                } else if (order.equals("stay")) {
+                    mob.getNavigation().stop();
+                } else if (order.equals("guard") && state.contains("JayceeMobAnchor")) {
+                    var guard = net.minecraft.core.BlockPos.of(state.getLong("JayceeMobAnchor"));
+                    if (mob.blockPosition().distSqr(guard) > 16.0)
+                        mob.getNavigation().moveTo(guard.getX() + .5, guard.getY(), guard.getZ() + .5, 1.0);
+                }
+            }
+        }
+
         if (mob.tickCount % 20 == 0 && mob.isAlive()) update(mob, "active");
     }
 }

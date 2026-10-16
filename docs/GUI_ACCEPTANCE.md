@@ -8,6 +8,7 @@
 - Maintain consistent proportions and crisp scaling at common Minecraft GUI scales and window sizes.
 - Preserve readability, clipping, click bounds, hover/selected/focused states, keyboard accessibility and sound feedback.
 - Match artwork before adding gameplay abilities. Compare in-game screenshots with each reference image before declaring completion.
+- Compare specifically against main's `the realUI.png` (blob `b606cc8e12a19936a4336775a73bfe0fc07b206b`): top bar over Status only, separate Equip Page panel, upper-left portrait/Face toggle and race ribbon, lower-left Stats/EXP, central animated orbital sigil and three stacked right-side detail panels. Capture the Status view at GUI scales 1–4 and a small window; check ornament proportions, text and slot hitboxes. Reference inspection is complete; this in-game comparison is not.
 
 ## Screen anatomy
 - Tabs: Status / Abilities / Skills / Magic / Quests, each clickable and visually distinct. No Species tab: click the race name on Status for evolution details, then Back to Status. The baseline race remains the existing Human preview until progression integration is implemented.
@@ -30,7 +31,9 @@ Actual supplied artwork is required to establish exact geometry and colors. If t
 - Start a clean Java 21 / NeoForge 21.1.172 client and a separate dedicated server. Confirm the server never loads client rendering classes.
 - Consume three essences on the server; confirm M opens immediately, then confirm unlock survives death and reconnect.
 - Check all four empty slots at middle-right. Rebind Z/X/C/V and confirm labels and inputs follow the new bindings.
-- Equip Soul Restore in a selected slot through Abilities, switch tabs, close/reopen M, and check the HUD shows the same equipment/page. Right-click a menu slot to clear it.
+- Select Soul Restore through Abilities, then click each equipment slot (including after returning to Status); switch tabs, close/reopen M, and check the HUD shows the same equipment/page. Verify all four Remove buttons and right-click clearing affect only the selected page. Confirm other arts remain non-activating previews.
+- Click each of the ten page selectors and both arrows; confirm the highlighted selector follows the server snapshot, including changes made with Alt-scroll. Check empty slots, names/icons, mana and instructions remain inside Equip Page.
+- Tab/Shift-Tab through controls and activate with the keyboard, including the narrated race ribbon and Back to Status. Resize with the screen open; check focus highlights, pointer hover/click/drag alignment, tooltips and 3D-model clipping at each GUI scale.
 - Alt-scroll through all ten pages in both menu and gameplay, including rapid scrolling and wraparound. Confirm vanilla hotbar scrolling is not also triggered.
 - Alt-key/Alt-click a slot to cycle modes; reconnect and confirm the mode persists. Verify duplicate copies/pages cannot bypass an ability's cooldown.
 - Check Face View with a multiplayer skin and toggle Hat in Skin Customization without relogging. Check 3D View with hat, jacket, sleeves and pants toggled; both portraits must use the shared Status preference.

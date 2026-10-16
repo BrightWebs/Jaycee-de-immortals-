@@ -289,10 +289,10 @@ public class JayceeScreen extends Screen {
     tooltip(g,List.of(Component.literal("Titles, race and affinities: unavailable / preview; not live progression")),mx,my);return;
    }
   }
-  private void tooltip(GuiGraphics g,List<Component> lines,int mx,int my){
-   int wrap=Math.max(1,Math.min(260,width-16));
-   g.renderTooltip(font,lines.stream().flatMap(line->font.split(line,wrap).stream()).toList(),mx,my);
-  }
+ }
+ private void tooltip(GuiGraphics g,List<Component> lines,int mx,int my){
+  int wrap=Math.max(1,Math.min(260,width-16));
+  g.renderTooltip(font,lines.stream().flatMap(line->font.split(line,wrap).stream()).toList(),mx,my);
  }
  @Override public boolean mouseClicked(double mx,double my,int button){
   double x=layout.localX(mx),y=layout.localY(my);

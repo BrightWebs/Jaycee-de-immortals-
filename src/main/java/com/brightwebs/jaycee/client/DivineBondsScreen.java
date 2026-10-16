@@ -168,6 +168,15 @@ final class DivineBondsScreen extends Screen {
             button(274, 367, 388, () -> "Petition Jaycee after denied release", () ->
                 DivinityNetwork.request("petition"), () -> data().getString("Release").equals("DENIED"));
         } else if (tab == 4) {
+            for (int i = 0; i < 4; i++) {
+                final String order = new String[]{"follow", "stay", "guard", "attack"}[i];
+                button(274 + (i % 2) * 196, 284 + (i / 2) * 26, 188,
+                    () -> "Command: " + order.toUpperCase(java.util.Locale.ROOT),
+                    () -> request("mob_order", selection, null, order, false),
+                    () -> isMob(selected()) && selected().hasUUID("Master")
+                        && (selected().getUUID("Master").equals(self()) || state().supreme()));
+            }
+        } else if (tab == 4) {
             button(274, 283, 388, () -> "Decision: " + DECISIONS[decision], () -> {
                 decision = (decision + 1) % DECISIONS.length; confirmed = false;
             }, this::canAdjudicate);
@@ -615,7 +624,7 @@ final class DivineBondsScreen extends Screen {
         int x = (int)Math.floor(layout.localX(mx)), y = (int)Math.floor(layout.localY(my));
         for (var c : controls) {
             c.button.setMessage(Component.literal(c.text.get())); c.button.active = c.enabled.getAsBoolean();
-            c.button.visible = !(tab == 4 && isMob(selected()) && c.button.getY() >= 283 && c.button.getX() >= 274);
+            c.button.visible = !(tab == 4 && isMob(selected()) && c.button.getY() >= 337 && c.button.getX() >= 274) && !(tab == 4 && !isMob(selected()) && c.button.getMessage().getString().startsWith("Command:"));
         }
         if (detailsNarration != null) detailsNarration.setMessage(Component.literal(String.join(". ", body()) + ". Page Up and Page Down scroll details."));
         if (mobInfoNarration != null) mobInfoNarration.setMessage(Component.literal(
@@ -701,12 +710,20 @@ final class DivineBondsScreen extends Screen {
         return scroll;
     }
     private LivingEntity loadedMob(CompoundTag record) {
-        var world = Minecraft.getInstance().level;
-        if (world == null || record.getBoolean("TerminalRemoval") || !record.getString("Status").equals("active") ||
-                !record.getString("Dimension").equals(world.dimension().location().toString()) || !record.hasUUID("Id"))
-            return null;
-        var entity = world.getEntity(record.getInt("EntityId"));
-        return entity instanceof LivingEntity living && living.getUUID().equals(id(record)) && living.isAlive() ? living : null;
+        var minecraft = Minecraft.getInstance();
+        var world = minecraft.level;
+        if (world == null || !record.hasUUID("Id") || record.getBoolean("TerminalRemoval")) return null;
+        if (!record.getString("Dimension").isEmpty()
+                && !record.getString("Dimension").equals(world.dimension().location().toString())) return null;
+        UUID identity = record.getUUID("Id");
+        // Entity ids are not synchronized across client and server: resolve by stable UUID.
+        if (minecraft.hitResult instanceof net.minecraft.world.phys.EntityHitResult hit
+                && hit.getEntity() instanceof LivingEntity living
+                && living.isAlive() && identity.equals(living.getUUID())) return living;
+        for (var entity : world.entitiesForRendering())
+            if (entity instanceof LivingEntity living
+                    && living.isAlive() && identity.equals(living.getUUID())) return living;
+        return null;
     }
     private void renderMobPreview(GuiGraphics g, CompoundTag record, MobBestowalUi.Rect r, int mx, int my) {
         DivineFrame.sapphire(g, r.x(), r.y(), r.width(), r.height(), false);
@@ -720,7 +737,7 @@ final class DivineBondsScreen extends Screen {
                 r.x() + r.width() - 3, r.y() + r.height() - 3, scale, .0625f, mx, my, entity);
         } else {
             if (r.height() > 50)
-                UiText.paragraph(g, "Live preview unavailable", r.x() + 5, r.y() + r.height() - 26,
+                UiText.paragraph(g, "Move near a loaded mob for live preview", r.x() + 5, r.y() + r.height() - 30,
                     r.width() - 10, 24, .65f, MUTED);
         }
     }
@@ -730,9 +747,9 @@ final class DivineBondsScreen extends Screen {
         var patrons = PatronTheme.retained(StatusData.patrons(state()));
         var palette = PatronTheme.palette(patrons);
         UiText.line(g, "Nearby eligible entities", 22, 96, 184, .8f, INK, true);
-        UiText.line(g, "Identity · your lineage frame", 234, 96, 202, .75f, palette.accent(), true);
+        UiText.line(g, "Selected creature", 234, 96, 202, .75f, palette.accent(), true);
         PatronEmblem.icon(g, palette.id(), 442, 91, 16);
-        UiText.line(g, "Transaction · scroll to review", 486, 96, 192, .75f, palette.accent(), true);
+        UiText.line(g, "Blessing review", 486, 96, 192, .75f, palette.accent(), true);
         var target = data().getCompound("MobTarget");
         boolean waiting = selection != null && !id(target).equals(selection);
         renderMobPreview(g, waiting ? new CompoundTag() : target, MobBestowalUi.PREVIEW, mx, my);

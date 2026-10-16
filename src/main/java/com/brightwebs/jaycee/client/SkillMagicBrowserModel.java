@@ -3,7 +3,6 @@ package com.brightwebs.jaycee.client;
 import java.util.List;
 import java.util.Locale;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 
 /** Dependency-free filtering and bounded scrolling; no saved gameplay state. */
 final class SkillMagicBrowserModel {
@@ -17,23 +16,6 @@ final class SkillMagicBrowserModel {
     static String detailNarration(String name, String status, List<String> lines) {
         return name + ". " + status + ". " + String.join(". ", lines) +
             ". Page Up and Page Down scroll the full details.";
-    }
-    /** Secondary filters describe implemented mechanics, never inferred patron or canon relationships. */
-    static List<String> skillCategories(String id, String category) {
-        var result = new LinkedHashSet<String>();
-        result.add(switch (category) {
-            case "Intrinsic" -> "Divine Mastery";
-            case "Physical" -> "Physical Mastery";
-            case "Magic" -> "Magical Mastery";
-            default -> category;
-        });
-        switch (id) {
-            case "jaycee:divine_speed", "jaycee:divine_flight" -> result.add("Movement");
-            case "jaycee:divine_perception" -> result.add("Perception");
-            case "jaycee:divine_resistances" -> result.add("Resistances");
-            default -> { }
-        }
-        return List.copyOf(result);
     }
     void entries(List<Entry> values) {
         var unique = new LinkedHashMap<String, Entry>();

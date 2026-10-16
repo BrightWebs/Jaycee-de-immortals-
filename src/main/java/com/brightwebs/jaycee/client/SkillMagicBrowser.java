@@ -123,7 +123,7 @@ final class SkillMagicBrowser {
                     art.implemented() && granted(art.id(), s), mastered(art.id(), s)));
             }
         } else for (var d : SkillDefinitions.ALL) {
-            entries.add(new SkillMagicBrowserModel.Entry(d.id(), d.name(), SkillMagicBrowserModel.skillCategories(d.id(), d.category()),
+            entries.add(new SkillMagicBrowserModel.Entry(d.id(), d.name(), d.categories(),
                 s.unlocked() && s.skillGranted(d.id()), mastered(d.id(), s)));
         }
         model.entries(entries);
@@ -231,7 +231,7 @@ final class SkillMagicBrowser {
         if (d != null) {
             lines.add(d.description());
             lines.add("Category: " + (magic ? id.equals(SkillDefinitions.RESTORE) ? "Healing" : "Divine" :
-                String.join(", ", SkillMagicBrowserModel.skillCategories(d.id(), d.category()))));
+                String.join(", ", d.categories())));
             lines.add("Level: " + s.skillLevel(id) + " / " + s.skillMaxLevel());
             long next = (long) Math.min(s.skillMaxLevel(), s.skillLevel(id) + 1);
             lines.add("XP: " + s.skillXp(id) + " / " + next * next * s.skillXpPerLevel() +

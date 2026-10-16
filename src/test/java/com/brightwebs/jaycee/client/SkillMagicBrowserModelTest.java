@@ -61,17 +61,25 @@ public final class SkillMagicBrowserModelTest {
         check(m.offset() == 0, "Registry shrink clamps an old bottom-page offset");
         m.detailScroll(100, 120); m.detailScroll(0, 2);
         check(m.detailOffset() == 0, "Shorter server-backed detail body clamps old scroll");
-        var registered = List.of("divine_speed", "divine_flight", "divine_perception",
-            "regeneration", "divine_resistances", "physical_training", "soul_restore");
+        String[][] registered = {
+            {"divine_speed", "Divine Mastery", "Movement"},
+            {"divine_flight", "Divine Mastery", "Movement"},
+            {"divine_perception", "Divine Mastery", "Perception"},
+            {"regeneration", "Divine Mastery"},
+            {"divine_resistances", "Divine Mastery", "Resistances"},
+            {"physical_training", "Physical Mastery"},
+            {"soul_restore", "Magical Mastery"}
+        };
         var actual = new ArrayList<SkillMagicBrowserModel.Entry>();
-        for (String name : registered) {
-            String primary = name.equals("physical_training") ? "Physical" : name.equals("soul_restore") ? "Magic" : "Intrinsic";
+        for (String[] definition : registered) {
+            String name = definition[0];
             String id = "jaycee:" + name;
-            actual.add(new SkillMagicBrowserModel.Entry(id, name, SkillMagicBrowserModel.skillCategories(id, primary), false, false));
+            actual.add(new SkillMagicBrowserModel.Entry(id, name,
+                List.of(java.util.Arrays.copyOfRange(definition, 1, definition.length)), false, false));
         }
         m.entries(actual);
         check(m.count("") == 7, "Only seven actual definitions; no fabricated magical-mastery skill");
-        check(m.count("Divine Mastery") == 5, "Intrinsic shorthand maps to Divine Mastery");
+        check(m.count("Divine Mastery") == 5, "Actual intrinsic metadata counted in Divine Mastery");
         check(m.count("Physical Mastery") == 1, "Physical Training uses actual Physical Mastery");
         check(m.count("Magical Mastery") == 1, "Only real Soul Restore mastery in Magical Mastery");
         check(m.count("Movement") == 2, "Speed and flight classified by implemented movement");
@@ -79,10 +87,13 @@ public final class SkillMagicBrowserModelTest {
         check(m.count("Resistances") == 1, "Plural resistance ID maps to real resistance filter");
         check(m.count("Patron Disciplines") == 0, "No guessed patron origin");
         check(m.count("Elemental Affinities") == 0, "No guessed affinities");
-        check(SkillMagicBrowserModel.skillCategories("jaycee:divine_speed", "Divine Mastery").equals(
-            SkillMagicBrowserModel.skillCategories("jaycee:divine_speed", "Intrinsic")), "Expanded and shorthand metadata equivalent");
-        check(SkillMagicBrowserModel.skillCategories("jaycee:divine_speed", "Movement").equals(List.of("Movement")),
-            "Repeated primary and secondary membership counted once");
+        m.category("Movement");
+        check(m.visible().size() == 2 && m.visible().stream().allMatch(e ->
+            e.id().equals("jaycee:divine_speed") || e.id().equals("jaycee:divine_flight")),
+            "Secondary category filters actual metadata without guessing from names");
+        m.entries(List.of(new SkillMagicBrowserModel.Entry("jaycee:divine_speed", "Divine Speed",
+            List.of("Movement", "Movement"), false, false)));
+        check(m.count("Movement") == 1, "Repeated category membership counts a definition once");
         String longDetail = "Complete effect description ".repeat(200);
         String narration = SkillMagicBrowserModel.detailNarration("Divine Speed", "Locked",
             List.of(longDetail, "Requires explicit server grant", "No patron origin registered"));

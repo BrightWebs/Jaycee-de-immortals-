@@ -625,6 +625,14 @@ final class DivineBondsScreen extends Screen {
         for (var c : controls) {
             c.button.setMessage(Component.literal(c.text.get())); c.button.active = c.enabled.getAsBoolean();
             c.button.visible = !(tab == 4 && isMob(selected()) && c.button.getY() >= 337 && c.button.getX() >= 274) && !(tab == 4 && !isMob(selected()) && c.button.getMessage().getString().startsWith("Command:"));
+            // Hide disabled placeholders: empty mob rows should not be drawn as clickable cards.
+            if (tab == 1 && mobs && c.button.getX() == 20
+                    && c.button.getY() >= 112 && c.button.getY() < 350
+                    && (c.button.getY() - 112) % 34 == 0) {
+                int index = (c.button.getY() - 112) / 34;
+                c.button.visible = index < records().size() - offset;
+            }
+
         }
         if (detailsNarration != null) detailsNarration.setMessage(Component.literal(String.join(". ", body()) + ". Page Up and Page Down scroll details."));
         if (mobInfoNarration != null) mobInfoNarration.setMessage(Component.literal(
@@ -746,7 +754,7 @@ final class DivineBondsScreen extends Screen {
             DivineFrame.sapphire(g, r.x(), r.y(), r.width(), r.height(), false);
         var patrons = PatronTheme.retained(StatusData.patrons(state()));
         var palette = PatronTheme.palette(patrons);
-        UiText.line(g, "Nearby eligible entities", 22, 96, 184, .8f, INK, true);
+        UiText.line(g, "Nearby mobs", 22, 96, 184, .8f, INK, true);
         UiText.line(g, "Selected creature", 234, 96, 202, .75f, palette.accent(), true);
         PatronEmblem.icon(g, palette.id(), 442, 91, 16);
         UiText.line(g, "Blessing review", 486, 96, 192, .75f, palette.accent(), true);
@@ -757,7 +765,7 @@ final class DivineBondsScreen extends Screen {
             MobBestowalUi.INFO, mobInfoOffset);
         UiText.line(g, "Optional name · unchanged = keep", 234, 232, 222, .73f, MUTED, false);
         UiText.line(g, "Essence · available " + data().getLong("Essence"), 234, 267, 222, .75f, INK, false);
-        UiText.line(g, "Owned powers · scroll · selected: " + (ability.isEmpty() ? "None" : abilityName(ability)),
+        UiText.line(g, "Optional power: " + (ability.isEmpty() ? "None" : abilityName(ability)),
             234, 331, 222, .7f, MUTED, false);
         if (!bind) {
             var warning = MobBestowalUi.DESPAWN_WARNING;

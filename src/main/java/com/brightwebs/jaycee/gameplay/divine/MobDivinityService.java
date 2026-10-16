@@ -73,7 +73,7 @@ final class MobDivinityService {
                 var mob = loaded(p.server, r.target());
                 if (mob == null || !reachable(p, mob))
                     throw new IllegalArgumentException("Your subordinate must be alive, loaded and nearby");
-                String order = r.name().strip().toLowerCase(java.util.Locale.ROOT);
+                String order = r.ability().strip().toLowerCase(java.util.Locale.ROOT);
                 if (!java.util.Set.of("follow", "stay", "guard", "attack").contains(order))
                     throw new IllegalArgumentException("Unknown mob command");
                 mob.getPersistentData().putString("JayceeMobOrder", order);

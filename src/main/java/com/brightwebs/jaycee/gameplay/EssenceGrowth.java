@@ -42,7 +42,7 @@ public final class EssenceGrowth {
     private static void onDeath(LivingDeathEvent event) {
         if (!(event.getSource().getEntity() instanceof ServerPlayer player)
                 || event.getEntity() instanceof net.minecraft.world.entity.player.Player
-                || player.isCreative() || player.isSpectator() || !player.isAlive()
+                || player.isSpectator() || !player.isAlive()
                 || !PlayerState.get(player).unlocked()) return;
         int reward = value(event.getEntity());
         var data = PlayerState.read(player);
@@ -57,8 +57,16 @@ public final class EssenceGrowth {
         PlayerState.save(player, data);
         if (amount <= 0) return;
         long credited = DivinityService.creditEssence(player, amount);
-        if (credited > 0)
-            player.displayClientMessage(Component.literal("+" + credited + " Essence"), true);
+        if (credited > 0) {
+            var progress = DivinityService.model(player).progression(player.getUUID());
+            player.displayClientMessage(Component.literal("+" + credited + " Essence  |  Total: "
+                + DivinityService.model(player).profile(player.getUUID()).essence()
+                + "  |  Lv " + progress.level() + ": " + progress.intoLevel()
+                + "/" + progress.nextCost()), true);
+            // CreditEssence synchronizes the actual ledger. Apply level resource growth immediately too.
+            grow(player);
+            GameplayNetwork.sync(player);
+        }
     }
 
     /** Called once per second. Apply only NEW level deltas, preserving configured pools. */

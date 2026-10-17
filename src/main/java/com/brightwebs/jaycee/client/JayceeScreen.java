@@ -30,7 +30,8 @@ public class JayceeScreen extends Screen {
  private SapphireLayout layout;
  private int tab,selected,category;
  private final SkillMagicBrowser skillsBrowser=new SkillMagicBrowser(false,()->selected),magicBrowser=new SkillMagicBrowser(true,()->selected);
- private int art=-1;
+ private int art=0;
+ private int artScroll;
  private Button portraitButton;
  private Button traitsFocus,affinitiesFocus;
  private int traitScroll,affinityScroll,traitHeight,affinityHeight;
@@ -92,7 +93,7 @@ public class JayceeScreen extends Screen {
     }else if(ordinary&&tab==1){
      String id=abilityBrowser.equippableSelection();
      if(id!=null)GameplayActions.equip(state().page(),s,id);
-    }else if(art>=0)GameplayActions.equip(state().page(),s,AbilityCatalog.ALL.get(art).id());
+    }else if(art>=0&&AbilityCatalog.ALL.get(art).implemented())GameplayActions.equip(state().page(),s,AbilityCatalog.ALL.get(art).id());
    },null);
    button("Remove "+(i+1),554+(i%2)*69,321+(i/2)*24,65,20,0,
     ()->GameplayActions.equip(state().page(),s,""),"Clear slot "+(i+1)+" on the current page");
@@ -130,17 +131,18 @@ public class JayceeScreen extends Screen {
   else if(tab==1){
    for(int i=0;i<CATS.length;i++){
     final int c=i;
-    var b=button(CATS[i],18,105+i*38,98,28,0,()->{category=c;rebuild();},"Category preview; filtering and progression are unavailable");
+    var b=button(CATS[i],18,105+i*38,98,28,0,()->{category=c;artScroll=0;var entries=visibleArts();if(!entries.contains(art))art=entries.isEmpty()?-1:entries.getFirst();rebuild();},"Filter abilities by category");
     if(i==category)selectedCategoryButton=b;
    }
-   for(int i=0;i<AbilityCatalog.ALL.size();i++){
-    final int a=i;
-    var ability=AbilityCatalog.ALL.get(i);
-    var b=button(ability.name()+(ability.implemented()?"":" [Preview]"),128,105+i*43,385,34,0,
-     ()->{art=a;rebuild();},"Select "+ability.name()+", then click an equipment slot. "+
-      (ability.implemented()?"Requires Sapphire unlock.":"Preview only; cannot activate."));
-    if(i==art)selectedArtButton=b;
-   }
+   java.util.List<Integer> visible=visibleArts();
+    artScroll=Math.clamp(artScroll,0,Math.max(0,visible.size()-5));
+    for(int row=0;row<5&&row+artScroll<visible.size();row++){
+     final int a=visible.get(row+artScroll);
+     var ability=AbilityCatalog.ALL.get(a);
+     var b=button(ability.name()+(ability.implemented()?"":" [Preview]"),137,229+row*30,365,26,0,
+      ()->{art=a;rebuild();},"Show "+ability.name()+" details. "+(ability.implemented()?"Click an equipment slot to equip.":"Preview only."));
+     if(a==art)selectedArtButton=b;
+    }
   }else if(tab==2||tab==3)browser().init(widget->addRenderableWidget(widget));
  }
  private Button statusFocus(int x,int y,int w,int h,String name){
@@ -211,8 +213,11 @@ public class JayceeScreen extends Screen {
    g.fill(18,54,10+tabStep()-12,55,theme.accent());
    DivineFrame.gem(g,10+(tabStep()-4)/2,9,2,theme.secondary());
   }
-  if(tab==1&&!ordinary)for(int i=0;i<AbilityCatalog.ALL.size();i++)
-   AbilityIcons.render(g,AbilityCatalog.ALL.get(i),152,115+i*43,14,i==art);
+  if(tab==1&&!ordinary){java.util.List<Integer> visible=visibleArts();
+   for(int row=0;row<5&&row+artScroll<visible.size();row++){int index=visible.get(row+artScroll);
+    AbilityIcons.render(g,AbilityCatalog.ALL.get(index),152,235+row*30,14,index==art);
+   }
+  }
   if(tab==1&&ordinary){abilityBrowser.renderRows(g);abilityBrowser.renderOutput(g);}
   if(tab==2||tab==3){browser().renderRows(g);browser().renderOutput(g);}
   equipment(g,snapshot);
@@ -390,9 +395,33 @@ public class JayceeScreen extends Screen {
   }
   return content;
  }
+ private java.util.List<Integer> visibleArts(){
+  java.util.List<Integer> result=new java.util.ArrayList<>();
+  for(int i=0;i<AbilityCatalog.ALL.size();i++){
+   String id=AbilityCatalog.ALL.get(i).id();
+   int type=id.contains("severance")||id.contains("pulse")?1:
+    id.contains("guard")?2:id.contains("restore")?3:
+    id.contains("step")||id.contains("flight")?4:5;
+   if(category==0||category==type)result.add(i);
+  }
+  return result;
+ }
  private void abilities(GuiGraphics g){
-  label(g,tab==1?"Abilities":"Magic",26,86,484,INK);
-  paragraph(g,"Select an art, then an equipment slot. Preview arts cannot activate.",36,376,464,24,MUTED);
+  label(g,"Abilities",26,86,484,INK);
+  panel(g,125,91,391,124,"Selected Ability");
+  if(art>=0&&art<AbilityCatalog.ALL.size()){
+   var ability=AbilityCatalog.ALL.get(art);
+   AbilityIcons.render(g,ability,149,131,28,true);
+   label(g,ability.name(),188,127,290,BLUE);
+   paragraph(g,ability.implemented()?
+    "Select an equipped slot on the right to use this unlocked art.":
+    "Preview only. This ability cannot be equipped or activated yet.",188,146,298,24,INK);
+   label(g,"Mana: "+(ability.implemented()?number(ability.manaCost()):"N/A"),146,179,103,MUTED);
+   label(g,"Cooldown: "+(ability.implemented()?number(ability.cooldownTicks()/20.0)+"s":"N/A"),253,179,126,MUTED);
+   label(g,"Mode: "+String.join(", ",ability.modes()),380,179,120,MUTED);
+  }
+  label(g,"Available Arts (scroll to browse)",136,215,358,INK);
+  paragraph(g,"Select an art to see details. Only usable arts can be equipped.",136,386,365,21,MUTED);
  }
  private SkillMagicBrowser browser(){return tab==3?magicBrowser:skillsBrowser;}
  private void species(GuiGraphics g){
@@ -497,6 +526,9 @@ public class JayceeScreen extends Screen {
    }
   }
   if(dy!=0&&Screen.hasAltDown()){GameplayActions.pageDelta(dy<0?1:-1);return true;}
+  if(tab==1&&!ordinary&&layout.localX(mx)>=125&&layout.localX(mx)<=516&&layout.localY(my)>=215&&layout.localY(my)<=386&&dy!=0){
+   artScroll=Math.clamp(artScroll+(dy<0?1:-1),0,Math.max(0,visibleArts().size()-5));rebuild();return true;
+  }
   if((tab==2||tab==3)&&browser().scroll(layout.localX(mx),layout.localY(my),dy))return true;
   if(ordinary&&tab==1&&abilityBrowser.scroll(layout.localX(mx),layout.localY(my),dy))return true;
   return super.mouseScrolled(layout.localX(mx),layout.localY(my),dx,dy);

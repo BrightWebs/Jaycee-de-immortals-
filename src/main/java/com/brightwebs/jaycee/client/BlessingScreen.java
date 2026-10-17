@@ -15,7 +15,8 @@ public final class BlessingScreen extends Screen {
     private String chosen = "";
     private Boolean accepted;
     private int revealTicks;
-    private boolean pending;
+    private enum Stage { CHOOSING, CONFIRMING, ROLLING }
+    private Stage stage = Stage.CHOOSING;
     private int panelLeft, panelTop, panelWidth, panelHeight;
     private static final int GOLD = 0xFFE5C685, BLUE = 0xFFB5D5EF;
     public BlessingScreen() { super(Component.literal("Divine Blessing")); }
@@ -32,6 +33,13 @@ public final class BlessingScreen extends Screen {
     }
     private static String cap(String id) {
         return id.isEmpty() ? id : id.substring(0, 1).toUpperCase(Locale.ROOT) + id.substring(1);
+    }
+    private static String emblem(String id) {
+        return switch (id) {
+            case "zeus" -> "Z"; case "poseidon" -> "III"; case "hades" -> "H";
+            case "athena" -> "A"; case "apollo" -> "SUN"; case "artemis" -> "MOON";
+            default -> cap(id).substring(0, 1);
+        };
     }
     private static String domain(String id) {
         return switch (id) {
@@ -51,7 +59,8 @@ public final class BlessingScreen extends Screen {
         panelHeight = Math.min(310, Math.max(150, height - 16));
         panelLeft = (width - panelWidth) / 2;
         panelTop = (height - panelHeight) / 2;
-        if (pending) return;
+        if (stage == Stage.ROLLING) return;
+        if (stage == Stage.CONFIRMING) { addConfirmButtons(); return; }
         int cols = panelWidth >= 440 ? 4 : 2;
         int rows = (DivineTotemService.OLYMPIANS.size() + cols - 1) / cols;
         int gap = 7, cell = (panelWidth - 32 - (cols - 1) * gap) / cols;
@@ -87,15 +96,33 @@ public final class BlessingScreen extends Screen {
         }
     }
     private void choose(String god) {
-        if (pending) return;
+        if (stage != Stage.CHOOSING) return;
         chosen = god;
-        pending = true;
+        stage = Stage.CONFIRMING;
+        rebuildWidgets();
+    }
+    private void rebuildWidgets() {
         clearWidgets();
-        PacketDistributor.sendToServer(new BlessingNetwork.Choose(god));
+        init();
+    }
+    private void addConfirmButtons() {
+        int y = panelTop + panelHeight - 43;
+        addRenderableWidget(Button.builder(Component.literal("Back"), button -> {
+            stage = Stage.CHOOSING;
+            chosen = "";
+            rebuildWidgets();
+        }).bounds(panelLeft + 55, y, 114, 23).build());
+        addRenderableWidget(Button.builder(Component.literal("Offer Totem"), button -> {
+            stage = Stage.ROLLING;
+            accepted = null;
+            revealTicks = 0;
+            clearWidgets();
+            PacketDistributor.sendToServer(new BlessingNetwork.Choose(chosen));
+        }).bounds(panelLeft + panelWidth - 169, y, 114, 23).build());
     }
     @Override public void tick() {
         super.tick();
-        if (pending) revealTicks++;
+        if (stage == Stage.ROLLING) revealTicks++;
     }
     @Override public void render(GuiGraphics g, int mx, int my, float partial) {
         this.renderBackground(g, mx, my, partial);
@@ -108,10 +135,19 @@ public final class BlessingScreen extends Screen {
         g.fill(x + 16, y + 12, x + w - 16, y + 14, 0xFFD8B776);
         g.drawCenteredString(font, Component.literal("THE COUNCIL OF OLYMPUS"), cx, y + 22, GOLD);
         g.drawCenteredString(font, Component.literal("A divine invitation awaits your answer"), cx, y + 41, BLUE);
-        if (!pending) {
+        if (stage == Stage.CHOOSING) {
             g.fill(x + 16, y + h - 39, x + w - 16, y + h - 38, 0xFF4D789E);
             g.drawCenteredString(font, Component.literal("Raids and Luck strengthen your plea. Fate is never certain."), cx, y + h - 31, BLUE);
             g.drawCenteredString(font, Component.literal("Select a god to offer one Divine Totem."), cx, y + h - 17, GOLD);
+        } else if (stage == Stage.CONFIRMING) {
+            g.drawCenteredString(font, Component.literal("REQUEST DIVINE FAVOR"), cx, y + 70, GOLD);
+            g.drawCenteredString(font, Component.literal(cap(chosen)), cx, y + 97, 0xFFFFFFFF);
+            g.drawCenteredString(font, Component.literal(domain(chosen)), cx, y + 117, BLUE);
+            g.fill(cx - 30, y + 139, cx + 30, y + 201, 0xFF527CA7);
+            g.fill(cx - 27, y + 142, cx + 27, y + 198, 0xFF122E4E);
+            g.drawCenteredString(font, Component.literal(emblem(chosen)), cx, y + 166, GOLD);
+            g.drawCenteredString(font, Component.literal(cap(chosen) + " may accept or refuse your offering."), cx, y + 218, BLUE);
+            g.drawCenteredString(font, Component.literal("A single Divine Totem is spent only when you offer it."), cx, y + 235, BLUE);
         } else {
             g.drawCenteredString(font, Component.literal(cap(chosen) + " weighs your fate"), cx, y + 50, 0xFFC5DDF3);
             int coinY = y + h / 2;

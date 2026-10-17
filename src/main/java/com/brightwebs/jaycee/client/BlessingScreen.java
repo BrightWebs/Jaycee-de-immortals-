@@ -17,6 +17,7 @@ public final class BlessingScreen extends Screen {
     private int revealTicks;
     private boolean pending;
     private int panelLeft, panelTop, panelWidth, panelHeight;
+    private static final int GOLD = 0xFFE5C685, BLUE = 0xFFB5D5EF;
     public BlessingScreen() { super(Component.literal("Divine Blessing")); }
     public static void open() { Minecraft.getInstance().setScreen(new BlessingScreen()); }
     public static void result(String god, boolean yes) {
@@ -32,26 +33,57 @@ public final class BlessingScreen extends Screen {
     private static String cap(String id) {
         return id.isEmpty() ? id : id.substring(0, 1).toUpperCase(Locale.ROOT) + id.substring(1);
     }
+    private static String domain(String id) {
+        return switch (id) {
+            case "zeus" -> "SKY & THUNDER"; case "poseidon" -> "OCEANS";
+            case "hades" -> "UNDERWORLD"; case "athena" -> "WISDOM";
+            case "ares" -> "WAR"; case "apollo" -> "SUN & PROPHECY";
+            case "artemis" -> "THE HUNT"; case "hermes" -> "SPEED & TRAVEL";
+            case "hephaestus" -> "FORGE & FIRE"; case "aphrodite" -> "LOVE";
+            case "demeter" -> "HARVEST"; case "dionysus" -> "REVELRY";
+            case "hera" -> "SOVEREIGNTY"; case "hestia" -> "HEARTH";
+            default -> "OLYMPUS";
+        };
+    }
     @Override protected void init() {
         super.init();
-        panelWidth = Math.min(510, width - 20);
-        panelHeight = Math.min(308, height - 20);
+        panelWidth = Math.min(554, Math.max(200, width - 20));
+        panelHeight = Math.min(310, Math.max(150, height - 16));
         panelLeft = (width - panelWidth) / 2;
         panelTop = (height - panelHeight) / 2;
         if (pending) return;
-        int cols = panelWidth >= 444 ? 4 : 2;
+        int cols = panelWidth >= 440 ? 4 : 2;
         int rows = (DivineTotemService.OLYMPIANS.size() + cols - 1) / cols;
-        int gap = 5, cell = (panelWidth - 36 - (cols - 1) * gap) / cols;
-        int buttonHeight = Math.clamp((panelHeight - 110) / rows - gap, 15, 25);
-        int gridHeight = rows * (buttonHeight + gap) - gap;
-        int startY = panelTop + 56 + Math.max(0, (panelHeight - 108 - gridHeight) / 2);
-        int startX = panelLeft + 18;
-        for (int i = 0; i < DivineTotemService.OLYMPIANS.size(); i++) {
-            String id = DivineTotemService.OLYMPIANS.get(i);
-            int x = startX + (i % cols) * (cell + gap);
-            int y = startY + (i / cols) * (buttonHeight + gap);
-            addRenderableWidget(Button.builder(Component.literal(cap(id)), button -> choose(id))
-                .bounds(x, y, cell, buttonHeight).build());
+        int gap = 7, cell = (panelWidth - 32 - (cols - 1) * gap) / cols;
+        int available = panelHeight - 109;
+        int cardHeight = Math.max(13, (available - (rows - 1) * gap) / rows);
+        int startY = panelTop + 62;
+        int startX = panelLeft + 16;
+        for (int n = 0; n < DivineTotemService.OLYMPIANS.size(); n++) {
+            String god = DivineTotemService.OLYMPIANS.get(n);
+            int x = startX + (n % cols) * (cell + gap);
+            int y = startY + (n / cols) * (cardHeight + gap);
+            addRenderableWidget(new Button(x, y, cell, cardHeight, Component.literal(cap(god)),
+                button -> choose(god), Button.DEFAULT_NARRATION) {
+                @Override protected void renderWidget(GuiGraphics g, int mx, int my, float delta) {
+                    boolean selected = isHoveredOrFocused();
+                    int border = selected ? 0xFFF5DB9C : 0xFF537BA4;
+                    g.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), border);
+                    g.fill(getX() + 2, getY() + 2, getX() + getWidth() - 2, getY() + getHeight() - 2,
+                        selected ? 0xFF254C70 : 0xFF142F50);
+                    g.fill(getX() + 6, getY() + 5, getX() + 8, getY() + getHeight() - 5,
+                        selected ? GOLD : 0xFF5C8DB5);
+                    int middle = getX() + getWidth() / 2;
+                    if (getHeight() >= 31) {
+                        g.drawCenteredString(font, getMessage(), middle, getY() + 8, selected ? GOLD : 0xFFE1EAF6);
+                        g.drawCenteredString(font, Component.literal(domain(god)), middle, getY() + 21,
+                            selected ? 0xFFE0D2AC : 0xFF83ABC9);
+                    } else {
+                        g.drawCenteredString(font, getMessage(), middle,
+                            getY() + (getHeight() - 8) / 2, selected ? GOLD : 0xFFE1EAF6);
+                    }
+                }
+            });
         }
     }
     private void choose(String god) {
@@ -69,15 +101,17 @@ public final class BlessingScreen extends Screen {
         this.renderBackground(g, mx, my, partial);
         int x = panelLeft, y = panelTop, w = panelWidth, h = panelHeight;
         int cx = width / 2;
-        g.fill(x, y, x + w, y + h, 0xF0081326);
-        g.fill(x + 3, y + 3, x + w - 3, y + h - 3, 0xFF102847);
-        g.renderOutline(x + 1, y + 1, w - 2, h - 2, 0xFF7AA5D2);
-        g.fill(x + 12, y + 12, x + w - 12, y + 14, 0xFFCEAC6A);
-        g.drawCenteredString(font, Component.literal("DIVINE INVITATION"), cx, y + 23, 0xFFEAD49E);
+        g.fill(x - 2, y - 2, x + w + 2, y + h + 2, 0xF0061323);
+        g.fill(x, y, x + w, y + h, 0xFF0E223B);
+        g.renderOutline(x, y, w, h, 0xFF7398C4);
+        g.renderOutline(x + 4, y + 4, w - 8, h - 8, 0xFF244C71);
+        g.fill(x + 16, y + 12, x + w - 16, y + 14, 0xFFD8B776);
+        g.drawCenteredString(font, Component.literal("THE COUNCIL OF OLYMPUS"), cx, y + 22, GOLD);
+        g.drawCenteredString(font, Component.literal("A divine invitation awaits your answer"), cx, y + 41, BLUE);
         if (!pending) {
-            g.drawCenteredString(font, Component.literal("Choose the Olympian whose favor you seek"), cx, y + 39, 0xFFB7CDE8);
-            g.drawCenteredString(font, Component.literal("Raids and Luck can sway the gods. No favor is guaranteed."), cx, y + h - 37, 0xFFC4D4EA);
-            g.drawCenteredString(font, Component.literal("One Divine Totem is consumed when you request a blessing."), cx, y + h - 22, 0xFFE6CF9D);
+            g.fill(x + 16, y + h - 39, x + w - 16, y + h - 38, 0xFF4D789E);
+            g.drawCenteredString(font, Component.literal("Raids and Luck strengthen your plea. Fate is never certain."), cx, y + h - 31, BLUE);
+            g.drawCenteredString(font, Component.literal("Select a god to offer one Divine Totem."), cx, y + h - 17, GOLD);
         } else {
             g.drawCenteredString(font, Component.literal(cap(chosen) + " weighs your fate"), cx, y + 50, 0xFFC5DDF3);
             int coinY = y + h / 2;

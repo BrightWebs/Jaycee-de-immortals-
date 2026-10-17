@@ -59,9 +59,7 @@ public final class PlayerState {
     public boolean jayceeTest() { return data.getBoolean("JayceeTest"); }
     public boolean playerMenuPreview() { return data.getBoolean("PlayerMenuPreview"); }
     public CompoundTag statusPresentation() { return data.getCompound("StatusPresentation").copy(); }
-    public boolean unlocked() { return consumed() >= 3 || jayceeTest() || supreme()
-        || !divinity().getCompound("Grants").isEmpty() || (!divinity().getString("Rank").isEmpty()
-            && !divinity().getString("Rank").equals("MORTAL")); }
+    public boolean unlocked() { return data.getBoolean("BlessedAwakened") || jayceeTest() || supreme(); }
     public CompoundTag divinity() { return data.getCompound("Divinity").copy(); }
     public boolean supreme() { return data.getCompound("Divinity").getBoolean("Supreme"); }
     public boolean abilityOwned(String id) {

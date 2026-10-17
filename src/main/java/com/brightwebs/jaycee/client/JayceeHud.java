@@ -49,7 +49,7 @@ public final class JayceeHud {
 
     private static boolean visible() {
         Minecraft mc = Minecraft.getInstance();
-        return HudConfig.ENABLED.get() && mc.player != null && mc.level != null
+        return HudConfig.ENABLED.get() && mc.player != null && PlayerState.get(mc.player).unlocked() && mc.level != null
                 && !mc.player.isSpectator() && !mc.options.hideGui
                 && !mc.getDebugOverlay().showDebugScreen() && mc.screen == null;
     }

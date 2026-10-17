@@ -362,6 +362,18 @@ public final class DivinityModel {
         catch (ArithmeticException e) { throw new IllegalArgumentException("Level exceeds supported earned Essence range"); }
         adminSetEarned(id, value, now);
     }
+    /** Normal gameplay acceptance, distinct from operator test metadata. */
+    public void acceptNpcBlessing(UUID id, String npc, long now) {
+        if (!NPC_PATRONS.contains(npc)) fail("Unknown Olympian");
+        var p = profile(id);
+        if (p.rank != Rank.MORTAL || !p.npcPatrons.isEmpty() || p.patron != null || supreme(id))
+            fail("You already have an active divine lineage or unique authority");
+        var patrons = new HashSet<>(p.npcPatrons);
+        patrons.add(npc);
+        put(p, p.divineName, Rank.BLESSED, p.ep, p.essence, p.capLift, p.bestow,
+            p.patron, patrons, p.grants, p.release);
+        log(now, id, id, "Divine Totem: accepted by Olympian " + npc);
+    }
     public void adminNpc(UUID id, String npc, boolean add, long now) {
         if (!NPC_PATRONS.contains(npc)) fail("Unsupported patron metadata");
         var p = profile(id); var patrons = new HashSet<>(p.npcPatrons);

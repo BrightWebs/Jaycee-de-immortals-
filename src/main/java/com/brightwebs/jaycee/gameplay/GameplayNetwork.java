@@ -43,6 +43,7 @@ public final class GameplayNetwork {
     public static void register(RegisterPayloadHandlersEvent event) {
         var registrar = event.registrar("1");
         com.brightwebs.jaycee.gameplay.divine.DivinityNetwork.register(registrar);
+        BlessingNetwork.registerOn(registrar);
         registrar.playToClient(State.TYPE, State.CODEC, (payload, context) ->
             PlayerState.save(context.player(), payload.data()));
         registrar.playToServer(Action.TYPE, Action.CODEC, (payload, context) -> {

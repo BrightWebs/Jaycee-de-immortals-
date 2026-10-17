@@ -176,8 +176,6 @@ final class SkillMagicBrowser {
         if (model.visible().isEmpty()) UiText.paragraph(g, "No registered entries match.", 143, 170, 180, 50, .8f, MUTED);
         line(g, model.visible().isEmpty() ? "0 / 0" : (model.offset() + 1) + "-" +
             Math.min(model.offset() + 6, model.visible().size()) + " / " + model.visible().size(), 136, 369, 196, MUTED);
-        line(g, "Mana " + number(s.mana()) + " / " + number(s.maxMana()), 136, 380, 196, INK);
-        line(g, "Regen " + number(s.manaRegen()) + "/s | drain " + number(s.activeDrain()) + "/s", 136, 390, 196, MUTED);
         detail(g, s);
         updateControls(s);
     }
@@ -192,13 +190,11 @@ final class SkillMagicBrowser {
                 g.fill(135, y + 2, 137, y + 32, VIOLET);
             }
             icon(g, e.id(), 141, y + 6, 22);
-            line(g, e.name(), 169, y + 5, 157, INK);
-            line(g, status(e.id(), s), 169, y + 16, 157, e.unlocked() ? VIOLET : MUTED);
+            // Three text baselines remain within the row's inner border.
+            line(g, e.name(), 169, y + 4, 152, INK);
+            line(g, status(e.id(), s), 169, y + 14, 152, e.unlocked() ? VIOLET : MUTED);
             if (SkillDefinitions.find(e.id()) != null) {
-                line(g, "Lv " + s.skillLevel(e.id()) + " | XP " + s.skillXp(e.id()), 169, y + 25, 157, MUTED);
-                int width = (int) Math.round(progress(e.id(), s) * 188);
-                g.fill(141, y + 32, 329, y + 33, 0xFF26384E);
-                g.fill(141, y + 32, 141 + width, y + 33, VIOLET);
+                line(g, "Lv " + s.skillLevel(e.id()) + "  XP " + s.skillXp(e.id()), 169, y + 24, 152, MUTED);
             }
         }
     }
@@ -233,38 +229,29 @@ final class SkillMagicBrowser {
         line(g, status(id, s), 350, 141, 166, VIOLET);
         var lines = new ArrayList<String>();
         if (d != null) {
-            lines.add(d.description());
-            lines.add("Category: " + (magic ? id.equals(SkillDefinitions.RESTORE) ? "Healing" : "Divine" :
-                String.join(", ", d.categories())));
+            lines.add("What it does: " + d.description());
+            lines.add("Type: " + String.join(", ", d.categories()));
             lines.add("Level: " + s.skillLevel(id) + " / " + s.skillMaxLevel());
             long next = (long) Math.min(s.skillMaxLevel(), s.skillLevel(id) + 1);
-            lines.add("XP: " + s.skillXp(id) + " / " + next * next * s.skillXpPerLevel() +
-                (mastered(id, s) ? " (mastered)" : " (next level)"));
-            lines.add("Effects: " + d.effectSummary(s));
+            lines.add("Skill XP: " + s.skillXp(id) + " / " + next * next * s.skillXpPerLevel());
+            lines.add("Current benefit: " + d.effectSummary(s));
             if (d.intrinsic()) {
-                lines.add("Activation mana: " + number(d.activationMana(s)));
-                lines.add("Upkeep: up to " + number(d.upkeepMana(s)) + "/s at 100% effective output.");
-                lines.add("Configured output: " + s.skillOutput(id) + "%. " + (s.skillEnabled(id) ? "Enabled" : "Disabled"));
-                lines.add(SkillMagicBrowserModel.SETTING_TIMING);
-                lines.add("At selected output: up to " + number(d.upkeepMana(s) * s.skillOutput(id) / 100.0) +
-                    " mana/s while effective; the footer reports actual total drain.");
-                lines.add("Prerequisite: explicit server grant or /jayceetest authorization. Canonical race / evolution rules unresolved.");
-                String origin=s.divinity().getCompound("Grants").getString(id);
-                lines.add("Origin: " + (s.supreme() ? "Unique Jaycee authority." : !origin.isEmpty() ? origin :
-                    s.jayceeTest() ? "Test authorization, not a learned patron grant." : "No intrinsic grant."));
+                lines.add("Mana to turn on: " + number(d.activationMana(s)));
+                lines.add("Mana used each second: up to " + number(d.upkeepMana(s)));
+                lines.add("Power setting: " + s.skillOutput(id) + "% (" + (s.skillEnabled(id) ? "On" : "Off") + ")");
+                lines.add("Adjust power with the slider below.");
+                if (d.modes().size() > 1) {
+                    lines.add("Mode: " + d.modes().get(s.skillMode(id)));
+                    lines.add("Use Mode to switch available modes.");
+                }
+                if (!d.styles().isEmpty())
+                    lines.add("Flight style: " + s.skillStyle(id));
+                lines.add("Unlock: Jaycee or skill granted to you.");
             } else {
-                lines.add("Prerequisite: Sapphire unlock; use-based progression.");
-                lines.add("Patron origin: none registered.");
+                lines.add("Progress by using this skill.");
             }
-            lines.add("Mastery: effective server-validated use; server-configured XP curve. No learned patron powers awarded.");
-            for (int i = 0; i < d.modes().size(); i++)
-                lines.add("Mode: " + d.modes().get(i) + (!granted(id, s) ? " (requires authorization)" :
-                    !d.intrinsic() || s.skillLevel(id) >= d.minimumModeLevel(s, i) ? " (available)" :
-                        " (requires level " + d.minimumModeLevel(s, i) + ")"));
-            if (!d.styles().isEmpty()) lines.add("Flight styles: " + String.join(", ", d.styles()) + ". Current: " + s.skillStyle(id));
         } else {
-            lines.add("Legacy art preview only. Canonical discipline mapping unresolved; not learned or executable.");
-            lines.add("Mastery / prerequisites / patron origin: unresolved.");
+            lines.add("Preview only. This ability is not available yet.");
         }
         if (magic && art != null) {
             if (art.implemented()) {
@@ -285,20 +272,21 @@ final class SkillMagicBrowser {
                 lines.add("Mana / cooldown / range / area / cast time / effects / modes: unresolved; preview cannot activate.");
             }
         }
-        lines.add("Evolution / fusion requirements: not implemented.");
-        lines.add("Essence: transferable bestowal reserve. EP: permanent power, not casting fuel. Inspect Divine Bonds (N). Natural earning rules remain unresolved.");
-        lines.add("Scroll details or focus and use Page Up / Down.");
+        lines.add("Scroll here to read more details.");
         detailsFocus.setMessage(Component.literal(SkillMagicBrowserModel.detailNarration(name, status(id, s), lines)));
         var wrapped = new ArrayList<FormattedCharSequence>();
-        for (String line : lines) wrapped.addAll(Minecraft.getInstance().font.split(Component.literal(line), 207));
+        for (String line : lines) wrapped.addAll(Minecraft.getInstance().font.split(Component.literal(line), SkillMagicLayout.TEXT.width() - 8));
         detailLines = wrapped;
         model.detailScroll(0, detailLines.size());
         var r = SkillMagicLayout.TEXT;
-        g.enableScissor(r.x(), r.y(), r.x() + r.width(), r.y() + r.height());
-        g.pose().pushPose(); g.pose().translate(r.x(), r.y(), 0); g.pose().scale(.8f, .8f, 1);
-        for (int i = 0; i < SkillMagicLayout.DETAIL_LINES && i + model.detailOffset() < detailLines.size(); i++)
-            g.drawString(Minecraft.getInstance().font, detailLines.get(i + model.detailOffset()), 0, i * 13, INK, false);
-        g.pose().popPose(); g.disableScissor();
+        // The parent screen already scales/translates the entire Sapphire UI.
+        // GuiGraphics scissor coordinates are not transformed the same way as drawString.
+        // The old scissor clipped every line at the wrong physical X coordinate.
+        // Limit the number of visible lines here instead; every line has already
+        // been word-wrapped to this panel's actual inner width.
+        int visible = Math.min(SkillMagicLayout.DETAIL_LINES, r.height() / 10);
+        for (int i = 0; i < visible && i + model.detailOffset() < detailLines.size(); i++)
+            g.drawString(Minecraft.getInstance().font, detailLines.get(i + model.detailOffset()), r.x() + 3, r.y() + i * 10, INK, false);
         line(g, (model.detailOffset() + 1) + "-" + Math.min(detailLines.size(), model.detailOffset() + SkillMagicLayout.DETAIL_LINES) +
             " / " + detailLines.size(), 350, 317, 166, MUTED);
     }

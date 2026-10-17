@@ -231,16 +231,16 @@ final class SkillMagicBrowser {
         line(g, status(id, s), 350, 141, 166, VIOLET);
         var lines = new ArrayList<String>();
         if (d != null) {
-            lines.add(d.description());
-            lines.add("Category: " + String.join(", ", d.categories()));
+            lines.add("What it does: " + d.description());
+            lines.add("Type: " + String.join(", ", d.categories()));
             lines.add("Level: " + s.skillLevel(id) + " / " + s.skillMaxLevel());
             long next = (long) Math.min(s.skillMaxLevel(), s.skillLevel(id) + 1);
-            lines.add("Progress: " + s.skillXp(id) + " / " + next * next * s.skillXpPerLevel() + " XP");
-            lines.add("Effect: " + d.effectSummary(s));
+            lines.add("Skill XP: " + s.skillXp(id) + " / " + next * next * s.skillXpPerLevel());
+            lines.add("Current benefit: " + d.effectSummary(s));
             if (d.intrinsic()) {
-                lines.add("Activation: " + number(d.activationMana(s)) + " mana");
-                lines.add("Mana use: up to " + number(d.upkeepMana(s)) + "/s at full power");
-                lines.add("Power: " + s.skillOutput(id) + "% (" + (s.skillEnabled(id) ? "On" : "Off") + ")");
+                lines.add("Mana to turn on: " + number(d.activationMana(s)));
+                lines.add("Mana used each second: up to " + number(d.upkeepMana(s)));
+                lines.add("Power setting: " + s.skillOutput(id) + "% (" + (s.skillEnabled(id) ? "On" : "Off") + ")");
                 lines.add("Adjust power with the slider below.");
                 if (d.modes().size() > 1) {
                     lines.add("Mode: " + d.modes().get(s.skillMode(id)));
@@ -248,7 +248,7 @@ final class SkillMagicBrowser {
                 }
                 if (!d.styles().isEmpty())
                     lines.add("Flight style: " + s.skillStyle(id));
-                lines.add("Requires: Jaycee or a granted skill.");
+                lines.add("Unlock: Jaycee or skill granted to you.");
             } else {
                 lines.add("Progress by using this skill.");
             }
@@ -277,15 +277,15 @@ final class SkillMagicBrowser {
         lines.add("Scroll here to read more details.");
         detailsFocus.setMessage(Component.literal(SkillMagicBrowserModel.detailNarration(name, status(id, s), lines)));
         var wrapped = new ArrayList<FormattedCharSequence>();
-        for (String line : lines) wrapped.addAll(Minecraft.getInstance().font.split(Component.literal(line), 185));
+        for (String line : lines) wrapped.addAll(Minecraft.getInstance().font.split(Component.literal(line), SkillMagicLayout.TEXT.width() - 8));
         detailLines = wrapped;
         model.detailScroll(0, detailLines.size());
         var r = SkillMagicLayout.TEXT;
         g.enableScissor(r.x(), r.y(), r.x() + r.width(), r.y() + r.height());
-        g.pose().pushPose(); g.pose().translate(r.x(), r.y(), 0); g.pose().scale(.8f, .8f, 1);
+        // Draw at native GUI scale. Scaling after setting a scissor caused text to appear cut off.
         for (int i = 0; i < SkillMagicLayout.DETAIL_LINES && i + model.detailOffset() < detailLines.size(); i++)
-            g.drawString(Minecraft.getInstance().font, detailLines.get(i + model.detailOffset()), 0, i * 12, INK, false);
-        g.pose().popPose(); g.disableScissor();
+            g.drawString(Minecraft.getInstance().font, detailLines.get(i + model.detailOffset()), r.x() + 3, r.y() + i * 10, INK, false);
+        g.disableScissor();
         line(g, (model.detailOffset() + 1) + "-" + Math.min(detailLines.size(), model.detailOffset() + SkillMagicLayout.DETAIL_LINES) +
             " / " + detailLines.size(), 350, 317, 166, MUTED);
     }

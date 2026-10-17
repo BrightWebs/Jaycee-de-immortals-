@@ -6,7 +6,6 @@ import com.brightwebs.jaycee.gameplay.divine.DivinityService;
 import java.util.List;
 import java.util.Locale;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.stats.Stats;
 import net.minecraft.server.level.ServerPlayer;
@@ -41,17 +40,12 @@ public final class DivineTotemService {
             new MerchantOffer(new ItemCost(Items.EMERALD, 16), new ItemStack(JayceeMod.DIVINE_TOTEM.get()), 4, 10, 0.05f));
     }
 
-    private static final List<String> OLYMPIANS = List.of("zeus", "poseidon", "hades", "athena", "ares",
+    public static final List<String> OLYMPIANS = List.of("zeus", "poseidon", "hades", "athena", "ares",
         "apollo", "artemis", "hermes", "hephaestus", "aphrodite", "demeter", "dionysus", "hera", "hestia");
 
     private static void show(ServerPlayer player) {
-        player.sendSystemMessage(Component.literal("DIVINE TOTEM - Select an Olympian. Higher gods are harder to convince."));
-        for (String id : OLYMPIANS) {
-            int chance = chance(player, id);
-            player.sendSystemMessage(Component.literal("[" + title(id) + "] " + (chance / 10.0) + "%")
-                .withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/jc patron seek " + id))));
-        }
-        player.sendSystemMessage(Component.literal("Completed raids and Luck Points improve your chances. Selecting consumes the Totem."));
+        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
+            new BlessingNetwork.Open());
     }
 
     private static String title(String id) { return id.substring(0, 1).toUpperCase(Locale.ROOT) + id.substring(1); }
@@ -74,7 +68,7 @@ public final class DivineTotemService {
         return Math.clamp(base + luck(player) * 2 + (raids > 0 ? 80 : 0), 10, 900);
     }
 
-    private static int seek(ServerPlayer player, String id) {
+    public static int seek(ServerPlayer player, String id) {
         if (!OLYMPIANS.contains(id) || !DivinityModel.NPC_PATRONS.contains(id)) return 0;
         if (DivinityService.model(player).profile(player.getUUID()).rank() != DivinityModel.Rank.MORTAL
             || !DivinityService.model(player).profile(player.getUUID()).npcPatrons().isEmpty()) {
@@ -97,12 +91,10 @@ public final class DivineTotemService {
         stack.shrink(1);
         data.putLong("DivineTotemNextAttempt", now + 30_000L);
         PlayerState.save(player, data);
-        if (player.getRandom().nextInt(1000) >= chance(player, id)) {
-            player.sendSystemMessage(Component.literal(title(id) + " declined your request. Complete raids and improve Luck to increase your chance."));
-            return 1;
-        }
-        DivinityService.olympianBless(player, id);
-        player.sendSystemMessage(Component.literal(title(id) + " accepted you! You received your blessing and 250 intangible Essence. Press M."));
+        boolean accepted = player.getRandom().nextInt(1000) < chance(player, id);
+        if (accepted) DivinityService.olympianBless(player, id);
+        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
+            new BlessingNetwork.Result(id, accepted));
         return 1;
     }
 

@@ -99,9 +99,9 @@ public final class BlessingScreen extends Screen {
         if (stage != Stage.CHOOSING) return;
         chosen = god;
         stage = Stage.CONFIRMING;
-        rebuildWidgets();
+        refreshBlessingButtons();
     }
-    private void rebuildWidgets() {
+    private void refreshBlessingButtons() {
         clearWidgets();
         init();
     }
@@ -110,7 +110,7 @@ public final class BlessingScreen extends Screen {
         addRenderableWidget(Button.builder(Component.literal("Back"), button -> {
             stage = Stage.CHOOSING;
             chosen = "";
-            rebuildWidgets();
+            refreshBlessingButtons();
         }).bounds(panelLeft + 55, y, 114, 23).build());
         addRenderableWidget(Button.builder(Component.literal("Offer Totem"), button -> {
             stage = Stage.ROLLING;

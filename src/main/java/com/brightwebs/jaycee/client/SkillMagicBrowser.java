@@ -176,8 +176,6 @@ final class SkillMagicBrowser {
         if (model.visible().isEmpty()) UiText.paragraph(g, "No registered entries match.", 143, 170, 180, 50, .8f, MUTED);
         line(g, model.visible().isEmpty() ? "0 / 0" : (model.offset() + 1) + "-" +
             Math.min(model.offset() + 6, model.visible().size()) + " / " + model.visible().size(), 136, 369, 196, MUTED);
-        line(g, "Mana " + number(s.mana()) + " / " + number(s.maxMana()), 136, 380, 196, INK);
-        line(g, "Regen " + number(s.manaRegen()) + "/s | drain " + number(s.activeDrain()) + "/s", 136, 390, 196, MUTED);
         detail(g, s);
         updateControls(s);
     }

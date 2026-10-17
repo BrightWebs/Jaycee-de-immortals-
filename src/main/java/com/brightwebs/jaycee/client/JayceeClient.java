@@ -30,13 +30,13 @@ public class JayceeClient {
   @SubscribeEvent public static void tick(ClientTickEvent.Post e){
    Minecraft mc=Minecraft.getInstance();
    while(OPEN.consumeClick()){
-    if(mc.player!=null&&mc.screen==null){
+    if(mc.player!=null&&mc.screen==null&&PlayerState.get(mc.player).unlocked()){
      var state=PlayerState.get(mc.player);
      mc.setScreen(new JayceeScreen(SapphireLayout.ordinaryMenu(state.supreme(),state.playerMenuPreview())));
     }
    }
    while(BESTOW.consumeClick()){
-    if(mc.player!=null&&mc.screen==null)mc.setScreen(new DivineBondsScreen(true));
+    if(mc.player!=null&&mc.screen==null&&PlayerState.get(mc.player).unlocked())mc.setScreen(new DivineBondsScreen(true));
    }
    for(int slot=0;slot<ABILITY_KEYS.length;slot++)while(ABILITY_KEYS[slot].consumeClick()){
     if(mc.player==null||mc.screen!=null||!JayceeMod.unlocked(mc.player))continue;

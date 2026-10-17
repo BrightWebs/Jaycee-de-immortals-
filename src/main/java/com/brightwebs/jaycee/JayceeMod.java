@@ -25,7 +25,8 @@ public final class JayceeMod {
  public static final DeferredItem<Item> DIVINE_TOTEM=ITEMS.register("divine_totem",()->new com.brightwebs.jaycee.gameplay.DivineTotemService.Totem(new Item.Properties().stacksTo(1)));
  public static final DeferredItem<Item> ESSENCE=ITEMS.register("jayces_essence",()->new Essence(new Item.Properties().stacksTo(16)));
  public static final java.util.function.Supplier<net.minecraft.world.item.CreativeModeTab> JAYCEE_TAB=CREATIVE_TABS.register("jaycee",()->net.minecraft.world.item.CreativeModeTab.builder()
-  .title(Component.literal("Jaycee: Di Immortales"))
+  .title(Component.translatable("itemGroup.jaycee"))
+  .withTabsBefore(net.minecraft.world.item.CreativeModeTabs.SPAWN_EGGS)
   .icon(()->new ItemStack(DIVINE_TOTEM.get()))
   .displayItems((parameters,output)->output.accept(DIVINE_TOTEM.get()))
   .build());

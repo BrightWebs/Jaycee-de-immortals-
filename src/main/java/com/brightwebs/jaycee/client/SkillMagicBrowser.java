@@ -192,13 +192,11 @@ final class SkillMagicBrowser {
                 g.fill(135, y + 2, 137, y + 32, VIOLET);
             }
             icon(g, e.id(), 141, y + 6, 22);
-            line(g, e.name(), 169, y + 5, 157, INK);
-            line(g, status(e.id(), s), 169, y + 16, 157, e.unlocked() ? VIOLET : MUTED);
+            // Three text baselines remain within the row's inner border.
+            line(g, e.name(), 169, y + 4, 152, INK);
+            line(g, status(e.id(), s), 169, y + 14, 152, e.unlocked() ? VIOLET : MUTED);
             if (SkillDefinitions.find(e.id()) != null) {
-                line(g, "Lv " + s.skillLevel(e.id()) + " | XP " + s.skillXp(e.id()), 169, y + 25, 157, MUTED);
-                int width = (int) Math.round(progress(e.id(), s) * 188);
-                g.fill(141, y + 32, 329, y + 33, 0xFF26384E);
-                g.fill(141, y + 32, 141 + width, y + 33, VIOLET);
+                line(g, "Lv " + s.skillLevel(e.id()) + "  XP " + s.skillXp(e.id()), 169, y + 24, 152, MUTED);
             }
         }
     }

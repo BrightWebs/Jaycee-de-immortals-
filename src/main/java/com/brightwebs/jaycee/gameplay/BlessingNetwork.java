@@ -5,7 +5,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 /** All blessing odds and random draws stay on the server. */
 public final class BlessingNetwork {
@@ -31,8 +31,7 @@ public final class BlessingNetwork {
         };
         public Type<Result> type() { return TYPE; }
     }
-    public static void register(RegisterPayloadHandlersEvent event) {
-        var r = event.registrar("1");
+    public static void registerOn(PayloadRegistrar r) {
         r.playToClient(Open.TYPE, Open.CODEC, (packet, context) ->
             context.enqueueWork(() -> com.brightwebs.jaycee.client.BlessingScreen.open()));
         r.playToClient(Result.TYPE, Result.CODEC, (packet, context) ->

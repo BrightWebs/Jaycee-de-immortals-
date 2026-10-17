@@ -92,6 +92,14 @@ public final class DivinityService {
         if (data.model.supreme(p.getUUID())) { data.model.tickRegeneration(); data.setDirty(); }
         if (p.tickCount % 20 == 0) { data.model.expire(now()); data.setDirty(); }
     }
+    /** Award a legitimate, one-time Olympian blessing only after a validated Totem draw. */
+    public static void olympianBless(ServerPlayer player, String patron) {
+        var data = DivinitySavedData.get(player.server);
+        data.model.acceptNpcBlessing(player.getUUID(), patron, now());
+        data.model.creditEssence(player.getUUID(), 250);
+        data.setDirty();
+        GameplayNetwork.sync(player);
+    }
     public static long awardEp(ServerPlayer p, long amount) {
         var data = DivinitySavedData.get(p.server); long added = data.model.awardEp(p.getUUID(), amount);
         data.setDirty(); GameplayNetwork.sync(p); return added;

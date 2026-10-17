@@ -52,6 +52,7 @@ public final class JayceeCommands {
             .then(Commands.literal("mastery").then(abilityArgument("id").executes(JayceeCommands::masteryInfo))));
         root.then(get);
         root.then(abilities());
+        root.then(EssenceGrowth.commands());
         root.then(Commands.literal("patron").executes(c -> own(c, "patron"))
             .then(Commands.literal("list").executes(c -> reply(c, "Known NPC patrons: "
                 + String.join(", ", DivinityModel.NPC_PATRONS.stream().sorted().toList())))));

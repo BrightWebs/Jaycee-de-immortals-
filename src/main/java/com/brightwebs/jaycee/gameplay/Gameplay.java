@@ -37,6 +37,7 @@ public final class Gameplay {
         bus.addListener((net.neoforged.neoforge.event.RegisterCommandsEvent event) -> JayceeCommands.register(event));
         SkillRuntime.register();
         EssenceGrowth.register();
+        DivineTotemService.register();
         com.brightwebs.jaycee.gameplay.divine.DivinityService.register();
         com.brightwebs.jaycee.gameplay.divine.DivineAppraisal.register();
     }

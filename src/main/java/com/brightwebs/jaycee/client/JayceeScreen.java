@@ -508,12 +508,20 @@ public class JayceeScreen extends Screen {
    if(button==1){GameplayActions.equip(state().page(),i,"");return true;}
    if(button==0&&Screen.hasAltDown()){GameplayActions.cycleMode(state().page(),i);return true;}
   }
+  if(button==0&&(tab==2||tab==3)&&browser().outputPointer(x,y,false))return true;
+  if(button==0&&ordinary&&tab==1&&abilityBrowser.outputPointer(x,y,false))return true;
   return super.mouseClicked(x,y,button);
  }
- @Override public boolean mouseReleased(double mx,double my,int button){return super.mouseReleased(layout.localX(mx),layout.localY(my),button);}
+ @Override public boolean mouseReleased(double mx,double my,int button){
+  skillsBrowser.releaseOutputPointer();magicBrowser.releaseOutputPointer();abilityBrowser.releaseOutputPointer();
+  return super.mouseReleased(layout.localX(mx),layout.localY(my),button);
+ }
  @Override public void mouseMoved(double mx,double my){super.mouseMoved(layout.localX(mx),layout.localY(my));}
  @Override public boolean mouseDragged(double mx,double my,int button,double dx,double dy){
-  return super.mouseDragged(layout.localX(mx),layout.localY(my),button,dx/layout.scale,dy/layout.scale);
+  double x=layout.localX(mx),y=layout.localY(my);
+  if(button==0&&(tab==2||tab==3)&&browser().outputPointer(x,y,true))return true;
+  if(button==0&&ordinary&&tab==1&&abilityBrowser.outputPointer(x,y,true))return true;
+  return super.mouseDragged(x,y,button,dx/layout.scale,dy/layout.scale);
  }
  @Override public boolean mouseScrolled(double mx,double my,double dx,double dy){
   if(tab==0&&!speciesOpen&&dy!=0){

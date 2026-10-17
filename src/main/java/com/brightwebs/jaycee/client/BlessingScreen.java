@@ -16,6 +16,7 @@ public final class BlessingScreen extends Screen {
     private Boolean accepted;
     private int revealTicks;
     private boolean pending;
+    private int panelLeft, panelTop, panelWidth, panelHeight;
     public BlessingScreen() { super(Component.literal("Divine Blessing")); }
     public static void open() { Minecraft.getInstance().setScreen(new BlessingScreen()); }
     public static void result(String god, boolean yes) {
@@ -33,16 +34,24 @@ public final class BlessingScreen extends Screen {
     }
     @Override protected void init() {
         super.init();
+        panelWidth = Math.min(510, width - 20);
+        panelHeight = Math.min(308, height - 20);
+        panelLeft = (width - panelWidth) / 2;
+        panelTop = (height - panelHeight) / 2;
         if (pending) return;
-        int columns = 4, width = 104, height = 23;
-        int left = this.width / 2 - 218;
-        int top = this.height / 2 - 80;
+        int cols = panelWidth >= 444 ? 4 : 2;
+        int rows = (DivineTotemService.OLYMPIANS.size() + cols - 1) / cols;
+        int gap = 5, cell = (panelWidth - 36 - (cols - 1) * gap) / cols;
+        int buttonHeight = Math.clamp((panelHeight - 110) / rows - gap, 15, 25);
+        int gridHeight = rows * (buttonHeight + gap) - gap;
+        int startY = panelTop + 56 + Math.max(0, (panelHeight - 108 - gridHeight) / 2);
+        int startX = panelLeft + 18;
         for (int i = 0; i < DivineTotemService.OLYMPIANS.size(); i++) {
             String id = DivineTotemService.OLYMPIANS.get(i);
-            int x = left + (i % columns) * 110;
-            int y = top + (i / columns) * 29;
+            int x = startX + (i % cols) * (cell + gap);
+            int y = startY + (i / cols) * (buttonHeight + gap);
             addRenderableWidget(Button.builder(Component.literal(cap(id)), button -> choose(id))
-                .bounds(x, y, width, height).build());
+                .bounds(x, y, cell, buttonHeight).build());
         }
     }
     private void choose(String god) {
@@ -58,34 +67,42 @@ public final class BlessingScreen extends Screen {
     }
     @Override public void render(GuiGraphics g, int mx, int my, float partial) {
         this.renderBackground(g, mx, my, partial);
-        int cx = width / 2, cy = height / 2;
-        g.fill(cx - 244, cy - 128, cx + 244, cy + 133, 0xEB07172D);
-        g.fill(cx - 241, cy - 125, cx + 241, cy + 130, 0xFF102947);
-        g.renderOutline(cx - 243, cy - 127, 486, 259, 0xFF9BB9ED);
-        g.drawCenteredString(font, Component.literal("DIVINE INVITATION"), cx, cy - 111, 0xFFE1D3AA);
+        int x = panelLeft, y = panelTop, w = panelWidth, h = panelHeight;
+        int cx = width / 2;
+        g.fill(x, y, x + w, y + h, 0xF0081326);
+        g.fill(x + 3, y + 3, x + w - 3, y + h - 3, 0xFF102847);
+        g.renderOutline(x + 1, y + 1, w - 2, h - 2, 0xFF7AA5D2);
+        g.fill(x + 12, y + 12, x + w - 12, y + 14, 0xFFCEAC6A);
+        g.drawCenteredString(font, Component.literal("DIVINE INVITATION"), cx, y + 23, 0xFFEAD49E);
         if (!pending) {
-            g.drawCenteredString(font, Component.literal("Select the Olympian whose favor you seek"), cx, cy - 96, 0xFFB5D2F0);
-            g.drawCenteredString(font, Component.literal("Powerful Olympians are harder to impress."), cx, cy + 48, 0xFFCAD9EB);
-            g.drawCenteredString(font, Component.literal("Raids and Luck Points can change your fate."), cx, cy + 63, 0xFFCAD9EB);
-            g.drawCenteredString(font, Component.literal("One Divine Totem is spent when you make your request."), cx, cy + 99, 0xFFDDCBA8);
+            g.drawCenteredString(font, Component.literal("Choose the Olympian whose favor you seek"), cx, y + 39, 0xFFB7CDE8);
+            g.drawCenteredString(font, Component.literal("Raids and Luck can sway the gods. No favor is guaranteed."), cx, y + h - 37, 0xFFC4D4EA);
+            g.drawCenteredString(font, Component.literal("One Divine Totem is consumed when you request a blessing."), cx, y + h - 22, 0xFFE6CF9D);
         } else {
-            g.drawCenteredString(font, Component.literal("The gods are deciding..."), cx, cy - 73, 0xFFD2DDF8);
-            g.drawCenteredString(font, Component.literal(cap(chosen)), cx, cy - 49, 0xFFE8CF99);
-            // Purely theatrical alternating coin faces; the actual verdict was rolled server-side.
-            boolean face = (revealTicks / Math.max(2, 9 - revealTicks / 10)) % 2 == 0;
-            int color = face ? 0xFFFFDC88 : 0xFF95BCF2;
-            g.fill(cx - 31, cy - 30, cx + 31, cy + 32, 0xFF07192B);
-            g.renderOutline(cx - 30, cy - 29, 60, 60, color);
-            g.drawCenteredString(font, Component.literal(accepted == null || revealTicks < 55
-                ? (face ? "FATE" : "FORTUNE") : accepted ? "YES" : "NO"), cx, cy - 2, color);
-            if (accepted != null && revealTicks >= 55) {
-                String message = accepted ? "YOUR BLESSING HAS BEEN GRANTED" : "THE OLYMPIAN HAS DECLINED";
-                g.drawCenteredString(font, Component.literal(message), cx, cy + 51,
-                    accepted ? 0xFFA9EBD0 : 0xFFF0B7BD);
-                g.drawCenteredString(font, Component.literal(accepted ? "250 Essence received. Press M for Divine Ascension."
-                    : "Seek greater favor through raids and Luck Points."), cx, cy + 68, 0xFFCCDBEA);
-                g.drawCenteredString(font, Component.literal("Press Escape to close"), cx, cy + 105, 0xFF8FA9C2);
+            g.drawCenteredString(font, Component.literal(cap(chosen) + " weighs your fate"), cx, y + 50, 0xFFC5DDF3);
+            int coinY = y + h / 2;
+            boolean spinning = accepted == null || revealTicks < 55;
+            boolean gold = ((revealTicks / Math.max(2, 8 - revealTicks / 12)) & 1) == 0;
+            int tone = gold ? 0xFFEDCD88 : 0xFF92BDE9;
+            int diameter = Math.min(72, h / 3);
+            int half = diameter / 2;
+            g.fill(cx - half - 4, coinY - half - 4, cx + half + 4, coinY + half + 4, 0xFF081A31);
+            g.fill(cx - half, coinY - half, cx + half, coinY + half, tone);
+            g.fill(cx - half + 4, coinY - half + 4, cx + half - 4, coinY + half - 4, 0xFF173252);
+            g.renderOutline(cx - half + 2, coinY - half + 2, diameter - 4, diameter - 4, 0xFFBBD0EF);
+            g.drawCenteredString(font, Component.literal(spinning ? gold ? "FATE" : "LUCK"
+                : accepted ? "YES" : "NO"), cx, coinY - 4, tone);
+            if (!spinning) {
+                g.drawCenteredString(font, Component.literal(accepted ? "BLESSING GRANTED" : "BLESSING DECLINED"),
+                    cx, coinY + half + 17, accepted ? 0xFF9FE4C3 : 0xFFFFBFC6);
+                g.drawCenteredString(font, Component.literal(accepted
+                    ? "Divine Ascension unlocked. Press M after closing."
+                    : "Win raids and earn Luck before trying again."), cx, coinY + half + 31, 0xFFD1E2F2);
+            } else {
+                g.drawCenteredString(font, Component.literal("The divine coin is turning..."), cx,
+                    coinY + half + 20, 0xFFB1CCE8);
             }
+            g.drawCenteredString(font, Component.literal("Press Esc to close"), cx, y + h - 20, 0xFF8DAAC9);
         }
         super.render(g, mx, my, partial);
     }

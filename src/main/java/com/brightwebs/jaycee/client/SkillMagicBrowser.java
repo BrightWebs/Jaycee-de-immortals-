@@ -279,11 +279,14 @@ final class SkillMagicBrowser {
         detailLines = wrapped;
         model.detailScroll(0, detailLines.size());
         var r = SkillMagicLayout.TEXT;
-        g.enableScissor(r.x(), r.y(), r.x() + r.width(), r.y() + r.height());
-        // Draw at native GUI scale. Scaling after setting a scissor caused text to appear cut off.
-        for (int i = 0; i < SkillMagicLayout.DETAIL_LINES && i + model.detailOffset() < detailLines.size(); i++)
+        // The parent screen already scales/translates the entire Sapphire UI.
+        // GuiGraphics scissor coordinates are not transformed the same way as drawString.
+        // The old scissor clipped every line at the wrong physical X coordinate.
+        // Limit the number of visible lines here instead; every line has already
+        // been word-wrapped to this panel's actual inner width.
+        int visible = Math.min(SkillMagicLayout.DETAIL_LINES, r.height() / 10);
+        for (int i = 0; i < visible && i + model.detailOffset() < detailLines.size(); i++)
             g.drawString(Minecraft.getInstance().font, detailLines.get(i + model.detailOffset()), r.x() + 3, r.y() + i * 10, INK, false);
-        g.disableScissor();
         line(g, (model.detailOffset() + 1) + "-" + Math.min(detailLines.size(), model.detailOffset() + SkillMagicLayout.DETAIL_LINES) +
             " / " + detailLines.size(), 350, 317, 166, MUTED);
     }

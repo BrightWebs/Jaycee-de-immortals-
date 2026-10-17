@@ -64,7 +64,7 @@ public final class BlessingScreen extends Screen {
             int x = startX + (n % cols) * (cell + gap);
             int y = startY + (n / cols) * (cardHeight + gap);
             addRenderableWidget(new Button(x, y, cell, cardHeight, Component.literal(cap(god)),
-                button -> choose(god), Button.DEFAULT_NARRATION) {
+                button -> choose(god), narration -> narration.get()) {
                 @Override protected void renderWidget(GuiGraphics g, int mx, int my, float delta) {
                     boolean selected = isHoveredOrFocused();
                     int border = selected ? 0xFFF5DB9C : 0xFF537BA4;

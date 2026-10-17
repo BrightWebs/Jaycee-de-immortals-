@@ -29,7 +29,8 @@ final class SkillMagicBrowser {
     private final SkillMagicBrowserModel model = new SkillMagicBrowserModel();
     private final List<Hint> hints = new ArrayList<>();
     private final List<Button> categories = new ArrayList<>(), rows = new ArrayList<>();
-    private Button filter, toggle, minus, plus, mode, style, detailsFocus;
+    private Button filter, toggle, mode, style, detailsFocus;
+    private boolean outputDragging;
     private EditBox search;
     private List<FormattedCharSequence> detailLines = List.of();
     private String query = "";
@@ -86,10 +87,6 @@ final class SkillMagicBrowser {
                 "%. Activation: " + number(d.activationMana(s)) +
                 " mana; disabling stops upkeep. Changes require server confirmation.";
         });
-        minus = button(add, 350, 354, 39, 19, () -> "-10%", () -> output(-10),
-            () -> outputHint() + ". Decrease output by ten percentage points.");
-        plus = button(add, 477, 354, 39, 19, () -> "+10%", () -> output(10),
-            () -> outputHint() + ". Increase output by ten percentage points.");
         mode = button(add, 350, 376, 81, 18, () -> "Mode", this::cycleMode, () -> {
             var d = SkillDefinitions.find(model.selected());
             return "Configured mode: " + (d == null || d.modes().isEmpty() ? "N/A" : d.modes().get(state().skillMode(d.id()))) +
@@ -312,7 +309,7 @@ final class SkillMagicBrowser {
     private void updateControls(PlayerState s) {
         var d = SkillDefinitions.find(model.selected());
         boolean intrinsic = d != null && d.intrinsic();
-        for (var b : List.of(toggle, minus, plus, mode, style)) { b.visible = intrinsic; b.active = false; }
+        for (var b : List.of(toggle, mode, style)) { b.visible = intrinsic; b.active = false; }
         if (!intrinsic) return;
         String id = d.id();
         boolean allowed = runtimeUsable(s) && s.skillGranted(id);
@@ -322,7 +319,7 @@ final class SkillMagicBrowser {
                 !Minecraft.getInstance().player.getAbilities().mayfly) &&
             s.mana() >= d.activationMana(s) && s.cooldownRemaining(id, now) == 0);
         toggle.setMessage(Component.literal((s.skillEnabled(id) ? "Disable" : "Enable") + " intrinsic"));
-        minus.active = allowed && s.skillOutput(id) > 0; plus.active = allowed && s.skillOutput(id) < 100;
+
         mode.active = allowed && d.modes().size() > 1 && s.skillLevel(id) >= d.minimumModeLevel(s, 1);
         style.active = allowed && d.styles().size() > 1;
         mode.visible = d.modes().size() > 1;
@@ -332,8 +329,27 @@ final class SkillMagicBrowser {
     }
     void renderOutput(GuiGraphics g) {
         var d = SkillDefinitions.find(model.selected());
-        if (d != null && d.intrinsic()) line(g, state().skillOutput(d.id()) + "%", 393, 360, 80, INK);
+        if (d != null && d.intrinsic()) {
+            int value = state().skillOutput(d.id());
+            g.fill(352, 357, 514, 360, 0xFF26384E);
+            g.fill(352, 357, 352 + Math.round(162 * value / 100f), 360, VIOLET);
+            int knob = 352 + Math.round(162 * value / 100f);
+            g.fill(knob - 3, 353, knob + 3, 364, INK);
+            line(g, value + "%", 390, 365, 86, INK);
+        }
     }
+    boolean outputPointer(double x, double y, boolean dragging) {
+        var d = SkillDefinitions.find(model.selected());
+        if (d == null || !d.intrinsic()) return false;
+        if (!dragging && (x < 348 || x > 518 || y < 349 || y > 374)) return false;
+        if (dragging && !outputDragging) return false;
+        if (!runtimeUsable(state()) || !state().skillGranted(d.id())) return false;
+        outputDragging = true;
+        int value = Math.clamp((int)Math.round((x - 352) * 100 / 162), 0, 100);
+        if (value != state().skillOutput(d.id())) GameplayActions.skillOutput(d.id(), value);
+        return true;
+    }
+    void releaseOutputPointer() { outputDragging = false; }
     private void output(int delta) {
         String id = model.selected(); if (id != null) GameplayActions.skillOutput(id, Math.clamp(state().skillOutput(id) + delta, 0, 100));
     }
@@ -355,6 +371,12 @@ final class SkillMagicBrowser {
     boolean scroll(double x, double y, double delta) {
         int step = delta < 0 ? 1 : -1;
         if (delta == 0) return false;
+        if (x >= 348 && x <= 518 && y >= 349 && y <= 374) {
+            var d = SkillDefinitions.find(model.selected());
+            if (d != null && d.intrinsic() && runtimeUsable(state()) && state().skillGranted(d.id())) {
+                output((int)Math.signum(delta)); return true;
+            }
+        }
         if (SkillMagicLayout.ROWS.contains(x, y)) { model.scroll(step); return true; }
         if (SkillMagicLayout.DETAILS.contains(x, y)) { model.detailScroll(step * 3, detailLines.size()); return true; }
         return false;

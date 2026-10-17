@@ -296,6 +296,7 @@ public final class Gameplay {
             SkillRuntime.tick(player);
             return;
         }
+        EssenceGrowth.grow(player);
         var state = PlayerState.get(player);
         if (player.isAlive() && !player.isSpectator()) {
             var data = PlayerState.read(player);

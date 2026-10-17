@@ -21,6 +21,7 @@ import net.neoforged.fml.config.ModConfig;
 public final class JayceeMod {
  public static final String ID="jaycee";
  public static final DeferredRegister.Items ITEMS=DeferredRegister.createItems(ID);
+ public static final DeferredItem<Item> DIVINE_TOTEM=ITEMS.register("divine_totem",()->new com.brightwebs.jaycee.gameplay.DivineTotemService.Totem(new Item.Properties().stacksTo(1)));
  public static final DeferredItem<Item> ESSENCE=ITEMS.register("jayces_essence",()->new Essence(new Item.Properties().stacksTo(16)));
  public JayceeMod(IEventBus bus,ModContainer container){ ITEMS.register(bus); Gameplay.register(bus); container.registerConfig(ModConfig.Type.CLIENT,HudConfig.SPEC); }
  public static boolean unlocked(Player p){return PlayerState.get(p).unlocked();}

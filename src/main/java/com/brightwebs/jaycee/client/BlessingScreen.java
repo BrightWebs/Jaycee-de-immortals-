@@ -125,7 +125,7 @@ public final class BlessingScreen extends Screen {
         if (stage == Stage.ROLLING) revealTicks++;
     }
     @Override public void render(GuiGraphics g, int mx, int my, float partial) {
-        this.renderBackground(g, mx, my, partial);
+        g.fill(0, 0, width, height, 0xF4091424);
         int x = panelLeft, y = panelTop, w = panelWidth, h = panelHeight;
         int cx = width / 2;
         g.fill(x - 2, y - 2, x + w + 2, y + h + 2, 0xF0061323);

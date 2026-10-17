@@ -28,7 +28,7 @@ public final class JayceeMod {
   public Essence(Properties properties){super(properties);}
   @Override public InteractionResultHolder<ItemStack> use(Level level,Player player,InteractionHand hand){
     ItemStack stack=player.getItemInHand(hand);
-    if(!level.isClientSide){int n=Gameplay.absorbEssence(player);stack.shrink(1);player.displayClientMessage(Component.literal(n==3?"Third core consumed. Unique Jaycee role checked. Press M.":"Essence absorbed: "+n+" / 3"),true);}
+    if(!level.isClientSide){int n=Gameplay.absorbEssence(player);stack.shrink(1);if(n==3 && player instanceof net.minecraft.server.level.ServerPlayer p){com.brightwebs.jaycee.gameplay.divine.DivinityService.checkCoreAwakening(p);com.brightwebs.jaycee.gameplay.GameplayNetwork.sync(p);p.sendSystemMessage(Component.literal(com.brightwebs.jaycee.gameplay.divine.DivinityService.model(p).supreme(p.getUUID())?"Jaycee authority granted. Press M.":"Three cores consumed. Jaycee authority belongs to another player; press M for your menu."));}player.displayClientMessage(Component.literal(n==3?"Three Essence cores consumed. Press M; the first player receives Jaycee authority.":"Essence absorbed: "+n+" / 3"),true);}
     return InteractionResultHolder.sidedSuccess(stack,level.isClientSide);
   }
  }

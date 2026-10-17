@@ -740,7 +740,7 @@ final class DivineBondsScreen extends Screen {
             // Inventory rendering and its scissor share this screen's reference-space pose.
             // Passing screen pixels here would apply GUI scaling twice.
             float extent = Math.max(.5f, Math.max(entity.getBbWidth(), entity.getBbHeight()));
-            int scale = Math.max(1, (int)(Math.min(r.width() - 12, r.height() - 16) / extent));
+            int scale = Math.max(1, (int)(Math.min(r.width() - 12, r.height() - 16) / (extent * 1.8f)));
             InventoryScreen.renderEntityInInventoryFollowsMouse(g, r.x() + 3, r.y() + 3,
                 r.x() + r.width() - 3, r.y() + r.height() - 3, scale, .0625f, mx, my, entity);
         } else {

@@ -53,6 +53,12 @@ public final class BlessingScreen extends Screen {
             default -> "OLYMPUS";
         };
     }
+    // Vanilla Screen can apply the menu blur effect before rendering; suppress it here.
+    // This GUI draws its own opaque Sapphire backdrop and must remain sharp.
+    @Override protected void renderBlurredBackground(float partialTick) { }
+    @Override public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        graphics.fill(0, 0, width, height, 0xFF091527);
+    }
     @Override protected void init() {
         super.init();
         panelWidth = Math.min(554, Math.max(200, width - 20));

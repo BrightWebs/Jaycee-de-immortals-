@@ -97,6 +97,12 @@ public final class DivinityService {
         var data = DivinitySavedData.get(player.server);
         data.model.acceptNpcBlessing(player.getUUID(), patron, now());
         data.model.creditEssence(player.getUUID(), 250);
+        var state = com.brightwebs.jaycee.gameplay.PlayerState.get(player);
+        var persistent = player.getPersistentData().getCompound(com.brightwebs.jaycee.gameplay.PlayerState.TAG).copy();
+        persistent.putBoolean("BlessedAwakened", true);
+        player.getPersistentData().put(com.brightwebs.jaycee.gameplay.PlayerState.TAG, persistent);
+        var advancement = player.server.getAdvancements().get(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("jaycee", "blessed"));
+        if (advancement != null) player.getAdvancements().award(advancement, "chosen");
         data.setDirty();
         GameplayNetwork.sync(player);
     }

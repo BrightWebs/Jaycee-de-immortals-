@@ -40,6 +40,8 @@ public final class PlayerState {
         player.getPersistentData().remove("JayceeConsumed");
     }
 
+    public int growthPoints() { return Math.max(0, data.getInt("GrowthPoints")); }
+    public int growthRank(String id) { return Math.max(0, data.getInt("GrowthRank_" + id)); }
     public double soul() { return bounded(data.getDouble("Soul"), maxSoul()); }
     public double maxSoul() { return maximum(data.getDouble("MaxSoul")); }
     public double barrier() { return bounded(data.getDouble("Barrier"), maxBarrier()); }

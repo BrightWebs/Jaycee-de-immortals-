@@ -333,8 +333,9 @@ public final class SkillRuntime {
                         ? SkillMath.healingDrain(d.upkeepMana(), s.skillOutput(d.id()),
                             healing, SkillConfig.HEAL.get())
                         : SkillMath.drain(d.upkeepMana(), s.skillOutput(d.id()), true);
+                    drain *= (1.0 - EssenceGrowth.efficiency(player));
                     plannedDrains.put(d.id(), drain);
-                    cost += drain * (1.0 - EssenceGrowth.efficiency(player));
+                    cost += drain;
                 }
             }
             runtime.paid.clear();

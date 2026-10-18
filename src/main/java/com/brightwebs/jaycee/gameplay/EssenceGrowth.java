@@ -165,7 +165,7 @@ public final class EssenceGrowth {
                 + ". /jc growth invest soul|mana|regeneration <points>"), false);
             return 1;
         });
-        for (String branch : java.util.List.of("health", "soul", "mana", "regeneration", "resistance", "strength", "patron"))
+        for (String branch : java.util.List.of("health", "soul", "mana", "regeneration", "resistance", "strength", "efficiency", "patron"))
             root.then(Commands.literal("invest").then(Commands.literal(branch)
                 .then(Commands.argument("points", IntegerArgumentType.integer(1, 100))
                     .executes(c -> invest(c.getSource().getPlayerOrException(), branch,
@@ -189,7 +189,7 @@ public final class EssenceGrowth {
         int oldRank = Math.max(0, data.getInt("GrowthRank_" + branch));
         if (oldRank > 100 - requested) return 0;
         switch (branch) {
-            case "health", "strength" -> { /* Vanilla attribute modifiers are refreshed server-side. */ }
+            case "health", "strength", "efficiency" -> { /* Vanilla attribute modifiers are refreshed server-side. */ }
             case "soul" -> {
                 double gain = Math.min(1_000_000 - state.maxSoul(), requested * 20.0);
                 if (gain <= 0) return 0;

@@ -130,6 +130,10 @@ public final class EssenceGrowth {
             + ", Spiritual Health +" + (int)soulBoost + ". Skill points available: " + points(player)));
     }
 
+    static double efficiency(ServerPlayer player) {
+        return Math.min(0.40, Math.max(0, PlayerState.read(player).getInt("GrowthRank_efficiency")) * 0.02);
+    }
+
     static void applyAttributes(ServerPlayer player) {
         var data = PlayerState.read(player);
         var health = player.getAttribute(Attributes.MAX_HEALTH);
@@ -187,7 +191,8 @@ public final class EssenceGrowth {
         if (spent > Integer.MAX_VALUE - requested) return 0;
         var state = PlayerState.get(player);
         int oldRank = Math.max(0, data.getInt("GrowthRank_" + branch));
-        if (oldRank > 100 - requested) return 0;
+        int cap = branch.equals("efficiency") ? 20 : branch.equals("resistance") ? 30 : 100;
+        if (oldRank > cap - requested) return 0;
         switch (branch) {
             case "health", "strength", "efficiency" -> { /* Vanilla attribute modifiers are refreshed server-side. */ }
             case "soul" -> {

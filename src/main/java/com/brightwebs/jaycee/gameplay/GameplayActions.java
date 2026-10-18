@@ -5,6 +5,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 /** Client-facing action senders; state changes arrive only through server synchronization. */
 public final class GameplayActions {
     private GameplayActions() {}
+    public static void investGrowth(String branch) { send("growth_invest", 1, 0, branch); }
     public static void page(int page) { send("page", page, 0, ""); }
     public static void pageDelta(int delta) { send("page_delta", delta, 0, ""); }
     public static void equip(int page, int slot, String id) { send("equip", page, slot, id); }

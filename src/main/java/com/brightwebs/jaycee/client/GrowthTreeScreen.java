@@ -44,6 +44,8 @@ public final class GrowthTreeScreen extends Screen {
             addRenderableWidget(Button.builder(Component.literal("+ Upgrade"), b -> GameplayActions.investGrowth(node.id()))
                 .bounds(left + panelWidth - buttonWidth - 22, yy + 2, buttonWidth, Math.max(16, rowH - 4)).build());
         }
+        addRenderableWidget(Button.builder(Component.literal("Evolve"), b -> GameplayActions.evolveGrowth())
+            .bounds(left + panelWidth - 97, top + panelHeight - 27, 78, 20).build());
         addRenderableWidget(Button.builder(Component.literal("Back"), b ->
             Minecraft.getInstance().setScreen(new JayceeScreen(ordinary)))
             .bounds(left + 12, top + panelHeight - 27, 70, 20).build());
@@ -73,8 +75,16 @@ public final class GrowthTreeScreen extends Screen {
             g.drawString(font, node.title() + "  [" + rank + "/100]", left + 21, yy + 4, 0xFFEAD29E, false);
             if (rowH >= 27) g.drawString(font, node.detail(), left + 21, yy + 16, 0xFFA8C5DC, false);
         }
-        g.drawCenteredString(font, "Each upgrade costs 1 point. Your choices persist after logout.", width / 2,
-            top + panelHeight - 20, 0xFFABC3D9);
+        int level = snapshot.divinity().getInt("DivineLevel");
+        String rank = snapshot.divinity().getString("Rank");
+        int target = switch (rank) {
+            case "BLESSED" -> 20; case "DEMIGOD" -> 45;
+            case "MINOR_GOD" -> 80; case "MAJOR_GOD" -> 120;
+            default -> -1;
+        };
+        String gate = target > 0 ? "Next evolution: " + rank.replace('_', ' ') + " | Lv " + level + "/" + target
+            : "Evolution: final rank or unavailable";
+        g.drawCenteredString(font, gate, width / 2, top + panelHeight - 17, 0xFFABC3D9);
         super.render(g, mx, my, dt);
     }
     @Override public boolean isPauseScreen() { return false; }

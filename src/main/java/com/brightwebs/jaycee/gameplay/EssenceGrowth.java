@@ -74,9 +74,42 @@ public final class EssenceGrowth {
         }
     }
 
+    /** First patron-specific skill-tree pass: server-owned temporary divine blessings.
+     * All effects require the Blessed lineage AND at least one invested Divine Affinity rank.
+     * These are small passive manifestations, not automatic ownership of god-exclusive spells. */
+    static void applyPatronAffinity(ServerPlayer player) {
+        var state = PlayerState.get(player);
+        if (!state.unlocked()) return;
+        int rank = Math.clamp(PlayerState.read(player).getInt("GrowthRank_patron"), 0, 100);
+        if (rank < 1) return;
+        var lineage = DivinityService.model(player).profile(player.getUUID()).npcPatrons();
+        if (lineage.isEmpty()) return;
+        String patron = lineage.stream().sorted().findFirst().orElse("");
+        var effect = switch (patron) {
+            case "zeus", "hermes" -> net.minecraft.world.effect.MobEffects.MOVEMENT_SPEED;
+            case "poseidon" -> net.minecraft.world.effect.MobEffects.WATER_BREATHING;
+            case "hades", "hephaestus" -> net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE;
+            case "athena", "hera" -> net.minecraft.world.effect.MobEffects.DAMAGE_RESISTANCE;
+            case "ares" -> net.minecraft.world.effect.MobEffects.DAMAGE_BOOST;
+            case "apollo" -> net.minecraft.world.effect.MobEffects.NIGHT_VISION;
+            case "artemis" -> net.minecraft.world.effect.MobEffects.JUMP;
+            case "aphrodite", "hestia" -> net.minecraft.world.effect.MobEffects.REGENERATION;
+            case "demeter" -> net.minecraft.world.effect.MobEffects.SATURATION;
+            case "dionysus" -> net.minecraft.world.effect.MobEffects.LUCK;
+            default -> null;
+        };
+        if (effect == null) return;
+        // Cap amplifier to keep early blessings meaningful without becoming invulnerability.
+        int amplifier = rank >= 12 ? 1 : 0;
+        var active = player.getEffect(effect);
+        if (active == null || active.getDuration() < 30 || active.getAmplifier() < amplifier)
+            player.addEffect(new net.minecraft.world.effect.MobEffectInstance(effect, 65, amplifier, true, false, true));
+    }
+
     /** Called once per second. Apply only NEW level deltas, preserving configured pools. */
     static void grow(ServerPlayer player) {
         applyAttributes(player);
+        applyPatronAffinity(player);
         var state = PlayerState.get(player);
         if (!state.unlocked()) return;
         int level = Math.min(10000, DivinityService.model(player).progression(player.getUUID()).level());
@@ -178,6 +211,7 @@ public final class EssenceGrowth {
         data.putInt("EssenceSpentPoints", spent + requested);
         PlayerState.save(player, data);
         applyAttributes(player);
+        if (branch.equals("health")) player.heal(requested * 2.0f);
         GameplayNetwork.sync(player);
         player.sendSystemMessage(Component.literal("Invested " + requested + " point(s) in " + branch + ". Remaining: " + points(player)));
         return 1;

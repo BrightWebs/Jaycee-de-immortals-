@@ -39,10 +39,10 @@ public final class GrowthTreeScreen extends Screen {
         ph = Math.min(545, height - 16);
         left = (width - pw) / 2;
         top = (height - ph) / 2;
-        rowGap = 5;
+        rowGap = 7;
         gridTop = top + 64;
         int available = ph - 117;
-        rowHeight = Math.min(45, Math.max(27, (available - 7 * rowGap) / 8));
+        rowHeight = 48;
         visibleRows = Math.max(1, Math.min(8, (available + rowGap) / (rowHeight + rowGap)));
         scroll = Math.clamp(scroll, 0, Math.max(0, NODES.size() - visibleRows));
         rebuildNodeButtons();
@@ -94,8 +94,17 @@ public final class GrowthTreeScreen extends Screen {
         g.renderOutline(left, top, pw, ph, 0xFF8BCBF8);
         g.renderOutline(left + 4, top + 4, pw - 8, ph - 8, 0xFF315F90);
         g.fill(left + 15, top + 12, left + pw - 15, top + 14, 0xFFBDA36D);
-        g.drawCenteredString(font, "DIVINE ASCENSION / SKILL TREE", width/2, top + 20, GOLD);
         PlayerState snapshot = state();
+        // Draw panel and row surfaces first, then widgets, and finally all text/icons.
+        // On NeoForge the default widget pass may otherwise dim text drawn before it.
+        for (int i = 0; i < visibleRows; i++) {
+            int y = gridTop + i * (rowHeight + rowGap);
+            int rx = left + 13, rw = pw - 26;
+            g.fill(rx, y, rx + rw, y + rowHeight, 0xFF102D4B);
+            g.renderOutline(rx, y, rw, rowHeight, 0xFF467EAB);
+        }
+        super.render(g, mx, my, dt);
+        g.drawCenteredString(font, "DIVINE ASCENSION / SKILL TREE", width/2, top + 20, GOLD);
         g.drawCenteredString(font, "Available skill points: " + snapshot.growthPoints(),
             width/2, top + 37, SKY);
         String previous = "";
@@ -103,8 +112,6 @@ public final class GrowthTreeScreen extends Screen {
             Node n = NODES.get(i + scroll);
             int y = gridTop + i * (rowHeight + rowGap);
             int rx = left + 13, rw = pw - 26;
-            g.fill(rx, y, rx + rw, y + rowHeight, 0xFF102D4B);
-            g.renderOutline(rx, y, rw, rowHeight, 0xFF467EAB);
             int square = Math.min(rowHeight - 8, 30);
             g.fill(rx + 5, y + 4, rx + square + 9, y + square + 4, n.tint());
             g.fill(rx + 7, y + 6, rx + square + 7, y + square + 2, 0xFF0A233D);
@@ -112,10 +119,10 @@ public final class GrowthTreeScreen extends Screen {
             int tx = rx + square + 18;
             int cap = Math.min(100, n.cap());
             String title = n.name() + "  [" + snapshot.growthRank(n.id()) + "/" + cap + "]";
-            g.drawString(font, title, tx, y + Math.max(4, rowHeight/2 - 11), PALE, false);
+            g.drawString(font, title, tx, y + 8, 0xFFF3F8FF, false);
             if (rowHeight >= 32) {
                 g.drawString(font, font.plainSubstrByWidth(n.detail(), Math.max(50, rw - (tx-rx) - 145)),
-                    tx, y + rowHeight/2 + 2, SKY, false);
+                    tx, y + 26, 0xFFBEDFFB, false);
             }
             if (!previous.equals(n.category())) {
                 g.fill(rx + 4, y, rx + rw - 4, y + 1, n.tint());
@@ -138,7 +145,6 @@ public final class GrowthTreeScreen extends Screen {
         String status = needed < 0 ? "Evolution unavailable"
             : rank.replace('_',' ') + "  |  Level " + level + " / " + needed;
         g.drawCenteredString(font, status, width/2, top + ph - 24, eligible ? GOLD : SKY);
-        super.render(g, mx, my, dt);
     }
     @Override public boolean isPauseScreen() { return false; }
 }

@@ -54,6 +54,7 @@ public final class GameplayNetwork {
     public static void sync(ServerPlayer player) {
         CompoundTag snapshot = PlayerState.read(player);
         snapshot.putLong("ServerTick", player.serverLevel().getGameTime());
+        snapshot.putInt("GrowthPoints", EssenceGrowth.points(player));
         var resolved = ManaBackends.resolve(player);
         snapshot.putString("EffectiveBackend", resolved.id());
         snapshot.putDouble("Mana", PlayerState.bounded(resolved.mana().getCurrent(), resolved.mana().getMax()));

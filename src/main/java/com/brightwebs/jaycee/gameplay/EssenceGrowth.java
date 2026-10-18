@@ -3,6 +3,9 @@ package com.brightwebs.jaycee.gameplay;
 import com.brightwebs.jaycee.gameplay.divine.DivinityService;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.minecraft.commands.Commands;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -15,6 +18,8 @@ import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 /** Server-authoritative, intangible Essence rewards and additive growth. */
 public final class EssenceGrowth {
     private EssenceGrowth() {}
+    private static final ResourceLocation HEALTH_BOOST = ResourceLocation.fromNamespaceAndPath("jaycee", "growth_health");
+    private static final ResourceLocation POWER_BOOST = ResourceLocation.fromNamespaceAndPath("jaycee", "growth_strength");
     static void register() { NeoForge.EVENT_BUS.addListener(EssenceGrowth::onDeath); }
 
     /** Provisional vanilla balance; modded creatures use a conservative fallback. */
@@ -71,6 +76,7 @@ public final class EssenceGrowth {
 
     /** Called once per second. Apply only NEW level deltas, preserving configured pools. */
     static void grow(ServerPlayer player) {
+        applyAttributes(player);
         var state = PlayerState.get(player);
         if (!state.unlocked()) return;
         int level = Math.min(10000, DivinityService.model(player).progression(player.getUUID()).level());
@@ -91,6 +97,28 @@ public final class EssenceGrowth {
             + ", Spiritual Health +" + (int)soulBoost + ". Skill points available: " + points(player)));
     }
 
+    static void applyAttributes(ServerPlayer player) {
+        var data = PlayerState.read(player);
+        var health = player.getAttribute(Attributes.MAX_HEALTH);
+        if (health != null) {
+            double bonus = Math.min(200, Math.max(0, data.getInt("GrowthRank_health")) * 2.0);
+            var old = health.getModifier(HEALTH_BOOST);
+            if ((old == null && bonus > 0) || (old != null && old.amount() != bonus)) {
+                health.removeModifier(HEALTH_BOOST);
+                if (bonus > 0) health.addTransientModifier(new AttributeModifier(HEALTH_BOOST, bonus, AttributeModifier.Operation.ADD_VALUE));
+            }
+        }
+        var damage = player.getAttribute(Attributes.ATTACK_DAMAGE);
+        if (damage != null) {
+            double bonus = Math.min(25, Math.max(0, data.getInt("GrowthRank_strength")) * 0.5);
+            var old = damage.getModifier(POWER_BOOST);
+            if ((old == null && bonus > 0) || (old != null && old.amount() != bonus)) {
+                damage.removeModifier(POWER_BOOST);
+                if (bonus > 0) damage.addTransientModifier(new AttributeModifier(POWER_BOOST, bonus, AttributeModifier.Operation.ADD_VALUE));
+            }
+        }
+    }
+
     static int points(ServerPlayer player) {
         var data = PlayerState.read(player);
         int earned = Math.max(0, DivinityService.model(player).progression(player.getUUID()).level() - 1);
@@ -104,7 +132,7 @@ public final class EssenceGrowth {
                 + ". /jc growth invest soul|mana|regeneration <points>"), false);
             return 1;
         });
-        for (String branch : java.util.List.of("soul", "mana", "regeneration"))
+        for (String branch : java.util.List.of("health", "soul", "mana", "regeneration", "resistance", "strength", "patron"))
             root.then(Commands.literal("invest").then(Commands.literal(branch)
                 .then(Commands.argument("points", IntegerArgumentType.integer(1, 100))
                     .executes(c -> invest(c.getSource().getPlayerOrException(), branch,
@@ -112,7 +140,11 @@ public final class EssenceGrowth {
         return root;
     }
 
-    private static int invest(ServerPlayer player, String branch, int requested) {
+    static int invest(ServerPlayer player, String branch, int requested) {
+        if (requested < 1 || requested > 100) return 0;
+        if (!java.util.Set.of("health", "soul", "mana", "regeneration", "resistance", "strength", "patron").contains(branch)) return 0;
+        var profile = DivinityService.model(player).profile(player.getUUID());
+        if ("patron".equals(branch) && profile.npcPatrons().isEmpty()) return 0;
         if (!PlayerState.get(player).unlocked() || requested > points(player)) {
             player.sendSystemMessage(Component.literal("Growth investment rejected: insufficient earned skill points or no awakening."));
             return 0;
@@ -121,7 +153,10 @@ public final class EssenceGrowth {
         int spent = Math.max(0, data.getInt("EssenceSpentPoints"));
         if (spent > Integer.MAX_VALUE - requested) return 0;
         var state = PlayerState.get(player);
+        int oldRank = Math.max(0, data.getInt("GrowthRank_" + branch));
+        if (oldRank > 100 - requested) return 0;
         switch (branch) {
+            case "health", "strength" -> { /* Vanilla attribute modifiers are refreshed server-side. */ }
             case "soul" -> {
                 double gain = Math.min(1_000_000 - state.maxSoul(), requested * 20.0);
                 if (gain <= 0) return 0;
@@ -135,10 +170,14 @@ public final class EssenceGrowth {
                 data.putDouble("Mana", state.mana() + gain);
             }
             case "regeneration" -> data.putDouble("ManaRegen", Math.min(10000, state.manaRegen() + requested * 0.25));
+            case "resistance" -> data.putDouble("SoulResistance", Math.min(0.75, state.soulResistance() + requested * 0.025));
+            case "patron" -> data.putDouble("ManaRegen", Math.min(10000, state.manaRegen() + requested * 0.15));
             default -> { return 0; }
         }
+        data.putInt("GrowthRank_" + branch, oldRank + requested);
         data.putInt("EssenceSpentPoints", spent + requested);
         PlayerState.save(player, data);
+        applyAttributes(player);
         GameplayNetwork.sync(player);
         player.sendSystemMessage(Component.literal("Invested " + requested + " point(s) in " + branch + ". Remaining: " + points(player)));
         return 1;

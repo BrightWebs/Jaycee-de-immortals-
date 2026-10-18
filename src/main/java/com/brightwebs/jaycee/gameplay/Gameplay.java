@@ -328,6 +328,10 @@ public final class Gameplay {
         int count = previous != null && previous.tick() == now ? previous.count() + 1 : 1;
         ACTION_RATES.put(player.getUUID(), new Rate(now, count));
         if (count > 12) return;
+        if ("growth_evolve".equals(action.action())) {
+            com.brightwebs.jaycee.gameplay.divine.DivinityService.evolve(player);
+            return;
+        }
         if ("growth_invest".equals(action.action())) {
             EssenceGrowth.invest(player, action.value(), action.first());
             return;

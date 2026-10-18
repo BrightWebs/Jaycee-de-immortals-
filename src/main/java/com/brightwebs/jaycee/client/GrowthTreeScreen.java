@@ -16,12 +16,9 @@ public final class GrowthTreeScreen extends Screen {
     private static final List<Node> NODES = List.of(
         new Node("health", "Physical Fortitude", "+2 maximum HP (one heart) per rank", "HP", 0xFFF18AA0, "PHYSICAL", 100),
         new Node("soul", "Soul Fortification", "+20 maximum Spiritual Health", "SP", 0xFFD39AFE, "SPIRITUAL", 100),
-        new Node("resistance", "Spirit Guard", "+2.5% spiritual resistance, up to 75%", "DEF", 0xFF97BEFF, "SPIRITUAL", 30),
         new Node("mana", "Mana Expansion", "+15 maximum Mana", "MP", 0xFFB896F6, "ARCANE", 100),
         new Node("regeneration", "Arcane Recovery", "+0.25 Mana per second", "REG", 0xFF71D5F9, "ARCANE", 100),
-        new Node("efficiency", "Arcane Efficiency", "2% less casting Mana per rank, up to 40%", "ARC", 0xFFB78CFF, "ARCANE", 20),
-        new Node("strength", "Mortal Strength", "+0.5 physical attack damage", "ATK", 0xFFF8D58C, "DIVINE", 100),
-        new Node("patron", "Divine Affinity", "+0.15 Mana regen; unlocks patron passive", "DIV", 0xFFEECC82, "DIVINE", 100)
+        new Node("strength", "Mortal Strength", "+0.5 physical attack damage", "ATK", 0xFFF8D58C, "PHYSICAL", 100)
     );
     private final boolean ordinary;
     private int left, top, pw, ph, scroll, visibleRows, rowHeight, rowGap, gridTop;
@@ -29,7 +26,7 @@ public final class GrowthTreeScreen extends Screen {
     private Button evolveButton;
 
     public GrowthTreeScreen(boolean ordinary) {
-        super(Component.literal("Divine Ascension / Skill Tree"));
+        super(Component.literal("Divine Ascension / Attributes"));
         this.ordinary = ordinary;
     }
     private PlayerState state() { return PlayerState.get(Minecraft.getInstance().player); }
@@ -42,8 +39,8 @@ public final class GrowthTreeScreen extends Screen {
         rowGap = 7;
         gridTop = top + 64;
         int available = ph - 117;
-        rowHeight = 48;
-        visibleRows = Math.max(1, Math.min(8, (available + rowGap) / (rowHeight + rowGap)));
+        rowHeight = Math.min(58, Math.max(35, (available - (NODES.size()-1)*rowGap) / NODES.size()));
+        visibleRows = Math.max(1, Math.min(NODES.size(), (available + rowGap) / (rowHeight + rowGap)));
         scroll = Math.clamp(scroll, 0, Math.max(0, NODES.size() - visibleRows));
         rebuildNodeButtons();
         int bottom = top + ph - 31;
@@ -104,7 +101,7 @@ public final class GrowthTreeScreen extends Screen {
             g.renderOutline(rx, y, rw, rowHeight, 0xFF467EAB);
         }
         super.render(g, mx, my, dt);
-        g.drawCenteredString(font, "DIVINE ASCENSION / SKILL TREE", width/2, top + 20, GOLD);
+        g.drawCenteredString(font, "DIVINE ASCENSION / ATTRIBUTES", width/2, top + 20, GOLD);
         g.drawCenteredString(font, "Available skill points: " + snapshot.growthPoints(),
             width/2, top + 37, SKY);
         String previous = "";
@@ -131,7 +128,7 @@ public final class GrowthTreeScreen extends Screen {
         }
         if (NODES.size() > visibleRows) {
             g.drawCenteredString(font, "Scroll to see more upgrades (" + (scroll+1) + "-"
-                + (scroll+visibleRows) + "/8)", width/2, top + ph - 51, SKY);
+                + (scroll+visibleRows) + "/" + NODES.size() + ")", width/2, top + ph - 51, SKY);
         }
         int level = snapshot.divinity().getInt("DivineLevel");
         String rank = snapshot.divinity().getString("Rank");

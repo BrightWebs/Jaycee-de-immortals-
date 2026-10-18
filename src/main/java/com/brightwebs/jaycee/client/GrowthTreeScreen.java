@@ -19,6 +19,7 @@ public final class GrowthTreeScreen extends Screen {
         new Node("regeneration", "Arcane Recovery", "+0.25 Mana regenerated each second"),
         new Node("resistance", "Spirit Guard", "+2.5% spiritual resistance, up to 75%"),
         new Node("strength", "Mortal Strength", "+0.5 physical attack damage"),
+        new Node("efficiency", "Arcane Efficiency", "2% less Mana consumed per rank, up to 40%"),
         new Node("patron", "Divine Affinity", "+0.15 Mana regeneration; requires Olympian patron")
     );
     private final boolean ordinary;

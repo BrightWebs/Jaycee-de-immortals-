@@ -36,7 +36,7 @@ public final class GrowthTreeScreen extends Screen {
         left = (width - panelWidth) / 2;
         top = (height - panelHeight) / 2;
         int gap = 5;
-        int rowH = Math.max(19, Math.min(35, (panelHeight - 92 - gap * 6) / 7));
+        int rowH = Math.max(16, Math.min(35, (panelHeight - 92 - gap * (NODES.size() - 1)) / NODES.size()));
         int start = top + 51;
         int buttonWidth = Math.min(98, panelWidth / 4);
         for (int i = 0; i < NODES.size(); i++) {

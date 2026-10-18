@@ -72,6 +72,7 @@ final class AbilityExecutors {
                 data = PlayerState.read(player);
                 return true;
             }
+            amount *= 1.0 - EssenceGrowth.efficiency(player);
             var mana = ManaBackends.resolve(player).mana();
             try {
                 if (mana.getCurrent() < amount || !mana.consume(amount)) return false;

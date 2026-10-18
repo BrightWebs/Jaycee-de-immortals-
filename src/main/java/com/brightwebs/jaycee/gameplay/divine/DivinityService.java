@@ -93,6 +93,18 @@ public final class DivinityService {
         if (p.tickCount % 20 == 0) { data.model.expire(now()); data.setDirty(); }
     }
     /** Award a legitimate, one-time Olympian blessing only after a validated Totem draw. */
+    /** Player-requested evolution cannot skip prerequisites or award Supreme authority. */
+    public static void evolve(ServerPlayer player) {
+        var data = DivinitySavedData.get(player.server);
+        try {
+            var rank = data.model.evolve(player.getUUID(), now());
+            data.setDirty();
+            GameplayNetwork.sync(player);
+            player.sendSystemMessage(Component.literal("DIVINE EVOLUTION: You have ascended to " + rank.name().replace('_', ' ') + "!"));
+        } catch (IllegalArgumentException ex) {
+            player.sendSystemMessage(Component.literal("Divine evolution unavailable: " + ex.getMessage()));
+        }
+    }
     public static void olympianBless(ServerPlayer player, String patron) {
         var data = DivinitySavedData.get(player.server);
         data.model.acceptNpcBlessing(player.getUUID(), patron, now());

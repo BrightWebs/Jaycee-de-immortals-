@@ -9,83 +9,135 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import java.util.List;
 
-/** Spend earned level points from the same saved pool used by /jc growth. */
+/** Crisp Sapphire skill tree; scrolls at smaller GUI scales with no clipped nodes. */
 public final class GrowthTreeScreen extends Screen {
-    private record Node(String id, String title, String detail) {}
+    private record Node(String id, String name, String detail, String symbol, int tint, String category, int cap) {}
+    private static final int GOLD = 0xFFE8CE91, PALE = 0xFFE1EFFC, SKY = 0xFFACC9E5;
     private static final List<Node> NODES = List.of(
-        new Node("health", "Physical Fortitude", "+2 maximum HP (one heart) per rank"),
-        new Node("soul", "Soul Fortification", "+20 maximum Spiritual Health"),
-        new Node("mana", "Mana Expansion", "+15 maximum Mana"),
-        new Node("regeneration", "Arcane Recovery", "+0.25 Mana regenerated each second"),
-        new Node("resistance", "Spirit Guard", "+2.5% spiritual resistance, up to 75%"),
-        new Node("strength", "Mortal Strength", "+0.5 physical attack damage"),
-        new Node("efficiency", "Arcane Efficiency", "2% less Mana consumed per rank, up to 40%"),
-        new Node("patron", "Divine Affinity", "+0.15 Mana regeneration; requires Olympian patron")
+        new Node("health", "Physical Fortitude", "+2 maximum HP (one heart) per rank", "HP", 0xFFF18AA0, "PHYSICAL", 100),
+        new Node("soul", "Soul Fortification", "+20 maximum Spiritual Health", "SP", 0xFFD39AFE, "SPIRITUAL", 100),
+        new Node("resistance", "Spirit Guard", "+2.5% spiritual resistance, up to 75%", "DEF", 0xFF97BEFF, "SPIRITUAL", 30),
+        new Node("mana", "Mana Expansion", "+15 maximum Mana", "MP", 0xFFB896F6, "ARCANE", 100),
+        new Node("regeneration", "Arcane Recovery", "+0.25 Mana per second", "REG", 0xFF71D5F9, "ARCANE", 100),
+        new Node("efficiency", "Arcane Efficiency", "2% less casting Mana per rank, up to 40%", "ARC", 0xFFB78CFF, "ARCANE", 20),
+        new Node("strength", "Mortal Strength", "+0.5 physical attack damage", "ATK", 0xFFF8D58C, "DIVINE", 100),
+        new Node("patron", "Divine Affinity", "+0.15 Mana regen; unlocks patron passive", "DIV", 0xFFEECC82, "DIVINE", 100)
     );
     private final boolean ordinary;
-    private int left, top, panelWidth, panelHeight;
+    private int left, top, pw, ph, scroll, visibleRows, rowHeight, rowGap, gridTop;
+    private final java.util.ArrayList<Button> nodeButtons = new java.util.ArrayList<>();
+    private Button evolveButton;
+
     public GrowthTreeScreen(boolean ordinary) {
-        super(Component.literal("Divine Skill Tree"));
+        super(Component.literal("Divine Ascension / Skill Tree"));
         this.ordinary = ordinary;
     }
     private PlayerState state() { return PlayerState.get(Minecraft.getInstance().player); }
     @Override protected void init() {
         super.init();
-        panelWidth = Math.min(580, width - 20);
-        panelHeight = Math.min(360, height - 20);
-        left = (width - panelWidth) / 2;
-        top = (height - panelHeight) / 2;
-        int gap = 5;
-        int rowH = Math.max(16, Math.min(35, (panelHeight - 92 - gap * (NODES.size() - 1)) / NODES.size()));
-        int start = top + 51;
-        int buttonWidth = Math.min(98, panelWidth / 4);
-        for (int i = 0; i < NODES.size(); i++) {
-            Node node = NODES.get(i);
-            int yy = start + i * (rowH + gap);
-            addRenderableWidget(Button.builder(Component.literal("+ Upgrade"), b -> GameplayActions.investGrowth(node.id()))
-                .bounds(left + panelWidth - buttonWidth - 22, yy + 2, buttonWidth, Math.max(16, rowH - 4)).build());
+        pw = Math.min(850, width - 18);
+        ph = Math.min(545, height - 16);
+        left = (width - pw) / 2;
+        top = (height - ph) / 2;
+        rowGap = 5;
+        gridTop = top + 64;
+        int available = ph - 117;
+        rowHeight = Math.min(45, Math.max(27, (available - 7 * rowGap) / 8));
+        visibleRows = Math.max(1, Math.min(8, (available + rowGap) / (rowHeight + rowGap)));
+        scroll = Math.clamp(scroll, 0, Math.max(0, NODES.size() - visibleRows));
+        rebuildNodeButtons();
+        int bottom = top + ph - 31;
+        addRenderableWidget(styledButton("Back", left + 14, bottom, 90, 22, () ->
+            Minecraft.getInstance().setScreen(new JayceeScreen(ordinary))));
+        evolveButton = addRenderableWidget(styledButton("Evolve", left + pw - 104, bottom, 90, 22,
+            GameplayActions::evolveGrowth));
+    }
+    private Button styledButton(String text, int x, int y, int w, int h, Runnable action) {
+        return new Button(x, y, w, h, Component.literal(text), b -> action.run(), n -> n.get()) {
+            @Override protected void renderWidget(GuiGraphics g, int mx, int my, float dt) {
+                int border = active ? isHoveredOrFocused() ? GOLD : 0xFF6EBBEA : 0xFF405B75;
+                g.fill(getX(), getY(), getX()+getWidth(), getY()+getHeight(), border);
+                g.fill(getX()+2, getY()+2, getX()+getWidth()-2, getY()+getHeight()-2,
+                    active ? isHoveredOrFocused() ? 0xFF20476C : 0xFF0A2647 : 0xFF101F31);
+                g.drawCenteredString(font, getMessage(), getX()+getWidth()/2,
+                    getY()+(getHeight()-8)/2, active ? GOLD : 0xFF7B93AD);
+            }
+        };
+    }
+    private void rebuildNodeButtons() {
+        for (Button b : nodeButtons) removeWidget(b);
+        nodeButtons.clear();
+        int bw = Math.min(114, Math.max(70, pw / 5));
+        for (int i = 0; i < visibleRows; i++) {
+            final Node node = NODES.get(i + scroll);
+            int y = gridTop + i * (rowHeight + rowGap);
+            Button button = styledButton("+ Upgrade", left + pw - bw - 16,
+                y + 3, bw, Math.max(19, rowHeight - 6), () -> GameplayActions.investGrowth(node.id()));
+            nodeButtons.add(addRenderableWidget(button));
         }
-        addRenderableWidget(Button.builder(Component.literal("Evolve"), b -> GameplayActions.evolveGrowth())
-            .bounds(left + panelWidth - 97, top + panelHeight - 27, 78, 20).build());
-        addRenderableWidget(Button.builder(Component.literal("Back"), b ->
-            Minecraft.getInstance().setScreen(new JayceeScreen(ordinary)))
-            .bounds(left + 12, top + panelHeight - 27, 70, 20).build());
+    }
+    @Override public boolean mouseScrolled(double mx, double my, double dx, double dy) {
+        if (NODES.size() > visibleRows && dy != 0) {
+            scroll = Math.clamp(scroll + (dy > 0 ? -1 : 1), 0, NODES.size()-visibleRows);
+            rebuildNodeButtons();
+            return true;
+        }
+        return super.mouseScrolled(mx, my, dx, dy);
     }
     @Override public void renderBackground(GuiGraphics g, int mx, int my, float dt) {
-        g.fill(0, 0, width, height, 0xE8091326);
+        g.fill(0, 0, width, height, 0xEF071424);
     }
     @Override public void render(GuiGraphics g, int mx, int my, float dt) {
         renderBackground(g, mx, my, dt);
-        g.fill(left, top, left + panelWidth, top + panelHeight, 0xFF0D243C);
-        g.renderOutline(left, top, panelWidth, panelHeight, 0xFFC3A66E);
-        g.renderOutline(left + 3, top + 3, panelWidth - 6, panelHeight - 6, 0xFF5582AF);
-        g.fill(left + 16, top + 13, left + panelWidth - 16, top + 15, 0xFFE3CA92);
-        g.drawCenteredString(font, "DIVINE ASCENSION / SKILL TREE", width / 2, top + 22, 0xFFE9D49F);
-        var snapshot = state();
-        int points = snapshot.growthPoints();
-        g.drawCenteredString(font, "Available skill points: " + points, width / 2, top + 37, 0xFFABD6ED);
-        int gap = 5;
-        int rowH = Math.max(19, Math.min(35, (panelHeight - 92 - gap * 6) / 7));
-        int start = top + 51;
-        for (int i = 0; i < NODES.size(); i++) {
-            Node node = NODES.get(i);
-            int yy = start + i * (rowH + gap);
-            g.fill(left + 12, yy, left + panelWidth - 13, yy + rowH, 0xFF183554);
-            g.renderOutline(left + 12, yy, panelWidth - 25, rowH, 0xFF476F92);
-            int rank = snapshot.growthRank(node.id());
-            g.drawString(font, node.title() + "  [" + rank + "/100]", left + 21, yy + 4, 0xFFEAD29E, false);
-            if (rowH >= 27) g.drawString(font, node.detail(), left + 21, yy + 16, 0xFFA8C5DC, false);
+        g.fill(left - 2, top - 2, left + pw + 2, top + ph + 2, 0xFF061526);
+        g.fill(left, top, left + pw, top + ph, 0xFF09203B);
+        g.renderOutline(left, top, pw, ph, 0xFF8BCBF8);
+        g.renderOutline(left + 4, top + 4, pw - 8, ph - 8, 0xFF315F90);
+        g.fill(left + 15, top + 12, left + pw - 15, top + 14, 0xFFBDA36D);
+        g.drawCenteredString(font, "DIVINE ASCENSION / SKILL TREE", width/2, top + 20, GOLD);
+        PlayerState snapshot = state();
+        g.drawCenteredString(font, "Available skill points: " + snapshot.growthPoints(),
+            width/2, top + 37, SKY);
+        String previous = "";
+        for (int i = 0; i < visibleRows; i++) {
+            Node n = NODES.get(i + scroll);
+            int y = gridTop + i * (rowHeight + rowGap);
+            int rx = left + 13, rw = pw - 26;
+            g.fill(rx, y, rx + rw, y + rowHeight, 0xFF102D4B);
+            g.renderOutline(rx, y, rw, rowHeight, 0xFF467EAB);
+            int square = Math.min(rowHeight - 8, 30);
+            g.fill(rx + 5, y + 4, rx + square + 9, y + square + 4, n.tint());
+            g.fill(rx + 7, y + 6, rx + square + 7, y + square + 2, 0xFF0A233D);
+            g.drawCenteredString(font, n.symbol(), rx + square/2 + 7, y + square/2, n.tint());
+            int tx = rx + square + 18;
+            int cap = Math.min(100, n.cap());
+            String title = n.name() + "  [" + snapshot.growthRank(n.id()) + "/" + cap + "]";
+            g.drawString(font, title, tx, y + Math.max(4, rowHeight/2 - 11), PALE, false);
+            if (rowHeight >= 32) {
+                g.drawString(font, font.plainSubstrByWidth(n.detail(), Math.max(50, rw - (tx-rx) - 145)),
+                    tx, y + rowHeight/2 + 2, SKY, false);
+            }
+            if (!previous.equals(n.category())) {
+                g.fill(rx + 4, y, rx + rw - 4, y + 1, n.tint());
+                previous = n.category();
+            }
+        }
+        if (NODES.size() > visibleRows) {
+            g.drawCenteredString(font, "Scroll to see more upgrades (" + (scroll+1) + "-"
+                + (scroll+visibleRows) + "/8)", width/2, top + ph - 51, SKY);
         }
         int level = snapshot.divinity().getInt("DivineLevel");
         String rank = snapshot.divinity().getString("Rank");
-        int target = switch (rank) {
+        int needed = switch (rank) {
             case "BLESSED" -> 20; case "DEMIGOD" -> 45;
             case "MINOR_GOD" -> 80; case "MAJOR_GOD" -> 120;
             default -> -1;
         };
-        String gate = target > 0 ? "Next evolution: " + rank.replace('_', ' ') + " | Lv " + level + "/" + target
-            : "Evolution: final rank or unavailable";
-        g.drawCenteredString(font, gate, width / 2, top + panelHeight - 17, 0xFFABC3D9);
+        boolean eligible = needed > 0 && level >= needed;
+        evolveButton.active = eligible;
+        String status = needed < 0 ? "Evolution unavailable"
+            : rank.replace('_',' ') + "  |  Level " + level + " / " + needed;
+        g.drawCenteredString(font, status, width/2, top + ph - 24, eligible ? GOLD : SKY);
         super.render(g, mx, my, dt);
     }
     @Override public boolean isPauseScreen() { return false; }

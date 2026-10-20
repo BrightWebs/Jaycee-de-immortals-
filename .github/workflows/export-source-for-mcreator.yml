@@ -1,0 +1,29 @@
+name: Export current Jaycee source
+on:
+  push:
+    paths:
+      - '.github/workflows/export-source-for-mcreator.yml'
+  workflow_dispatch:
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pack mod sources and resources
+        run: |
+          python3 - <<'PY'
+          import zipfile,os
+          with zipfile.ZipFile('jaycee-source-for-mcreator.zip','w',zipfile.ZIP_DEFLATED) as z:
+              for d in ['src','docs']:
+                  if os.path.isdir(d):
+                      for root,_,files in os.walk(d):
+                          for fn in files:
+                              p=os.path.join(root,fn)
+                              z.write(p)
+              for fn in ['gradle.properties','build.gradle','settings.gradle','README.md']:
+                  if os.path.isfile(fn):z.write(fn)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jaycee-source-for-mcreator
+          path: jaycee-source-for-mcreator.zip

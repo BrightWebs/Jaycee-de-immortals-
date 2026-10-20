@@ -36,6 +36,8 @@ public final class Gameplay {
         bus.addListener(Gameplay::tick);
         bus.addListener((net.neoforged.neoforge.event.RegisterCommandsEvent event) -> JayceeCommands.register(event));
         SkillRuntime.register();
+        EssenceGrowth.register();
+        DivineTotemService.register();
         com.brightwebs.jaycee.gameplay.divine.DivinityService.register();
         com.brightwebs.jaycee.gameplay.divine.DivineAppraisal.register();
     }
@@ -295,6 +297,7 @@ public final class Gameplay {
             SkillRuntime.tick(player);
             return;
         }
+        EssenceGrowth.grow(player);
         var state = PlayerState.get(player);
         if (player.isAlive() && !player.isSpectator()) {
             var data = PlayerState.read(player);
@@ -325,6 +328,14 @@ public final class Gameplay {
         int count = previous != null && previous.tick() == now ? previous.count() + 1 : 1;
         ACTION_RATES.put(player.getUUID(), new Rate(now, count));
         if (count > 12) return;
+        if ("growth_evolve".equals(action.action())) {
+            com.brightwebs.jaycee.gameplay.divine.DivinityService.evolve(player);
+            return;
+        }
+        if ("growth_invest".equals(action.action())) {
+            EssenceGrowth.invest(player, action.value(), action.first());
+            return;
+        }
         if (action.action().equals("skill_toggle") || action.action().equals("skill_output")
                 || action.action().equals("skill_style") || action.action().equals("skill_mode")) {
             SkillRuntime.action(player, action);

@@ -40,6 +40,8 @@ public final class PlayerState {
         player.getPersistentData().remove("JayceeConsumed");
     }
 
+    public int growthPoints() { return Math.max(0, data.getInt("GrowthPoints")); }
+    public int growthRank(String id) { return Math.max(0, data.getInt("GrowthRank_" + id)); }
     public double soul() { return bounded(data.getDouble("Soul"), maxSoul()); }
     public double maxSoul() { return maximum(data.getDouble("MaxSoul")); }
     public double barrier() { return bounded(data.getDouble("Barrier"), maxBarrier()); }
@@ -59,9 +61,7 @@ public final class PlayerState {
     public boolean jayceeTest() { return data.getBoolean("JayceeTest"); }
     public boolean playerMenuPreview() { return data.getBoolean("PlayerMenuPreview"); }
     public CompoundTag statusPresentation() { return data.getCompound("StatusPresentation").copy(); }
-    public boolean unlocked() { return consumed() >= 3 || jayceeTest() || supreme()
-        || !divinity().getCompound("Grants").isEmpty() || (!divinity().getString("Rank").isEmpty()
-            && !divinity().getString("Rank").equals("MORTAL")); }
+    public boolean unlocked() { return data.getBoolean("BlessedAwakened") || jayceeTest() || supreme(); }
     public CompoundTag divinity() { return data.getCompound("Divinity").copy(); }
     public boolean supreme() { return data.getCompound("Divinity").getBoolean("Supreme"); }
     public boolean abilityOwned(String id) {

@@ -110,6 +110,8 @@ public class JayceeScreen extends Screen {
     "Switch Face / 3D portrait; shared with the gameplay HUD");
    button("Race: Human",106,117,151,18,0,()->{speciesOpen=!speciesOpen;rebuild();},
     "Open species and evolution details. Human is a preview, not saved progression.");
+   button("Attributes / Skill Tree",242,406,126,15,0,()->Minecraft.getInstance().setScreen(new GrowthTreeScreen(ordinary)),
+    "Spend upgrade points on physical health, mana and divine abilities");
    if(speciesOpen)button("Back to Status",160,370,195,24,0,()->{speciesOpen=false;rebuild();},null);
    if(!speciesOpen){
     traitsFocus=statusFocus(390,174,118,46,"Trait");

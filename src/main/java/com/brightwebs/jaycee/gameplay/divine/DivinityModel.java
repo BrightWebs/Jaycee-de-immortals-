@@ -325,6 +325,25 @@ public final class DivinityModel {
             put(p, p.divineName, p.rank, p.ep, p.essence, p.capLift, p.bestow, p.patron, p.npcPatrons, grants, p.release);
         }
     }
+    /** Player-earned evolution: one step at a time, never confers Jaycee authority. */
+    public Rank evolve(UUID id, long now) {
+        var p = profile(id);
+        if (supreme(id) || p.npcPatrons.isEmpty()) fail("Evolution requires an Olympian blessing");
+        int nextLevel = switch (p.rank) {
+            case BLESSED -> 20;
+            case DEMIGOD -> 45;
+            case MINOR_GOD -> 80;
+            case MAJOR_GOD -> 120;
+            default -> -1;
+        };
+        if (nextLevel < 0 || progression(id).level() < nextLevel)
+            fail("Evolution is locked. Current divine rank requires a higher Essence level");
+        Rank next = Rank.values()[p.rank.ordinal() + 1];
+        put(p, p.divineName, next, p.ep, p.essence, p.capLift,
+            next.ordinal() >= Rank.MINOR_GOD.ordinal(), p.patron, p.npcPatrons, p.grants, p.release);
+        log(now, id, id, "Earned divine evolution: " + p.rank + " to " + next);
+        return next;
+    }
     public void adminRank(UUID id, Rank rank, long now) {
         var p = profile(id);
         put(p, p.divineName, rank, p.ep, p.essence, p.capLift, rank.ordinal() >= Rank.MINOR_GOD.ordinal(),
@@ -361,6 +380,18 @@ public final class DivinityModel {
         try { value = EssenceProgression.earnedForLevel(level, config.progression()); }
         catch (ArithmeticException e) { throw new IllegalArgumentException("Level exceeds supported earned Essence range"); }
         adminSetEarned(id, value, now);
+    }
+    /** Normal gameplay acceptance, distinct from operator test metadata. */
+    public void acceptNpcBlessing(UUID id, String npc, long now) {
+        if (!NPC_PATRONS.contains(npc)) fail("Unknown Olympian");
+        var p = profile(id);
+        if (p.rank != Rank.MORTAL || !p.npcPatrons.isEmpty() || p.patron != null || supreme(id))
+            fail("You already have an active divine lineage or unique authority");
+        var patrons = new HashSet<>(p.npcPatrons);
+        patrons.add(npc);
+        put(p, p.divineName, Rank.BLESSED, p.ep, p.essence, p.capLift, p.bestow,
+            p.patron, patrons, p.grants, p.release);
+        log(now, id, id, "Divine Totem: accepted by Olympian " + npc);
     }
     public void adminNpc(UUID id, String npc, boolean add, long now) {
         if (!NPC_PATRONS.contains(npc)) fail("Unsupported patron metadata");

@@ -92,6 +92,32 @@ public final class DivinityService {
         if (data.model.supreme(p.getUUID())) { data.model.tickRegeneration(); data.setDirty(); }
         if (p.tickCount % 20 == 0) { data.model.expire(now()); data.setDirty(); }
     }
+    /** Award a legitimate, one-time Olympian blessing only after a validated Totem draw. */
+    /** Player-requested evolution cannot skip prerequisites or award Supreme authority. */
+    public static void evolve(ServerPlayer player) {
+        var data = DivinitySavedData.get(player.server);
+        try {
+            var rank = data.model.evolve(player.getUUID(), now());
+            data.setDirty();
+            GameplayNetwork.sync(player);
+            player.sendSystemMessage(Component.literal("DIVINE EVOLUTION: You have ascended to " + rank.name().replace('_', ' ') + "!"));
+        } catch (IllegalArgumentException ex) {
+            player.sendSystemMessage(Component.literal("Divine evolution unavailable: " + ex.getMessage()));
+        }
+    }
+    public static void olympianBless(ServerPlayer player, String patron) {
+        var data = DivinitySavedData.get(player.server);
+        data.model.acceptNpcBlessing(player.getUUID(), patron, now());
+        data.model.creditEssence(player.getUUID(), 250);
+        var state = com.brightwebs.jaycee.gameplay.PlayerState.get(player);
+        var persistent = player.getPersistentData().getCompound(com.brightwebs.jaycee.gameplay.PlayerState.TAG).copy();
+        persistent.putBoolean("BlessedAwakened", true);
+        player.getPersistentData().put(com.brightwebs.jaycee.gameplay.PlayerState.TAG, persistent);
+        var advancement = player.server.getAdvancements().get(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("jaycee", "blessed"));
+        if (advancement != null) player.getAdvancements().award(advancement, "chosen");
+        data.setDirty();
+        GameplayNetwork.sync(player);
+    }
     public static long awardEp(ServerPlayer p, long amount) {
         var data = DivinitySavedData.get(p.server); long added = data.model.awardEp(p.getUUID(), amount);
         data.setDirty(); GameplayNetwork.sync(p); return added;

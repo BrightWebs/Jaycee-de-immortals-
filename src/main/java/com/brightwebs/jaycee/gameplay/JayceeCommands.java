@@ -1,6 +1,5 @@
 package com.brightwebs.jaycee.gameplay;
 
-import com.brightwebs.jaycee.JayceeMod;
 import com.brightwebs.jaycee.gameplay.divine.DivineAppraisal;
 import com.brightwebs.jaycee.gameplay.divine.DivinityModel;
 import com.brightwebs.jaycee.gameplay.divine.DivinityNetwork;
@@ -22,7 +21,6 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 /** One public command tree; operator status never implies divine authority. */
@@ -52,6 +50,8 @@ public final class JayceeCommands {
             .then(Commands.literal("mastery").then(abilityArgument("id").executes(JayceeCommands::masteryInfo))));
         root.then(get);
         root.then(abilities());
+        root.then(Commands.literal("patron").then(DivineTotemService.commands()));
+        root.then(EssenceGrowth.commands());
         root.then(Commands.literal("patron").executes(c -> own(c, "patron"))
             .then(Commands.literal("list").executes(c -> reply(c, "Known NPC patrons: "
                 + String.join(", ", DivinityModel.NPC_PATRONS.stream().sorted().toList())))));
@@ -85,10 +85,10 @@ public final class JayceeCommands {
         root.then(config);
         debug.then(Commands.literal("essence").executes(c -> {
             var p = c.getSource().getPlayerOrException();
-            var stack = new ItemStack(JayceeMod.ESSENCE.get(), 3);
-            p.getInventory().add(stack);
-            if (!stack.isEmpty()) p.drop(stack, false);
-            return reply(c, "Received 3 legacy unlock items; no Essence balance or earned progression added.");
+            for (int i = PlayerState.get(p).consumed(); i < 3; i++) Gameplay.absorbEssence(p);
+            return reply(c, DivinityService.model(p).supreme(p.getUUID())
+                ? "Three intangible awakenings complete: unique Jaycee authority claimed."
+                : "Three intangible awakenings complete. Jaycee authority is already claimed by another player.");
         }));
         root.then(debug);
         var registered = dispatcher.register(root);

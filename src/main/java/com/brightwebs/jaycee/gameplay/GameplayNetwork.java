@@ -43,6 +43,7 @@ public final class GameplayNetwork {
     public static void register(RegisterPayloadHandlersEvent event) {
         var registrar = event.registrar("1");
         com.brightwebs.jaycee.gameplay.divine.DivinityNetwork.register(registrar);
+        BlessingNetwork.registerOn(registrar);
         registrar.playToClient(State.TYPE, State.CODEC, (payload, context) ->
             PlayerState.save(context.player(), payload.data()));
         registrar.playToServer(Action.TYPE, Action.CODEC, (payload, context) -> {
@@ -53,6 +54,7 @@ public final class GameplayNetwork {
     public static void sync(ServerPlayer player) {
         CompoundTag snapshot = PlayerState.read(player);
         snapshot.putLong("ServerTick", player.serverLevel().getGameTime());
+        snapshot.putInt("GrowthPoints", EssenceGrowth.points(player));
         var resolved = ManaBackends.resolve(player);
         snapshot.putString("EffectiveBackend", resolved.id());
         snapshot.putDouble("Mana", PlayerState.bounded(resolved.mana().getCurrent(), resolved.mana().getMax()));

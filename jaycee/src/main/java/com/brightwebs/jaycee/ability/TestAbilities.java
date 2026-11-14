@@ -12,7 +12,10 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LightningBolt;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -34,7 +37,8 @@ public final class TestAbilities {
                 public boolean activate(ServerPlayer player, ServerLevel level) {
                     BlockHitResult hit = lookedAtBlock(player);
                     if (hit == null) return false;
-                    LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(level, EntitySpawnReason.TRIGGERED);
+                    EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("lightning_bolt"));
+                    Entity bolt = type == null ? null : type.create(level, EntitySpawnReason.TRIGGERED);
                     if (bolt == null) return false;
                     Vec3 at = hit.getLocation();
                     bolt.setPos(at.x, at.y, at.z);
@@ -50,7 +54,7 @@ public final class TestAbilities {
                 public boolean activate(ServerPlayer player, ServerLevel level) {
                     Vec3 look = player.getLookAngle();
                     player.setDeltaMovement(player.getDeltaMovement().add(look.x * 1.3, Math.max(0.2, look.y * 0.55), look.z * 1.3));
-                    player.hurtMarked = true;
+                    player.connection.send(new ClientboundSetEntityMotionPacket(player)); // tell the client it moved
                     return true;
                 }
             });

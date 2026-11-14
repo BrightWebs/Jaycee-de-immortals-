@@ -1,0 +1,28 @@
+license="MIT"
+
+[[mods]]
+modId="jaycee"
+version="${version}"
+displayName="Jaycee: Di Immortales"
+description='''A Greek-mythology mod built on Ichor, the blood of the gods.'''
+
+[[dependencies.jaycee]]
+modId="brightcore"
+type="required"
+versionRange="[${brightcore_version},)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.jaycee]]
+modId="neoforge"
+type="required"
+versionRange="[${neo_version},)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.jaycee]]
+modId="minecraft"
+type="required"
+versionRange="${minecraft_version_range}"
+ordering="NONE"
+side="BOTH"

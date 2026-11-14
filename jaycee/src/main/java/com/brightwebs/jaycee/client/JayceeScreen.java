@@ -4,6 +4,9 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.client.input.MouseButtonEvent;
+import com.mojang.blaze3d.platform.InputConstants;
+import org.lwjgl.glfw.GLFW;
 
 /** Six interactive pages; the status portrait uses the real local player's skin. */
 public class JayceeScreen extends Screen {
@@ -110,20 +113,24 @@ public class JayceeScreen extends Screen {
   String[] names={"Awakening","Essence of Existence","The First Ascension","A New Reality"};
   for(int i=0;i<names.length;i++){highlight(g,151,116+i*38,250,34);text(g,names[i],161,129+i*38,0xFFE6F3FF);}
  }
- @Override public boolean mouseClicked(double mx,double my,int button){
-  if(tab==2 && button==0){
-   int x=(int)mx-left,y=(int)my-top;
+ @Override public boolean mouseClicked(MouseButtonEvent event,boolean doubleClick){
+  if(tab==2 && event.button()==0){
+   int x=(int)event.x()-left,y=(int)event.y()-top;
    for(int i=0;i<4;i++)for(int j=0;j<4;j++){
     if(Math.abs(x-(180+i*63))<=13&&Math.abs(y-(140+j*34))<=14){
      skill=i;skillTier=j;return true;
     }
    }
   }
-  return super.mouseClicked(mx,my,button);
+  return super.mouseClicked(event,doubleClick);
  }
  @Override public boolean mouseScrolled(double mx,double my,double dx,double dy){
-  if(dy!=0 && Screen.hasAltDown()){page=Math.floorMod(page+(dy<0?1:-1),10);return true;}
+  if(dy!=0 && altDown()){page=Math.floorMod(page+(dy<0?1:-1),10);return true;}
   return super.mouseScrolled(mx,my,dx,dy);
+ }
+ private static boolean altDown(){
+  var window=Minecraft.getInstance().getWindow();
+  return InputConstants.isKeyDown(window,GLFW.GLFW_KEY_LEFT_ALT)||InputConstants.isKeyDown(window,GLFW.GLFW_KEY_RIGHT_ALT);
  }
  @Override public boolean isPauseScreen(){return false;}
 }

@@ -1,0 +1,21 @@
+{
+  "key.category.brightcore.abilities": "Abilities",
+  "key.brightcore.ability_1": "Ability 1",
+  "key.brightcore.ability_2": "Ability 2",
+  "key.brightcore.ability_3": "Ability 3",
+  "key.brightcore.ability_4": "Ability 4",
+  "key.brightcore.ability_5": "Ability 5",
+  "key.brightcore.next_page": "Next ability page",
+
+  "brightcore.message.cooldown": "%s is recharging (%ss)",
+  "brightcore.message.no_mana": "Not enough mana for %s",
+
+  "brightcore.command.unknown": "Unknown ability: %s",
+  "brightcore.command.learned": "%s learned %s",
+  "brightcore.command.learned_all": "%s learned %s abilities",
+  "brightcore.command.already": "%s already knows %s",
+  "brightcore.command.forgot": "%s forgot %s",
+  "brightcore.command.slot_set": "Slot %s set",
+  "brightcore.command.slot_failed": "Couldn't set slot %s (not owned, or passive)",
+  "brightcore.command.mana": "Max mana set to %s"
+}

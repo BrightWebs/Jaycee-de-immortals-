@@ -1,0 +1,21 @@
+license="MIT"
+
+[[mods]]
+modId="brightcore"
+version="${version}"
+displayName="Bright Core"
+description='''The framework behind Jaycee: Di Immortales. Abilities, player data, syncing and the ability bar.'''
+
+[[dependencies.brightcore]]
+modId="neoforge"
+type="required"
+versionRange="[${neo_version},)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.brightcore]]
+modId="minecraft"
+type="required"
+versionRange="${minecraft_version_range}"
+ordering="NONE"
+side="BOTH"

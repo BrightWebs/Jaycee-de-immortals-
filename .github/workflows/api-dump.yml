@@ -1,0 +1,35 @@
+name: API dump (dev helper)
+on:
+  push:
+    branches: ["feature/**", "fix/**"]
+  workflow_dispatch:
+jobs:
+  dump:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.2.1'
+      - name: Prepare Minecraft
+        run: gradle :brightcore:createMinecraftArtifacts --no-daemon
+      - name: Dump class signatures
+        run: |
+          MC=$(find brightcore/build -name 'minecraft-patched-*.jar' ! -name '*sources*' | head -1)
+          NEO=$(find ~/.gradle -name 'neoforge-*-universal.jar' | head -1)
+          JAR="$MC:$NEO"
+          echo "JAR=$JAR"
+          ls brightcore/build/moddev/artifacts || true
+          while read -r c; do
+            [ -z "$c" ] && continue
+            echo "##### $c"
+            javap -cp "$JAR" -protected "$c" 2>&1 | sed 's/^/API| /'
+          done < tools/api-classes.txt
+          echo "##### classes matching argument/Identifier"
+          unzip -l "$MC" | grep -E 'commands/arguments/(Identifier|ResourceLocation)|permissions/' | sed 's/^/API| /'

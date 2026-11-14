@@ -21,7 +21,9 @@ jobs:
         run: gradle :brightcore:createMinecraftArtifacts --no-daemon
       - name: Dump class signatures
         run: |
-          JAR=$(find brightcore/build -name 'neoforge-*.jar' ! -name '*sources*' | head -1)
+          MC=$(find brightcore/build -name 'minecraft-patched-*.jar' ! -name '*sources*' | head -1)
+          NEO=$(find ~/.gradle -name 'neoforge-*-universal.jar' | head -1)
+          JAR="$MC:$NEO"
           echo "JAR=$JAR"
           ls brightcore/build/moddev/artifacts || true
           while read -r c; do
@@ -30,4 +32,4 @@ jobs:
             javap -cp "$JAR" -public "$c" 2>&1 | sed 's/^/API| /'
           done < tools/api-classes.txt
           echo "##### classes matching argument/Identifier"
-          unzip -l "$JAR" | grep -E 'commands/arguments/(Identifier|ResourceLocation)|permissions/' | sed 's/^/API| /'
+          unzip -l "$MC" | grep -E 'commands/arguments/(Identifier|ResourceLocation)|permissions/' | sed 's/^/API| /'

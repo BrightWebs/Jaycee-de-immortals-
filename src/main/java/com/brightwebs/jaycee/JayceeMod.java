@@ -1,44 +1,18 @@
 package com.brightwebs.jaycee;
 
-import net.neoforged.fml.common.Mod;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.registries.DeferredRegister;
-import net.neoforged.neoforge.registries.DeferredItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.event.RegisterCommandsEvent;
-import net.neoforged.neoforge.common.NeoForge;
-import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.Component;
+import net.neoforged.fml.common.Mod;
 
+/**
+ * Jaycee: Di Immortales.
+ *
+ * Only the interface remains for now (see the client package). Gameplay was
+ * cleared out so the Ichor system can be built on a clean base.
+ */
 @Mod(JayceeMod.ID)
 public final class JayceeMod {
- public static final String ID="jaycee";
- public static final DeferredRegister.Items ITEMS=DeferredRegister.createItems(ID);
- public static final DeferredItem<Item> ESSENCE=ITEMS.register("jayces_essence",()->new Essence(new Item.Properties().stacksTo(16)));
- public JayceeMod(IEventBus bus){ ITEMS.register(bus); NeoForge.EVENT_BUS.addListener(this::commands); PhaseOneGameplay.register(); DivineBestowal.register(); }
- private void commands(RegisterCommandsEvent event){event.getDispatcher().register(Commands.literal("jayceeessence").requires(s->s.hasPermission(2)).executes(c->{ServerPlayer p=c.getSource().getPlayerOrException();p.getInventory().add(new ItemStack(ESSENCE.get(),3));c.getSource().sendSuccess(()->Component.literal("Received 3 Jayce's Essences"),false);return 1;}));}
- public static boolean unlocked(Player p){return p.getPersistentData().getInt("JayceeConsumed")>=1;}
- public static final class Essence extends Item {
-  public Essence(Properties properties){super(properties);}
-  @Override public InteractionResultHolder<ItemStack> use(Level level,Player player,InteractionHand hand){
-    ItemStack stack=player.getItemInHand(hand);
-    if(!level.isClientSide){
-      int previous=player.getPersistentData().getInt("JayceeConsumed");
-      player.getPersistentData().putInt("JayceeConsumed",Math.min(3,previous+1));
-      if(player instanceof ServerPlayer serverPlayer) PhaseOneGameplay.earn(serverPlayer,500);
-      // Divine essence must be consumed even in Creative Mode.
-      stack.shrink(1);
-      player.displayClientMessage(Component.literal(previous==0
-          ?"Divine essence awakened. Press M to open the menu."
-          :"500 transferable essence absorbed."),true);
+    public static final String ID = "jaycee";
+
+    public JayceeMod(IEventBus bus) {
     }
-    return InteractionResultHolder.sidedSuccess(stack,level.isClientSide);
-  }
- }
 }

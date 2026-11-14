@@ -12,9 +12,8 @@ import org.lwjgl.glfw.GLFW;
 
 @EventBusSubscriber(modid=JayceeMod.ID,bus=EventBusSubscriber.Bus.MOD,value=net.neoforged.api.distmarker.Dist.CLIENT)
 public class JayceeClient {
- public static final KeyMapping BESTOW=new KeyMapping("key.jaycee.bestow",InputConstants.Type.KEYSYM,GLFW.GLFW_KEY_N,"key.categories.jaycee");
  public static final KeyMapping OPEN=new KeyMapping("key.jaycee.open",InputConstants.Type.KEYSYM,GLFW.GLFW_KEY_M,"key.categories.jaycee");
- @SubscribeEvent public static void register(RegisterKeyMappingsEvent e){e.register(OPEN);e.register(BESTOW);}
+ @SubscribeEvent public static void register(RegisterKeyMappingsEvent e){e.register(OPEN);}
  @EventBusSubscriber(modid=JayceeMod.ID,value=net.neoforged.api.distmarker.Dist.CLIENT)
- public static class Tick { @SubscribeEvent public static void tick(ClientTickEvent.Post e){while(BESTOW.consumeClick()) DivineBestowalScreen.openForTarget();while(OPEN.consumeClick()){Minecraft mc=Minecraft.getInstance();if(mc.player!=null){mc.setScreen(new JayceeScreen());}}}}
+ public static class Tick { @SubscribeEvent public static void tick(ClientTickEvent.Post e){while(OPEN.consumeClick()){Minecraft mc=Minecraft.getInstance();if(mc.player!=null){mc.setScreen(new JayceeScreen());}}}}
 }

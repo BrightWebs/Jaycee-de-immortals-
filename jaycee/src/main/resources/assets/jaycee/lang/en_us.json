@@ -1,7 +1,6 @@
 {
   "key.category.jaycee.main": "Jaycee",
   "key.jaycee.open": "Open Jaycee menu",
-
   "ability.jaycee.thunderbolt": "Thunderbolt",
   "ability.jaycee.thunderbolt.desc": "Zeus's lightning strikes where you look.",
   "ability.jaycee.hermes_dash": "Hermes' Dash",
@@ -12,8 +11,18 @@
   "ability.jaycee.shadow_step.desc": "Step through shadow to the block you look at.",
   "ability.jaycee.aegis": "Aegis",
   "ability.jaycee.aegis.desc": "Athena's shield: absorption hearts for 15 seconds.",
-
   "jaycee.message.look_at_block": "Look at a block within 24 blocks",
   "jaycee.message.no_room": "No room to land there",
-  "jaycee.message.full_health": "Already at full health"
+  "jaycee.message.full_health": "Already at full health",
+  "jaycee.birthright.mortal_born": "Mortal-born",
+  "jaycee.birthright.mortal_born.subtitle": "An ordinary soul. Everything must be earned.",
+  "jaycee.birthright.mortal_born.chat": "You were born Mortal. The Mist hides the hidden world from you, for now.",
+  "jaycee.birthright.oracle_born": "Oracle-born",
+  "jaycee.birthright.oracle_born.subtitle": "The Mist is thin around you.",
+  "jaycee.birthright.oracle_born.chat": "You were born Oracle-born. You will see what others cannot, but it cannot touch you yet.",
+  "jaycee.birthright.godblood": "Godblood",
+  "jaycee.birthright.godblood.subtitle": "A god's blood runs in your veins.",
+  "jaycee.birthright.godblood.chat": "You were born Godblood, the distant child of a god. The hidden world sees you, and it can reach you.",
+  "jaycee.prayer.answer": "The gods answer your prayer: you carry %s Ichor. You are %s.",
+  "jaycee.command.ichor.get": "%s: %s Ichor, %s, %s"
 }

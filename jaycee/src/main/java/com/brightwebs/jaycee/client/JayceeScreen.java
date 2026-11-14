@@ -6,6 +6,9 @@ import com.brightwebs.brightcore.api.AbilityCategory;
 import com.brightwebs.brightcore.api.AbilityRegistry;
 import com.brightwebs.brightcore.data.AbilityData;
 import com.brightwebs.brightcore.network.BrightNetwork;
+import com.brightwebs.jaycee.ichor.Grade;
+import com.brightwebs.jaycee.ichor.IchorAPI;
+import com.brightwebs.jaycee.ichor.IchorData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
@@ -38,6 +41,13 @@ public class JayceeScreen extends Screen {
  private static AbilityData data(){var p=Minecraft.getInstance().player;return p==null?AbilityData.EMPTY:AbilityAPI.get(p);}
  private static void send(net.minecraft.network.protocol.common.custom.CustomPacketPayload payload){ClientPacketDistributor.sendToServer(payload);}
  private static int glyph(Identifier id){return Math.floorMod(id.hashCode(),997);}
+ private static IchorData ichor(){var p=Minecraft.getInstance().player;return p==null?IchorData.EMPTY:IchorAPI.get(p);}
+ /** Exact Ichor once the Mist has thinned (Seer); before that, whatever the last prayer told you. */
+ private static String ichorText(IchorData i){
+  if(i.seesOwnIchor())return String.format("%,d",i.ichor());
+  if(i.revealed()>=0)return String.format("%,d",i.revealed())+" (last prayer)";
+  return "Unknown: pray at a temple";
+ }
 
  private List<Ability> listed(){
   var p=Minecraft.getInstance().player;
@@ -93,7 +103,7 @@ public class JayceeScreen extends Screen {
   highlight(g,6+tab*84,8,85,31);
   text(g,"JAYCEE",18,56,0xFFF2F8FF);
   text(g,player==null?"Player":font.plainSubstrByWidth(player.getName().getString(),105),16,73,0xFF9BDAFF);
-  text(g,"DIVINE INITIATE",14,91,0xFF8CC7FF);
+  text(g,ichor().grade().label().toUpperCase(),14,91,0xFFF3CF82);
   if(tab!=0){
    String[] names={"HEALTH","MANA","SOUL HP"};int[] colors={0xFFE96888,0xFF52B7EE,0xFFAE8CFF};
    double[] ratios={player==null?0:player.getHealth()/Math.max(1,player.getMaxHealth()),d.maxMana()==0?0:(double)d.mana()/d.maxMana(),0};
@@ -135,6 +145,8 @@ public class JayceeScreen extends Screen {
   text(g,"ADVENTURER PROFILE",173,119,0xFFE5F5FF);
   DivineFrame.divider(g,left+171,top+132,201);
   if(player!=null)text(g,font.plainSubstrByWidth(player.getName().getString(),184),172,139,0xFF8DD7FF);
+  IchorData ic=ichor();
+  text(g,font.plainSubstrByWidth(ic.grade().label()+"  \u00b7  "+ic.birthright().label(),210),172,150,0xFFF3CF82);
   String[] stats={"HEALTH","MANA","SOUL"};
   int[] colors={0xFFE96F91,0xFF67C2FF,0xFFA58AFF};
   double[] ratios={player==null?0:player.getHealth()/Math.max(1,player.getMaxHealth()),d.maxMana()==0?0:(double)d.mana()/d.maxMana(),0};
@@ -146,7 +158,7 @@ public class JayceeScreen extends Screen {
    g.fill(left+169,top+y+12,left+376,top+y+20,0xFF1E3150);
    g.fill(left+170,top+y+13,left+170+(int)(205*Math.max(0,Math.min(1,ratios[i]))),top+y+19,colors[i]);
   }
-  text(g,"ABILITIES OWNED: "+d.owned().size(),168,283,0xFFB8DDFF);
+  text(g,font.plainSubstrByWidth("ICHOR: "+ichorText(ic),232),168,283,0xFFF3CF82);
  }
 
  private void abilities(GuiGraphicsExtractor g){
@@ -179,9 +191,20 @@ public class JayceeScreen extends Screen {
   text(g,TRACKS[skill]+" mastery / Tier "+(skillTier+1)+" (preview)",157,280,0xFFB3D4ED);
  }
  private void species(GuiGraphicsExtractor g){
-  text(g,"DIVINE EVOLUTION",158,88,0xFF9AD9FF);highlight(g,159,118,228,121);
-  text(g,"Mortal  >  Seer  >  Hero  >  Demigod",166,151,0xFFE4EBFF);
-  text(g,"Grades arrive with the Ichor step",157,272,0xFF9ABDDC);
+  text(g,"GRADES OF DIVINITY",158,78,0xFF9AD9FF);DivineFrame.divider(g,left+155,top+88,237);
+  IchorData ic=ichor();Grade now=ic.grade();
+  Grade[] all=Grade.values();
+  for(int i=0;i<all.length;i++){
+   Grade gr=all[all.length-1-i];int y=96+i*19;
+   boolean cur=gr==now,reached=gr.number()<=now.number();
+   if(cur)highlight(g,153,y-4,248,18);
+   text(g,(gr.number())+"  "+gr.label(),163,y+1,cur?0xFFF3CF82:reached?0xFFE4EBFF:0xFF6F8BB0);
+   String from=gr.minIchor()==0?"from 0":"from "+String.format("%,d",gr.minIchor());
+   text(g,from,392-font.width(from),y+1,cur?0xFFF3CF82:0xFF6F8BB0);
+  }
+  Grade next=now.next();
+  String hint=next==null?"The highest Grade":"Next: "+next.label()+" at "+String.format("%,d",next.minIchor())+" Ichor";
+  text(g,font.plainSubstrByWidth(hint,240),157,283,0xFF9ABDDC);
  }
  private void quests(GuiGraphicsExtractor g){
   text(g,"QUEST JOURNAL",155,88,0xFF9AD9FF);

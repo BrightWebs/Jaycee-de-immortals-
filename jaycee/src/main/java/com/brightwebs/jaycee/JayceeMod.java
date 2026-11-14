@@ -1,6 +1,7 @@
 package com.brightwebs.jaycee;
 
 import com.brightwebs.jaycee.ability.TestAbilities;
+import com.brightwebs.jaycee.ichor.IchorAPI;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 
@@ -16,5 +17,6 @@ public final class JayceeMod {
 
     public JayceeMod(IEventBus bus) {
         TestAbilities.init(bus);
+        IchorAPI.init(bus);
     }
 }

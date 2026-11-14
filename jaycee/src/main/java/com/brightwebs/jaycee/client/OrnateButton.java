@@ -1,16 +1,19 @@
 package com.brightwebs.jaycee.client;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.network.chat.Component;
 
 /** Interactive button with sapphire glass styling rather than vanilla grey widgets. */
-public final class OrnateButton extends Button {
+public final class OrnateButton extends net.minecraft.client.gui.components.AbstractButton {
+ private final Runnable onPress;
  public OrnateButton(String caption,int x,int y,int w,int h,Runnable onPress) {
-  super(x,y,w,h,Component.literal(caption),b->onPress.run(),DEFAULT_NARRATION);
+  super(x,y,w,h,Component.literal(caption));
+  this.onPress=onPress;
  }
- @Override protected void renderWidget(GuiGraphics g,int mx,int my,float dt) {
+ @Override public void onPress(InputWithModifiers input){onPress.run();}
+ @Override protected void extractContents(GuiGraphicsExtractor g,int mx,int my,float dt) {
   int x=getX(),y=getY(),w=width,h=height;
   boolean hover=isHoveredOrFocused();
   int edge=hover?0xFFBDEAFF:0xFF518DCF;
@@ -21,6 +24,9 @@ public final class OrnateButton extends Button {
   g.fill(x+w-1,y+4,x+w,y+h-4,edge);
   g.fill(x+2,y+2,x+10,y+3,0xFF9FDFFF);
   g.fill(x+w-10,y+h-3,x+w-2,y+h-2,0xFF9FDFFF);
-  g.drawCenteredString(Minecraft.getInstance().font,getMessage(),x+w/2,y+(h-8)/2,hover?0xFFFFFFFF:0xFFC3E6FF);
+  var font=Minecraft.getInstance().font;
+  String label=font.plainSubstrByWidth(getMessage().getString(),w-6);
+  g.centeredText(font,label,x+w/2,y+(h-8)/2,hover?0xFFFFFFFF:0xFFC3E6FF);
  }
+ @Override protected void updateWidgetNarration(net.minecraft.client.gui.narration.NarrationElementOutput output){defaultButtonNarrationText(output);}
 }

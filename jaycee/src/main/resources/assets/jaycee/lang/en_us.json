@@ -1,4 +1,19 @@
 {
-  "key.jaycee.open": "Open Jaycee Interface",
-  "key.categories.jaycee": "Jaycee"
+  "key.category.jaycee.main": "Jaycee",
+  "key.jaycee.open": "Open Jaycee menu",
+
+  "ability.jaycee.thunderbolt": "Thunderbolt",
+  "ability.jaycee.thunderbolt.desc": "Zeus's lightning strikes where you look.",
+  "ability.jaycee.hermes_dash": "Hermes' Dash",
+  "ability.jaycee.hermes_dash.desc": "A burst of speed in the direction you face.",
+  "ability.jaycee.apollos_mending": "Apollo's Mending",
+  "ability.jaycee.apollos_mending.desc": "Heals four hearts.",
+  "ability.jaycee.shadow_step": "Shadow Step",
+  "ability.jaycee.shadow_step.desc": "Step through shadow to the block you look at.",
+  "ability.jaycee.aegis": "Aegis",
+  "ability.jaycee.aegis.desc": "Athena's shield: absorption hearts for 15 seconds.",
+
+  "jaycee.message.look_at_block": "Look at a block within 24 blocks",
+  "jaycee.message.no_room": "No room to land there",
+  "jaycee.message.full_health": "Already at full health"
 }

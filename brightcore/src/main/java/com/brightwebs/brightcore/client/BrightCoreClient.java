@@ -28,7 +28,7 @@ public final class BrightCoreClient {
     public static void registerLayers(RegisterGuiLayersEvent event) {
         event.registerAboveAll(BrightCore.id("ability_bar"), (g, delta) -> {
             Minecraft mc = Minecraft.getInstance();
-            if (mc.player == null || mc.player.isSpectator() || mc.options.hideGui) return;
+            if (mc.player == null || mc.player.isSpectator()) return; // TODO: also hide when F1 hides the HUD
             barRenderer.render(g, g.guiWidth(), g.guiHeight(), mc.player, AbilityAPI.get(mc.player));
         });
     }

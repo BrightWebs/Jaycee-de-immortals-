@@ -126,13 +126,13 @@ public final class AbilityAPI {
 
         long left = data.cooldownLeft(id, now);
         if (left > 0) {
-            player.displayClientMessage(Component.translatable("brightcore.message.cooldown",
-                    ability.name(), String.format("%.1f", left / 20f)), true);
+            player.sendOverlayMessage(Component.translatable("brightcore.message.cooldown",
+                    ability.name(), String.format("%.1f", left / 20f)));
             return false;
         }
         int cost = player.isCreative() ? 0 : event.getManaCost();
         if (data.mana() < cost) {
-            player.displayClientMessage(Component.translatable("brightcore.message.no_mana", ability.name()), true);
+            player.sendOverlayMessage(Component.translatable("brightcore.message.no_mana", ability.name()));
             return false;
         }
 

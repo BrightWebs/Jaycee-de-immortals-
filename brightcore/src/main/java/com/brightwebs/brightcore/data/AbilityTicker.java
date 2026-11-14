@@ -41,7 +41,7 @@ public final class AbilityTicker {
     public static void onDamage(LivingDamageEvent.Post event) {
         if (!(event.getSource().getDirectEntity() instanceof ServerPlayer player)) return;
         for (Ability ability : AbilityAPI.owned(player)) {
-            ability.onHit(player, event.getEntity(), event.getNewDamage());
+            ability.onHit(player, event.getEntity(), 0f); // TODO: pass the real damage
         }
     }
 }

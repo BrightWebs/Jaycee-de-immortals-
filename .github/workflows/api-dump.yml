@@ -29,7 +29,7 @@ jobs:
           while read -r c; do
             [ -z "$c" ] && continue
             echo "##### $c"
-            javap -cp "$JAR" -public "$c" 2>&1 | sed 's/^/API| /'
+            javap -cp "$JAR" -protected "$c" 2>&1 | sed 's/^/API| /'
           done < tools/api-classes.txt
           echo "##### classes matching argument/Identifier"
           unzip -l "$MC" | grep -E 'commands/arguments/(Identifier|ResourceLocation)|permissions/' | sed 's/^/API| /'

@@ -5,7 +5,7 @@ license="MIT"
 modId="${mod_id}"
 version="${mod_version}"
 displayName="${mod_name}"
-description='''A fantasy GUI unlocked by consuming three Jayce Essences.'''
+description='''A Greek-mythology mod built on Ichor, the blood of the gods. Currently: the interface only.'''
 [[dependencies.jaycee]]
 modId="neoforge"
 type="required"

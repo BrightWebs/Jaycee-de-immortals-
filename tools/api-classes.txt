@@ -1,8 +1,5 @@
-C net.minecraft.client.gui.font.providers.TrueTypeGlyphProviderDefinition
-C net.minecraft.client.gui.font.TrueTypeGlyphProvider$Glyph
-C net.minecraft.client.gui.font.TrueTypeGlyphProvider
-net.minecraft.world.level.ChunkPos
-net.minecraft.world.entity.LivingEntity
-net.minecraft.world.entity.player.Player
-net.minecraft.world.damagesource.DamageSources
-net.minecraft.world.food.FoodData
+C com.mojang.blaze3d.font.TrueTypeGlyphProvider
+C com.mojang.blaze3d.font.TrueTypeGlyphProvider$Glyph
+C com.mojang.blaze3d.font.TrueTypeGlyphProvider$GlyphEntry
+net.minecraft.world.entity.ai.attributes.AttributeInstance
+net.minecraft.world.entity.Entity

@@ -1,19 +1,8 @@
-net.minecraft.client.input.KeyEvent
-net.minecraft.client.input.CharacterEvent
-net.minecraft.client.gui.components.events.GuiEventListener
-net.neoforged.neoforge.event.entity.player.PlayerEvent$NameFormat
-net.neoforged.neoforge.event.entity.living.LivingDropsEvent
-net.neoforged.neoforge.event.entity.living.LivingHealEvent
-net.neoforged.neoforge.event.entity.living.LivingEvent$LivingJumpEvent
-net.neoforged.neoforge.event.entity.living.LivingDamageEvent$Post
-net.neoforged.neoforge.event.level.BlockEvent$BreakEvent
-net.minecraft.world.entity.projectile.Projectile
-net.minecraft.tags.ItemTags
-net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase
-net.minecraft.world.entity.item.ItemEntity
-net.minecraft.world.entity.player.Inventory
-net.minecraft.client.gui.screens.inventory.InventoryScreen
-net.minecraft.server.level.ServerPlayer
-net.minecraft.client.renderer.RenderPipelines
-net.neoforged.neoforge.event.tick.PlayerTickEvent$Post
-net.minecraft.world.entity.Entity
+C net.minecraft.client.gui.font.providers.TrueTypeGlyphProviderDefinition
+C net.minecraft.client.gui.font.TrueTypeGlyphProvider$Glyph
+C net.minecraft.client.gui.font.TrueTypeGlyphProvider
+net.minecraft.world.level.ChunkPos
+net.minecraft.world.entity.LivingEntity
+net.minecraft.world.entity.player.Player
+net.minecraft.world.damagesource.DamageSources
+net.minecraft.world.food.FoodData

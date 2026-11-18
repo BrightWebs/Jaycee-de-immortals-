@@ -31,7 +31,7 @@ public final class BrightKeys {
 
     static {
         for (int i = 0; i < ABILITY.length; i++) {
-            ABILITY[i] = new KeyMapping("key.brightcore.ability_" + (i + 1), DEFAULTS[i], CATEGORY);
+            ABILITY[i] = new KeyMapping("key.brightcore.skill_slot_" + (i + 1), DEFAULTS[i], CATEGORY);
         }
     }
 

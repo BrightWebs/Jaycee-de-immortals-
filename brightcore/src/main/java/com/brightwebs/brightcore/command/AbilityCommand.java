@@ -22,7 +22,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
-/** /ability learn | learnall | forget | slot | list | mana. For testing and admins. */
+/** /ability learn | learnall | forget | slot | list. For testing and admins. */
 @EventBusSubscriber(modid = BrightCore.ID)
 public final class AbilityCommand {
     private static final DynamicCommandExceptionType UNKNOWN =
@@ -83,22 +83,13 @@ public final class AbilityCommand {
                             ServerPlayer p = EntityArgument.getPlayer(c, "player");
                             AbilityData data = AbilityAPI.get(p);
                             c.getSource().sendSuccess(() -> Component.literal(p.getName().getString()
-                                    + ": mana " + data.mana() + "/" + data.maxMana() + ", page " + (data.page() + 1)), false);
+                                    + ": page " + (data.page() + 1)), false);
                             for (Identifier id : data.owned()) {
                                 c.getSource().sendSuccess(() -> Component.literal(" - " + id), false);
                             }
                             return data.owned().size();
                         })))
-                .then(Commands.literal("mana").then(Commands.argument("player", EntityArgument.player())
-                        .then(Commands.argument("max", IntegerArgumentType.integer(0))
-                                .executes(c -> {
-                                    ServerPlayer p = EntityArgument.getPlayer(c, "player");
-                                    int max = IntegerArgumentType.getInteger(c, "max");
-                                    AbilityAPI.setMaxMana(p, max);
-                                    AbilityAPI.setMana(p, max);
-                                    c.getSource().sendSuccess(() -> Component.translatable("brightcore.command.mana", max), true);
-                                    return 1;
-                                })))));
+                );
     }
 
     private static Ability ability(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {

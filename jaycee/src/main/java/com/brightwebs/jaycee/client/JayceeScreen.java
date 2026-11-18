@@ -6,9 +6,11 @@ import com.brightwebs.brightcore.api.AbilityCategory;
 import com.brightwebs.brightcore.api.AbilityRegistry;
 import com.brightwebs.brightcore.data.AbilityData;
 import com.brightwebs.brightcore.network.BrightNetwork;
-import com.brightwebs.jaycee.ichor.Grade;
-import com.brightwebs.jaycee.ichor.IchorAPI;
-import com.brightwebs.jaycee.ichor.IchorData;
+import com.brightwebs.brightcore.api.EnergyAPI;
+import com.brightwebs.brightcore.api.race.Race;
+import com.brightwebs.brightcore.api.race.RaceAPI;
+import com.brightwebs.brightcore.api.race.RaceRegistry;
+import com.brightwebs.brightcore.data.EnergyData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
@@ -33,6 +35,15 @@ public class JayceeScreen extends Screen {
  private static final int[] SLOT_Y={99,99,151,151,203};
  private static int tab=0,selected=0,category=0; // remembered between openings
  private int skill=0,skillTier=0,shownOwned=-1;
+ private String shownState="";
+ /** Changes when race, EP readiness or XP change, so evolve buttons appear and vanish live. */
+ private static String stateKey(){
+  var p=Minecraft.getInstance().player;
+  if(p==null)return "";
+  StringBuilder b=new StringBuilder(RaceAPI.data(p).race());
+  for(var evo:RaceAPI.next(p))b.append(RaceAPI.blocker(p,evo).isEmpty()?'1':'0');
+  return b.toString();
+ }
  private Ability chosen;
  private int left,top;
  public JayceeScreen(){super(Component.literal("Jaycee : Di Immortales"));}
@@ -41,13 +52,9 @@ public class JayceeScreen extends Screen {
  private static AbilityData data(){var p=Minecraft.getInstance().player;return p==null?AbilityData.EMPTY:AbilityAPI.get(p);}
  private static void send(net.minecraft.network.protocol.common.custom.CustomPacketPayload payload){ClientPacketDistributor.sendToServer(payload);}
  private static int glyph(Identifier id){return Math.floorMod(id.hashCode(),997);}
- private static IchorData ichor(){var p=Minecraft.getInstance().player;return p==null?IchorData.EMPTY:IchorAPI.get(p);}
- /** Exact Ichor once the Mist has thinned (Seer); before that, whatever the last prayer told you. */
- private static String ichorText(IchorData i){
-  if(i.seesOwnIchor())return String.format("%,d",i.ichor());
-  if(i.revealed()>=0)return String.format("%,d",i.revealed())+" (last prayer)";
-  return "Unknown: pray at a temple";
- }
+ private static EnergyData energy(){var p=Minecraft.getInstance().player;return p==null?EnergyData.EMPTY:EnergyAPI.get(p);}
+ private static String raceName(){var p=Minecraft.getInstance().player;return p==null?"":RaceAPI.race(p).map(r->r.name().getString()).orElse("No race");}
+ private static double ratio(double v,double max){return max<=0?0:v/max;}
 
  private List<Ability> listed(){
   var p=Minecraft.getInstance().player;
@@ -72,9 +79,20 @@ public class JayceeScreen extends Screen {
    for(int i=0;i<list.size();i++){final Ability a=list.get(i);button(a.name().getString(),250,92+i*29,152,25,()->assign(a));}
   }else if(tab==2){
    for(int i=0;i<4;i++){final int branch=i;button(TRACKS[i],153+i*63,94,58,24,()->{skill=branch;});}
+  }else if(tab==4){
+   var p=Minecraft.getInstance().player;
+   if(p!=null){
+    var next=RaceAPI.next(p);
+    for(int i=0;i<Math.min(3,next.size());i++){
+     final var evo=next.get(i);
+     boolean ready=RaceAPI.blocker(p,evo).isEmpty();
+     if(ready)button("Evolve",326,176+i*34,66,22,()->send(new BrightNetwork.Evolve(evo.target().toString())));
+    }
+   }
   }
   var p=Minecraft.getInstance().player;
   shownOwned=p==null?0:AbilityAPI.get(p).owned().size();
+  shownState=stateKey();
  }
  private void rebuild(){clearWidgets();init();}
 
@@ -95,7 +113,7 @@ public class JayceeScreen extends Screen {
  @Override public void extractRenderState(GuiGraphicsExtractor g,int mx,int my,float dt){
   var player=Minecraft.getInstance().player;
   // Owned abilities changed while open (e.g. /ability learn): refresh the list.
-  if(player!=null&&AbilityAPI.get(player).owned().size()!=shownOwned)rebuild();
+  if(player!=null&&(AbilityAPI.get(player).owned().size()!=shownOwned||!stateKey().equals(shownState)))rebuild();
   AbilityData d=data();
   extractBackground(g,mx,my,dt);
   box(g,left,top,520,310,false);DivineFrame.ribbon(g,left+6,top+5,508,36);
@@ -103,10 +121,11 @@ public class JayceeScreen extends Screen {
   highlight(g,6+tab*84,8,85,31);
   text(g,"JAYCEE",18,56,0xFFF2F8FF);
   text(g,player==null?"Player":font.plainSubstrByWidth(player.getName().getString(),105),16,73,0xFF9BDAFF);
-  text(g,ichor().grade().label().toUpperCase(),14,91,0xFFF3CF82);
+  text(g,font.plainSubstrByWidth(raceName().toUpperCase(),112),14,91,0xFFF3CF82);
   if(tab!=0){
-   String[] names={"HEALTH","MANA","SOUL HP"};int[] colors={0xFFE96888,0xFF52B7EE,0xFFAE8CFF};
-   double[] ratios={player==null?0:player.getHealth()/Math.max(1,player.getMaxHealth()),d.maxMana()==0?0:(double)d.mana()/d.maxMana(),0};
+   EnergyData e=energy();
+   String[] names={"HEALTH","MANA","SPIRIT"};int[] colors={0xFFE96888,0xFF52B7EE,0xFFAE8CFF};
+   double[] ratios={player==null?0:player.getHealth()/Math.max(1,player.getMaxHealth()),ratio(e.mana(),e.maxMana()),ratio(e.spirit(),e.maxSpirit())};
    for(int i=0;i<3;i++){int y=135+i*31;text(g,names[i],15,y,colors[i]);bar(g,15,y+14,104,ratios[i],colors[i]);}
   }
   text(g,TABS[tab].toUpperCase(),154,58,0xFFE5F4FF);
@@ -145,20 +164,24 @@ public class JayceeScreen extends Screen {
   text(g,"ADVENTURER PROFILE",173,119,0xFFE5F5FF);
   DivineFrame.divider(g,left+171,top+132,201);
   if(player!=null)text(g,font.plainSubstrByWidth(player.getName().getString(),184),172,139,0xFF8DD7FF);
-  IchorData ic=ichor();
-  text(g,font.plainSubstrByWidth(ic.grade().label()+"  \u00b7  "+ic.birthright().label(),210),172,150,0xFFF3CF82);
-  String[] stats={"HEALTH","MANA","SOUL"};
-  int[] colors={0xFFE96F91,0xFF67C2FF,0xFFA58AFF};
-  double[] ratios={player==null?0:player.getHealth()/Math.max(1,player.getMaxHealth()),d.maxMana()==0?0:(double)d.mana()/d.maxMana(),0};
-  String[] values={player==null?"-":(int)Math.ceil(player.getHealth())+"/"+(int)player.getMaxHealth(),d.mana()+"/"+d.maxMana(),"-"};
-  for(int i=0;i<3;i++){
-   int y=163+i*30;
+  EnergyData e=energy();
+  var race=player==null?java.util.Optional.<Race>empty():RaceAPI.race(player);
+  String sub=race.map(r->r.name().getString()+"  \u00b7  "+r.alignment().label()+"  \u00b7  Tier "+r.tier()).orElse("No race chosen");
+  text(g,font.plainSubstrByWidth(sub,210),172,150,race.map(r->r.alignment().color()).orElse(0xFF8699BA));
+  String[] stats={"HEALTH","AURA","MANA","SPIRIT"};
+  int[] colors={0xFFE96F91,0xFFF3CF82,0xFF67C2FF,0xFFA58AFF};
+  double[] ratios={player==null?0:player.getHealth()/Math.max(1,player.getMaxHealth()),ratio(e.aura(),e.maxAura()),ratio(e.mana(),e.maxMana()),ratio(e.spirit(),e.maxSpirit())};
+  String[] values={player==null?"-":(int)Math.ceil(player.getHealth())+"/"+(int)player.getMaxHealth(),
+   EnergyAPI.format(e.aura())+"/"+EnergyAPI.format(e.maxAura()),EnergyAPI.format(e.mana())+"/"+EnergyAPI.format(e.maxMana()),
+   EnergyAPI.format(e.spirit())+"/"+EnergyAPI.format(e.maxSpirit())};
+  for(int i=0;i<4;i++){
+   int y=160+i*27;
    text(g,stats[i],169,y,colors[i]);
    text(g,values[i],376-font.width(values[i]),y,0xFF8699BA);
    g.fill(left+169,top+y+12,left+376,top+y+20,0xFF1E3150);
    g.fill(left+170,top+y+13,left+170+(int)(205*Math.max(0,Math.min(1,ratios[i]))),top+y+19,colors[i]);
   }
-  text(g,font.plainSubstrByWidth("ICHOR: "+ichorText(ic),232),168,283,0xFFF3CF82);
+  text(g,"EP: "+EnergyAPI.format(e.ep()),168,283,0xFFF3CF82);
  }
 
  private void abilities(GuiGraphicsExtractor g){
@@ -191,24 +214,33 @@ public class JayceeScreen extends Screen {
   text(g,TRACKS[skill]+" mastery / Tier "+(skillTier+1)+" (preview)",157,280,0xFFB3D4ED);
  }
  private void species(GuiGraphicsExtractor g){
-  text(g,"GRADES OF DIVINITY",158,78,0xFF9AD9FF);DivineFrame.divider(g,left+155,top+88,237);
-  IchorData ic=ichor();Grade now=ic.grade();
-  Grade[] all=Grade.values();
-  for(int i=0;i<all.length;i++){
-   Grade gr=all[all.length-1-i];int y=96+i*19;
-   boolean cur=gr==now,reached=gr.number()<=now.number();
-   if(cur)highlight(g,153,y-4,248,18);
-   text(g,(gr.number())+"  "+gr.label(),163,y+1,cur?0xFFF3CF82:reached?0xFFE4EBFF:0xFF6F8BB0);
-   String from=gr.minIchor()==0?"from 0":"from "+String.format("%,d",gr.minIchor());
-   text(g,from,392-font.width(from),y+1,cur?0xFFF3CF82:0xFF6F8BB0);
+  var p=Minecraft.getInstance().player;
+  text(g,"EVOLUTION",158,78,0xFF9AD9FF);DivineFrame.divider(g,left+155,top+88,237);
+  if(p==null)return;
+  var race=RaceAPI.race(p);
+  if(race.isEmpty()){text(g,"Choose a race to begin",170,120,0xFF9ABDDC);return;}
+  Race r=race.get();
+  highlight(g,153,96,248,62);
+  text(g,font.plainSubstrByWidth(r.name().getString(),230),163,104,r.alignment().color());
+  text(g,r.alignment().label()+"  \u00b7  Tier "+r.tier()+(r.isDivine()?"  \u00b7  DIVINE":""),163,117,0xFFB8DDFF);
+  int line=0;
+  for(var row:font.split(r.description(),228)){if(line++<2)g.text(font,row,left+163,top+130+(line-1)*11,0xFF8FB4D9,false);}
+  var next=r.evolutions();
+  if(next.isEmpty()){text(g,r.isDivine()?"The peak of this line: divinity.":"No further evolution.",163,176,0xFFF3CF82);return;}
+  text(g,"NEXT FORM",158,163,0xFF9AD9FF);
+  for(int i=0;i<Math.min(3,next.size());i++){
+   var evo=next.get(i);var target=RaceRegistry.get(evo.target());
+   int y=176+i*34;
+   highlight(g,153,y-4,248,30);
+   text(g,font.plainSubstrByWidth(target==null?"?":target.name().getString(),160),163,y+1,0xFFE4EBFF);
+   var why=RaceAPI.blocker(p,evo);
+   String req=why.map(Component::getString).orElse("Ready to evolve");
+   text(g,font.plainSubstrByWidth(req,160),163,y+12,why.isPresent()?0xFF8699BA:0xFF7DF7A6);
   }
-  Grade next=now.next();
-  String hint=next==null?"The highest Grade":"Next: "+next.label()+" at "+String.format("%,d",next.minIchor())+" Ichor";
-  text(g,font.plainSubstrByWidth(hint,240),157,283,0xFF9ABDDC);
  }
  private void quests(GuiGraphicsExtractor g){
   text(g,"QUEST JOURNAL",155,88,0xFF9AD9FF);
-  String[] names={"Awakening","Through the Mist","The First Ascension","Beyond Olympus"};
+  String[] names={"Reborn","The First Hunt","Evolution","Toward Divinity"};
   for(int i=0;i<names.length;i++){highlight(g,151,116+i*38,250,34);text(g,names[i],161,129+i*38,0xFFE6F3FF);}
  }
 

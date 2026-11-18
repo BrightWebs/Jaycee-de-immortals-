@@ -16,9 +16,12 @@ public final class IchorEvents {
 
     private IchorEvents() {}
 
+    /** Paused while the race system comes first; the Greek layer returns later. */
+    public static final boolean BIRTHRIGHT_ENABLED = false;
+
     @SubscribeEvent
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player
+        if (BIRTHRIGHT_ENABLED && event.getEntity() instanceof ServerPlayer player
                 && IchorAPI.get(player).birthright() == Birthright.UNDRAWN) {
             IchorAPI.drawBirthright(player);
         }

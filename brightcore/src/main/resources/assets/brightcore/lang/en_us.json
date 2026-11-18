@@ -6,10 +6,8 @@
   "key.brightcore.ability_4": "Ability 4",
   "key.brightcore.ability_5": "Ability 5",
   "key.brightcore.next_page": "Next ability page",
-
   "brightcore.message.cooldown": "%s is recharging (%ss)",
   "brightcore.message.no_mana": "Not enough mana for %s",
-
   "brightcore.command.unknown": "Unknown ability: %s",
   "brightcore.command.learned": "%s learned %s",
   "brightcore.command.learned_all": "%s learned %s abilities",
@@ -17,5 +15,16 @@
   "brightcore.command.forgot": "%s forgot %s",
   "brightcore.command.slot_set": "Slot %s set",
   "brightcore.command.slot_failed": "Couldn't set slot %s (not owned, or passive)",
-  "brightcore.command.mana": "Max mana set to %s"
+  "brightcore.energy.gained": "+%s EP",
+  "brightcore.race.none": "No race",
+  "brightcore.race.unknown": "That form no longer exists",
+  "brightcore.race.unknown_id": "Unknown race: %s",
+  "brightcore.race.need_ep": "Needs %s EP (you have %s)",
+  "brightcore.race.need_xp": "Needs %s experience levels (you have %s)",
+  "brightcore.race.evolved": "You have evolved into %s.",
+  "brightcore.command.race.get": "%s is %s",
+  "brightcore.command.race.set": "%s is now %s",
+  "brightcore.command.race.reset": "%s's race was cleared; the race menu will open",
+  "brightcore.command.ep.get": "%s: %s EP (%s Aura, %s Mana)",
+  "brightcore.command.ep.set": "%s now has %s EP"
 }

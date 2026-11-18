@@ -1,6 +1,8 @@
 package com.brightwebs.jaycee.client;
 
 import com.brightwebs.brightcore.api.Ability;
+import com.brightwebs.brightcore.api.EnergyAPI;
+import com.brightwebs.brightcore.data.EnergyData;
 import com.brightwebs.brightcore.client.BrightCoreClient;
 import com.brightwebs.brightcore.client.BrightKeys;
 import com.brightwebs.brightcore.data.AbilityData;
@@ -27,10 +29,11 @@ final class JayceeAbilityBar {
         DivineFrame.frame(g, x, y, W, H, false);
 
         // Top row: page on the left, mana bar on the right.
+        EnergyData energy = EnergyAPI.get(player);
         g.text(font, (data.page() + 1) + "/" + AbilityData.PAGES, x + PAD, y + 6, 0xFF9CD4FF, false);
         int barX = x + 40, barW = W - 40 - PAD;
         g.fill(barX, y + 7, barX + barW, y + 12, 0xFF203B5A);
-        float mana = data.maxMana() == 0 ? 0 : data.mana() / (float) data.maxMana();
+        float mana = energy.maxMana() <= 0 ? 0 : (float) (energy.mana() / energy.maxMana());
         g.fill(barX + 1, y + 8, barX + 1 + Math.round((barW - 2) * mana), y + 11, 0xFF52B7EE);
 
         // Five slots.
@@ -48,7 +51,7 @@ final class JayceeAbilityBar {
                     int h = Math.round((SLOT - 2) * cd);
                     g.fill(sx + 1, sy + 1, sx + SLOT - 1, sy + 1 + h, 0xB0050A18);
                     g.centeredText(font, String.valueOf(BrightCoreClient.cooldownSeconds(a, data)), sx + SLOT / 2, sy + 7, 0xFFFFFFFF);
-                } else if (!player.isCreative() && data.mana() < a.manaCost()) {
+                } else if (!player.isCreative() && energy.mana() < a.manaCost()) {
                     g.fill(sx + 1, sy + 1, sx + SLOT - 1, sy + SLOT - 1, 0x66E04050);
                 }
             }

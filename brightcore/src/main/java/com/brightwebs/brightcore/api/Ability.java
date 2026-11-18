@@ -68,6 +68,13 @@ public class Ability {
     public List<Mode> modes() { return List.copyOf(properties.modes); }
     public Mode mode(int index) { return properties.modes.get(Math.floorMod(index, properties.modes.size())); }
     public int maxMastery() { return properties.type.maxMastery(); }
+    public boolean isMagic() { return properties.type == SkillType.MAGIC; }
+    /** Magic only: "aspectual", "elemental", "holy", "summoning" or "other". */
+    public String magicClass() { return properties.magicClass; }
+    /** Magic only: the school, e.g. "fire" (shown as "Fire Magic"). */
+    public String school() { return properties.school; }
+    public int castTicks() { return properties.castTicks; }
+    public int range() { return properties.range; }
 
     /** First mode's numbers, for menus. */
     public int manaCost() { return mode(0).manaCost(); }
@@ -106,6 +113,8 @@ public class Ability {
         private AbilityCategory category = AbilityCategory.OFFENSE;
         private boolean passive = false, toggle = false;
         private final List<Mode> modes = new ArrayList<>();
+        private String magicClass = "", school = "";
+        private int castTicks = 0, range = 0;
 
         public Properties manaCost(int mana) { this.manaCost = mana; return this; }
         public Properties auraCost(int aura) { this.auraCost = aura; return this; }
@@ -114,6 +123,11 @@ public class Ability {
         public Properties type(SkillType type) { this.type = type; return this; }
         public Properties category(AbilityCategory category) { this.category = category; return this; }
         public Properties passive() { this.passive = true; return this; }
+        /** Makes this a spell: its classification, school, casting time and range. */
+        public Properties magic(String magicClass, String school, float castSeconds, int range) {
+            this.type = SkillType.MAGIC; this.magicClass = magicClass; this.school = school;
+            this.castTicks = Math.round(castSeconds * 20); this.range = range; return this;
+        }
         public Properties toggle() { this.toggle = true; return this; }
         /** Add a mode. Skills with no modes get one from manaCost/auraCost/cooldown. */
         public Properties mode(String key, int mana, int aura, float cooldownSeconds) {

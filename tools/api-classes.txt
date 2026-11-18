@@ -1,4 +1,2 @@
-net.minecraft.client.gui.GuiGraphicsExtractor
-net.minecraft.client.gui.screens.inventory.InventoryScreen
-net.minecraft.client.renderer.RenderPipelines
-net.minecraft.client.gui.Font
+net.minecraft.client.Screenshot
+net.minecraft.client.Minecraft

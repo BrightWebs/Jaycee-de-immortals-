@@ -28,14 +28,15 @@ public final class BrightSkills {
     /** EP needed, with the Resistance mastered, for it to become a Nullification. */
     public static final double EP_FOR_NULLIFICATION = 1_000_000;
 
-    static {
-        for (DamageKind kind : DamageKind.values()) {
-            String r = kind.key() + "_resistance", n = kind.key() + "_nullification";
-            SKILLS.register(r, () -> new ResistanceSkill(kind, false));
-            SKILLS.register(n, () -> new ResistanceSkill(kind, true));
-            RESISTANCE.put(kind, BrightCore.id(r));
-            NULLIFICATION.put(kind, BrightCore.id(n));
-        }
+    /**
+     * A content mod registers the Resistance and Nullification for a damage kind with its own
+     * register and names. Kinds nobody registers simply have no resistance.
+     */
+    public static void register(DeferredRegister<Ability> register, DamageKind kind, String resistance, String nullification) {
+        register.register(resistance, () -> new ResistanceSkill(kind, false));
+        register.register(nullification, () -> new ResistanceSkill(kind, true));
+        RESISTANCE.put(kind, Identifier.fromNamespaceAndPath(register.getNamespace(), resistance));
+        NULLIFICATION.put(kind, Identifier.fromNamespaceAndPath(register.getNamespace(), nullification));
     }
 
     private BrightSkills() {}
@@ -45,11 +46,13 @@ public final class BrightSkills {
     }
 
     public static ResistanceSkill resistance(DamageKind kind) {
-        return (ResistanceSkill) AbilityRegistry.get(RESISTANCE.get(kind));
+        Identifier id = RESISTANCE.get(kind);
+        return id == null ? null : (ResistanceSkill) AbilityRegistry.get(id);
     }
 
     public static ResistanceSkill nullification(DamageKind kind) {
-        return (ResistanceSkill) AbilityRegistry.get(NULLIFICATION.get(kind));
+        Identifier id = NULLIFICATION.get(kind);
+        return id == null ? null : (ResistanceSkill) AbilityRegistry.get(id);
     }
 
     /** Content mods add the Unique skills a newly reborn player can roll. */

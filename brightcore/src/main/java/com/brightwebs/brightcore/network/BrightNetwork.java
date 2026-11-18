@@ -61,6 +61,14 @@ public final class BrightNetwork {
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     }
 
+    /** "Set this skill to mode N" (menu). */
+    public record SetMode(String ability, int mode) implements CustomPacketPayload {
+        public static final Type<SetMode> TYPE = new Type<>(BrightCore.id("set_mode"));
+        public static final StreamCodec<ByteBuf, SetMode> CODEC = StreamCodec.composite(
+                ByteBufCodecs.STRING_UTF8, SetMode::ability, ByteBufCodecs.VAR_INT, SetMode::mode, SetMode::new);
+        @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
+    }
+
     /** "I choose this race" from the first-join menu. "random" picks one of the starting races. */
     public record ChooseRace(String race) implements CustomPacketPayload {
         public static final Type<ChooseRace> TYPE = new Type<>(BrightCore.id("choose_race"));
@@ -80,7 +88,7 @@ public final class BrightNetwork {
     @SubscribeEvent
     public static void register(RegisterPayloadHandlersEvent event) {
         // Bump this whenever a packet's format changes.
-        PayloadRegistrar registrar = event.registrar("3");
+        PayloadRegistrar registrar = event.registrar("4");
         registrar.playToServer(ActivateSlot.TYPE, ActivateSlot.CODEC, BrightNetwork::onActivate);
         registrar.playToServer(SetPage.TYPE, SetPage.CODEC, BrightNetwork::onSetPage);
         registrar.playToServer(AssignSlot.TYPE, AssignSlot.CODEC, BrightNetwork::onAssign);
@@ -88,6 +96,12 @@ public final class BrightNetwork {
             if (context.player() instanceof ServerPlayer player
                     && payload.slot() >= 0 && payload.slot() < AbilityData.SLOTS_PER_PAGE) {
                 AbilityAPI.cycleMode(player, payload.slot());
+            }
+        });
+        registrar.playToServer(SetMode.TYPE, SetMode.CODEC, (payload, context) -> {
+            if (context.player() instanceof ServerPlayer player) {
+                var a = AbilityRegistry.get(Identifier.tryParse(payload.ability()));
+                if (a != null) AbilityAPI.setMode(player, a, payload.mode());
             }
         });
         registrar.playToServer(ChooseRace.TYPE, ChooseRace.CODEC, BrightNetwork::onChooseRace);

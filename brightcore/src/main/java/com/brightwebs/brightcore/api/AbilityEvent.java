@@ -35,7 +35,12 @@ public abstract class AbilityEvent extends Event {
 
     /** After an ability fired and its cost was paid. */
     public static final class Activated extends AbilityEvent {
-        public Activated(ServerPlayer player, Ability ability) { super(player, ability); }
+        private final int manaSpent, auraSpent;
+        public Activated(ServerPlayer player, Ability ability, int manaSpent, int auraSpent) {
+            super(player, ability); this.manaSpent = manaSpent; this.auraSpent = auraSpent;
+        }
+        public int getManaSpent() { return manaSpent; }
+        public int getAuraSpent() { return auraSpent; }
     }
 
     /** Before a player learns an ability. Cancel to prevent it. */

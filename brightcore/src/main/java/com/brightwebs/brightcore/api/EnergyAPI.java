@@ -70,9 +70,18 @@ public final class EnergyAPI {
     // ---- changing --------------------------------------------------------------
 
     public static boolean spendMana(LivingEntity entity, double amount) {
+        if (amount <= 0) return true;
         EnergyData d = get(entity);
         if (d.mana() < amount) return false;
         set(entity, d.withMana(d.mana() - amount));
+        return true;
+    }
+
+    public static boolean spendAura(LivingEntity entity, double amount) {
+        if (amount <= 0) return true;
+        EnergyData d = get(entity);
+        if (d.aura() < amount) return false;
+        set(entity, d.withAura(d.aura() - amount));
         return true;
     }
 

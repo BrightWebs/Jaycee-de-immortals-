@@ -29,6 +29,7 @@ public final class BrightCore {
         AbilityRegistry.init(modBus);
         RaceRegistry.init(modBus);
         BrightAttachments.init(modBus);
+        com.brightwebs.brightcore.api.skill.BrightSkills.init(modBus);
     }
 
     private static String commandRoot = ID;

@@ -66,7 +66,23 @@ public final class JayceeRaces {
     private JayceeRaces() {}
 
     /** Registers five forms in order; each evolves into the next. */
+    /** Each line's Intrinsic skill, by its first form. */
+    private static final java.util.Map<String, String> INTRINSIC = java.util.Map.ofEntries(
+            java.util.Map.entry("human", "tenacity"),
+            java.util.Map.entry("elf", "keen_senses"),
+            java.util.Map.entry("dwarf", "stoneblood"),
+            java.util.Map.entry("beastfolk", "beast_sprint"),
+            java.util.Map.entry("goblin", "scavenger"),
+            java.util.Map.entry("orc", "iron_gut"),
+            java.util.Map.entry("ogre", "war_roar"),
+            java.util.Map.entry("slime", "gelatinous_body"),
+            java.util.Map.entry("lizardfolk", "scaled_hide"),
+            java.util.Map.entry("giant", "earthshaker"),
+            java.util.Map.entry("lesser_daemon", "infernal_blood"),
+            java.util.Map.entry("wight", "deathless_flesh"));
+
     private static void line(Shape s, String... forms) {
+        final String intrinsic = INTRINSIC.get(forms[0]);
         for (int i = 0; i < forms.length; i++) {
             final int t = i;
             final String next = i + 1 < forms.length ? forms[i + 1] : null;
@@ -83,6 +99,7 @@ public final class JayceeRaces {
                         .knockbackResistance(KNOCKBACK[t])
                         .size(s.size())
                         .alignment(t == 4 && s.holyAtPeak() ? Alignment.HOLY : s.alignment());
+                if (intrinsic != null) p.intrinsic(Identifier.fromNamespaceAndPath(JayceeMod.ID, intrinsic));
                 if (t == 0) p.starting();
                 if (t == 4) p.divine();
                 if (next != null) p.evolvesTo(Identifier.fromNamespaceAndPath(JayceeMod.ID, next), EP_NEEDED[t], XP_NEEDED[t]);

@@ -39,6 +39,8 @@ public final class Race {
     /** 1 for a starting race, then 2, 3... up the line. */
     public int tier() { return p.tier; }
     public List<Evolution> evolutions() { return List.copyOf(p.evolutions); }
+    /** Skills every member of this form has. Learned on becoming it. */
+    public List<Identifier> intrinsics() { return List.copyOf(p.intrinsics); }
 
     public Identifier id() {
         Identifier id = RaceRegistry.REGISTRY.getKey(this);
@@ -71,6 +73,7 @@ public final class Race {
         private boolean starting = false, divine = false;
         private int tier = 1;
         private final List<Evolution> evolutions = new ArrayList<>();
+        private final List<Identifier> intrinsics = new ArrayList<>();
 
         public Properties aura(double min, double max) { this.minAura = min; this.maxAura = max; return this; }
         public Properties mana(double min, double max) { this.minMana = min; this.maxMana = max; return this; }
@@ -85,6 +88,10 @@ public final class Race {
         public Properties starting() { this.starting = true; return this; }
         public Properties divine() { this.divine = true; return this; }
         public Properties tier(int t) { this.tier = t; return this; }
+        public Properties intrinsic(Identifier... skills) {
+            intrinsics.addAll(List.of(skills));
+            return this;
+        }
         public Properties evolvesTo(Identifier target, double epNeeded, int xpLevels) {
             evolutions.add(new Evolution(target, epNeeded, xpLevels));
             return this;

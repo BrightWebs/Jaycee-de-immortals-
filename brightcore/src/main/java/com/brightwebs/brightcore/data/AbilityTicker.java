@@ -20,8 +20,9 @@ public final class AbilityTicker {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         ServerLevel level = (ServerLevel) player.level();
 
+        AbilityData owned = AbilityAPI.get(player);
         for (Ability ability : AbilityAPI.owned(player)) {
-            ability.tick(player, level);
+            if (!ability.isToggle() || owned.isToggled(ability.id())) ability.tick(player, level);
         }
 
         if (player.tickCount % 20 == 0) {

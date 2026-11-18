@@ -16,7 +16,8 @@ import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 /**
  * Five ability keys (R, G, V, B, N by default) and a page key (Y), all rebindable under
- * Controls > "Abilities". Pressing one only sends the slot number; the server does the rest.
+ * Controls > "Abilities". Shift + a key switches that skill's mode. Pressing one only sends the
+ * slot number; the server does the rest.
  */
 @EventBusSubscriber(modid = BrightCore.ID, value = Dist.CLIENT)
 public final class BrightKeys {
@@ -49,7 +50,9 @@ public final class BrightKeys {
         if (mc.player == null) return;
         for (int i = 0; i < ABILITY.length; i++) {
             while (ABILITY[i].consumeClick()) {
-                ClientPacketDistributor.sendToServer(new BrightNetwork.ActivateSlot(i));
+                ClientPacketDistributor.sendToServer(mc.hasShiftDown()
+                        ? new BrightNetwork.CycleMode(i)
+                        : new BrightNetwork.ActivateSlot(i));
             }
         }
         while (NEXT_PAGE.consumeClick()) {

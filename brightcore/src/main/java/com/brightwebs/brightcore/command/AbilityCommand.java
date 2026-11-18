@@ -78,14 +78,25 @@ public final class AbilityCommand {
                                                     ok ? "brightcore.command.slot_set" : "brightcore.command.slot_failed", slot), true);
                                             return ok ? 1 : 0;
                                         })))))
+                .then(Commands.literal("master").then(Commands.argument("player", EntityArgument.player())
+                        .then(Commands.argument("ability", IdentifierArgument.id())
+                                .suggests((c, b) -> SharedSuggestionProvider.suggestResource(AbilityRegistry.REGISTRY.keySet(), b))
+                                .executes(c -> {
+                                    ServerPlayer p = EntityArgument.getPlayer(c, "player");
+                                    Ability a = ability(c);
+                                    AbilityAPI.setMastery(p, a, a.maxMastery());
+                                    c.getSource().sendSuccess(() -> Component.translatable("brightcore.message.mastered", a.name()), true);
+                                    return 1;
+                                }))))
                 .then(Commands.literal("list").then(Commands.argument("player", EntityArgument.player())
                         .executes(c -> {
                             ServerPlayer p = EntityArgument.getPlayer(c, "player");
                             AbilityData data = AbilityAPI.get(p);
                             c.getSource().sendSuccess(() -> Component.literal(p.getName().getString()
                                     + ": page " + (data.page() + 1)), false);
-                            for (Identifier id : data.owned()) {
-                                c.getSource().sendSuccess(() -> Component.literal(" - " + id), false);
+                            for (Ability a : AbilityAPI.owned(p)) {
+                                c.getSource().sendSuccess(() -> Component.literal(" - [" + a.type().label() + "] ")
+                                        .append(a.name()).append(" " + AbilityAPI.mastery(p, a) + "/" + a.maxMastery()), false);
                             }
                             return data.owned().size();
                         })))

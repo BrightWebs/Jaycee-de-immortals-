@@ -1,7 +1,11 @@
 package com.brightwebs.brightcore.api.race;
 
 import com.brightwebs.brightcore.BrightCore;
+import com.brightwebs.brightcore.api.Ability;
+import com.brightwebs.brightcore.api.AbilityAPI;
+import com.brightwebs.brightcore.api.AbilityRegistry;
 import com.brightwebs.brightcore.api.EnergyAPI;
+import com.brightwebs.brightcore.api.skill.BrightSkills;
 import com.brightwebs.brightcore.data.BrightAttachments;
 import com.brightwebs.brightcore.data.RaceData;
 import net.minecraft.core.Holder;
@@ -57,6 +61,7 @@ public final class RaceAPI {
     public static boolean choose(ServerPlayer player, Race race) {
         if (data(player).chosen() || !race.isStarting()) return false;
         become(player, race, true);
+        grantStartingUnique(player);
         return true;
     }
 
@@ -92,6 +97,22 @@ public final class RaceAPI {
         else EnergyAPI.raiseFor(player, race);
         applyBody(player, race);
         player.setHealth(player.getMaxHealth());
+        for (Identifier skill : race.intrinsics()) {
+            Ability a = AbilityRegistry.get(skill);
+            if (a != null && AbilityAPI.learn(player, a)) {
+                player.sendSystemMessage(Component.translatable("brightcore.message.acquired", a.name()));
+            }
+        }
+    }
+
+    /** Reincarnation's gift: one random Unique skill from the pool content mods fill. */
+    private static void grantStartingUnique(ServerPlayer player) {
+        List<Identifier> pool = BrightSkills.startingUniques();
+        if (pool.isEmpty()) return;
+        Ability a = AbilityRegistry.get(pool.get(player.getRandom().nextInt(pool.size())));
+        if (a != null && AbilityAPI.learn(player, a)) {
+            player.sendSystemMessage(Component.translatable("brightcore.message.unique_born", a.name()));
+        }
     }
 
     // ---- the body ----------------------------------------------------------------

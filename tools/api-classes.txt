@@ -1,5 +1,2 @@
-C com.mojang.blaze3d.font.TrueTypeGlyphProvider
-C com.mojang.blaze3d.font.TrueTypeGlyphProvider$Glyph
-C com.mojang.blaze3d.font.TrueTypeGlyphProvider$GlyphEntry
-net.minecraft.world.entity.ai.attributes.AttributeInstance
-net.minecraft.world.entity.Entity
+net.minecraft.client.Screenshot
+net.minecraft.client.Minecraft

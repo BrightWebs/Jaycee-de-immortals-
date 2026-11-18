@@ -129,7 +129,7 @@ public final class JayceeSkills {
                     }
                     for (LivingEntity t : around(player, 6)) {
                         Vec3 away = t.position().subtract(player.position()).normalize();
-                        t.knockback(1.5 * power(player, this), -away.x, -away.z);
+                        t.knockback(1.5 * power(player, this), -away.x, -away.z, player.damageSources().playerAttack(player), 1f);
                     }
                     level.sendParticles(ParticleTypes.GUST, player.getX(), player.getY() + 1, player.getZ(), 6, 2, 0.5, 2, 0);
                     level.playSound(null, player.blockPosition(), SoundEvents.BREEZE_WIND_CHARGE_BURST.value(), SoundSource.PLAYERS, 1, 1);
@@ -172,7 +172,7 @@ public final class JayceeSkills {
                     }
                     for (LivingEntity t : around(player, 5)) {
                         Vec3 away = t.position().subtract(player.position()).normalize();
-                        t.knockback(2.0, -away.x, -away.z);
+                        t.knockback(2.0, -away.x, -away.z, player.damageSources().playerAttack(player), 1f);
                         give(t, MobEffects.SLOWNESS, 3, 1);
                     }
                     level.playSound(null, player.blockPosition(), SoundEvents.SHIELD_BLOCK.value(), SoundSource.PLAYERS, 1, 0.8f);
@@ -374,7 +374,7 @@ public final class JayceeSkills {
                 @Override public boolean activate(ServerPlayer p, ServerLevel l) {
                     for (LivingEntity t : around(p, 6)) {
                         Vec3 away = t.position().subtract(p.position()).normalize();
-                        t.knockback(1.2, -away.x, -away.z);
+                        t.knockback(1.2, -away.x, -away.z, p.damageSources().playerAttack(p), 1f);
                         t.hurtServer(l, p.damageSources().playerAttack(p), 5 * power(p, this));
                     }
                     l.sendParticles(ParticleTypes.EXPLOSION, p.getX(), p.getY(), p.getZ(), 4, 2, 0.2, 2, 0);

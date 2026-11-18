@@ -1,2 +1,9 @@
-net.minecraft.client.Minecraft
-net.minecraft.client.gui.Gui
+net.minecraft.world.effect.MobEffects
+net.minecraft.tags.DamageTypeTags
+net.minecraft.world.damagesource.DamageTypes
+net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent
+net.minecraft.world.damagesource.DamageSource
+net.minecraft.world.level.Level
+net.minecraft.world.entity.LivingEntity
+net.minecraft.world.phys.AABB
+net.minecraft.world.entity.Mob

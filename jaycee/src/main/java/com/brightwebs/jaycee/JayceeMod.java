@@ -1,6 +1,6 @@
 package com.brightwebs.jaycee;
 
-import com.brightwebs.jaycee.ability.TestAbilities;
+import com.brightwebs.jaycee.skill.JayceeSkills;
 import com.brightwebs.jaycee.ichor.IchorAPI;
 import com.brightwebs.jaycee.race.JayceeRaces;
 import net.neoforged.bus.api.IEventBus;
@@ -19,7 +19,7 @@ public final class JayceeMod {
     public JayceeMod(IEventBus bus) {
         // Every cheat command lives under /jaycee.
         com.brightwebs.brightcore.BrightCore.setCommandRoot(ID);
-        TestAbilities.init(bus);
+        JayceeSkills.init(bus);
         IchorAPI.init(bus);
         JayceeRaces.init(bus);
         com.brightwebs.jaycee.race.CreatureEnergy.init(bus);

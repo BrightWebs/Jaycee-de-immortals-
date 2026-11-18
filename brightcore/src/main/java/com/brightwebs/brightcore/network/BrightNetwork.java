@@ -53,6 +53,14 @@ public final class BrightNetwork {
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     }
 
+    /** "Switch the skill in slot N to its next mode" (Shift + ability key). */
+    public record CycleMode(int slot) implements CustomPacketPayload {
+        public static final Type<CycleMode> TYPE = new Type<>(BrightCore.id("cycle_mode"));
+        public static final StreamCodec<ByteBuf, CycleMode> CODEC =
+                StreamCodec.composite(ByteBufCodecs.VAR_INT, CycleMode::slot, CycleMode::new);
+        @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
+    }
+
     /** "I choose this race" from the first-join menu. "random" picks one of the starting races. */
     public record ChooseRace(String race) implements CustomPacketPayload {
         public static final Type<ChooseRace> TYPE = new Type<>(BrightCore.id("choose_race"));
@@ -72,10 +80,16 @@ public final class BrightNetwork {
     @SubscribeEvent
     public static void register(RegisterPayloadHandlersEvent event) {
         // Bump this whenever a packet's format changes.
-        PayloadRegistrar registrar = event.registrar("2");
+        PayloadRegistrar registrar = event.registrar("3");
         registrar.playToServer(ActivateSlot.TYPE, ActivateSlot.CODEC, BrightNetwork::onActivate);
         registrar.playToServer(SetPage.TYPE, SetPage.CODEC, BrightNetwork::onSetPage);
         registrar.playToServer(AssignSlot.TYPE, AssignSlot.CODEC, BrightNetwork::onAssign);
+        registrar.playToServer(CycleMode.TYPE, CycleMode.CODEC, (payload, context) -> {
+            if (context.player() instanceof ServerPlayer player
+                    && payload.slot() >= 0 && payload.slot() < AbilityData.SLOTS_PER_PAGE) {
+                AbilityAPI.cycleMode(player, payload.slot());
+            }
+        });
         registrar.playToServer(ChooseRace.TYPE, ChooseRace.CODEC, BrightNetwork::onChooseRace);
         registrar.playToServer(Evolve.TYPE, Evolve.CODEC, BrightNetwork::onEvolve);
     }

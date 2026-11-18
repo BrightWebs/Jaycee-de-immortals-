@@ -15,7 +15,7 @@ import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 /**
- * Five ability keys (R, G, V, B, N by default) and a page key (Y), all rebindable under
+ * Four ability keys (Z, X, C, V by default) and a preset key (Y), all rebindable under
  * Controls > "Abilities". Shift + a key switches that skill's mode. Pressing one only sends the
  * slot number; the server does the rest.
  */
@@ -24,7 +24,7 @@ public final class BrightKeys {
     public static final KeyMapping.Category CATEGORY = new KeyMapping.Category(BrightCore.id("abilities"));
 
     private static final int[] DEFAULTS = {
-            InputConstants.KEY_R, InputConstants.KEY_G, InputConstants.KEY_V, InputConstants.KEY_B, InputConstants.KEY_N};
+            InputConstants.KEY_Z, InputConstants.KEY_X, InputConstants.KEY_C, InputConstants.KEY_V};
 
     public static final KeyMapping[] ABILITY = new KeyMapping[AbilityData.SLOTS_PER_PAGE];
     public static final KeyMapping NEXT_PAGE = new KeyMapping("key.brightcore.next_page", InputConstants.KEY_Y, CATEGORY);

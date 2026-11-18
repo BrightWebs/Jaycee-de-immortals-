@@ -5,7 +5,7 @@
   "key.brightcore.ability_3": "Ability 3",
   "key.brightcore.ability_4": "Ability 4",
   "key.brightcore.ability_5": "Ability 5",
-  "key.brightcore.next_page": "Next ability page",
+  "key.brightcore.next_page": "Next ability preset",
   "brightcore.message.cooldown": "%s is recharging (%ss)",
   "brightcore.message.no_mana": "Not enough mana for %s",
   "brightcore.command.unknown": "Unknown ability: %s",

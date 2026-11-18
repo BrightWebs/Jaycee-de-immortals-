@@ -31,8 +31,8 @@ public record AbilityData(Set<Identifier> owned,
                           Map<Identifier, Integer> modes,
                           Map<String, Double> damageTaken) {
 
-    public static final int SLOTS_PER_PAGE = 5;
-    public static final int PAGES = 10;
+    public static final int SLOTS_PER_PAGE = 4;
+    public static final int PAGES = 9;
     public static final int TOTAL_SLOTS = SLOTS_PER_PAGE * PAGES;
 
     public static final AbilityData EMPTY = new AbilityData(Set.of(), Map.of(), List.of(), 0, Map.of(), Set.of(), Map.of(), Map.of());

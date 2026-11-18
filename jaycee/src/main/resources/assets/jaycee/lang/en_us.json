@@ -205,5 +205,9 @@
   "ability.jaycee.deathless_flesh.desc": "Intrinsic (Wight). Immune to poison and wither.",
   "jaycee.message.no_target": "No target in sight",
   "jaycee.skill.analyze": "%s: %s/%s HP, %s EP",
-  "jaycee.skill.appraise": "You are %s. %s EP (%s Aura, %s Mana)"
+  "jaycee.skill.appraise": "You are %s. %s EP (%s Aura, %s Mana)",
+  "jaycee.menu.title": "Existence System",
+  "jaycee.command.title.set": "%s's title is now %s",
+  "jaycee.command.title.clear": "%s's title was cleared",
+  "jaycee.command.souls": "%s now has %s souls"
 }

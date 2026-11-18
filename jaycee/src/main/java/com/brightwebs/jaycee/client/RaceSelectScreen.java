@@ -56,7 +56,7 @@ public final class RaceSelectScreen extends Screen {
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor g, int mx, int my, float dt) {
-        extractBackground(g, mx, my, dt);
+        // 26.3 draws the blurred background before this method; drawing it again crashes.
         DivineFrame.frame(g, left, top, W, H, false);
         DivineFrame.ribbon(g, left + 6, top + 5, W - 12, 30);
         g.centeredText(font, title, left + W / 2, top + 16, 0xFFEEDFA8);

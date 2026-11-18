@@ -115,7 +115,7 @@ public class JayceeScreen extends Screen {
   // Owned abilities changed while open (e.g. /ability learn): refresh the list.
   if(player!=null&&(AbilityAPI.get(player).owned().size()!=shownOwned||!stateKey().equals(shownState)))rebuild();
   AbilityData d=data();
-  extractBackground(g,mx,my,dt);
+  // 26.3 draws the blurred background before this method; drawing it again crashes.
   box(g,left,top,520,310,false);DivineFrame.ribbon(g,left+6,top+5,508,36);
   box(g,left+5,top+46,130,257,false);box(g,left+141,top+46,270,257,false);box(g,left+415,top+46,100,257,false);
   highlight(g,6+tab*84,8,85,31);

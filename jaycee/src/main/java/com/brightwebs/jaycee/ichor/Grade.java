@@ -5,7 +5,7 @@ public enum Grade {
     MORTAL("Mortal", 0),
     TOUCHED("Touched", 10),
     SEER("Seer", 50),
-    HERO("Hero", 200),
+    INITIATE("Initiate", 200),
     DEMIGOD("Demigod", 1_000),
     ASCENDANT("Ascendant", 5_000),
     LESSER_GOD("Lesser God", 25_000),

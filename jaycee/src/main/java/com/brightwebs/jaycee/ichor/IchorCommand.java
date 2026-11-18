@@ -11,7 +11,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 /**
- * /ichor for testing: get, set, add, pray (stand-in until the temple exists), reroll (draws a new Birthright).
+ * /jaycee ichor for testing: get, set, add, pray (stand-in until the temple exists), reroll (draws a new Birthright).
  */
 @EventBusSubscriber(modid = JayceeMod.ID)
 public final class IchorCommand {
@@ -19,7 +19,7 @@ public final class IchorCommand {
 
     @SubscribeEvent
     public static void register(RegisterCommandsEvent event) {
-        event.getDispatcher().register(Commands.literal("ichor")
+        event.getDispatcher().register(Commands.literal(JayceeMod.ID).requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).then(Commands.literal("ichor")
                 .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.literal("get").then(Commands.argument("player", EntityArgument.player())
                         .executes(c -> {
@@ -53,7 +53,7 @@ public final class IchorCommand {
                             ServerPlayer p = EntityArgument.getPlayer(c, "player");
                             IchorAPI.drawBirthright(p);
                             return confirm(c.getSource(), p);
-                        }))));
+                        })))));
     }
 
     private static int confirm(net.minecraft.commands.CommandSourceStack source, ServerPlayer p) {

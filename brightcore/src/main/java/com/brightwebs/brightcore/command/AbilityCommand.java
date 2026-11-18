@@ -33,7 +33,7 @@ public final class AbilityCommand {
     @SubscribeEvent
     public static void register(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> d = event.getDispatcher();
-        d.register(Commands.literal("ability")
+        d.register(Commands.literal(BrightCore.commandRoot()).requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).then(Commands.literal("ability")
                 .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.literal("learn").then(Commands.argument("player", EntityArgument.player())
                         .then(Commands.argument("ability", IdentifierArgument.id())
@@ -89,7 +89,7 @@ public final class AbilityCommand {
                             }
                             return data.owned().size();
                         })))
-                );
+                ));
     }
 
     private static Ability ability(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {

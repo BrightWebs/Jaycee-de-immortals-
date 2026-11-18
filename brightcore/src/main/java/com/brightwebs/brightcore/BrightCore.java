@@ -18,7 +18,7 @@ import org.slf4j.Logger;
  *   data/     abilities (10 pages x 5 slots), energy (Aura, Mana, Spirit = EP) and race, per entity
  *   network/  the client only ever says "I pressed slot N" or "switch page"; the server decides
  *   client/   ability keys and the bottom-right ability bar (its look can be replaced)
- *   command/  /ability for testing and admins
+ *   command/  /<root> ability | race | ep, for testing and admins (root set by the content mod)
  */
 @Mod(BrightCore.ID)
 public final class BrightCore {
@@ -30,6 +30,14 @@ public final class BrightCore {
         RaceRegistry.init(modBus);
         BrightAttachments.init(modBus);
     }
+
+    private static String commandRoot = ID;
+
+    /** The root for Bright Core's commands: /<root> ability|race|ep. Content mods set their own. */
+    public static String commandRoot() { return commandRoot; }
+
+    /** Call from your mod's constructor, before commands are registered. */
+    public static void setCommandRoot(String root) { commandRoot = root; }
 
     public static Identifier id(String path) {
         return Identifier.fromNamespaceAndPath(ID, path);

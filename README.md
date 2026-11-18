@@ -21,13 +21,24 @@ Put **both** jars in your `mods` folder. GitHub builds them on every push: open 
 
 All keys are rebindable in Controls.
 
-Quick test: `/ability learnall @s`, then press **R**. In the menu's **Abilities** tab, pick a loadout slot on the right, then click an ability to place it there. Right-click a slot to clear it, and Alt + scroll to change pages.
+Quick test: `/jaycee ability learnall @s`, then press **R**. In the menu's **Abilities** tab, pick a loadout slot on the right, then click an ability to place it there. Right-click a slot to clear it, and Alt + scroll to change pages.
 
 ## What's in so far
 
 - **Ability bar** (bottom right, like Palladium): 5 slots per page, 10 pages, key labels, cooldown shade with seconds, red tint when you can't afford it, mana bar, page number.
 - **Menu**: six tabs, live 3D player model, real health and mana, and the 5-slot loadout shared with the ability bar.
 - **Five test abilities**: Thunderbolt, Hermes' Dash, Apollo's Mending, Shadow Step, Aegis. Placeholders until we design the real ones.
+
+## Cheat commands
+
+Everything is under `/jaycee` (operators only):
+
+| Command | Does |
+| --- | --- |
+| `/jaycee race get\|set\|evolve\|reset <player> ...` | Check, force, evolve or clear a race (reset reopens the race menu) |
+| `/jaycee ep get\|add <player> ...` | Check EP, or add EP |
+| `/jaycee ability learn\|learnall\|forget\|slot\|list <player> ...` | Manage abilities |
+| `/jaycee ichor ...` | Greek layer (paused) |
 
 ## For development
 

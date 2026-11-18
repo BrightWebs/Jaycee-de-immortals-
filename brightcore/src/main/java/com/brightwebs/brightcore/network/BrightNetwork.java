@@ -3,6 +3,9 @@ package com.brightwebs.brightcore.network;
 import com.brightwebs.brightcore.BrightCore;
 import com.brightwebs.brightcore.api.AbilityAPI;
 import com.brightwebs.brightcore.api.AbilityRegistry;
+import com.brightwebs.brightcore.api.race.Race;
+import com.brightwebs.brightcore.api.race.RaceAPI;
+import com.brightwebs.brightcore.api.race.RaceRegistry;
 import com.brightwebs.brightcore.data.AbilityData;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -50,13 +53,31 @@ public final class BrightNetwork {
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     }
 
+    /** "I choose this race" from the first-join menu. "random" picks one of the starting races. */
+    public record ChooseRace(String race) implements CustomPacketPayload {
+        public static final Type<ChooseRace> TYPE = new Type<>(BrightCore.id("choose_race"));
+        public static final StreamCodec<ByteBuf, ChooseRace> CODEC =
+                StreamCodec.composite(ByteBufCodecs.STRING_UTF8, ChooseRace::race, ChooseRace::new);
+        @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
+    }
+
+    /** "Evolve me into this race." The server checks every requirement. */
+    public record Evolve(String target) implements CustomPacketPayload {
+        public static final Type<Evolve> TYPE = new Type<>(BrightCore.id("evolve"));
+        public static final StreamCodec<ByteBuf, Evolve> CODEC =
+                StreamCodec.composite(ByteBufCodecs.STRING_UTF8, Evolve::target, Evolve::new);
+        @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
+    }
+
     @SubscribeEvent
     public static void register(RegisterPayloadHandlersEvent event) {
         // Bump this whenever a packet's format changes.
-        PayloadRegistrar registrar = event.registrar("1");
+        PayloadRegistrar registrar = event.registrar("2");
         registrar.playToServer(ActivateSlot.TYPE, ActivateSlot.CODEC, BrightNetwork::onActivate);
         registrar.playToServer(SetPage.TYPE, SetPage.CODEC, BrightNetwork::onSetPage);
         registrar.playToServer(AssignSlot.TYPE, AssignSlot.CODEC, BrightNetwork::onAssign);
+        registrar.playToServer(ChooseRace.TYPE, ChooseRace.CODEC, BrightNetwork::onChooseRace);
+        registrar.playToServer(Evolve.TYPE, Evolve.CODEC, BrightNetwork::onEvolve);
     }
 
     private static void onActivate(ActivateSlot payload, IPayloadContext context) {
@@ -69,6 +90,23 @@ public final class BrightNetwork {
     private static void onSetPage(SetPage payload, IPayloadContext context) {
         if (context.player() instanceof ServerPlayer player) {
             AbilityAPI.setPage(player, payload.page());
+        }
+    }
+
+    private static void onChooseRace(ChooseRace payload, IPayloadContext context) {
+        if (!(context.player() instanceof ServerPlayer player)) return;
+        var options = RaceRegistry.starting();
+        if (options.isEmpty()) return;
+        Race race = payload.race().equals("random")
+                ? options.get(player.getRandom().nextInt(options.size()))
+                : RaceRegistry.get(Identifier.tryParse(payload.race()));
+        if (race != null) RaceAPI.choose(player, race);
+    }
+
+    private static void onEvolve(Evolve payload, IPayloadContext context) {
+        if (context.player() instanceof ServerPlayer player) {
+            Identifier id = Identifier.tryParse(payload.target());
+            if (id != null) RaceAPI.evolve(player, id);
         }
     }
 

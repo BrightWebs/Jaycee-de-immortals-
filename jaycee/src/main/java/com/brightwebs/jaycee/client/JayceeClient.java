@@ -1,5 +1,7 @@
 package com.brightwebs.jaycee.client;
 
+import com.brightwebs.brightcore.api.race.RaceAPI;
+import com.brightwebs.brightcore.api.race.RaceRegistry;
 import com.brightwebs.brightcore.client.BrightCoreClient;
 import com.brightwebs.jaycee.JayceeMod;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -35,8 +37,13 @@ public final class JayceeClient {
     @SubscribeEvent
     public static void tick(ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) return;
+        boolean needsRace = !RaceAPI.data(mc.player).chosen() && !RaceRegistry.starting().isEmpty();
         while (OPEN.consumeClick()) {
-            if (mc.player != null) mc.setScreenAndShow(new JayceeScreen());
+            mc.setScreenAndShow(needsRace ? new RaceSelectScreen() : new JayceeScreen());
+        }
+        if (needsRace && mc.gui.screen() == null && mc.player.tickCount > 40) {
+            mc.setScreenAndShow(new RaceSelectScreen());
         }
     }
 }

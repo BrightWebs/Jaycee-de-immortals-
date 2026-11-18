@@ -93,14 +93,6 @@ public final class AbilityAPI {
         set(player, get(player).withPage(page));
     }
 
-    public static void setMana(ServerPlayer player, int mana) {
-        set(player, get(player).withMana(mana));
-    }
-
-    public static void setMaxMana(ServerPlayer player, int maxMana) {
-        set(player, get(player).withMaxMana(maxMana));
-    }
-
     public static void resetCooldown(ServerPlayer player, Ability ability) {
         set(player, get(player).withCooldown(ability.id(), 0));
     }
@@ -131,15 +123,15 @@ public final class AbilityAPI {
             return false;
         }
         int cost = player.isCreative() ? 0 : event.getManaCost();
-        if (data.mana() < cost) {
+        if (EnergyAPI.get(player).mana() < cost) {
             player.sendOverlayMessage(Component.translatable("brightcore.message.no_mana", ability.name()));
             return false;
         }
 
         if (!ability.activate(player, level)) return false;
 
+        EnergyAPI.spendMana(player, cost);
         AbilityData after = get(player); // the ability itself may have changed the data
-        after = after.withMana(after.mana() - cost);
         if (ability.cooldownTicks() > 0) after = after.withCooldown(id, now + ability.cooldownTicks());
         set(player, after);
 

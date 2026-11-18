@@ -10,12 +10,9 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-/** Server-side upkeep: passive ticks, on-hit hooks, mana regeneration. */
+/** Server-side upkeep: passive ticks, on-hit hooks, cooldown cleanup. */
 @EventBusSubscriber(modid = BrightCore.ID)
 public final class AbilityTicker {
-    /** Mana gained per second. */
-    public static final int MANA_REGEN_PER_SECOND = 3;
-
     private AbilityTicker() {}
 
     @SubscribeEvent
@@ -30,9 +27,6 @@ public final class AbilityTicker {
         if (player.tickCount % 20 == 0) {
             AbilityData data = AbilityAPI.get(player);
             AbilityData updated = data.withExpiredCooldownsRemoved(level.getGameTime());
-            if (updated.mana() < updated.maxMana()) {
-                updated = updated.withMana(updated.mana() + MANA_REGEN_PER_SECOND);
-            }
             if (!updated.equals(data)) player.setData(BrightAttachments.ABILITIES, updated);
         }
     }

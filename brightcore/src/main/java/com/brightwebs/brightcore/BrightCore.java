@@ -1,6 +1,7 @@
 package com.brightwebs.brightcore;
 
 import com.brightwebs.brightcore.api.AbilityRegistry;
+import com.brightwebs.brightcore.api.race.RaceRegistry;
 import com.brightwebs.brightcore.data.BrightAttachments;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.Identifier;
@@ -13,7 +14,8 @@ import org.slf4j.Logger;
  *
  * It owns the systems every content mod needs and nothing content-specific:
  *   api/      Ability, the registry, AbilityAPI (all rules) and events
- *   data/     per-player ability data: owned abilities, 10 pages x 5 slots, cooldowns, mana
+ *   api/race/ races: forms, evolutions, alignment, body stats
+ *   data/     abilities (10 pages x 5 slots), energy (Aura, Mana, Spirit = EP) and race, per entity
  *   network/  the client only ever says "I pressed slot N" or "switch page"; the server decides
  *   client/   ability keys and the bottom-right ability bar (its look can be replaced)
  *   command/  /ability for testing and admins
@@ -25,6 +27,7 @@ public final class BrightCore {
 
     public BrightCore(IEventBus modBus) {
         AbilityRegistry.init(modBus);
+        RaceRegistry.init(modBus);
         BrightAttachments.init(modBus);
     }
 

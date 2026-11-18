@@ -1,5 +1,2 @@
-net.minecraft.core.particles.DustParticleOptions
-net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket
-net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket
-net.neoforged.neoforge.event.entity.player.PlayerEvent$PlayerLoggedInEvent
-net.minecraft.server.level.ServerLevel
+net.minecraft.client.Minecraft
+net.minecraft.client.gui.Gui

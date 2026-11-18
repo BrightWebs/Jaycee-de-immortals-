@@ -28,6 +28,7 @@ public final class SkillEvents {
         for (DamageKind kind : DamageKind.values()) {
             if (!kind.matches(event.getSource())) continue;
             ResistanceSkill nul = BrightSkills.nullification(kind), res = BrightSkills.resistance(kind);
+            if (res == null || nul == null) continue;
             ResistanceSkill best = AbilityAPI.has(player, nul) ? nul : AbilityAPI.has(player, res) ? res : null;
 
             if (best == null) {

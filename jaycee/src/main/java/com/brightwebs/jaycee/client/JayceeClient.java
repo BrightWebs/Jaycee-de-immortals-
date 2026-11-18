@@ -19,7 +19,7 @@ import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 @EventBusSubscriber(modid = JayceeMod.ID, value = Dist.CLIENT)
 public final class JayceeClient {
     public static final KeyMapping.Category CATEGORY = new KeyMapping.Category(Identifier.fromNamespaceAndPath(JayceeMod.ID, "main"));
-    public static final KeyMapping OPEN = new KeyMapping("key.jaycee.open", InputConstants.KEY_M, CATEGORY);
+    public static final KeyMapping MENU = new KeyMapping("key.jaycee.menu", InputConstants.KEY_M, CATEGORY);
 
     private JayceeClient() {}
 
@@ -31,16 +31,16 @@ public final class JayceeClient {
     @SubscribeEvent
     public static void register(RegisterKeyMappingsEvent event) {
         event.registerCategory(CATEGORY);
-        event.register(OPEN);
+        event.register(MENU);
     }
 
     @SubscribeEvent
     public static void tick(ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
-        boolean needsRace = !RaceAPI.data(mc.player).chosen() && !RaceRegistry.starting().isEmpty();
-        while (OPEN.consumeClick()) {
-            mc.setScreenAndShow(needsRace ? new RaceSelectScreen() : new JayceeScreen());
+        boolean needsRace = (!RaceAPI.data(mc.player).chosen() || RaceAPI.race(mc.player).isEmpty()) && !RaceRegistry.starting().isEmpty();
+        while (MENU.consumeClick()) {
+            mc.setScreenAndShow(needsRace ? new RaceSelectScreen() : new MenuScreen());
         }
         if (needsRace && mc.gui.screen() == null && mc.player.tickCount > 40) {
             mc.setScreenAndShow(new RaceSelectScreen());

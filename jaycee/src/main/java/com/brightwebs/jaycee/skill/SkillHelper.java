@@ -45,6 +45,20 @@ final class SkillHelper {
         return best;
     }
 
+    /** Like target, but without the hint message. */
+    static LivingEntity targetQuiet(ServerPlayer player, double range) {
+        Vec3 eye = player.getEyePosition();
+        Vec3 end = eye.add(player.getLookAngle().scale(range));
+        LivingEntity best = null;
+        double bestDist = Double.MAX_VALUE;
+        AABB box = player.getBoundingBox().expandTowards(player.getLookAngle().scale(range)).inflate(1.5);
+        for (LivingEntity e : player.level().getEntitiesOfClass(LivingEntity.class, box, e -> e != player && e.isAlive())) {
+            Optional<Vec3> hit = e.getBoundingBox().inflate(0.4).clip(eye, end);
+            if (hit.isPresent() && eye.distanceToSqr(hit.get()) < bestDist) { bestDist = eye.distanceToSqr(hit.get()); best = e; }
+        }
+        return best;
+    }
+
     /** The block the player is looking at, or null (with a hint). */
     static BlockHitResult block(ServerPlayer player, double range) {
         HitResult hit = player.pick(range, 0f, false);

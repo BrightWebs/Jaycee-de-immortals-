@@ -59,7 +59,8 @@ public final class RaceAPI {
 
     /** First-join choice. Ignored if the player already chose. */
     public static boolean choose(ServerPlayer player, Race race) {
-        if (data(player).chosen() || !race.isStarting()) return false;
+        // A saved race that no longer exists (an older version of the mod) counts as no race.
+        if ((data(player).chosen() && race(player).isPresent()) || !race.isStarting()) return false;
         become(player, race, true);
         grantStartingUnique(player);
         return true;

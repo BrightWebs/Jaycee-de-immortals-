@@ -113,6 +113,11 @@ public final class AbilityAPI {
     }
 
     /** Adds mastery points, telling the player when the skill becomes mastered. */
+    /** Mastery shown as a level from 1 to 10 (10 = mastered). */
+    public static int level(Player player, Ability ability) {
+        return isMastered(player, ability) ? 10 : 1 + (int) Math.floor(masteryFraction(player, ability) * 9);
+    }
+
     public static void addMastery(ServerPlayer player, Ability ability, int points) {
         AbilityData data = get(player);
         if (!data.has(ability.id())) return;
@@ -143,6 +148,12 @@ public final class AbilityAPI {
             set(player, get(player).withMode(ability.id(), next));
             player.sendOverlayMessage(Component.translatable("brightcore.message.mode", ability.name(), ability.modeName(next)));
         });
+    }
+
+    /** Picks a skill's mode directly (from a menu). */
+    public static void setMode(ServerPlayer player, Ability ability, int mode) {
+        if (!has(player, ability) || mode < 0 || mode >= ability.modes().size()) return;
+        set(player, get(player).withMode(ability.id(), mode));
     }
 
     public static boolean isToggled(Player player, Ability ability) {
@@ -215,7 +226,7 @@ public final class AbilityAPI {
         set(player, after);
         addMastery(player, ability, 1);
 
-        NeoForge.EVENT_BUS.post(new AbilityEvent.Activated(player, ability));
+        NeoForge.EVENT_BUS.post(new AbilityEvent.Activated(player, ability, manaCost, auraCost));
         return true;
     }
 }

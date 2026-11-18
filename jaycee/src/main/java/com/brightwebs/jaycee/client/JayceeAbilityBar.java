@@ -11,7 +11,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * The bottom-right ability bar in the menu's sapphire style: five slots for the current page,
+ * The bottom-right ability bar in the menu's sapphire style: four slots for the current preset,
  * the key under each slot, a draining cooldown shade with seconds left, a red tint when you
  * can't afford it, the mana bar and the page number.
  */
@@ -36,7 +36,7 @@ final class JayceeAbilityBar {
         float mana = energy.maxMana() <= 0 ? 0 : (float) (energy.mana() / energy.maxMana());
         g.fill(barX + 1, y + 8, barX + 1 + Math.round((barW - 2) * mana), y + 11, 0xFF52B7EE);
 
-        // Five slots.
+        // Four slots.
         int sy = y + 17;
         for (int i = 0; i < AbilityData.SLOTS_PER_PAGE; i++) {
             int sx = x + PAD + i * (SLOT + GAP);
@@ -45,7 +45,8 @@ final class JayceeAbilityBar {
                 g.fill(sx, sy, sx + SLOT, sy + SLOT, 0xFF355D9A);
                 g.fill(sx + 1, sy + 1, sx + SLOT - 1, sy + SLOT - 1, 0xCC0B1C38);
             } else {
-                DivineGlyph.icon(g, sx + 1, sy + 1, SLOT - 2, Math.floorMod(a.id().hashCode(), 997), false);
+                g.fill(sx, sy, sx + SLOT, sy + SLOT, 0xCC081626);
+                SkillIcons.icon(g, a, sx + 1, sy + 1, SLOT - 2);
                 float cd = BrightCoreClient.cooldownFraction(a, data);
                 if (cd > 0) {
                     int h = Math.round((SLOT - 2) * cd);

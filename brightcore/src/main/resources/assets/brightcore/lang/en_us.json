@@ -1,11 +1,6 @@
 {
   "key.category.brightcore.abilities": "Abilities",
-  "key.brightcore.ability_1": "Ability 1",
-  "key.brightcore.ability_2": "Ability 2",
-  "key.brightcore.ability_3": "Ability 3",
-  "key.brightcore.ability_4": "Ability 4",
-  "key.brightcore.ability_5": "Ability 5",
-  "key.brightcore.next_page": "Next ability page",
+  "key.brightcore.next_page": "Next ability preset",
   "brightcore.message.cooldown": "%s is recharging (%ss)",
   "brightcore.message.no_mana": "Not enough mana for %s",
   "brightcore.command.unknown": "Unknown ability: %s",
@@ -69,5 +64,9 @@
   "ability.brightcore.physical_resistance": "Physical Attack Resistance",
   "ability.brightcore.physical_resistance.desc": "Blunts physical attack damage. Learned by enduring it, and stronger with every hit.",
   "ability.brightcore.physical_nullification": "Physical Attack Nullification",
-  "ability.brightcore.physical_nullification.desc": "Near-immunity to physical attack damage. A mastered Resistance becomes this at 1M EP."
+  "ability.brightcore.physical_nullification.desc": "Near-immunity to physical attack damage. A mastered Resistance becomes this at 1M EP.",
+  "key.brightcore.skill_slot_1": "Skill slot 1",
+  "key.brightcore.skill_slot_2": "Skill slot 2",
+  "key.brightcore.skill_slot_3": "Skill slot 3",
+  "key.brightcore.skill_slot_4": "Skill slot 4"
 }

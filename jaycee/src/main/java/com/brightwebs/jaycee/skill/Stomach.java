@@ -45,7 +45,7 @@ public final class Stomach {
         ItemStack left = c.addItem(stack);
         p.setData(STOMACH, List.copyOf(c.getItems()));
         if (!left.isEmpty()) {
-            p.drop(left, false);
+            p.spawnAtLocation((net.minecraft.server.level.ServerLevel) p.level(), left);
             p.sendOverlayMessage(Component.translatable("jaycee.skill.stomach.full"));
         }
     }

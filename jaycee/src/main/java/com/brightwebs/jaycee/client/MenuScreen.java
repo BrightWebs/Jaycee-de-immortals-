@@ -154,7 +154,7 @@ public class MenuScreen extends Screen {
 
     static void click() {
         Minecraft.getInstance().getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(
-                net.minecraft.sounds.SoundEvents.UI_BUTTON_CLICK, 1.0f, 0.35f));
+                net.minecraft.sounds.SoundEvents.UI_BUTTON_CLICK.value(), 1.0f, 0.35f));
     }
 
     @Override

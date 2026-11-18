@@ -17,6 +17,8 @@ public final class JayceeMod {
     public static final String ID = "jaycee";
 
     public JayceeMod(IEventBus bus) {
+        // Every cheat command lives under /jaycee.
+        com.brightwebs.brightcore.BrightCore.setCommandRoot(ID);
         TestAbilities.init(bus);
         IchorAPI.init(bus);
         JayceeRaces.init(bus);

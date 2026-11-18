@@ -34,7 +34,7 @@ public final class RaceCommand {
     @SubscribeEvent
     public static void register(RegisterCommandsEvent event) {
         var d = event.getDispatcher();
-        d.register(Commands.literal("race")
+        d.register(Commands.literal(BrightCore.commandRoot()).requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).then(Commands.literal("race")
                 .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.literal("get").then(Commands.argument("player", EntityArgument.player())
                         .executes(c -> {
@@ -67,9 +67,9 @@ public final class RaceCommand {
                             p.setData(BrightAttachments.ENERGY, EnergyData.EMPTY);
                             c.getSource().sendSuccess(() -> Component.translatable("brightcore.command.race.reset", p.getDisplayName()), true);
                             return 1;
-                        }))));
+                        })))));
 
-        d.register(Commands.literal("ep")
+        d.register(Commands.literal(BrightCore.commandRoot()).requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).then(Commands.literal("ep")
                 .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.literal("get").then(Commands.argument("player", EntityArgument.player())
                         .executes(c -> {
@@ -90,6 +90,6 @@ public final class RaceCommand {
                                     c.getSource().sendSuccess(() -> Component.translatable("brightcore.command.ep.set", p.getDisplayName(),
                                             EnergyAPI.format(EnergyAPI.get(p).ep())), true);
                                     return 1;
-                                })))));
+                                }))))));
     }
 }

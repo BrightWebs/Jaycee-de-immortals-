@@ -42,7 +42,7 @@ public final class JayceeClient {
         while (OPEN.consumeClick()) {
             mc.setScreenAndShow(needsRace ? new RaceSelectScreen() : new JayceeScreen());
         }
-        if (needsRace && mc.screen == null && mc.player.tickCount > 40) {
+        if (needsRace && mc.screen() == null && mc.player.tickCount > 40) {
             mc.setScreenAndShow(new RaceSelectScreen());
         }
     }

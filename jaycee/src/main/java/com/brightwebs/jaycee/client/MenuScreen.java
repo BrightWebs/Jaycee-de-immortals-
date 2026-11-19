@@ -11,10 +11,10 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 
 /**
- * The Existence System (M). One fixed frame: the artwork is 1536 x 1024 design pixels with the
+ * The Existence System (B). One fixed frame: the artwork is 1536 x 1024 design pixels with the
  * side bar just outside its right edge, scaled to sit comfortably on screen with the game still
  * visible around it. The portrait, tabs and side bar never move; only the content changes.
- * Esc steps back one page (sub-pages return to where you came from, tabs return to Status),
+ * Every page sits in the same Status frame with the tabs. B always opens on Status; Esc returns to Status,
  * and closes the menu from Status.
  */
 public class MenuScreen extends Screen {
@@ -40,7 +40,7 @@ public class MenuScreen extends Screen {
         pages.put(Id.TITLES, new TitlesPage(this));
         pages.put(Id.BONDS, new BondsPage(this));
         pages.put(Id.EDITOR, new EditorPage(this));
-        page = remembered == Id.RACE || remembered == Id.TITLES || remembered == Id.BONDS || remembered == Id.EDITOR ? Id.STATUS : remembered;
+        page = Id.STATUS; // B always opens on Status
     }
 
     LocalPlayer player() { return Minecraft.getInstance().player; }
@@ -141,7 +141,7 @@ public class MenuScreen extends Screen {
             double x = fx(event.x()), y = fy(event.y());
             int b = UI.button(event);
             Page pg = pages.get(page);
-            if (b == 0 && page != Id.BONDS && page != Id.RACE && page != Id.TITLES) {
+            if (b == 0) { // the tabs work from every page
                 for (int i = 0; i < TABS.length; i++) {
                     if (Page.in(x, y, TABS[i][0], TABS[i][1], TABS[i][2], TABS[i][3])) { open(Id.values()[i]); click(); return true; }
                 }
@@ -149,8 +149,8 @@ public class MenuScreen extends Screen {
             for (int i = 0; i < 4; i++) {
                 float sy = SIDE_Y + i * SIDE_STEP;
                 if (b == 0 && Page.in(x, y, SIDE_X, sy, SIDE_X + 118, sy + 104)) {
-                    if (i == 0) open(page == Id.BONDS ? back : Id.BONDS);
-                    else if (i == 1) open(page == Id.EDITOR ? back : Id.EDITOR);
+                    if (i == 0) open(page == Id.BONDS ? Id.STATUS : Id.BONDS);
+                    else if (i == 1) open(page == Id.EDITOR ? Id.STATUS : Id.EDITOR);
                     click();
                     return true;
                 }
@@ -209,11 +209,8 @@ public class MenuScreen extends Screen {
     /** Esc: step back toward Status; close from Status. */
     @Override
     public void onClose() {
-        switch (page) {
-            case STATUS -> super.onClose();
-            case BONDS, EDITOR -> page = back;
-            default -> page = Id.STATUS;
-        }
+        // Esc: any page goes back to Status; Status closes the menu
+        if (page == Id.STATUS) super.onClose(); else page = Id.STATUS;
     }
 
     @Override

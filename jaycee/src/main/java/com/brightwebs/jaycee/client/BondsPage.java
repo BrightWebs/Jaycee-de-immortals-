@@ -13,8 +13,17 @@ final class BondsPage extends Page {
     @Override String background() { return "bg_bonds"; }
     @Override boolean showsPlayer() { return false; }
 
+    /** The bonds layout sits inside the Existence System's content area (same frame as Status). */
+    private static final T TF = new T(96, 228, 0.911f, 24, 150);
+
     @Override
     void draw(GuiGraphicsExtractor g, double mx, double my) {
+        TF.push(g);
+        content(g);
+        TF.pop(g);
+    }
+
+    private void content(GuiGraphicsExtractor g) {
         var subs = com.brightwebs.jaycee.bonds.Bonds.subs(player());
         UI.text(g, "Total: " + subs.size(), 990, 203, 22, 0xFFFFFFFF, 1);
         if (subs.isEmpty()) {

@@ -19,7 +19,7 @@ import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 @EventBusSubscriber(modid = JayceeMod.ID, value = Dist.CLIENT)
 public final class JayceeClient {
     public static final KeyMapping.Category CATEGORY = new KeyMapping.Category(Identifier.fromNamespaceAndPath(JayceeMod.ID, "main"));
-    public static final KeyMapping MENU = new KeyMapping("key.jaycee.menu", InputConstants.KEY_B, CATEGORY);
+    public static final KeyMapping MENU = new KeyMapping("key.jaycee.open_menu", InputConstants.KEY_B, CATEGORY);
     /** Name the creature you're looking at (Shift: toggle whether others may name you). */
     public static final KeyMapping NAME = new KeyMapping("key.jaycee.name", InputConstants.KEY_N, CATEGORY);
 

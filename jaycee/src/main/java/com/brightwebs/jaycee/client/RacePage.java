@@ -239,7 +239,8 @@ final class RacePage extends Page {
                 case "item_consume", "item_carry" -> (int) r.amount() + " " + net.minecraft.core.registries.BuiltInRegistries.ITEM
                         .getValue(Identifier.parse(r.arg())).getDefaultInstance().getHoverName().getString() + (r.type().equals("item_carry") ? " (carried)" : "");
                 case "awaken" -> "True Demon Lord";
-                case "named" -> "Named (title)";
+                case "named" -> "Given a name";
+                case "cure" -> "Cured: Weakness, Resistance, Fire Res., Regen II, Absorption IV";
                 case "physical" -> "Physical body";
                 case "colossus" -> "Warden defeated";
                 case "skill" -> "Skill " + r.arg();

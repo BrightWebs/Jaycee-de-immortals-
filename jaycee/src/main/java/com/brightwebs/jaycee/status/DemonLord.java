@@ -141,11 +141,11 @@ public final class DemonLord {
                 p.sendSystemMessage(Component.translatable("brightcore.message.acquired", nul.name()));
             }
         }
+        // Tensura: awakening jumps to the race's awakening form (Human -> Human Saint...), if it has one
         RaceAPI.race(p).ifPresent(r -> {
-            if (!r.evolutions().isEmpty()) {
-                Race next = RaceRegistry.get(r.evolutions().get(0).target());
-                if (next != null) RaceAPI.set(p, next);
-            }
+            String to = com.brightwebs.jaycee.race.TensuraRequirements.AWAKENING.get(r.id().getPath());
+            Race next = to == null ? null : RaceRegistry.get(com.brightwebs.jaycee.race.JayceeRaces.id(to));
+            if (next != null) RaceAPI.set(p, next);
         });
         setFlag(p, "true_demon_lord", 1);
         p.removeEffect(MobEffects.BLINDNESS);

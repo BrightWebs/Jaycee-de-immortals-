@@ -171,12 +171,13 @@ public final class Naming {
         EnergyAPI.set(owner, od);
     }
 
-    /** Evolve and Endow: a named player takes their race's next form. */
+    /** Evolve and Endow: a named player takes their race's Harvest Festival form, as in Tensura. */
     private static void evolve(LivingEntity sub) {
         if (!(sub instanceof ServerPlayer p)) return;
+        // Tensura's getHarvestFestivalEvolution (Human -> Enlightened Human, Ogre -> Kijin...)
         RaceAPI.race(p).ifPresent(r -> {
-            if (r.evolutions().isEmpty()) return;
-            Race next = RaceRegistry.get(r.evolutions().get(0).target());
+            String to = com.brightwebs.jaycee.race.TensuraRequirements.HARVEST.get(r.id().getPath());
+            Race next = to == null ? null : RaceRegistry.get(com.brightwebs.jaycee.race.JayceeRaces.id(to));
             if (next != null) RaceAPI.set(p, next);
         });
     }

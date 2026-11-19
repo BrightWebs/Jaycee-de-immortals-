@@ -61,13 +61,13 @@ public final class BodyArmor {
             for (EquipmentSlot slot : SLOTS) if (isScale(p.getItemBySlot(slot))) { p.setItemSlot(slot, ItemStack.EMPTY); any = true; }
             if (!any) return false;
             level.playSound(null, p.blockPosition(), SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.PLAYERS, 1, 0.6f);
-            level.sendParticles(ParticleTypes.ITEM_SLIME, p.getX(), p.getY() + 1, p.getZ(), 20, 0.3, 0.6, 0.3, 0.05);
+            com.brightwebs.brightcore.fx.Fx.burst(level, com.brightwebs.brightcore.fx.BrightParticles.SHARD, p.position().add(0, 1, 0), 16, 0.25);
             return true;
         }
         if (!Tk.spend(p, a, COST)) return false;
         for (int i = 0; i < SLOTS.length; i++) if (p.getItemBySlot(SLOTS[i]).isEmpty()) p.setItemSlot(SLOTS[i], scale(PIECES[i]));
         level.playSound(null, p.blockPosition(), SoundEvents.ARMOR_EQUIP_NETHERITE.value(), SoundSource.PLAYERS, 1, 0.8f);
-        level.sendParticles(ParticleTypes.ENCHANTED_HIT, p.getX(), p.getY() + 1, p.getZ(), 30, 0.4, 0.7, 0.4, 0.1);
+        com.brightwebs.brightcore.fx.Fx.spiral(level, com.brightwebs.brightcore.fx.BrightParticles.SHARD, p.position(), 0.7, 2, 2, 24, 0); com.brightwebs.brightcore.fx.Fx.burst(level, com.brightwebs.brightcore.fx.BrightParticles.SPARK, p.position().add(0, 1, 0), 8, 0.2);
         return true;
     }
 

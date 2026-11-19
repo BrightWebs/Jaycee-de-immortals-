@@ -33,6 +33,12 @@ public final class EnergyEvents {
                     ? RaceAPI.race(p).map(Race::alignment).orElse(Alignment.NEUTRAL)
                     : Alignment.NEUTRAL;
             double gained = EnergyAPI.absorbKill(killer, victim, alignment);
+            if (gained >= 1 && victim.level() instanceof net.minecraft.server.level.ServerLevel sl) {
+                // Tensura's souls: wisps leave the body and drift to the one who took its power
+                var from = victim.position().add(0, victim.getBbHeight() / 2, 0);
+                com.brightwebs.brightcore.fx.Fx.burst(sl, com.brightwebs.brightcore.fx.BrightParticles.SOUL, from, 6, 0.08);
+                com.brightwebs.brightcore.fx.Fx.beam(sl, com.brightwebs.brightcore.fx.BrightParticles.SOUL, from, killer.position().add(0, killer.getBbHeight() * 0.6, 0), 0.7);
+            }
             if (killer instanceof ServerPlayer player && gained >= 1) {
                 player.sendOverlayMessage(Component.translatable("brightcore.energy.gained", EnergyAPI.format(gained)));
             }

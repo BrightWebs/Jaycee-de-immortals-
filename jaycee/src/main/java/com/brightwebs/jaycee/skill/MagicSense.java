@@ -86,7 +86,7 @@ final class MagicSense {
 
     static void toggled(ServerPlayer p, boolean on) {
         ServerLevel level = (ServerLevel) p.level();
-        level.sendParticles(ParticleTypes.WITCH, p.getX(), p.getY() + 1.6, p.getZ(), 20, 0.4, 0.3, 0.4, 0.1);
+        com.brightwebs.brightcore.fx.Fx.ring(level, com.brightwebs.brightcore.fx.BrightParticles.RUNE, p.position().add(0, 0.1, 0), 1.0, 12, on ? 0.12 : -0.04); com.brightwebs.brightcore.fx.Fx.aura(level, com.brightwebs.brightcore.fx.BrightParticles.AURA, p, 10);
         if (!on) {
             Set<Integer> shown = SHOWN.remove(p.getUUID());
             if (shown != null) for (int id : shown) restore(p, level.getEntity(id));

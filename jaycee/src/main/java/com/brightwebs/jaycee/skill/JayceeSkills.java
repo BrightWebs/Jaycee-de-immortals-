@@ -143,7 +143,7 @@ public final class JayceeSkills {
                     }
                     if (hurt && p.tickCount % 20 == 0 && REGEN_UNTIL.getOrDefault(p.getUUID(), 0L) > p.tickCount) {
                         p.heal(Tk.mastered(p, this) ? 4 : 2);
-                        l.sendParticles(ParticleTypes.HAPPY_VILLAGER, p.getX(), p.getY() + 1, p.getZ(), 3, 0.35, 0.5, 0.35, 0);
+                        com.brightwebs.brightcore.fx.Fx.aura(l, com.brightwebs.brightcore.fx.BrightParticles.HEAL, p, 4);
                     }
                 }
                 @Override public void onLearned(ServerPlayer p) { AbilityAPI.setToggled(p, this, true); }

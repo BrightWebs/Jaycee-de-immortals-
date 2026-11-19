@@ -125,9 +125,9 @@ public final class Predation {
         for (int i = 0; i < 3; i++) {
             double d = 0.6 + p.getRandom().nextDouble() * m.range;
             Vec3 at = eye.add(look.scale(d));
-            level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y - 0.2, at.z, 2, 0.2 * d, 0.16 * d, 0.2 * d, 0.005);
+            com.brightwebs.brightcore.fx.Fx.move(level, com.brightwebs.brightcore.fx.BrightParticles.MIST, at.add(0, -0.2, 0), look.scale(0.05));
         }
-        if (m.age % 6 == 0) level.sendParticles(ParticleTypes.SCULK_SOUL, eye.x + look.x * m.range * 0.7, eye.y + look.y * 2 - 0.2, eye.z + look.z * m.range * 0.7, 2, 0.5, 0.4, 0.5, 0.01);
+        if (m.age % 6 == 0) com.brightwebs.brightcore.fx.Fx.cloud(level, com.brightwebs.brightcore.fx.BrightParticles.VOID, eye.add(look.scale(m.range * 0.7)), 2, 0.5);
         if (!active) return;
         AABB box = p.getBoundingBox().inflate(m.range + 1);
         if (m.age % 10 == 0) {
@@ -141,7 +141,7 @@ public final class Predation {
         if (m.eatsProjectiles) {
             for (Projectile pr : level.getEntitiesOfClass(Projectile.class, box, e -> e.getOwner() != p)) {
                 if (!inMist(eye, look, m.range, pr.position(), 0.5f)) continue;
-                level.sendParticles(ParticleTypes.SQUID_INK, pr.getX(), pr.getY(), pr.getZ(), 6, 0.1, 0.1, 0.1, 0.01);
+                com.brightwebs.brightcore.fx.Fx.burst(level, com.brightwebs.brightcore.fx.BrightParticles.MIST, pr.position(), 6, 0.05);
                 pr.discard();
             }
         }
@@ -172,7 +172,7 @@ public final class Predation {
         BEING_DEVOURED.add(t.getUUID());
         t.hurtServer(level, p.damageSources().playerAttack(p), DAMAGE);
         BEING_DEVOURED.remove(t.getUUID());
-        level.sendParticles(ParticleTypes.SQUID_INK, t.getX(), t.getY() + t.getBbHeight() / 2, t.getZ(), 12, 0.3, 0.4, 0.3, 0.02);
+        com.brightwebs.brightcore.fx.Fx.burst(level, com.brightwebs.brightcore.fx.BrightParticles.MIST, t.position().add(0, t.getBbHeight() / 2, 0), 10, 0.08); com.brightwebs.brightcore.fx.Fx.beam(level, com.brightwebs.brightcore.fx.BrightParticles.SOUL, t.position().add(0, t.getBbHeight() / 2, 0), p.position().add(0, 1, 0), 0.6);
     }
 
     private static void devourRandomSkill(ServerPlayer p, Player target) {
@@ -213,7 +213,7 @@ public final class Predation {
             double ep = EnergyAPI.ep(t) * EP_STEAL;
             if (ep > 0) Tk.gainMana(p, ep, true);
             ServerLevel level = (ServerLevel) p.level();
-            level.sendParticles(ParticleTypes.SQUID_INK, t.getX(), t.getY() + t.getBbHeight() / 2, t.getZ(), 40, 0.5, 0.5, 0.5, 0.05);
+            com.brightwebs.brightcore.fx.Fx.sphere(level, com.brightwebs.brightcore.fx.BrightParticles.MIST, t.position().add(0, t.getBbHeight() / 2, 0), t.getBbWidth() + 0.3, 30); com.brightwebs.brightcore.fx.Fx.burst(level, com.brightwebs.brightcore.fx.BrightParticles.SOUL, t.position().add(0, t.getBbHeight() / 2, 0), 12, 0.15);
             level.playSound(null, t.blockPosition(), SoundEvents.GENERIC_EAT.value(), SoundSource.PLAYERS, 1, 0.5f);
             p.sendOverlayMessage(Component.translatable("jaycee.skill.predation.done", t.getDisplayName()));
         });
@@ -251,7 +251,7 @@ public final class Predation {
             level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
             if (!item.isEmpty()) Stomach.store(p, item);
         } else return;
-        level.sendParticles(ParticleTypes.SQUID_INK, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 10, 0.3, 0.3, 0.3, 0.01);
+        com.brightwebs.brightcore.fx.Fx.burst(level, com.brightwebs.brightcore.fx.BrightParticles.MIST, net.minecraft.world.phys.Vec3.atCenterOf(pos), 8, 0.06);
         level.playSound(null, pos, SoundEvents.GENERIC_EAT.value(), SoundSource.PLAYERS, 0.6f, 0.7f);
     }
 
@@ -273,8 +273,8 @@ public final class Predation {
                 removed++;
             }
             if (removed == 0) return false;
-            level.sendParticles(ParticleTypes.SQUID_INK, who.getX(), who.getY() + who.getBbHeight() * 0.66, who.getZ(), 30, who.getBbWidth(), 0.3, who.getBbWidth(), 0.02);
-            level.sendParticles(ParticleTypes.SMOKE, who.getX(), who.getY() + who.getBbHeight() * 0.33, who.getZ(), 30, who.getBbWidth() * 1.2, 0.2, who.getBbWidth() * 1.2, 0.02);
+            com.brightwebs.brightcore.fx.Fx.ring(level, com.brightwebs.brightcore.fx.BrightParticles.MIST, who.position().add(0, who.getBbHeight() * 0.66, 0), who.getBbWidth() * 1.2, 20, -0.04);
+            com.brightwebs.brightcore.fx.Fx.ring(level, com.brightwebs.brightcore.fx.BrightParticles.DARK_SPARK, who.position().add(0, who.getBbHeight() * 0.33, 0), who.getBbWidth() * 1.5, 12, -0.05);
             AbilityAPI.setCooldown(p, a, (Tk.mastered(p, a) ? ISOLATION_CD_MASTERED : ISOLATION_CD) * 20);
             level.playSound(null, p.blockPosition(), SoundEvents.BREWING_STAND_BREW, SoundSource.PLAYERS, 1, 0.6f);
             return true;
@@ -289,7 +289,7 @@ public final class Predation {
         p.heal((float) (food.nutrition() * DISSOLVE_HEALTH / 2));
         AbilityAPI.addMasteryPoint(p, a);
         held.shrink(1);
-        level.sendParticles(ParticleTypes.SQUID_INK, p.getX(), p.getY() + 1, p.getZ(), 15, 0.3, 0.3, 0.3, 0.02);
+        com.brightwebs.brightcore.fx.Fx.burst(level, com.brightwebs.brightcore.fx.BrightParticles.MIST, p.position().add(0, 1.2, 0).add(p.getLookAngle().scale(0.6)), 12, 0.05);
         level.playSound(null, p.blockPosition(), SoundEvents.GENERIC_EAT.value(), SoundSource.PLAYERS, 0.8f, 0.6f);
         return true;
     }

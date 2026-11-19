@@ -43,7 +43,7 @@ public final class SkillState {
         for (LivingEntity e : SkillHelper.around(p, radius)) give(e, MobEffects.SLOWNESS, seconds, slow);
         give(p, MobEffects.SPEED, seconds, haste);
         give(p, MobEffects.HASTE, seconds, haste);
-        ((ServerLevel) p.level()).sendParticles(ParticleTypes.ENCHANT, p.getX(), p.getY() + 1, p.getZ(), 60, 1.5, 1, 1.5, 0.5);
+        com.brightwebs.brightcore.fx.Fx.spiral((ServerLevel) p.level(), com.brightwebs.brightcore.fx.BrightParticles.RUNE, p.position(), 1.2, 2.4, 2, 36, p.tickCount * 0.2); com.brightwebs.brightcore.fx.Fx.shockwave((ServerLevel) p.level(), p.position().add(0, 1, 0), 0.6);
         p.level().playSound(null, p.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.6f, 1.8f);
         p.sendOverlayMessage(Component.translatable("jaycee.skill.thought_acceleration.on"));
     }
@@ -84,7 +84,7 @@ public final class SkillState {
             if (!(event.getEntity() instanceof ServerPlayer p) || event.getSource().getEntity() == null) return;
             if (FORESIGHT.getOrDefault(p.getUUID(), 0L) <= now(p) || p.getRandom().nextFloat() >= 0.5f) return;
             event.setCanceled(true);
-            ((ServerLevel) p.level()).sendParticles(ParticleTypes.END_ROD, p.getX(), p.getY() + 1, p.getZ(), 12, 0.4, 0.6, 0.4, 0.02);
+            com.brightwebs.brightcore.fx.Fx.burst((ServerLevel) p.level(), com.brightwebs.brightcore.fx.BrightParticles.HOLY, p.position().add(0, 1, 0), 10, 0.15); com.brightwebs.brightcore.fx.Fx.move((ServerLevel) p.level(), com.brightwebs.brightcore.fx.BrightParticles.SHOCKWAVE, p.position().add(0, 1, 0), net.minecraft.world.phys.Vec3.ZERO);
             p.sendOverlayMessage(Component.translatable("jaycee.skill.dodged"));
         });
     }

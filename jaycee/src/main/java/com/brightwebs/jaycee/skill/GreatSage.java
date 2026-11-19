@@ -90,6 +90,7 @@ public final class GreatSage {
 
     /** Switched off in the menu: the passives stop (attributes back to normal, no auto-refining, scan off). */
     static void switchedOff(ServerPlayer p) {
+        send(p, com.brightwebs.jaycee.network.JayceeNetwork.AppraisalInfo.NONE);
         AttributeInstance s = p.getAttribute(Attributes.MOVEMENT_SPEED), at = p.getAttribute(Attributes.ATTACK_SPEED);
         if (s != null) s.removeModifier(MOD);
         if (at != null) at.removeModifier(MOD);
@@ -122,6 +123,7 @@ public final class GreatSage {
         } else {
             boolean on = StatusData.counter(p, "sage_scan") <= 0;
             StatusData.addCounter(p, "sage_scan", (on ? 1 : 0) - StatusData.counter(p, "sage_scan"));
+            if (!on) send(p, com.brightwebs.jaycee.network.JayceeNetwork.AppraisalInfo.NONE);
             p.sendOverlayMessage(Component.translatable(on ? "jaycee.skill.analytical.on" : "jaycee.skill.analytical.off").withStyle(ChatFormatting.DARK_AQUA));
         }
         p.level().playSound(null, p.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1, 1.4f);
@@ -135,8 +137,9 @@ public final class GreatSage {
         int mode = (int) StatusData.counter(p, "sage_scan_mode");
         if (mode != 2) {
             LivingEntity t = SkillHelper.targetQuiet(p, radius);
-            if (t != null) { p.sendOverlayMessage(describe(p, t, level)); return; }
+            if (t != null) { send(p, reading(p, t, level)); return; }
         }
+        send(p, com.brightwebs.jaycee.network.JayceeNetwork.AppraisalInfo.IDLE);
         if (mode != 1) {
             HitResult hit = p.pick(radius, 0, false);
             if (hit instanceof BlockHitResult bh && hit.getType() == HitResult.Type.BLOCK) {
@@ -146,6 +149,35 @@ public final class GreatSage {
                         String.format("%.1f", st.getDestroySpeed(p.level(), pos))).withStyle(ChatFormatting.AQUA));
             }
         }
+    }
+
+    private static final java.util.Map<java.util.UUID, Integer> SHOWING = new java.util.HashMap<>();
+
+    /**
+     * Sends the panel's reading. A creature's reading is refreshed every half second; IDLE (on, nothing
+     * targeted) and NONE (off) are sent only when the state changes.
+     */
+    static void send(ServerPlayer p, com.brightwebs.jaycee.network.JayceeNetwork.AppraisalInfo info) {
+        Integer before = SHOWING.put(p.getUUID(), info.entity());
+        if (info.entity() < 0 && before != null && before == info.entity()) return;
+        if (info.entity() == -1 && before == null) return;
+        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(p, info);
+    }
+
+    private static com.brightwebs.jaycee.network.JayceeNetwork.AppraisalInfo reading(ServerPlayer p, LivingEntity t, int level) {
+        var e = EnergyAPI.get(t);
+        String race = t instanceof Player other ? RaceAPI.race(other).map(r -> r.name().getString()).orElse("")
+                : t.getType().getDescription().getString();
+        List<String> skills = new ArrayList<>();
+        if (t instanceof Player other) {
+            for (Ability s : AbilityAPI.owned(other)) if (level >= ANALYSIS_LEVEL_MASTERED || s.type() != SkillType.UNIQUE && s.type() != SkillType.ULTIMATE) skills.add(s.id().toString());
+        } else if (t.fireImmune()) {
+            Ability res = com.brightwebs.brightcore.api.skill.BrightSkills.resistance(com.brightwebs.brightcore.api.skill.DamageKind.FLAME);
+            if (res != null) skills.add(res.id().toString());
+        }
+        return new com.brightwebs.jaycee.network.JayceeNetwork.AppraisalInfo(t.getId(), t.getDisplayName().getString(), race,
+                e.ep(), t.getHealth(), t.getMaxHealth(), (float) e.spirit(), (float) e.maxSpirit(), (float) e.mana(), (float) e.maxMana(),
+                (float) e.aura(), (float) e.maxAura(), t.getArmorValue(), skills);
     }
 
     private static boolean hasRaphael(Player p) { Ability r = raphael(); return r != null && AbilityAPI.has(p, r); }

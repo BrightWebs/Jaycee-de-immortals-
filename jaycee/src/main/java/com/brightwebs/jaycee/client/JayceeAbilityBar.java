@@ -35,6 +35,7 @@ final class JayceeAbilityBar {
     private static float lerp(float a, float b, float t) { return a + (b - a) * t; }
 
     static void render(GuiGraphicsExtractor g, int sw, int sh, Player player, AbilityData data) {
+        com.brightwebs.brightcore.api.util.Safe.run("AppraisalPanel.render", () -> AppraisalPanel.render(g, sw, sh));
         com.brightwebs.brightcore.api.util.Safe.run("JayceeAbilityBar.render", () -> {
             long now = System.nanoTime();
             float dt = lastNanos == 0 ? 0 : Math.min(0.1f, (now - lastNanos) / 1e9f);

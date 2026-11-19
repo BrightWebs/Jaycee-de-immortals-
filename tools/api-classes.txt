@@ -1,2 +1,3 @@
-net.minecraft.client.Screenshot
-net.minecraft.client.Minecraft
+net.minecraft.client.input.MouseButtonEvent
+net.minecraft.client.input.MouseButtonInfo
+C net.minecraft.client.input.MouseButtonInfo

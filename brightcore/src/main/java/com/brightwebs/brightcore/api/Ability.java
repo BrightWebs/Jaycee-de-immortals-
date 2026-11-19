@@ -46,6 +46,18 @@ public class Ability {
         return false;
     }
 
+    /**
+     * Held skills only: runs every tick while the key stays down (heldTicks counts from 0).
+     * Return false to stop holding.
+     */
+    public boolean onHeld(ServerPlayer player, ServerLevel level, int mode, int heldTicks) { return true; }
+
+    /** Held skills only: the key was let go after heldTicks ticks. */
+    public void onRelease(ServerPlayer player, ServerLevel level, int mode, int heldTicks) {}
+
+    /** Return true when this press skips the cooldown check (Tensura: Shift + Predation changes its block mode). */
+    public boolean ignoresCooldown(ServerPlayer player, int mode) { return false; }
+
     /** Runs every tick: always for passives, only while toggled on for toggles. */
     public void tick(ServerPlayer player, ServerLevel level) {}
 
@@ -65,6 +77,8 @@ public class Ability {
     public AbilityCategory category() { return properties.category; }
     public boolean isPassive() { return properties.passive; }
     public boolean isToggle() { return properties.toggle; }
+    /** Held skills work while the key is down (breaths, chanted spells). */
+    public boolean isHeld() { return properties.held; }
     public List<Mode> modes() { return List.copyOf(properties.modes); }
     public Mode mode(int index) { return properties.modes.get(Math.floorMod(index, properties.modes.size())); }
     public int maxMastery() { return properties.type.maxMastery(); }
@@ -111,7 +125,7 @@ public class Ability {
         private int manaCost = 0, auraCost = 0, cooldownTicks = 0;
         private SkillType type = SkillType.COMMON;
         private AbilityCategory category = AbilityCategory.OFFENSE;
-        private boolean passive = false, toggle = false;
+        private boolean passive = false, toggle = false, held = false;
         private final List<Mode> modes = new ArrayList<>();
         private String magicClass = "", school = "";
         private int castTicks = 0, range = 0;
@@ -129,6 +143,8 @@ public class Ability {
             this.castTicks = Math.round(castSeconds * 20); this.range = range; return this;
         }
         public Properties toggle() { this.toggle = true; return this; }
+        /** The skill keeps working while its key is held, and hears when it is released. */
+        public Properties held() { this.held = true; return this; }
         /** Add a mode. Skills with no modes get one from manaCost/auraCost/cooldown. */
         public Properties mode(String key, int mana, int aura, float cooldownSeconds) {
             modes.add(Mode.of(key, mana, aura, cooldownSeconds));

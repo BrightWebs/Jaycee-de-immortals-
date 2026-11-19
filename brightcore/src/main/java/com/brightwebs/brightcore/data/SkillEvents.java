@@ -37,7 +37,7 @@ public final class SkillEvents {
                 } else {
                     float reduced = best.reduce(event.getAmount(), player.getHealth(), AbilityAPI.masteryFraction(player, best));
                     event.setAmount(reduced);
-                    AbilityAPI.addMastery(player, best, 1);
+                    AbilityAPI.addMasteryPoint(player, best);
                     if (best == res && AbilityAPI.isMastered(player, res)
                             && EnergyAPI.get(player).ep() >= BrightSkills.EP_FOR_NULLIFICATION && AbilityAPI.learn(player, nul)) {
                         player.sendSystemMessage(Component.translatable("brightcore.message.acquired", nul.name()));
@@ -51,16 +51,27 @@ public final class SkillEvents {
         });
     }
 
+    /**
+     * Tensura's learning: a hit above 15 damage is a learning point; smaller hits add up, and every
+     * 150 damage taken that way is another point. 500 points and the resistance is learned.
+     */
     private static void learnByEndurance(ServerPlayer player, DamageKind kind, ResistanceSkill res, float amount) {
         AbilityData data = AbilityAPI.get(player);
-        double total = data.damageTaken().getOrDefault(kind.key(), 0.0) + amount;
-        if (total >= BrightSkills.DAMAGE_TO_LEARN) {
-            player.setData(BrightAttachments.ABILITIES, data.withDamageTaken(kind.key(), 0));
+        String pk = kind.key() + "_points";
+        double points = data.damageTaken().getOrDefault(pk, 0.0), pool = data.damageTaken().getOrDefault(kind.key(), 0.0);
+        if (amount > BrightSkills.HIT_FOR_POINT) {
+            points += 1;
+        } else {
+            pool += amount;
+            if (pool >= BrightSkills.HIT_FOR_POINT * BrightSkills.POOL_MULTIPLIER) { points += 1; pool = 0; }
+        }
+        if (points >= BrightSkills.POINTS_TO_LEARN) {
+            player.setData(BrightAttachments.ABILITIES, data.withDamageTaken(pk, 0).withDamageTaken(kind.key(), 0));
             if (AbilityAPI.learn(player, res)) {
                 player.sendSystemMessage(Component.translatable("brightcore.message.acquired", res.name()));
             }
         } else {
-            player.setData(BrightAttachments.ABILITIES, data.withDamageTaken(kind.key(), total));
+            player.setData(BrightAttachments.ABILITIES, data.withDamageTaken(pk, points).withDamageTaken(kind.key(), pool));
         }
     }
 }

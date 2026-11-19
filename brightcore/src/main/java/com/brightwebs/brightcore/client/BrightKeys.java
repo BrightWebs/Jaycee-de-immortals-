@@ -37,6 +37,8 @@ public final class BrightKeys {
         }
     }
 
+    private static final boolean[] DOWN = new boolean[AbilityData.SLOTS_PER_PAGE];
+
     private BrightKeys() {}
 
     @SubscribeEvent
@@ -53,6 +55,9 @@ public final class BrightKeys {
             Minecraft mc = Minecraft.getInstance();
             if (mc.player == null) return;
             for (int i = 0; i < ABILITY.length; i++) {
+                boolean down = ABILITY[i].isDown();
+                if (DOWN[i] && !down) ClientPacketDistributor.sendToServer(new BrightNetwork.ReleaseSlot(i));
+                DOWN[i] = down;
                 while (ABILITY[i].consumeClick()) {
                     ClientPacketDistributor.sendToServer(MODE_SWITCH.isDown()
                             ? new BrightNetwork.CycleMode(i)

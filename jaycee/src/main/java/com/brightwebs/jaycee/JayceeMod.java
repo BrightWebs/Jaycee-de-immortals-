@@ -24,6 +24,7 @@ public final class JayceeMod {
         JayceeRaces.init(bus);
         com.brightwebs.jaycee.status.StatusData.init(bus);
         com.brightwebs.jaycee.skill.Stomach.init(bus);
+        com.brightwebs.jaycee.skill.Refining.init(bus);
         com.brightwebs.jaycee.training.Training.init(bus);
         com.brightwebs.jaycee.race.CreatureEnergy.init(bus);
     }

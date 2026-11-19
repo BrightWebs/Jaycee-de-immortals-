@@ -37,10 +37,13 @@ public final class ResistanceSkill extends Ability {
      * @param mastery       0 to 1
      * @return the damage that gets through
      */
+    /**
+     * Tensura's rule. Nullification blocks the damage completely. Resistance halves it, unless a
+     * single hit is more than half your current health, which goes through in full.
+     */
     public float reduce(float amount, float currentHealth, float mastery) {
-        int band = Math.min(4, (int) (mastery * 5));
-        float threshold = (nullification ? NUL_THRESHOLD : RES_THRESHOLD)[band] * currentHealth;
-        if (amount < threshold) return 0;
-        return amount * (nullification ? NUL_MULT : RES_MULT)[band];
+        if (nullification) return 0;
+        if (amount > currentHealth * 0.5f) return amount;
+        return amount * 0.5f;
     }
 }

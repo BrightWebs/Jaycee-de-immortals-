@@ -70,6 +70,14 @@ public final class BrightNetwork {
     }
 
     /** "I choose this race" from the first-join menu. "random" picks one of the starting races. */
+    /** A slot key was let go (ends held skills). */
+    public record ReleaseSlot(int slot) implements CustomPacketPayload {
+        public static final Type<ReleaseSlot> TYPE = new Type<>(BrightCore.id("release_slot"));
+        public static final StreamCodec<ByteBuf, ReleaseSlot> CODEC =
+                StreamCodec.composite(ByteBufCodecs.VAR_INT, ReleaseSlot::slot, ReleaseSlot::new);
+        @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
+    }
+
     public record ChooseRace(String race) implements CustomPacketPayload {
         public static final Type<ChooseRace> TYPE = new Type<>(BrightCore.id("choose_race"));
         public static final StreamCodec<ByteBuf, ChooseRace> CODEC =
@@ -88,8 +96,14 @@ public final class BrightNetwork {
     @SubscribeEvent
     public static void register(RegisterPayloadHandlersEvent event) {
         // Bump this whenever a packet's format changes.
-        PayloadRegistrar registrar = event.registrar("4");
+        PayloadRegistrar registrar = event.registrar("5");
         registrar.playToServer(ActivateSlot.TYPE, ActivateSlot.CODEC, BrightNetwork::onActivate);
+        registrar.playToServer(ReleaseSlot.TYPE, ReleaseSlot.CODEC, (payload, context) -> com.brightwebs.brightcore.api.util.Safe.run("BrightNetwork.release", () -> {
+            if (context.player() instanceof ServerPlayer player
+                    && payload.slot() >= 0 && payload.slot() < AbilityData.SLOTS_PER_PAGE) {
+                AbilityAPI.releaseSlot(player, payload.slot());
+            }
+        }));
         registrar.playToServer(SetPage.TYPE, SetPage.CODEC, BrightNetwork::onSetPage);
         registrar.playToServer(AssignSlot.TYPE, AssignSlot.CODEC, BrightNetwork::onAssign);
         registrar.playToServer(CycleMode.TYPE, CycleMode.CODEC, (payload, context) -> {

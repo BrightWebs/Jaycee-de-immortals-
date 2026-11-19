@@ -45,7 +45,7 @@ final class JayceeAbilityBar {
             if (Math.abs(target - open) < 0.01f) open = target;
             float t = open * open * (3 - 2 * open); // smoothstep
 
-            float k = sw / DESIGN_W;
+            float k = sw / DESIGN_W * 0.72f; // smaller skill bar
             float top = (sh / k) * TOP_FRACTION;
             EnergyData energy = EnergyAPI.get(player);
 

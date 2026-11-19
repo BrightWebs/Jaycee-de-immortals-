@@ -31,7 +31,7 @@ public class RaceSelectScreen extends Screen {
 
     @Override
     protected void init() {
-        k = Math.min(width * 0.96f / W, height * 0.92f / H);
+        k = Math.min(width * 0.76f / W, height * 0.73f / H);
         left = Math.round((width - W * k) / 2);
         top = Math.round((height - H * k) / 2);
     }

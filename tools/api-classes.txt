@@ -1,2 +1,35 @@
-net.minecraft.client.Screenshot
-net.minecraft.client.Minecraft
+G renderer/entity/(layers/RenderLayer|player/|state/(Avatar|Player|LivingEntity|HumanoidRender))
+G client/model/(player/|HumanoidModel|geom/(ModelPart|PartPose|ModelLayer)|geom/builders/(CubeListBuilder|MeshDefinition|LayerDefinition|PartDefinition|CubeDeformation))
+G client/renderer/(SubmitNodeCollector|rendertype/RenderTypes|RenderType\.)
+G neoforge/client/(event/EntityRenderersEvent|renderstate/)
+G neoforge/event/entity/living/LivingChangeTarget
+G world/entity/ai/goal/(Goal|GoalSelector|FollowOwner)\.
+G client/gui/components/EditBox
+net.minecraft.client.renderer.entity.layers.RenderLayer
+net.minecraft.client.renderer.entity.player.AvatarRenderer
+net.minecraft.client.renderer.entity.state.AvatarRenderState
+net.minecraft.client.renderer.entity.state.HumanoidRenderState
+net.minecraft.client.renderer.entity.state.LivingEntityRenderState
+net.minecraft.client.model.player.PlayerModel
+net.minecraft.client.model.HumanoidModel
+net.minecraft.client.model.geom.ModelPart
+net.minecraft.client.model.geom.PartPose
+net.minecraft.client.model.geom.ModelLayerLocation
+net.minecraft.client.model.geom.builders.CubeListBuilder
+net.minecraft.client.model.geom.builders.MeshDefinition
+net.minecraft.client.model.geom.builders.PartDefinition
+net.minecraft.client.model.geom.builders.LayerDefinition
+net.minecraft.client.model.geom.builders.CubeDeformation
+net.minecraft.client.renderer.SubmitNodeCollector
+net.minecraft.client.renderer.rendertype.RenderTypes
+net.neoforged.neoforge.client.event.EntityRenderersEvent$AddLayers
+net.neoforged.neoforge.client.event.EntityRenderersEvent$RegisterLayerDefinitions
+net.neoforged.neoforge.client.renderstate.RegisterRenderStateModifiersEvent
+net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent
+net.minecraft.world.entity.Mob
+net.minecraft.world.entity.ai.goal.Goal
+net.minecraft.world.entity.ai.goal.GoalSelector
+net.minecraft.world.entity.ai.navigation.PathNavigation
+net.minecraft.client.gui.components.EditBox
+net.minecraft.client.gui.screens.inventory.InventoryScreen
+net.minecraft.util.context.ContextKey

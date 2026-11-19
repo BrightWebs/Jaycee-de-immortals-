@@ -30,6 +30,7 @@ jobs:
             [ -z "$c" ] && continue
             echo "##### $c"
             case "$c" in
+              G\ *) unzip -l "${MC}" | grep -E "${c#G }" | sed 's/^/API| /'; unzip -l "${NEO}" | grep -E "${c#G }" | sed 's/^/API| /' ;;
               C\ *) javap -cp "$JAR" -c -p "${c#C }" 2>&1 | sed 's/^/API| /' ;;
               *) javap -cp "$JAR" -protected "$c" 2>&1 | sed 's/^/API| /' ;;
             esac

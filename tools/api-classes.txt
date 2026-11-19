@@ -1,2 +1,11 @@
-net.minecraft.client.Screenshot
-net.minecraft.client.Minecraft
+net.minecraft.client.particle.SingleQuadParticle
+net.minecraft.client.particle.TextureSheetParticle
+net.minecraft.client.particle.Particle
+net.minecraft.client.particle.SpriteSet
+net.minecraft.client.particle.ParticleProvider
+net.minecraft.core.particles.SimpleParticleType
+net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent
+net.minecraft.client.particle.ParticleRenderType
+net.minecraft.client.particle.SingleQuadParticle$Layer
+net.minecraft.client.particle.FlameParticle
+C net.minecraft.client.particle.FlameParticle$Provider

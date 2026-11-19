@@ -41,7 +41,10 @@ public final class Titles {
     }
 
     static {
-        add("demon_lord_seed", "greater", 1, p -> EnergyAPI.get(p).ep() >= 1_000_000,
+        add("true_demon_lord", "greater", 1, p -> DemonLord.isTrue(p),
+                new Effect("attack", "+12", Attributes.ATTACK_DAMAGE, 12, AttributeModifier.Operation.ADD_VALUE),
+                new Effect("max_health", "+40", Attributes.MAX_HEALTH, 40, AttributeModifier.Operation.ADD_VALUE));
+        add("demon_lord_seed", "greater", 1, p -> DemonLord.isSeed(p),
                 new Effect("attack", "+4", Attributes.ATTACK_DAMAGE, 4, AttributeModifier.Operation.ADD_VALUE),
                 new Effect("max_health", "+10", Attributes.MAX_HEALTH, 10, AttributeModifier.Operation.ADD_VALUE));
         add("evolved_one", "unique", 0, p -> StatusData.counter(p, "evolutions") >= 1,

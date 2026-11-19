@@ -64,7 +64,19 @@ public final class Race {
      * @param epNeeded  EP (max Aura + max Mana) needed
      * @param xpLevels  experience levels needed (spent on evolving)
      */
-    public record Evolution(Identifier target, double epNeeded, int xpLevels) {}
+    public record Evolution(Identifier target, double epNeeded, int xpLevels, List<Requirement> requirements) {
+        public Evolution(Identifier target, double epNeeded, int xpLevels) {
+            this(target, epNeeded, xpLevels, List.of(new Requirement("ep", "", epNeeded, 100)));
+        }
+    }
+
+    /**
+     * One part of an evolution's requirements (Tensura: Reincarnated's weighted requirements).
+     * Parts are worth weight percent each; the evolution opens at 100%.
+     * Types: ep (amount), item_consume / item_carry (arg = item id, amount), skill (arg = ability id),
+     * plus any a content mod registers (boss, awaken, named...).
+     */
+    public record Requirement(String type, String arg, double amount, float weight) {}
 
     public static final class Properties {
         private double minAura = 500, maxAura = 1000, minMana = 50, maxMana = 100;
@@ -90,6 +102,11 @@ public final class Race {
         public Properties tier(int t) { this.tier = t; return this; }
         public Properties intrinsic(Identifier... skills) {
             intrinsics.addAll(List.of(skills));
+            return this;
+        }
+        public Properties evolvesTo(Identifier target, List<Requirement> requirements) {
+            double ep = requirements.stream().filter(r -> r.type().equals("ep")).mapToDouble(Requirement::amount).max().orElse(0);
+            evolutions.add(new Evolution(target, ep, 0, List.copyOf(requirements)));
             return this;
         }
         public Properties evolvesTo(Identifier target, double epNeeded, int xpLevels) {

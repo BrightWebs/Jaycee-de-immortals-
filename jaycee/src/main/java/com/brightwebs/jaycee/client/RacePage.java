@@ -197,8 +197,8 @@ final class RacePage extends Page {
             req[1] = cur.evolutions().isEmpty() ? "" : cur.evolutions().size() + " evolution path(s) ahead"; ok[1] = true;
         } else if (evo != null) {
             req[0] = Component.translatable("jaycee.ui.req.previous", cur.name()).getString(); ok[0] = true;
-            req[1] = Component.translatable("jaycee.ui.req.ep", UI.num(evo.epNeeded())).getString() + "  (" + UI.shortNum(ep) + ")";
-            ok[1] = ep >= evo.epNeeded();
+            req[1] = requirementText(p, evo);
+            ok[1] = RaceAPI.progress(p, evo) >= 100;
         } else if (!acq) {
             String parent = null; double need = 0;
             for (String[] e : edges) if (e[1].equals(id)) {
@@ -225,6 +225,29 @@ final class RacePage extends Page {
             UI.rect(g, 1075, 858, 1500, 896, 2, 0xFF7FF6FF);
             UI.text(g, Component.translatable("jaycee.ui.evolve"), 1288, 877, 20, 0xFFFFFFFF, 1);
         }
+    }
+
+    /** "62%: EP 400k + 4 bosses" in Tensura's weighted style. */
+    static String requirementText(LocalPlayer p, Race.Evolution evo) {
+        StringBuilder b = new StringBuilder(String.format("%.0f%%: ", RaceAPI.progress(p, evo)));
+        for (int i = 0; i < evo.requirements().size(); i++) {
+            Race.Requirement r = evo.requirements().get(i);
+            if (i > 0) b.append(" + ");
+            String what = switch (r.type()) {
+                case "ep" -> "EP " + UI.shortNum(r.amount());
+                case "boss" -> (int) r.amount() + " boss" + (r.amount() > 1 ? "es" : "");
+                case "item_consume", "item_carry" -> (int) r.amount() + " " + net.minecraft.core.registries.BuiltInRegistries.ITEM
+                        .getValue(Identifier.parse(r.arg())).getDefaultInstance().getHoverName().getString() + (r.type().equals("item_carry") ? " (carried)" : "");
+                case "awaken" -> "True Demon Lord";
+                case "named" -> "Named (title)";
+                case "physical" -> "Physical body";
+                case "colossus" -> "Warden defeated";
+                case "skill" -> "Skill " + r.arg();
+                default -> r.type();
+            };
+            b.append(what);
+        }
+        return b.toString();
     }
 
     @Override

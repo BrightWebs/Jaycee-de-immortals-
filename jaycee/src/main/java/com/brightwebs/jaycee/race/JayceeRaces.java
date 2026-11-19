@@ -69,7 +69,11 @@ public final class JayceeRaces {
             if (starting) p.starting();
             if (divine) p.divine();
             for (String i : intrinsics) p.intrinsic(Identifier.parse(i));
-            for (E e : evolutions) p.evolvesTo(Identifier.fromNamespaceAndPath(JayceeMod.ID, e.target()), e.ep(), 0);
+            for (E e : evolutions) {
+                Identifier to = Identifier.fromNamespaceAndPath(JayceeMod.ID, e.target());
+                var reqs = TensuraRequirements.BY_TARGET.get(e.target());
+                if (reqs != null) p.evolvesTo(to, reqs); else p.evolvesTo(to, e.ep(), 0);
+            }
             return new Race(p);
         });
     }

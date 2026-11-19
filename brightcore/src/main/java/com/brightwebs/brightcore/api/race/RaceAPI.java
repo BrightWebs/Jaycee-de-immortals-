@@ -21,6 +21,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.List;
@@ -41,18 +42,70 @@ public final class RaceAPI {
     }
 
     /** What stands between the player and an evolution, or empty if they can take it now. */
+    /** Checks a requirement part: 0..1 progress. Content mods add types (boss, awaken, named...). */
+    @FunctionalInterface public interface RequirementCheck { float progress(Player player, Race.Requirement r); }
+    private static final java.util.Map<String, RequirementCheck> CHECKS = new java.util.HashMap<>();
+
+    public static void registerRequirement(String type, RequirementCheck check) { CHECKS.put(type, check); }
+
+    private static Item item(String id) {
+        return net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(Identifier.parse(id));
+    }
+
+    private static int countItem(Player player, Item item) {
+        int n = 0;
+        var inv = player.getInventory();
+        for (int i = 0; i < inv.getContainerSize(); i++) if (inv.getItem(i).is(item)) n += inv.getItem(i).getCount();
+        return n;
+    }
+
+    /** 0..1 progress for one requirement part. */
+    public static float progress(Player player, Race.Requirement r) {
+        return switch (r.type()) {
+            case "ep" -> r.amount() <= 0 ? 1 : (float) Math.min(1, EnergyAPI.get(player).ep() / r.amount());
+            case "item_consume", "item_carry" -> (float) Math.min(1, countItem(player, item(r.arg())) / Math.max(1, r.amount()));
+            case "skill" -> {
+                var a = com.brightwebs.brightcore.api.AbilityRegistry.get(Identifier.parse(r.arg()));
+                yield a != null && com.brightwebs.brightcore.api.AbilityAPI.has(player, a) ? 1 : 0;
+            }
+            default -> { RequirementCheck c = CHECKS.get(r.type()); yield c == null ? 0 : Math.max(0, Math.min(1, c.progress(player, r))); }
+        };
+    }
+
+    /** Total progress in percent (capped at 100), as Tensura weighs it. */
+    public static float progress(Player player, Race.Evolution evo) {
+        float total = 0;
+        for (Race.Requirement r : evo.requirements()) total += r.weight() * progress(player, r);
+        return Math.min(100, total);
+    }
+
     public static Optional<Component> blocker(Player player, Race.Evolution evo) {
         Race target = RaceRegistry.get(evo.target());
         if (target == null) return Optional.of(Component.translatable("brightcore.race.unknown"));
-        double ep = EnergyAPI.get(player).ep();
-        if (ep < evo.epNeeded()) {
-            return Optional.of(Component.translatable("brightcore.race.need_ep",
-                    EnergyAPI.format(evo.epNeeded()), EnergyAPI.format(ep)));
-        }
-        if (!player.isCreative() && player.experienceLevel < evo.xpLevels()) {
+        if (player.isCreative()) return Optional.empty();
+        float pct = progress(player, evo);
+        if (pct < 100) return Optional.of(Component.translatable("brightcore.race.need_progress", String.format("%.0f", pct)));
+        if (player.experienceLevel < evo.xpLevels()) {
             return Optional.of(Component.translatable("brightcore.race.need_xp", evo.xpLevels(), player.experienceLevel));
         }
         return Optional.empty();
+    }
+
+    /** Items an evolution consumes are taken when it happens. */
+    static void consume(ServerPlayer player, Race.Evolution evo) {
+        if (player.isCreative()) return;
+        for (Race.Requirement r : evo.requirements()) {
+            if (!r.type().equals("item_consume")) continue;
+            int left = (int) r.amount();
+            Item it = item(r.arg());
+            var inv = player.getInventory();
+            for (int i = 0; i < inv.getContainerSize() && left > 0; i++) {
+                if (!inv.getItem(i).is(it)) continue;
+                int take = Math.min(left, inv.getItem(i).getCount());
+                inv.getItem(i).shrink(take);
+                left -= take;
+            }
+        }
     }
 
     // ---- changing ----------------------------------------------------------------
@@ -85,6 +138,7 @@ public final class RaceAPI {
             Race target = RaceRegistry.get(targetId);
             if (NeoForge.EVENT_BUS.post(new RaceEvent.Evolve(player, current.get(), target)).isCanceled()) return false;
             if (!player.isCreative()) player.giveExperienceLevels(-evo.xpLevels());
+            consume(player, evo);
             become(player, target, false);
             celebrate(player, target);
             return true;

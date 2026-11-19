@@ -72,5 +72,6 @@
   "key.brightcore.mode_switch": "Switch Mode (hold + skill key)",
   "key.brightcore.race_ability": "Race Ability",
   "brightcore.race.no_ability": "Your race has no ability of its own.",
-  "brightcore.race.cooldown": "Race ability ready in %ss"
+  "brightcore.race.cooldown": "Race ability ready in %ss",
+  "brightcore.race.need_progress": "Evolution progress %s%% - not all requirements are met yet."
 }

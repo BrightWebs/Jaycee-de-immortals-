@@ -53,7 +53,8 @@ public final class StatusData {
     /** Progress counters (mana spent, damage endured, monsters killed...). Server only. */
     public static final Supplier<AttachmentType<Map<String, Double>>> COUNTERS = ATTACHMENTS.register("counters",
             () -> AttachmentType.<Map<String, Double>>builder(() -> Map.of())
-                    .serialize(Codec.unboundedMap(Codec.STRING, Codec.DOUBLE).fieldOf("counters")).copyOnDeath().build());
+                    .serialize(Codec.unboundedMap(Codec.STRING, Codec.DOUBLE).fieldOf("counters")).copyOnDeath()
+                    .sync((holder, to) -> holder == to, ByteBufCodecs.map(java.util.HashMap::new, ByteBufCodecs.STRING_UTF8, ByteBufCodecs.DOUBLE)).build());
 
     private StatusData() {}
 
@@ -97,11 +98,13 @@ public final class StatusData {
     public static void onDeath(LivingDeathEvent event) {
         com.brightwebs.brightcore.api.util.Safe.run("StatusData.onDeath", () -> {
             if (!(event.getSource().getEntity() instanceof ServerPlayer killer) || killer == event.getEntity()) return;
-            if (hasSoul(event.getEntity())) killer.setData(SOULS, souls(killer) + 1);
+            DemonLord.onKill(killer, event.getEntity());
             if (event.getEntity() instanceof Enemy) addCounter(killer, "monsters_killed", 1);
             String type = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(event.getEntity().getType()).getPath();
             if (type.contains("slime")) addCounter(killer, "slimes_killed", 1);
             if (type.equals("elder_guardian")) addCounter(killer, "sea_boss_killed", 1); // Tensura: Charybdis
+            if (type.equals("wither") || type.equals("ender_dragon") || type.equals("elder_guardian") || type.equals("warden")) addCounter(killer, "bosses_killed", 1);
+            if (type.equals("warden")) addCounter(killer, "warden_killed", 1);
         });
     }
 

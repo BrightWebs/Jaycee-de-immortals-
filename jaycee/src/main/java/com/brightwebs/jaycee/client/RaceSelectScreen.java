@@ -191,8 +191,7 @@ public class RaceSelectScreen extends Screen {
                     var a = AbilityRegistry.get(id);
                     return a == null ? id.getPath() : a.name().getString();
                 }).toList());
-        UI.text(g, "◆", 1117, 784, 11, 0xFF5AE6FF, 1);
-        UI.semi(g, intr, 1128, 784, 17, 0xFFF0F0FA, 0);
+        UI.semi(g, intr, 1112, 784, 17, 0xFFF0F0FA, 0);
     }
 
     @Override

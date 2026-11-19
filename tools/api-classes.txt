@@ -1,1 +1,5 @@
-C net.minecraft.client.Minecraft
+C net.minecraft.client.MouseHandler
+C net.minecraft.client.gui.Gui
+net.minecraft.client.gui.components.events.AbstractContainerEventHandler
+net.minecraft.client.gui.components.events.ContainerEventHandler
+net.minecraft.client.gui.components.events.GuiEventListener

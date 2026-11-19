@@ -19,7 +19,9 @@ import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 @EventBusSubscriber(modid = JayceeMod.ID, value = Dist.CLIENT)
 public final class JayceeClient {
     public static final KeyMapping.Category CATEGORY = new KeyMapping.Category(Identifier.fromNamespaceAndPath(JayceeMod.ID, "main"));
-    public static final KeyMapping MENU = new KeyMapping("key.jaycee.menu", InputConstants.KEY_M, CATEGORY);
+    public static final KeyMapping MENU = new KeyMapping("key.jaycee.menu", InputConstants.KEY_B, CATEGORY);
+    /** Name the creature you're looking at (Shift: toggle whether others may name you). */
+    public static final KeyMapping NAME = new KeyMapping("key.jaycee.name", InputConstants.KEY_N, CATEGORY);
 
     private JayceeClient() {}
 
@@ -32,6 +34,8 @@ public final class JayceeClient {
     public static void register(RegisterKeyMappingsEvent event) {
         event.registerCategory(CATEGORY);
         event.register(MENU);
+        event.register(NAME);
+        com.brightwebs.jaycee.network.JayceeNetwork.openNaming = NamingScreen::open;
     }
 
     @SubscribeEvent
@@ -42,6 +46,9 @@ public final class JayceeClient {
             boolean needsRace = (!RaceAPI.data(mc.player).chosen() || RaceAPI.race(mc.player).isEmpty()) && !RaceRegistry.starting().isEmpty();
             while (MENU.consumeClick()) {
                 mc.setScreenAndShow(needsRace ? new RaceSelectScreen() : new MenuScreen());
+            }
+            while (NAME.consumeClick()) {
+                net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(new com.brightwebs.jaycee.network.JayceeNetwork.NamingKey(mc.player.isShiftKeyDown()));
             }
             if (needsRace && mc.gui.screen() == null && mc.player.tickCount > 40) {
                 mc.setScreenAndShow(new RaceSelectScreen());

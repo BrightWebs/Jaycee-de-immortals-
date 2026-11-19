@@ -63,14 +63,56 @@ public final class JayceeNetwork {
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     }
 
+    /** N pressed (shift: toggle your nameable status). */
+    public record NamingKey(boolean shift) implements CustomPacketPayload {
+        public static final Type<NamingKey> TYPE = new Type<>(Identifier.fromNamespaceAndPath(JayceeMod.ID, "naming_key"));
+        public static final StreamCodec<ByteBuf, NamingKey> CODEC = StreamCodec.composite(ByteBufCodecs.BOOL, NamingKey::shift, NamingKey::new);
+        @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
+    }
+
+    /** Server -> client: open the naming pop-up for this creature, with what each choice gives and costs. */
+    public record OpenNaming(int entity, String name, String race, double ep, float hp,
+                             double gain0, double gain1, double gain2, double cost0, double cost1, double cost2) implements CustomPacketPayload {
+        public static final Type<OpenNaming> TYPE = new Type<>(Identifier.fromNamespaceAndPath(JayceeMod.ID, "open_naming"));
+        public static final StreamCodec<net.minecraft.network.FriendlyByteBuf, OpenNaming> CODEC = StreamCodec.of(
+                (b, v) -> { b.writeVarInt(v.entity()); b.writeUtf(v.name()); b.writeUtf(v.race()); b.writeDouble(v.ep()); b.writeFloat(v.hp());
+                    b.writeDouble(v.gain0()); b.writeDouble(v.gain1()); b.writeDouble(v.gain2()); b.writeDouble(v.cost0()); b.writeDouble(v.cost1()); b.writeDouble(v.cost2()); },
+                b -> new OpenNaming(b.readVarInt(), b.readUtf(), b.readUtf(), b.readDouble(), b.readFloat(),
+                        b.readDouble(), b.readDouble(), b.readDouble(), b.readDouble(), b.readDouble(), b.readDouble()));
+        @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
+    }
+
+    /** The pop-up's Name button. type 0 Subdue, 1 Evolve, 2 Endow. */
+    public record NameRequest(int entity, String name, int namingType) implements CustomPacketPayload {
+        public static final Type<NameRequest> TYPE = new Type<>(Identifier.fromNamespaceAndPath(JayceeMod.ID, "name_request"));
+        public static final StreamCodec<ByteBuf, NameRequest> CODEC = StreamCodec.composite(ByteBufCodecs.VAR_INT, NameRequest::entity,
+                ByteBufCodecs.STRING_UTF8, NameRequest::name, ByteBufCodecs.VAR_INT, NameRequest::namingType, NameRequest::new);
+        @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
+    }
+
+    /** Bonds page: follow / stay / release a subordinate. */
+    public record SubCommand(String uuid, String command) implements CustomPacketPayload {
+        public static final Type<SubCommand> TYPE = new Type<>(Identifier.fromNamespaceAndPath(JayceeMod.ID, "sub_command"));
+        public static final StreamCodec<ByteBuf, SubCommand> CODEC = StreamCodec.composite(ByteBufCodecs.STRING_UTF8, SubCommand::uuid,
+                ByteBufCodecs.STRING_UTF8, SubCommand::command, SubCommand::new);
+        @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
+    }
+
+    /** Set on the client by OpenNaming; the client opens the pop-up. */
+    public static volatile java.util.function.Consumer<OpenNaming> openNaming = p -> {};
+
     /** The latest reading on this client, and when it arrived (read by the HUD). */
     public static volatile AppraisalInfo lastAppraisal = AppraisalInfo.NONE;
     public static volatile long lastAppraisalAt;
 
     @SubscribeEvent
     public static void register(RegisterPayloadHandlersEvent event) {
-        var r = event.registrar("2");
+        var r = event.registrar("3");
         r.playToClient(AppraisalInfo.TYPE, AppraisalInfo.CODEC, (p, c) -> { lastAppraisal = p; lastAppraisalAt = System.currentTimeMillis(); });
+        r.playToClient(OpenNaming.TYPE, OpenNaming.CODEC, (p, c) -> openNaming.accept(p));
+        r.playToServer(NamingKey.TYPE, NamingKey.CODEC, (p, c) -> { if (c.player() instanceof ServerPlayer sp) com.brightwebs.brightcore.api.util.Safe.run("NamingKey", () -> com.brightwebs.jaycee.bonds.Naming.key(sp, p.shift())); });
+        r.playToServer(NameRequest.TYPE, NameRequest.CODEC, (p, c) -> { if (c.player() instanceof ServerPlayer sp) com.brightwebs.brightcore.api.util.Safe.run("NameRequest", () -> com.brightwebs.jaycee.bonds.Naming.name(sp, p.entity(), p.name(), p.namingType())); });
+        r.playToServer(SubCommand.TYPE, SubCommand.CODEC, (p, c) -> { if (c.player() instanceof ServerPlayer sp) com.brightwebs.brightcore.api.util.Safe.run("SubCommand", () -> com.brightwebs.jaycee.bonds.Bonds.command(sp, p.uuid(), p.command())); });
         r.playToServer(EquipTitle.TYPE, EquipTitle.CODEC, (p, c) -> { if (c.player() instanceof ServerPlayer sp) Titles.equip(sp, p.title()); });
         r.playToServer(TitlePublic.TYPE, TitlePublic.CODEC, (p, c) -> { if (c.player() instanceof ServerPlayer sp) Titles.setPublic(sp, p.on()); });
     }

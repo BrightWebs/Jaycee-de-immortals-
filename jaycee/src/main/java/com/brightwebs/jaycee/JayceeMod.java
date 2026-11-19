@@ -29,5 +29,6 @@ public final class JayceeMod {
         com.brightwebs.jaycee.skill.Refining.init(bus);
         com.brightwebs.jaycee.training.Training.init(bus);
         com.brightwebs.jaycee.race.CreatureEnergy.init(bus);
+        com.brightwebs.jaycee.bonds.Bonds.init(bus);
     }
 }

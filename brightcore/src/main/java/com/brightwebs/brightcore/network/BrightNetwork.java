@@ -128,7 +128,8 @@ public final class BrightNetwork {
         Race race = payload.race().equals("random")
                 ? options.get(player.getRandom().nextInt(options.size()))
                 : RaceRegistry.get(Identifier.tryParse(payload.race()));
-        if (race != null) RaceAPI.choose(player, race);
+        boolean ok = race != null && RaceAPI.choose(player, race);
+        com.mojang.logging.LogUtils.getLogger().info("[BrightCore] {} chose race {} -> {}", player.getName().getString(), payload.race(), ok ? "accepted" : "rejected");
     }
 
     private static void onEvolve(Evolve payload, IPayloadContext context) {

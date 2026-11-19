@@ -210,6 +210,7 @@ final class TexSizes {
         S.put("../race/node/wight_king", new int[]{96, 96});
         S.put("../race/node/wolfkin", new int[]{96, 96});
         S.put("../race/node/zombie", new int[]{96, 96});
+        S.put("appr_panel", new int[]{480, 552});
         S.put("attr/agility", new int[]{50, 38});
         S.put("attr/archery", new int[]{50, 38});
         S.put("attr/aura_control", new int[]{50, 38});

@@ -97,7 +97,7 @@ public final class StatusData {
     public static void onDeath(LivingDeathEvent event) {
         com.brightwebs.brightcore.api.util.Safe.run("StatusData.onDeath", () -> {
             if (!(event.getSource().getEntity() instanceof ServerPlayer killer) || killer == event.getEntity()) return;
-            if (hasSoul(event.getEntity())) killer.setData(SOULS, souls(killer) + 1);
+            DemonLord.onKill(killer, event.getEntity());
             if (event.getEntity() instanceof Enemy) addCounter(killer, "monsters_killed", 1);
             String type = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(event.getEntity().getType()).getPath();
             if (type.contains("slime")) addCounter(killer, "slimes_killed", 1);

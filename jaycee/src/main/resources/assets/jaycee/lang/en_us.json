@@ -530,5 +530,12 @@
  "ability.jaycee.ultraspeed_regeneration": "Ultraspeed Regeneration",
  "ability.jaycee.ultraspeed_regeneration.desc": "Wounds close instantly: all missing health at once, for 100 magicules per HP (60 mastered). Learned with Self-Regeneration mastered, the sea's great beast defeated (Elder Guardian) and over 300,000 EP.",
  "ability.jaycee.infinite_regeneration": "Infinite Regeneration",
- "ability.jaycee.infinite_regeneration.desc": "The peak of regeneration: body and spiritual health restored instantly. Learned with Ultraspeed Regeneration and over 2,000,000 EP."
+ "ability.jaycee.infinite_regeneration.desc": "The peak of regeneration: body and spiritual health restored instantly. Learned with Ultraspeed Regeneration and over 2,000,000 EP.",
+ "jaycee.demon_lord.seed": "You have become a Demon Lord Seed. From now on, the souls of those you defeat are yours.",
+ "jaycee.demon_lord.can_awaken": "You hold 10,000 souls. Begin the Harvest Festival with /jaycee harvest (at 20,000 it begins on its own).",
+ "jaycee.demon_lord.festival": "%s has begun the Harvest Festival...",
+ "jaycee.demon_lord.success": "%s has awakened as a True Demon Lord!",
+ "jaycee.demon_lord.cannot": "You need to be a Demon Lord Seed holding 10,000 souls.",
+ "title.jaycee.true_demon_lord": "True Demon Lord",
+ "title.jaycee.true_demon_lord.desc": "Awakened through the Harvest Festival."
 }

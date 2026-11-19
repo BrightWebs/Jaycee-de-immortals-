@@ -63,6 +63,11 @@ public final class RaceSkills {
         e.push(x * f / len, y * f / len, z * f / len);
     }
 
+    /** Players move on their own client, so a changed velocity has to be sent to them. */
+    static void sync(ServerPlayer p) {
+        p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket(p));
+    }
+
     private static void setFlight(ServerPlayer p, boolean on) {
         if (p.isCreative() || p.isSpectator()) return;
         p.getAbilities().mayfly = on;
@@ -108,7 +113,7 @@ public final class RaceSkills {
                 Vec3 d = p.getDeltaMovement();
                 double dy = d.y <= 0 ? upward : d.y + upward;
                 p.setDeltaMovement(new Vec3(d.x * (0.3f + upward), dy, d.z * (0.3f + upward)));
-                p.hurtMarked = true;
+                sync(p);
                 startGlide(p);
                 ((ServerLevel) p.level()).sendParticles(ParticleTypes.CLOUD, p.getX(), p.getY(), p.getZ(), 14, 0.5, 0.1, 0.5, 0.05);
                 p.level().playSound(null, p.blockPosition(), SoundEvents.PHANTOM_FLAP, SoundSource.PLAYERS, 1, 1);
@@ -132,8 +137,7 @@ public final class RaceSkills {
                 }
                 riptidePush(p, boost);
                 RaceAbilities.setCooldown(p, 3);
-                p.hurtMarked = true;
-                p.hasImpulse = true;
+                sync(p);
                 startGlide(p);
                 ((ServerLevel) p.level()).sendParticles(ParticleTypes.FLAME, p.getX(), p.getY() + 0.5, p.getZ(), 16, 0.4, 0.3, 0.4, 0.03);
                 p.level().playSound(null, p.blockPosition(), SoundEvents.ENDER_DRAGON_FLAP, SoundSource.PLAYERS, 0.8f, 1.1f);
@@ -156,7 +160,7 @@ public final class RaceSkills {
         Vec3 h = new Vec3(d.x, 0, d.z).scale(0.99).add(look.x * 0.02, 0, look.z * 0.02);
         p.setDeltaMovement(h.x, fall, h.z);
         p.resetFallDistance();
-        p.hurtMarked = true;
+        sync(p);
     }
 
     // ---- charge jump (Slime) ---------------------------------------------
@@ -178,7 +182,7 @@ public final class RaceSkills {
                 Vec3 look = p.getLookAngle().normalize();
                 look = look.multiply(3.5 * charge, 3.3 * charge, 3.5 * charge).add(0, p.getDeltaMovement().y, 0);
                 p.setDeltaMovement(look);
-                p.hurtMarked = true;
+                sync(p);
                 p.level().playSound(null, p.blockPosition(), SoundEvents.SLIME_JUMP, SoundSource.PLAYERS, 1, 0.8f);
             }
         };

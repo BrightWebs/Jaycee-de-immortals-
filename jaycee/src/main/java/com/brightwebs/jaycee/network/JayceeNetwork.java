@@ -34,7 +34,7 @@ public final class JayceeNetwork {
     /** Analytical Appraisal's reading of the creature you're looking at (entity -1 clears it). */
     public record AppraisalInfo(int entity, String name, String race, double ep, float hp, float maxHp,
                                 float spirit, float maxSpirit, float mana, float maxMana, float aura, float maxAura,
-                                int armor, java.util.List<String> skills) implements CustomPacketPayload {
+                                int armor, java.util.List<String> skills, int radius, int scanMode) implements CustomPacketPayload {
         public static final Type<AppraisalInfo> TYPE = new Type<>(Identifier.fromNamespaceAndPath(JayceeMod.ID, "appraisal"));
         public static final StreamCodec<net.minecraft.network.FriendlyByteBuf, AppraisalInfo> CODEC = StreamCodec.of(
                 (b, v) -> {
@@ -42,6 +42,7 @@ public final class JayceeNetwork {
                     b.writeFloat(v.hp()); b.writeFloat(v.maxHp()); b.writeFloat(v.spirit()); b.writeFloat(v.maxSpirit());
                     b.writeFloat(v.mana()); b.writeFloat(v.maxMana()); b.writeFloat(v.aura()); b.writeFloat(v.maxAura());
                     b.writeVarInt(v.armor()); b.writeVarInt(v.skills().size()); for (String s : v.skills()) b.writeUtf(s);
+                    b.writeVarInt(v.radius()); b.writeVarInt(v.scanMode());
                 },
                 b -> {
                     int e = b.readVarInt(); String n = b.readUtf(), r = b.readUtf(); double ep = b.readDouble();
@@ -50,11 +51,15 @@ public final class JayceeNetwork {
                     int armor = b.readVarInt(), count = Math.min(b.readVarInt(), 32);
                     java.util.List<String> skills = new java.util.ArrayList<>();
                     for (int i = 0; i < count; i++) skills.add(b.readUtf());
-                    return new AppraisalInfo(e, n, r, ep, hp, mh, sp, ms, mp, mm, ap, ma, armor, skills);
+                    int radius = b.readVarInt(), scanMode = b.readVarInt();
+                    return new AppraisalInfo(e, n, r, ep, hp, mh, sp, ms, mp, mm, ap, ma, armor, skills, radius, scanMode);
                 });
-        /** Scan on, nothing in sight. */
-        public static final AppraisalInfo IDLE = new AppraisalInfo(-2, "", "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, java.util.List.of());
-        public static final AppraisalInfo NONE = new AppraisalInfo(-1, "", "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, java.util.List.of());
+        /** Scan on and no creature in sight: the client reads blocks itself within radius. scanMode 0 both, 1 creatures, 2 blocks. */
+        public static AppraisalInfo idle(int radius, int scanMode) {
+            return new AppraisalInfo(-2, "", "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, java.util.List.of(), radius, scanMode);
+        }
+        /** Scan off. */
+        public static final AppraisalInfo NONE = new AppraisalInfo(-1, "", "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, java.util.List.of(), 0, 0);
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     }
 

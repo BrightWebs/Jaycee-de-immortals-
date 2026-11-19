@@ -137,18 +137,10 @@ public final class GreatSage {
         int mode = (int) StatusData.counter(p, "sage_scan_mode");
         if (mode != 2) {
             LivingEntity t = SkillHelper.targetQuiet(p, radius);
-            if (t != null) { send(p, reading(p, t, level)); return; }
+            if (t != null) { send(p, reading(p, t, level, radius, mode)); return; }
         }
-        send(p, com.brightwebs.jaycee.network.JayceeNetwork.AppraisalInfo.IDLE);
-        if (mode != 1) {
-            HitResult hit = p.pick(radius, 0, false);
-            if (hit instanceof BlockHitResult bh && hit.getType() == HitResult.Type.BLOCK) {
-                BlockPos pos = bh.getBlockPos();
-                BlockState st = p.level().getBlockState(pos);
-                p.sendOverlayMessage(Component.translatable("jaycee.skill.analytical.block", st.getBlock().getName(),
-                        String.format("%.1f", st.getDestroySpeed(p.level(), pos))).withStyle(ChatFormatting.AQUA));
-            }
-        }
+        // no creature: the client analyses the block in sight itself
+        send(p, com.brightwebs.jaycee.network.JayceeNetwork.AppraisalInfo.idle(radius, mode));
     }
 
     private static final java.util.Map<java.util.UUID, Integer> SHOWING = new java.util.HashMap<>();
@@ -158,13 +150,14 @@ public final class GreatSage {
      * targeted) and NONE (off) are sent only when the state changes.
      */
     static void send(ServerPlayer p, com.brightwebs.jaycee.network.JayceeNetwork.AppraisalInfo info) {
-        Integer before = SHOWING.put(p.getUUID(), info.entity());
-        if (info.entity() < 0 && before != null && before == info.entity()) return;
+        int key = info.entity() < 0 ? info.entity() * 1000 - info.scanMode() * 100 - info.radius() : info.entity();
+        Integer before = SHOWING.put(p.getUUID(), key);
+        if (info.entity() < 0 && before != null && before == key) return;
         if (info.entity() == -1 && before == null) return;
         net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(p, info);
     }
 
-    private static com.brightwebs.jaycee.network.JayceeNetwork.AppraisalInfo reading(ServerPlayer p, LivingEntity t, int level) {
+    private static com.brightwebs.jaycee.network.JayceeNetwork.AppraisalInfo reading(ServerPlayer p, LivingEntity t, int level, int radius, int mode) {
         var e = EnergyAPI.get(t);
         String race = t instanceof Player other ? RaceAPI.race(other).map(r -> r.name().getString()).orElse("")
                 : t.getType().getDescription().getString();
@@ -177,7 +170,7 @@ public final class GreatSage {
         }
         return new com.brightwebs.jaycee.network.JayceeNetwork.AppraisalInfo(t.getId(), t.getDisplayName().getString(), race,
                 e.ep(), t.getHealth(), t.getMaxHealth(), (float) e.spirit(), (float) e.maxSpirit(), (float) e.mana(), (float) e.maxMana(),
-                (float) e.aura(), (float) e.maxAura(), t.getArmorValue(), skills);
+                (float) e.aura(), (float) e.maxAura(), t.getArmorValue(), skills, radius, mode);
     }
 
     private static boolean hasRaphael(Player p) { Ability r = raphael(); return r != null && AbilityAPI.has(p, r); }

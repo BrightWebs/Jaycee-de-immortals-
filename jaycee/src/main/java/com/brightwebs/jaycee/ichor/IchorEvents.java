@@ -21,10 +21,12 @@ public final class IchorEvents {
 
     @SubscribeEvent
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        if (BIRTHRIGHT_ENABLED && event.getEntity() instanceof ServerPlayer player
-                && IchorAPI.get(player).birthright() == Birthright.UNDRAWN) {
-            IchorAPI.drawBirthright(player);
-        }
+        com.brightwebs.brightcore.api.util.Safe.run("IchorEvents.onLogin", () -> {
+            if (BIRTHRIGHT_ENABLED && event.getEntity() instanceof ServerPlayer player
+                    && IchorAPI.get(player).birthright() == Birthright.UNDRAWN) {
+                IchorAPI.drawBirthright(player);
+            }
+        });
     }
 
     /**
@@ -33,13 +35,15 @@ public final class IchorEvents {
      */
     @SubscribeEvent
     public static void onTick(PlayerTickEvent.Post event) {
-        if (!(event.getEntity() instanceof ServerPlayer player) || player.isSpectator()) return;
-        Grade grade = IchorAPI.get(player).grade();
-        if (grade.number() < Grade.DEMIGOD.number()) return;
-        boolean god = grade.number() >= Grade.LESSER_GOD.number();
-        if (player.tickCount % (god ? 10 : 20) != 0) return;
-        ServerLevel level = (ServerLevel) player.level();
-        level.sendParticles(GOLD, player.getX(), player.getY() + player.getBbHeight() * 0.6, player.getZ(),
-                god ? 4 : 2, 0.35, 0.5, 0.35, 0.0);
+        com.brightwebs.brightcore.api.util.Safe.run("IchorEvents.onTick", () -> {
+            if (!(event.getEntity() instanceof ServerPlayer player) || player.isSpectator()) return;
+            Grade grade = IchorAPI.get(player).grade();
+            if (grade.number() < Grade.DEMIGOD.number()) return;
+            boolean god = grade.number() >= Grade.LESSER_GOD.number();
+            if (player.tickCount % (god ? 10 : 20) != 0) return;
+            ServerLevel level = (ServerLevel) player.level();
+            level.sendParticles(GOLD, player.getX(), player.getY() + player.getBbHeight() * 0.6, player.getZ(),
+                    god ? 4 : 2, 0.35, 0.5, 0.35, 0.0);
+        });
     }
 }

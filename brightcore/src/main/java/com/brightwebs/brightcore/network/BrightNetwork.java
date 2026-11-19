@@ -109,43 +109,63 @@ public final class BrightNetwork {
     }
 
     private static void onActivate(ActivateSlot payload, IPayloadContext context) {
-        if (context.player() instanceof ServerPlayer player
-                && payload.slot() >= 0 && payload.slot() < AbilityData.SLOTS_PER_PAGE) {
-            AbilityAPI.activateSlot(player, payload.slot());
-        }
+
+        com.brightwebs.brightcore.api.util.Safe.run("BrightNetwork.onActivate", () -> {
+            if (context.player() instanceof ServerPlayer player
+                    && payload.slot() >= 0 && payload.slot() < AbilityData.SLOTS_PER_PAGE) {
+                AbilityAPI.activateSlot(player, payload.slot());
+            }
+        });
+
     }
 
     private static void onSetPage(SetPage payload, IPayloadContext context) {
-        if (context.player() instanceof ServerPlayer player) {
-            AbilityAPI.setPage(player, payload.page());
-        }
+
+        com.brightwebs.brightcore.api.util.Safe.run("BrightNetwork.onSetPage", () -> {
+            if (context.player() instanceof ServerPlayer player) {
+                AbilityAPI.setPage(player, payload.page());
+            }
+        });
+
     }
 
     private static void onChooseRace(ChooseRace payload, IPayloadContext context) {
-        if (!(context.player() instanceof ServerPlayer player)) return;
-        var options = RaceRegistry.starting();
-        if (options.isEmpty()) return;
-        Race race = payload.race().equals("random")
-                ? options.get(player.getRandom().nextInt(options.size()))
-                : RaceRegistry.get(Identifier.tryParse(payload.race()));
-        boolean ok = race != null && RaceAPI.choose(player, race);
-        com.mojang.logging.LogUtils.getLogger().info("[BrightCore] {} chose race {} -> {}", player.getName().getString(), payload.race(), ok ? "accepted" : "rejected");
+
+        com.brightwebs.brightcore.api.util.Safe.run("BrightNetwork.onChooseRace", () -> {
+            if (!(context.player() instanceof ServerPlayer player)) return;
+            var options = RaceRegistry.starting();
+            if (options.isEmpty()) return;
+            Race race = payload.race().equals("random")
+                    ? options.get(player.getRandom().nextInt(options.size()))
+                    : RaceRegistry.get(Identifier.tryParse(payload.race()));
+            boolean ok = race != null && RaceAPI.choose(player, race);
+            com.mojang.logging.LogUtils.getLogger().info("[BrightCore] {} chose race {} -> {}", player.getName().getString(), payload.race(), ok ? "accepted" : "rejected");
+        });
+
     }
 
     private static void onEvolve(Evolve payload, IPayloadContext context) {
-        if (context.player() instanceof ServerPlayer player) {
-            Identifier id = Identifier.tryParse(payload.target());
-            if (id != null) RaceAPI.evolve(player, id);
-        }
+
+        com.brightwebs.brightcore.api.util.Safe.run("BrightNetwork.onEvolve", () -> {
+            if (context.player() instanceof ServerPlayer player) {
+                Identifier id = Identifier.tryParse(payload.target());
+                if (id != null) RaceAPI.evolve(player, id);
+            }
+        });
+
     }
 
     private static void onAssign(AssignSlot payload, IPayloadContext context) {
-        if (!(context.player() instanceof ServerPlayer player)) return;
-        if (payload.ability().isEmpty()) {
-            AbilityAPI.assign(player, payload.index(), null);
-            return;
-        }
-        var ability = AbilityRegistry.get(Identifier.tryParse(payload.ability()));
-        if (ability != null) AbilityAPI.assign(player, payload.index(), ability);
+
+        com.brightwebs.brightcore.api.util.Safe.run("BrightNetwork.onAssign", () -> {
+            if (!(context.player() instanceof ServerPlayer player)) return;
+            if (payload.ability().isEmpty()) {
+                AbilityAPI.assign(player, payload.index(), null);
+                return;
+            }
+            var ability = AbilityRegistry.get(Identifier.tryParse(payload.ability()));
+            if (ability != null) AbilityAPI.assign(player, payload.index(), ability);
+        });
+
     }
 }

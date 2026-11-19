@@ -68,20 +68,24 @@ public final class SkillState {
 
     @SubscribeEvent
     public static void onTick(ServerTickEvent.Post event) {
-        for (Iterator<Cast> it = CASTS.iterator(); it.hasNext(); ) {
-            Cast c = it.next();
-            if (c.player().isRemoved() || !c.player().isAlive()) { it.remove(); continue; }
-            if (now(c.player()) >= c.at()) { it.remove(); c.effect().run(); }
-        }
+        com.brightwebs.brightcore.api.util.Safe.run("SkillState.onTick", () -> {
+            for (Iterator<Cast> it = CASTS.iterator(); it.hasNext(); ) {
+                Cast c = it.next();
+                if (c.player().isRemoved() || !c.player().isAlive()) { it.remove(); continue; }
+                if (now(c.player()) >= c.at()) { it.remove(); c.effect().run(); }
+            }
+        });
     }
 
     /** Future Attack Prediction: a 50% chance to see an attack coming and dodge it. */
     @SubscribeEvent
     public static void onIncoming(LivingIncomingDamageEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer p) || event.getSource().getEntity() == null) return;
-        if (FORESIGHT.getOrDefault(p.getUUID(), 0L) <= now(p) || p.getRandom().nextFloat() >= 0.5f) return;
-        event.setCanceled(true);
-        ((ServerLevel) p.level()).sendParticles(ParticleTypes.END_ROD, p.getX(), p.getY() + 1, p.getZ(), 12, 0.4, 0.6, 0.4, 0.02);
-        p.sendOverlayMessage(Component.translatable("jaycee.skill.dodged"));
+        com.brightwebs.brightcore.api.util.Safe.run("SkillState.onIncoming", () -> {
+            if (!(event.getEntity() instanceof ServerPlayer p) || event.getSource().getEntity() == null) return;
+            if (FORESIGHT.getOrDefault(p.getUUID(), 0L) <= now(p) || p.getRandom().nextFloat() >= 0.5f) return;
+            event.setCanceled(true);
+            ((ServerLevel) p.level()).sendParticles(ParticleTypes.END_ROD, p.getX(), p.getY() + 1, p.getZ(), 12, 0.4, 0.6, 0.4, 0.02);
+            p.sendOverlayMessage(Component.translatable("jaycee.skill.dodged"));
+        });
     }
 }

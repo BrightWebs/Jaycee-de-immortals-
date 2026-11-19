@@ -103,22 +103,26 @@ public final class Titles {
 
     @SubscribeEvent
     public static void onTick(PlayerTickEvent.Post event) {
-        if (!(event.getEntity() instanceof ServerPlayer p) || p.tickCount % 100 != 0) return;
-        for (Title t : ALL.values()) if (!owns(p, t.id()) && t.unlock().test(p)) grant(p, t.id());
-        Title t = ALL.get(StatusData.title(p));
-        if (t != null && t.effects().stream().anyMatch(e -> e.attribute() != null
-                && p.getAttribute(e.attribute()) != null && p.getAttribute(e.attribute()).getModifier(MOD) == null)) apply(p);
+        com.brightwebs.brightcore.api.util.Safe.run("Titles.onTick", () -> {
+            if (!(event.getEntity() instanceof ServerPlayer p) || p.tickCount % 100 != 0) return;
+            for (Title t : ALL.values()) if (!owns(p, t.id()) && t.unlock().test(p)) grant(p, t.id());
+            Title t = ALL.get(StatusData.title(p));
+            if (t != null && t.effects().stream().anyMatch(e -> e.attribute() != null
+                    && p.getAttribute(e.attribute()) != null && p.getAttribute(e.attribute()).getModifier(MOD) == null)) apply(p);
+        });
     }
 
     /** "[Title] Name" above the head and in chat while the title is public. */
     @SubscribeEvent
     public static void onName(PlayerEvent.NameFormat event) {
-        Player p = event.getEntity();
-        String id = StatusData.title(p);
-        if (id.isEmpty() || !StatusData.titlePublic(p) || !ALL.containsKey(id)) return;
-        event.setDisplayname(Component.literal("[").withStyle(ChatFormatting.LIGHT_PURPLE)
-                .append(Component.translatable("title.jaycee." + id).withStyle(ChatFormatting.LIGHT_PURPLE))
-                .append(Component.literal("] ").withStyle(ChatFormatting.LIGHT_PURPLE))
-                .append(event.getDisplayname()));
+        com.brightwebs.brightcore.api.util.Safe.run("Titles.onName", () -> {
+            Player p = event.getEntity();
+            String id = StatusData.title(p);
+            if (id.isEmpty() || !StatusData.titlePublic(p) || !ALL.containsKey(id)) return;
+            event.setDisplayname(Component.literal("[").withStyle(ChatFormatting.LIGHT_PURPLE)
+                    .append(Component.translatable("title.jaycee." + id).withStyle(ChatFormatting.LIGHT_PURPLE))
+                    .append(Component.literal("] ").withStyle(ChatFormatting.LIGHT_PURPLE))
+                    .append(event.getDisplayname()));
+        });
     }
 }

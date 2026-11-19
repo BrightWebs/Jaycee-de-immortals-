@@ -17,26 +17,30 @@ public final class AbilityTicker {
 
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        ServerLevel level = (ServerLevel) player.level();
-
-        AbilityData owned = AbilityAPI.get(player);
-        for (Ability ability : AbilityAPI.owned(player)) {
-            if (!ability.isToggle() || owned.isToggled(ability.id())) ability.tick(player, level);
-        }
-
-        if (player.tickCount % 20 == 0) {
-            AbilityData data = AbilityAPI.get(player);
-            AbilityData updated = data.withExpiredCooldownsRemoved(level.getGameTime());
-            if (!updated.equals(data)) player.setData(BrightAttachments.ABILITIES, updated);
-        }
+        com.brightwebs.brightcore.api.util.Safe.run("AbilityTicker.onPlayerTick", () -> {
+            if (!(event.getEntity() instanceof ServerPlayer player)) return;
+            ServerLevel level = (ServerLevel) player.level();
+    
+            AbilityData owned = AbilityAPI.get(player);
+            for (Ability ability : AbilityAPI.owned(player)) {
+                if (!ability.isToggle() || owned.isToggled(ability.id())) ability.tick(player, level);
+            }
+    
+            if (player.tickCount % 20 == 0) {
+                AbilityData data = AbilityAPI.get(player);
+                AbilityData updated = data.withExpiredCooldownsRemoved(level.getGameTime());
+                if (!updated.equals(data)) player.setData(BrightAttachments.ABILITIES, updated);
+            }
+        });
     }
 
     @SubscribeEvent
     public static void onDamage(LivingDamageEvent.Post event) {
-        if (!(event.getSource().getDirectEntity() instanceof ServerPlayer player)) return;
-        for (Ability ability : AbilityAPI.owned(player)) {
-            ability.onHit(player, event.getEntity(), event.getInflictedDamage());
-        }
+        com.brightwebs.brightcore.api.util.Safe.run("AbilityTicker.onDamage", () -> {
+            if (!(event.getSource().getDirectEntity() instanceof ServerPlayer player)) return;
+            for (Ability ability : AbilityAPI.owned(player)) {
+                ability.onHit(player, event.getEntity(), event.getInflictedDamage());
+            }
+        });
     }
 }

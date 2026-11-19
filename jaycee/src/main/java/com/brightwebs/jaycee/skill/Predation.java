@@ -87,9 +87,11 @@ public final class Predation {
     /** A devoured creature's drops go into the Stomach instead of the ground. */
     @SubscribeEvent
     public static void onDrops(LivingDropsEvent event) {
-        if (!BEING_DEVOURED.contains(event.getEntity().getUUID())) return;
-        if (!(event.getSource().getEntity() instanceof ServerPlayer p)) return;
-        for (ItemEntity drop : event.getDrops()) Stomach.store(p, drop.getItem().copy());
-        event.getDrops().clear();
+        com.brightwebs.brightcore.api.util.Safe.run("Predation.onDrops", () -> {
+            if (!BEING_DEVOURED.contains(event.getEntity().getUUID())) return;
+            if (!(event.getSource().getEntity() instanceof ServerPlayer p)) return;
+            for (ItemEntity drop : event.getDrops()) Stomach.store(p, drop.getItem().copy());
+            event.getDrops().clear();
+        });
     }
 }

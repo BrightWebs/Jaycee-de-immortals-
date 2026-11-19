@@ -215,7 +215,7 @@ public final class AbilityAPI {
 
         if (ability.isToggle()) {
             setToggled(player, ability, true);
-        } else if (!ability.activate(player, level, modeIndex)) {
+        } else if (!com.brightwebs.brightcore.api.util.Safe.call("ability " + id, () -> ability.activate(player, level, modeIndex), false)) {
             return false;
         }
 

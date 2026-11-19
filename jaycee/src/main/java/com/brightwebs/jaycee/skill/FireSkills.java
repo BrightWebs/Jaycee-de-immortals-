@@ -107,7 +107,6 @@ public final class FireSkills {
         BALLS.add(new Ball(p, (ServerLevel) p.level(), p.getEyePosition().add(0, -0.25, 0).add(dir), dir.scale(SPEED),
                 charged ? FIRE_CHARGED : FIRE, charged ? MAGIC_CHARGED : MAGIC, charged ? RADIUS_CHARGED : RADIUS, charged ? 3 : 2));
         p.level().playSound(null, p.blockPosition(), SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 1, charged ? 0.7f : 1.0f);
-        p.swing(InteractionHand.MAIN_HAND);
         AbilityAPI.addMasteryPoint(p, a);
         AbilityAPI.setCooldown(p, a, (Tk.mastered(p, a) ? CD_MASTERED : CD) * 20);
     }

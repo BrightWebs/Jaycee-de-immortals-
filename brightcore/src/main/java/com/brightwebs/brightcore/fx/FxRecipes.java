@@ -46,6 +46,8 @@ public final class FxRecipes {
 
     public static Recipe get(String abilityId) { return all().get(abilityId); }
 
+    public static java.util.Set<String> ids() { return all().keySet(); }
+
     private static Supplier<SimpleParticleType> fam(String name) {
         var h = BrightParticles.ALL.get(name);
         return h != null ? h : BrightParticles.AURA;

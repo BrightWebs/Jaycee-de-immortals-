@@ -524,5 +524,7 @@
  "jaycee.appraisal.no": "No",
  "jaycee.appraisal.explosion": "Explosion resistance",
  "jaycee.appraisal.light": "Light level",
- "jaycee.appraisal.growth": "Growth"
+ "jaycee.appraisal.growth": "Growth",
+ "jaycee.command.fx.unknown": "No particle recipe for %s.",
+ "jaycee.command.fx.played": "%s: %s + %s, %s"
 }

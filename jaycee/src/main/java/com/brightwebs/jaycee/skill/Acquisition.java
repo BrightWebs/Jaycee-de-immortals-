@@ -72,6 +72,7 @@ public final class Acquisition {
                 AbilityAPI.setToggled(p, regen, true);
             }
             com.brightwebs.jaycee.race.RaceSkills.raceChanged(p);
+            if (p.tickCount % 20 == 0) com.brightwebs.jaycee.appearance.Appearance.raceChanged(p); // keep the look valid for the current form
             merfolk(p);
         });
     }

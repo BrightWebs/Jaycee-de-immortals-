@@ -45,12 +45,12 @@ public final class JayceeClient {
             if (mc.player == null) return;
             boolean needsRace = (!RaceAPI.data(mc.player).chosen() || RaceAPI.race(mc.player).isEmpty()) && !RaceRegistry.starting().isEmpty();
             while (MENU.consumeClick()) {
-                mc.setScreenAndShow(needsRace ? new RaceSelectScreen() : new MenuScreen());
+                mc.setScreenAndShow(needsRace && !RaceSelectScreen.awaitingServer() ? new RaceSelectScreen() : new MenuScreen());
             }
             while (NAME.consumeClick()) {
                 net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(new com.brightwebs.jaycee.network.JayceeNetwork.NamingKey(mc.player.isShiftKeyDown()));
             }
-            if (needsRace && mc.gui.screen() == null && mc.player.tickCount > 40) {
+            if (needsRace && mc.gui.screen() == null && mc.player.tickCount > 40 && !RaceSelectScreen.awaitingServer()) {
                 mc.setScreenAndShow(new RaceSelectScreen());
             }
         });

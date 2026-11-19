@@ -25,7 +25,8 @@ public final class BrightParticles {
             SPARK = reg("spark"), DARK_SPARK = reg("dark_spark"), SHOCKWAVE = reg("shockwave"), SOUL = reg("soul"),
             SPIRIT = reg("spirit"), MIST = reg("mist"), HEAL = reg("heal"), RUNE = reg("rune"), AURA = reg("aura"),
             HOLY = reg("holy"), VOID = reg("void"), BUBBLE = reg("bubble"), GUST = reg("gust"), PETAL = reg("petal"),
-            SHARD = reg("shard"), BLOOD = reg("blood"), DROP = reg("drop"), ACID = reg("acid"), SLASH = reg("slash");
+            SHARD = reg("shard"), BLOOD = reg("blood"), DROP = reg("drop"), ACID = reg("acid"), SLASH = reg("slash"),
+            PREDATOR_MIST = reg("predator_mist");
 
     private BrightParticles() {}
 

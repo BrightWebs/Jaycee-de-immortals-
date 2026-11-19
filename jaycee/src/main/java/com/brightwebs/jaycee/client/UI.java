@@ -34,7 +34,9 @@ public final class UI {
     static Font font() { return Minecraft.getInstance().font; }
 
     public static Identifier gui(String name) {
-        return Identifier.fromNamespaceAndPath(JayceeMod.ID, "textures/gui/" + name + ".png");
+        // Resource paths may not contain "..", so "../race/x" means textures/race/x.
+        String path = name.startsWith("../") ? "textures/" + name.substring(3) : "textures/gui/" + name;
+        return Identifier.fromNamespaceAndPath(JayceeMod.ID, path + ".png");
     }
 
     static int[] size(String name) {

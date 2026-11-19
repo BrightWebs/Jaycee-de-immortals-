@@ -36,14 +36,16 @@ public final class JayceeClient {
 
     @SubscribeEvent
     public static void tick(ClientTickEvent.Post event) {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) return;
-        boolean needsRace = (!RaceAPI.data(mc.player).chosen() || RaceAPI.race(mc.player).isEmpty()) && !RaceRegistry.starting().isEmpty();
-        while (MENU.consumeClick()) {
-            mc.setScreenAndShow(needsRace ? new RaceSelectScreen() : new MenuScreen());
-        }
-        if (needsRace && mc.gui.screen() == null && mc.player.tickCount > 40) {
-            mc.setScreenAndShow(new RaceSelectScreen());
-        }
+        com.brightwebs.brightcore.api.util.Safe.run("JayceeClient.tick", () -> {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.player == null) return;
+            boolean needsRace = (!RaceAPI.data(mc.player).chosen() || RaceAPI.race(mc.player).isEmpty()) && !RaceRegistry.starting().isEmpty();
+            while (MENU.consumeClick()) {
+                mc.setScreenAndShow(needsRace ? new RaceSelectScreen() : new MenuScreen());
+            }
+            if (needsRace && mc.gui.screen() == null && mc.player.tickCount > 40) {
+                mc.setScreenAndShow(new RaceSelectScreen());
+            }
+        });
     }
 }

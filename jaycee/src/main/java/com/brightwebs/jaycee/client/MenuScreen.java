@@ -72,31 +72,33 @@ public class MenuScreen extends Screen {
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor g, int mx, int my, float dt) {
-        LocalPlayer p = player();
-        if (p == null) return;
-        Page pg = pages.get(page);
-        double fx = fx(mx), fy = fy(my);
-
-        g.pose().pushMatrix();
-        g.pose().translate(left, top);
-        g.pose().scale(k, k);
-        UI.tex(g, pg.background(), 0, 0, 1536, 1024);
-        drawSideBar(g, fx, fy);
-        g.pose().popMatrix();
-
-        if (pg.showsPlayer()) {
-            // Your own skin, armour and look, turning to follow the cursor.
-            InventoryScreen.extractEntityInInventoryFollowsMouse(g, sx(140), sy(270), sx(420), sy(752),
-                    Math.max(8, Math.round(205 * k)), 0.0625f, mx, my, p);
-        }
-
-        g.pose().pushMatrix();
-        g.pose().translate(left, top);
-        g.pose().scale(k, k);
-        pg.draw(g, fx, fy);
-        drawSideTooltip(g, fx, fy);
-        g.pose().popMatrix();
-        super.extractRenderState(g, mx, my, dt);
+        com.brightwebs.brightcore.api.util.Safe.run("MenuScreen.extractRenderState", () -> {
+            LocalPlayer p = player();
+            if (p == null) return;
+            Page pg = pages.get(page);
+            double fx = fx(mx), fy = fy(my);
+    
+            g.pose().pushMatrix();
+            g.pose().translate(left, top);
+            g.pose().scale(k, k);
+            UI.tex(g, pg.background(), 0, 0, 1536, 1024);
+            drawSideBar(g, fx, fy);
+            g.pose().popMatrix();
+    
+            if (pg.showsPlayer()) {
+                // Your own skin, armour and look, turning to follow the cursor.
+                InventoryScreen.extractEntityInInventoryFollowsMouse(g, sx(140), sy(270), sx(420), sy(752),
+                        Math.max(8, Math.round(205 * k)), 0.0625f, mx, my, p);
+            }
+    
+            g.pose().pushMatrix();
+            g.pose().translate(left, top);
+            g.pose().scale(k, k);
+            pg.draw(g, fx, fy);
+            drawSideTooltip(g, fx, fy);
+            g.pose().popMatrix();
+            super.extractRenderState(g, mx, my, dt);
+        });
     }
 
     private static final String[] SIDE_TIPS = {"jaycee.ui.side.bonds", "jaycee.ui.side.editor", "jaycee.ui.side.locked", "jaycee.ui.side.locked"};
@@ -131,25 +133,27 @@ public class MenuScreen extends Screen {
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        double x = fx(event.x()), y = fy(event.y());
-        int b = UI.button(event);
-        Page pg = pages.get(page);
-        if (b == 0 && page != Id.BONDS && page != Id.RACE && page != Id.TITLES) {
-            for (int i = 0; i < TABS.length; i++) {
-                if (Page.in(x, y, TABS[i][0], TABS[i][1], TABS[i][2], TABS[i][3])) { open(Id.values()[i]); click(); return true; }
+        return com.brightwebs.brightcore.api.util.Safe.call("MenuScreen.mouseClicked", () -> {
+            double x = fx(event.x()), y = fy(event.y());
+            int b = UI.button(event);
+            Page pg = pages.get(page);
+            if (b == 0 && page != Id.BONDS && page != Id.RACE && page != Id.TITLES) {
+                for (int i = 0; i < TABS.length; i++) {
+                    if (Page.in(x, y, TABS[i][0], TABS[i][1], TABS[i][2], TABS[i][3])) { open(Id.values()[i]); click(); return true; }
+                }
             }
-        }
-        for (int i = 0; i < 4; i++) {
-            float sy = SIDE_Y + i * SIDE_STEP;
-            if (b == 0 && Page.in(x, y, SIDE_X, sy, SIDE_X + 118, sy + 104)) {
-                if (i == 0) open(page == Id.BONDS ? back : Id.BONDS);
-                else if (i == 1 && player() != null) player().sendOverlayMessage(Component.translatable("jaycee.ui.editor_soon"));
-                click();
-                return true;
+            for (int i = 0; i < 4; i++) {
+                float sy = SIDE_Y + i * SIDE_STEP;
+                if (b == 0 && Page.in(x, y, SIDE_X, sy, SIDE_X + 118, sy + 104)) {
+                    if (i == 0) open(page == Id.BONDS ? back : Id.BONDS);
+                    else if (i == 1 && player() != null) player().sendOverlayMessage(Component.translatable("jaycee.ui.editor_soon"));
+                    click();
+                    return true;
+                }
             }
-        }
-        if (pg.click(x, y, b)) { click(); return true; }
-        return super.mouseClicked(event, doubleClick);
+            if (pg.click(x, y, b)) { click(); return true; }
+            return super.mouseClicked(event, doubleClick);
+        }, false);
     }
 
     static void click() {
@@ -159,21 +163,27 @@ public class MenuScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mx, double my, double dx, double dy) {
-        if (dy != 0 && pages.get(page).scroll(fx(mx), fy(my), dy)) return true;
-        return super.mouseScrolled(mx, my, dx, dy);
+        return com.brightwebs.brightcore.api.util.Safe.call("MenuScreen.mouseScrolled", () -> {
+            if (dy != 0 && pages.get(page).scroll(fx(mx), fy(my), dy)) return true;
+            return super.mouseScrolled(mx, my, dx, dy);
+        }, false);
     }
 
     @Override
     public boolean charTyped(CharacterEvent event) {
-        if (pages.get(page).typed(event.codepoint())) return true;
-        return super.charTyped(event);
+        return com.brightwebs.brightcore.api.util.Safe.call("MenuScreen.charTyped", () -> {
+            if (pages.get(page).typed(event.codepoint())) return true;
+            return super.charTyped(event);
+        }, false);
     }
 
     @Override
     public boolean keyPressed(KeyEvent event) {
-        if (event.key() != 256 && pages.get(page).key(event.key())) return true;
-        if (event.key() != 256 && JayceeClient.MENU.matches(event)) { page = Id.STATUS; onClose(); return true; }
-        return super.keyPressed(event);
+        return com.brightwebs.brightcore.api.util.Safe.call("MenuScreen.keyPressed", () -> {
+            if (event.key() != 256 && pages.get(page).key(event.key())) return true;
+            if (event.key() != 256 && JayceeClient.MENU.matches(event)) { page = Id.STATUS; onClose(); return true; }
+            return super.keyPressed(event);
+        }, false);
     }
 
     /** Esc: step back toward Status; close from Status. */

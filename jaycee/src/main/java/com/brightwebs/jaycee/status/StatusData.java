@@ -95,9 +95,11 @@ public final class StatusData {
 
     @SubscribeEvent
     public static void onDeath(LivingDeathEvent event) {
-        if (!(event.getSource().getEntity() instanceof ServerPlayer killer) || killer == event.getEntity()) return;
-        if (hasSoul(event.getEntity())) killer.setData(SOULS, souls(killer) + 1);
-        if (event.getEntity() instanceof Enemy) addCounter(killer, "monsters_killed", 1);
+        com.brightwebs.brightcore.api.util.Safe.run("StatusData.onDeath", () -> {
+            if (!(event.getSource().getEntity() instanceof ServerPlayer killer) || killer == event.getEntity()) return;
+            if (hasSoul(event.getEntity())) killer.setData(SOULS, souls(killer) + 1);
+            if (event.getEntity() instanceof Enemy) addCounter(killer, "monsters_killed", 1);
+        });
     }
 
     @SubscribeEvent

@@ -185,63 +185,67 @@ public final class Training {
 
     @SubscribeEvent
     public static void onTick(PlayerTickEvent.Post event) {
-        if (!(event.getEntity() instanceof ServerPlayer p)) return;
-        Live l = live(p);
-        if (p.tickCount % 10 == 0 && l.dirty) flush(p, l);
-        if (p.tickCount % 20 != 0 || !p.isAlive()) return;
-        l.thisSecond.clear();
-        Vec3 pos = p.position();
-        double moved = l.lastPos == null ? 0 : Math.sqrt(Math.pow(pos.x - l.lastPos.x, 2) + Math.pow(pos.z - l.lastPos.z, 2));
-        boolean teleported = moved > 40;
-        l.lastPos = pos;
-        if (!teleported && moved > 0.5 && p.getVehicle() == null && !p.getAbilities().flying) {
-            if (p.isInWater()) {
-                gain(p, Attr.SWIMMING_SPEED, moved * 1.5, "swimming");
-                gain(p, Attr.ENDURANCE, 0.6, "swimming");
-            } else if (p.isSprinting()) {
-                gain(p, Attr.SPEED, moved, "running");
-                gain(p, Attr.ENDURANCE, 0.5, "running");
-            } else if (p.onGround()) {
-                gain(p, Attr.SPEED, moved * 0.3, "walking");
+        com.brightwebs.brightcore.api.util.Safe.run("Training.onTick", () -> {
+            if (!(event.getEntity() instanceof ServerPlayer p)) return;
+            Live l = live(p);
+            if (p.tickCount % 10 == 0 && l.dirty) flush(p, l);
+            if (p.tickCount % 20 != 0 || !p.isAlive()) return;
+            l.thisSecond.clear();
+            Vec3 pos = p.position();
+            double moved = l.lastPos == null ? 0 : Math.sqrt(Math.pow(pos.x - l.lastPos.x, 2) + Math.pow(pos.z - l.lastPos.z, 2));
+            boolean teleported = moved > 40;
+            l.lastPos = pos;
+            if (!teleported && moved > 0.5 && p.getVehicle() == null && !p.getAbilities().flying) {
+                if (p.isInWater()) {
+                    gain(p, Attr.SWIMMING_SPEED, moved * 1.5, "swimming");
+                    gain(p, Attr.ENDURANCE, 0.6, "swimming");
+                } else if (p.isSprinting()) {
+                    gain(p, Attr.SPEED, moved, "running");
+                    gain(p, Attr.ENDURANCE, 0.5, "running");
+                } else if (p.onGround()) {
+                    gain(p, Attr.SPEED, moved * 0.3, "walking");
+                }
             }
-        }
-        if (p.isEyeInFluid(FluidTags.WATER) && p.getAirSupply() < p.getMaxAirSupply()) gain(p, Attr.LUNG_CAPACITY, 2.5, "underwater");
-        // exploring new ground
-        long ck = p.chunkPosition().pack();
-        if (l.chunks.add(ck)) gain(p, Attr.PERCEPTION, 3, "exploring");
-        if (l.chunks.size() > 4096) l.chunks.clear();
-        // sensing enemies and enduring pressure from stronger beings
-        double myEp = Math.max(1, EnergyAPI.get(p).ep());
-        int enemies = 0; double pressure = 0, aura = 0;
-        for (LivingEntity e : p.level().getEntitiesOfClass(LivingEntity.class, p.getBoundingBox().inflate(16), e -> e != p && e.isAlive())) {
-            if (e instanceof Enemy) enemies++;
-            double ratio = EnergyAPI.get(e).ep() / myEp;
-            if (ratio > 1.5 && e.distanceTo(p) < 12) { pressure = Math.max(pressure, Math.min(ratio, 10)); aura = Math.max(aura, EnergyAPI.get(e).aura() / Math.max(1, EnergyAPI.get(p).maxAura())); }
-        }
-        if (enemies > 0) gain(p, Attr.PERCEPTION, Math.min(3, enemies) * 0.5, "sensing_enemies");
-        if (pressure > 0) gain(p, Attr.MENTAL_FORTITUDE, pressure, "pressure");
-        if (aura > 1) gain(p, Attr.AURA_CONTROL, Math.min(aura, 6), "aura_exposure");
-        // natural recovery
-        float hp = p.getHealth();
-        if (l.lastHealth >= 0 && hp > l.lastHealth && !p.hasEffect(MobEffects.REGENERATION)) {
-            gain(p, Attr.REGENERATION, (hp - l.lastHealth) * 4, "recovering");
-            StatusData.addCounter(p, "healed", hp - l.lastHealth);
-        }
-        l.lastHealth = hp;
-        // Regeneration's own bonus: faster natural healing
-        int regen = l.levels.getOrDefault(Attr.REGENERATION.key(), 0);
-        if (regen > 0 && p.tickCount % 100 == 0 && hp < p.getMaxHealth() && p.getFoodData().getFoodLevel() > 6) p.heal(0.05f * regen);
+            if (p.isEyeInFluid(FluidTags.WATER) && p.getAirSupply() < p.getMaxAirSupply()) gain(p, Attr.LUNG_CAPACITY, 2.5, "underwater");
+            // exploring new ground
+            long ck = p.chunkPosition().pack();
+            if (l.chunks.add(ck)) gain(p, Attr.PERCEPTION, 3, "exploring");
+            if (l.chunks.size() > 4096) l.chunks.clear();
+            // sensing enemies and enduring pressure from stronger beings
+            double myEp = Math.max(1, EnergyAPI.get(p).ep());
+            int enemies = 0; double pressure = 0, aura = 0;
+            for (LivingEntity e : p.level().getEntitiesOfClass(LivingEntity.class, p.getBoundingBox().inflate(16), e -> e != p && e.isAlive())) {
+                if (e instanceof Enemy) enemies++;
+                double ratio = EnergyAPI.get(e).ep() / myEp;
+                if (ratio > 1.5 && e.distanceTo(p) < 12) { pressure = Math.max(pressure, Math.min(ratio, 10)); aura = Math.max(aura, EnergyAPI.get(e).aura() / Math.max(1, EnergyAPI.get(p).maxAura())); }
+            }
+            if (enemies > 0) gain(p, Attr.PERCEPTION, Math.min(3, enemies) * 0.5, "sensing_enemies");
+            if (pressure > 0) gain(p, Attr.MENTAL_FORTITUDE, pressure, "pressure");
+            if (aura > 1) gain(p, Attr.AURA_CONTROL, Math.min(aura, 6), "aura_exposure");
+            // natural recovery
+            float hp = p.getHealth();
+            if (l.lastHealth >= 0 && hp > l.lastHealth && !p.hasEffect(MobEffects.REGENERATION)) {
+                gain(p, Attr.REGENERATION, (hp - l.lastHealth) * 4, "recovering");
+                StatusData.addCounter(p, "healed", hp - l.lastHealth);
+            }
+            l.lastHealth = hp;
+            // Regeneration's own bonus: faster natural healing
+            int regen = l.levels.getOrDefault(Attr.REGENERATION.key(), 0);
+            if (regen > 0 && p.tickCount % 100 == 0 && hp < p.getMaxHealth() && p.getFoodData().getFoodLevel() > 6) p.heal(0.05f * regen);
+        });
     }
 
     @SubscribeEvent
     public static void onJump(LivingEvent.LivingJumpEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer p)) return;
-        Live l = live(p);
-        long now = p.level().getGameTime();
-        Vec3 v = p.getDeltaMovement();
-        if (now - l.lastJump < 8 || v.horizontalDistance() < 0.05) return;
-        l.lastJump = now;
-        gain(p, Attr.AGILITY, 1.5, p.isSprinting() ? "parkour" : "jumping");
+        com.brightwebs.brightcore.api.util.Safe.run("Training.onJump", () -> {
+            if (!(event.getEntity() instanceof ServerPlayer p)) return;
+            Live l = live(p);
+            long now = p.level().getGameTime();
+            Vec3 v = p.getDeltaMovement();
+            if (now - l.lastJump < 8 || v.horizontalDistance() < 0.05) return;
+            l.lastJump = now;
+            gain(p, Attr.AGILITY, 1.5, p.isSprinting() ? "parkour" : "jumping");
+        });
     }
 
     private static boolean worthy(ServerPlayer p, LivingEntity t) {
@@ -251,81 +255,95 @@ public final class Training {
 
     @SubscribeEvent
     public static void onDamage(LivingDamageEvent.Post event) {
-        float dmg = event.getInflictedDamage();
-        if (dmg <= 0) return;
-        DamageSource src = event.getSource();
-        LivingEntity victim = event.getEntity();
-        if (src.getEntity() instanceof ServerPlayer p && worthy(p, victim)) {
-            Live l = live(p);
-            int hits = l.hitsOn.merge(victim.getUUID(), 1, Integer::sum);
-            if (l.hitsOn.size() > 256) l.hitsOn.clear();
-            double k = (victim instanceof Enemy || victim instanceof Player ? 1.0 : 0.3) / (1 + hits / 15.0);
-            double d = Math.min(dmg, 40) * k;
-            if (src.getDirectEntity() instanceof Projectile) {
-                gain(p, Attr.ARCHERY, d * 2, "archery");
-                gain(p, Attr.TARGETING, p.distanceTo(victim) * 1.2 * k, "long_shot");
-            } else if (src.getDirectEntity() == p) {
-                gain(p, Attr.PHYSICAL_STRENGTH, d * 2, "melee_combat");
-                if (p.getMainHandItem().is(ItemTags.SWORDS) || p.getMainHandItem().is(ItemTags.AXES)) gain(p, Attr.COMBAT_MASTERY, d * 2.5, "weapon_combat");
-                gain(p, Attr.ENDURANCE, d * 0.5, "combat");
+        com.brightwebs.brightcore.api.util.Safe.run("Training.onDamage", () -> {
+            float dmg = event.getInflictedDamage();
+            if (dmg <= 0) return;
+            DamageSource src = event.getSource();
+            LivingEntity victim = event.getEntity();
+            if (src.getEntity() instanceof ServerPlayer p && worthy(p, victim)) {
+                Live l = live(p);
+                int hits = l.hitsOn.merge(victim.getUUID(), 1, Integer::sum);
+                if (l.hitsOn.size() > 256) l.hitsOn.clear();
+                double k = (victim instanceof Enemy || victim instanceof Player ? 1.0 : 0.3) / (1 + hits / 15.0);
+                double d = Math.min(dmg, 40) * k;
+                if (src.getDirectEntity() instanceof Projectile) {
+                    gain(p, Attr.ARCHERY, d * 2, "archery");
+                    gain(p, Attr.TARGETING, p.distanceTo(victim) * 1.2 * k, "long_shot");
+                } else if (src.getDirectEntity() == p) {
+                    gain(p, Attr.PHYSICAL_STRENGTH, d * 2, "melee_combat");
+                    if (p.getMainHandItem().is(ItemTags.SWORDS) || p.getMainHandItem().is(ItemTags.AXES)) gain(p, Attr.COMBAT_MASTERY, d * 2.5, "weapon_combat");
+                    gain(p, Attr.ENDURANCE, d * 0.5, "combat");
+                }
+                gain(p, Attr.PERCEPTION, 0.5 * k, "combat_awareness");
             }
-            gain(p, Attr.PERCEPTION, 0.5 * k, "combat_awareness");
-        }
-        if (victim instanceof ServerPlayer p) {
-            boolean env = src.getEntity() == null;
-            double k = env ? 0.25 : 1.0;
-            gain(p, Attr.VITALITY, Math.min(dmg, 40) * 2 * k, env ? "enduring_hazards" : "taking_hits");
-            gain(p, Attr.ENDURANCE, Math.min(dmg, 40) * k, "taking_hits");
-            if (src.is(DamageTypeTags.WITCH_RESISTANT_TO) || src.getMsgId().contains("magic")) gain(p, Attr.MENTAL_FORTITUDE, dmg * 3, "resisting_magic");
-            if (!env) StatusData.addCounter(p, "physical_taken", src.getDirectEntity() == src.getEntity() ? dmg : 0);
-        }
+            if (victim instanceof ServerPlayer p) {
+                boolean env = src.getEntity() == null;
+                double k = env ? 0.25 : 1.0;
+                gain(p, Attr.VITALITY, Math.min(dmg, 40) * 2 * k, env ? "enduring_hazards" : "taking_hits");
+                gain(p, Attr.ENDURANCE, Math.min(dmg, 40) * k, "taking_hits");
+                if (src.is(DamageTypeTags.WITCH_RESISTANT_TO) || src.getMsgId().contains("magic")) gain(p, Attr.MENTAL_FORTITUDE, dmg * 3, "resisting_magic");
+                if (!env) StatusData.addCounter(p, "physical_taken", src.getDirectEntity() == src.getEntity() ? dmg : 0);
+            }
+        });
     }
 
     /** Archery and Targeting make projectiles hit harder; Mental Fortitude blunts magic. */
     @SubscribeEvent
     public static void onIncoming(LivingIncomingDamageEvent event) {
-        DamageSource src = event.getSource();
-        if (src.getDirectEntity() instanceof Projectile && src.getEntity() instanceof ServerPlayer p) {
-            TrainingData d = get(p);
-            event.setAmount(event.getAmount() * (float) (1 + 0.008 * d.level(Attr.ARCHERY) + 0.004 * d.level(Attr.TARGETING)));
-        }
-        if (event.getEntity() instanceof ServerPlayer p && (src.is(DamageTypeTags.WITCH_RESISTANT_TO) || src.getMsgId().contains("magic"))) {
-            event.setAmount(event.getAmount() * (float) (1 - Math.min(0.4, 0.005 * level(p, Attr.MENTAL_FORTITUDE))));
-        }
+        com.brightwebs.brightcore.api.util.Safe.run("Training.onIncoming", () -> {
+            DamageSource src = event.getSource();
+            if (src.getDirectEntity() instanceof Projectile && src.getEntity() instanceof ServerPlayer p) {
+                TrainingData d = get(p);
+                event.setAmount(event.getAmount() * (float) (1 + 0.008 * d.level(Attr.ARCHERY) + 0.004 * d.level(Attr.TARGETING)));
+            }
+            if (event.getEntity() instanceof ServerPlayer p && (src.is(DamageTypeTags.WITCH_RESISTANT_TO) || src.getMsgId().contains("magic"))) {
+                event.setAmount(event.getAmount() * (float) (1 - Math.min(0.4, 0.005 * level(p, Attr.MENTAL_FORTITUDE))));
+            }
+        });
     }
 
     /** Magic Control makes skills and spells cheaper. */
     @SubscribeEvent
     public static void onActivate(AbilityEvent.Activate event) {
-        ServerPlayer p = event.getPlayer();
-        double cut = Math.min(0.5, 0.005 * level(p, Attr.MAGIC_CONTROL));
-        if (event.getAbility().isMagic() && StatusData.title(p).equals("magicule_master")) cut += 0.1;
-        event.setManaCost((int) Math.ceil(event.getManaCost() * (1 - cut)));
+        com.brightwebs.brightcore.api.util.Safe.run("Training.onActivate", () -> {
+            ServerPlayer p = event.getPlayer();
+            double cut = Math.min(0.5, 0.005 * level(p, Attr.MAGIC_CONTROL));
+            if (event.getAbility().isMagic() && StatusData.title(p).equals("magicule_master")) cut += 0.1;
+            event.setManaCost((int) Math.ceil(event.getManaCost() * (1 - cut)));
+        });
     }
 
     @SubscribeEvent
     public static void onActivated(AbilityEvent.Activated event) {
-        ServerPlayer p = event.getPlayer();
-        if (event.getManaSpent() > 0) {
-            gain(p, Attr.MAGIC_CONTROL, event.getManaSpent() * 0.6, event.getAbility().isMagic() ? "casting_magic" : "using_skills");
-            StatusData.addCounter(p, "mana_spent", event.getManaSpent());
-        }
-        if (event.getAuraSpent() > 0) gain(p, Attr.AURA_CONTROL, event.getAuraSpent() * 0.6, "manipulating_aura");
+        com.brightwebs.brightcore.api.util.Safe.run("Training.onActivated", () -> {
+            ServerPlayer p = event.getPlayer();
+            if (event.getManaSpent() > 0) {
+                gain(p, Attr.MAGIC_CONTROL, event.getManaSpent() * 0.6, event.getAbility().isMagic() ? "casting_magic" : "using_skills");
+                StatusData.addCounter(p, "mana_spent", event.getManaSpent());
+            }
+            if (event.getAuraSpent() > 0) gain(p, Attr.AURA_CONTROL, event.getAuraSpent() * 0.6, "manipulating_aura");
+        });
     }
 
     @SubscribeEvent
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        LIVE.remove(event.getEntity().getUUID());
-        applyBonuses(event.getEntity());
+        com.brightwebs.brightcore.api.util.Safe.run("Training.onLogin", () -> {
+            LIVE.remove(event.getEntity().getUUID());
+            applyBonuses(event.getEntity());
+        });
     }
 
     @SubscribeEvent
-    public static void onRespawn(PlayerEvent.PlayerRespawnEvent event) { applyBonuses(event.getEntity()); }
+    public static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        com.brightwebs.brightcore.api.util.Safe.run("Training.onRespawn", () -> { applyBonuses(event.getEntity()); });
+    }
 
     @SubscribeEvent
     public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        if (event.getEntity() instanceof ServerPlayer p && LIVE.containsKey(p.getUUID())) flush(p, LIVE.get(p.getUUID()));
-        LIVE.remove(event.getEntity().getUUID());
+        com.brightwebs.brightcore.api.util.Safe.run("Training.onLogout", () -> {
+            if (event.getEntity() instanceof ServerPlayer p && LIVE.containsKey(p.getUUID())) flush(p, LIVE.get(p.getUUID()));
+            LIVE.remove(event.getEntity().getUUID());
+        });
     }
 
     @SubscribeEvent

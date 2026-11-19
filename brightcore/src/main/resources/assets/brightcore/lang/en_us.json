@@ -68,5 +68,6 @@
   "key.brightcore.skill_slot_1": "Skill slot 1",
   "key.brightcore.skill_slot_2": "Skill slot 2",
   "key.brightcore.skill_slot_3": "Skill slot 3",
-  "key.brightcore.skill_slot_4": "Skill slot 4"
+  "key.brightcore.skill_slot_4": "Skill slot 4",
+  "key.brightcore.mode_switch": "Switch Mode (hold + skill key)"
 }

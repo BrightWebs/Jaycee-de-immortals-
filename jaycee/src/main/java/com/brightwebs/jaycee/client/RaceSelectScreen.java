@@ -47,52 +47,54 @@ public class RaceSelectScreen extends Screen {
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor g, int mx, int my, float dt) {
-        double x = (mx - left) / k, y = (my - top) / k;
-        g.pose().pushMatrix();
-        g.pose().translate(left, top);
-        g.pose().scale(k, k);
-        UI.tex(g, "bg_race_select", 0, 0, W, H);
-        // filters
-        for (int i = 0; i < FILTERS.length; i++) {
-            float cx = 328 + i * (CHIP_W + 6);
-            boolean on = FILTERS[i].equals(filter), hov = !on && Page.in(x, y, cx + 6, 162, cx + 6 + CHIP_W, 206);
-            UI.tex(g, on ? "chip_1" : hov ? "chip_h" : "chip_0", cx, 156);
-            Component label = Component.translatable("jaycee.ui.filter." + FILTERS[i]);
-            UI.semi(g, label, cx + 54, 185, UI.fitSize(label.getString(), 17, 12, 84, false), on ? 0xFFFFFFFF : hov ? 0xFFFFFFFF : 0xFFE0ECF4, 1);
-        }
-        // tiles
-        List<String> list = races();
-        int rows = (list.size() + 3) / 4;
-        scroll = Math.max(0, Math.min(scroll, rows - 4));
-        for (int i = 0; i < 16; i++) {
-            int idx = scroll * 4 + i;
-            if (idx >= list.size()) break;
-            String id = list.get(idx);
-            int[] c = COLS[i % 4], r = ROWS[i / 4];
-            boolean on = id.equals(selected), hov = !on && Page.in(x, y, c[0], r[0], c[1], r[1]);
-            UI.tex(g, on ? "rtile_sel" : hov ? "rtile_h" : "rtile", c[0] - 3, r[0] - 3);
-            UI.tex(g, "../race/face/" + id, c[0] + 3, r[0] + 3, c[1] - c[0] - 6, r[1] - r[0] - 40);
-            UI.fill(g, c[0] + 3, r[1] - 37, c[1] - 3, r[1] - 3, 0xF0060C18);
-            String name = Component.translatable("race.jaycee." + id).getString();
-            UI.text(g, name, (c[0] + c[1]) / 2f, r[1] - 20, UI.fitSize(name, 23, 14, c[1] - c[0] - 14, true), 0xFFFFFFFF, 1);
-            pill(g, "pill_", JayceeRaces.INFO.get(id).difficulty(), c[0] + 4, r[0] + 4, false);
-        }
-        if (rows > 4) {
-            float th = 640f * 4 / rows, ty = 250 + (640 - th) * scroll / (rows - 4);
-            UI.fill(g, 1048, 250, 1053, 890, 0xFF0A2232);
-            UI.fill(g, 1048, ty, 1053, ty + th, 0xFF3FE0FF);
-        }
-        details(g);
-        labels(g);
-        confirm(g, x, y);
-        g.pose().popMatrix();
-        // The left box holds only you: your own skin, standing on the ring and following the cursor.
-        var player = net.minecraft.client.Minecraft.getInstance().player;
-        if (player != null) {
-            net.minecraft.client.gui.screens.inventory.InventoryScreen.extractEntityInInventoryFollowsMouse(g,
-                    sx(40), sy(250), sx(290), sy(728), Math.max(8, Math.round(200 * k)), 0.0625f, mx, my, player);
-        }
-        super.extractRenderState(g, mx, my, dt);
+        com.brightwebs.brightcore.api.util.Safe.run("RaceSelectScreen.extractRenderState", () -> {
+            double x = (mx - left) / k, y = (my - top) / k;
+            g.pose().pushMatrix();
+            g.pose().translate(left, top);
+            g.pose().scale(k, k);
+            UI.tex(g, "bg_race_select", 0, 0, W, H);
+            // filters
+            for (int i = 0; i < FILTERS.length; i++) {
+                float cx = 328 + i * (CHIP_W + 6);
+                boolean on = FILTERS[i].equals(filter), hov = !on && Page.in(x, y, cx + 6, 162, cx + 6 + CHIP_W, 206);
+                UI.tex(g, on ? "chip_1" : hov ? "chip_h" : "chip_0", cx, 156);
+                Component label = Component.translatable("jaycee.ui.filter." + FILTERS[i]);
+                UI.semi(g, label, cx + 54, 185, UI.fitSize(label.getString(), 17, 12, 84, false), on ? 0xFFFFFFFF : hov ? 0xFFFFFFFF : 0xFFE0ECF4, 1);
+            }
+            // tiles
+            List<String> list = races();
+            int rows = (list.size() + 3) / 4;
+            scroll = Math.max(0, Math.min(scroll, rows - 4));
+            for (int i = 0; i < 16; i++) {
+                int idx = scroll * 4 + i;
+                if (idx >= list.size()) break;
+                String id = list.get(idx);
+                int[] c = COLS[i % 4], r = ROWS[i / 4];
+                boolean on = id.equals(selected), hov = !on && Page.in(x, y, c[0], r[0], c[1], r[1]);
+                UI.tex(g, on ? "rtile_sel" : hov ? "rtile_h" : "rtile", c[0] - 3, r[0] - 3);
+                UI.tex(g, "../race/face/" + id, c[0] + 3, r[0] + 3, c[1] - c[0] - 6, r[1] - r[0] - 40);
+                UI.fill(g, c[0] + 3, r[1] - 37, c[1] - 3, r[1] - 3, 0xF0060C18);
+                String name = Component.translatable("race.jaycee." + id).getString();
+                UI.text(g, name, (c[0] + c[1]) / 2f, r[1] - 20, UI.fitSize(name, 23, 14, c[1] - c[0] - 14, true), 0xFFFFFFFF, 1);
+                pill(g, "pill_", JayceeRaces.INFO.get(id).difficulty(), c[0] + 4, r[0] + 4, false);
+            }
+            if (rows > 4) {
+                float th = 640f * 4 / rows, ty = 250 + (640 - th) * scroll / (rows - 4);
+                UI.fill(g, 1048, 250, 1053, 890, 0xFF0A2232);
+                UI.fill(g, 1048, ty, 1053, ty + th, 0xFF3FE0FF);
+            }
+            details(g);
+            labels(g);
+            confirm(g, x, y);
+            g.pose().popMatrix();
+            // The left box holds only you: your own skin, standing on the ring and following the cursor.
+            var player = net.minecraft.client.Minecraft.getInstance().player;
+            if (player != null) {
+                net.minecraft.client.gui.screens.inventory.InventoryScreen.extractEntityInInventoryFollowsMouse(g,
+                        sx(40), sy(250), sx(290), sy(728), Math.max(8, Math.round(200 * k)), 0.0625f, mx, my, player);
+            }
+            super.extractRenderState(g, mx, my, dt);
+        });
     }
 
     /** Difficulty pill: the blank pill art with its word drawn live. */
@@ -138,17 +140,19 @@ public class RaceSelectScreen extends Screen {
 
     @Override
     public boolean mouseReleased(MouseButtonEvent event) {
-        boolean was = pressing;
-        pressing = false;
-        double x = (event.x() - left) / k, y = (event.y() - top) / k;
-        if (was && UI.button(event) == 0 && overConfirm(x, y)) {
-            LOG.info("[Jaycee] confirm race {}", selected);
-            ClientPacketDistributor.sendToServer(new BrightNetwork.ChooseRace(JayceeMod.ID + ":" + selected));
-            MenuScreen.click();
-            onClose();
-            return true;
-        }
-        return super.mouseReleased(event);
+        return com.brightwebs.brightcore.api.util.Safe.call("RaceSelectScreen.mouseReleased", () -> {
+            boolean was = pressing;
+            pressing = false;
+            double x = (event.x() - left) / k, y = (event.y() - top) / k;
+            if (was && UI.button(event) == 0 && overConfirm(x, y)) {
+                LOG.info("[Jaycee] confirm race {}", selected);
+                ClientPacketDistributor.sendToServer(new BrightNetwork.ChooseRace(JayceeMod.ID + ":" + selected));
+                MenuScreen.click();
+                onClose();
+                return true;
+            }
+            return super.mouseReleased(event);
+        }, false);
     }
 
     private void details(GuiGraphicsExtractor g) {
@@ -193,27 +197,31 @@ public class RaceSelectScreen extends Screen {
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        double x = (event.x() - left) / k, y = (event.y() - top) / k;
-        if (UI.button(event) != 0) return false;
-        for (int i = 0; i < FILTERS.length; i++) {
-            float cx = 328 + i * (CHIP_W + 6);
-            if (x >= cx + 6 && x < cx + 6 + CHIP_W && y >= 162 && y < 206) { filter = FILTERS[i]; scroll = 0; MenuScreen.click(); return true; }
-        }
-        List<String> list = races();
-        for (int i = 0; i < 16; i++) {
-            int idx = scroll * 4 + i;
-            if (idx >= list.size()) break;
-            int[] c = COLS[i % 4], r = ROWS[i / 4];
-            if (x >= c[0] && x < c[1] && y >= r[0] && y < r[1]) { selected = list.get(idx); MenuScreen.click(); return true; }
-        }
-        if (overConfirm(x, y)) { pressing = true; return true; }
-        return super.mouseClicked(event, doubleClick);
+        return com.brightwebs.brightcore.api.util.Safe.call("RaceSelectScreen.mouseClicked", () -> {
+            double x = (event.x() - left) / k, y = (event.y() - top) / k;
+            if (UI.button(event) != 0) return false;
+            for (int i = 0; i < FILTERS.length; i++) {
+                float cx = 328 + i * (CHIP_W + 6);
+                if (x >= cx + 6 && x < cx + 6 + CHIP_W && y >= 162 && y < 206) { filter = FILTERS[i]; scroll = 0; MenuScreen.click(); return true; }
+            }
+            List<String> list = races();
+            for (int i = 0; i < 16; i++) {
+                int idx = scroll * 4 + i;
+                if (idx >= list.size()) break;
+                int[] c = COLS[i % 4], r = ROWS[i / 4];
+                if (x >= c[0] && x < c[1] && y >= r[0] && y < r[1]) { selected = list.get(idx); MenuScreen.click(); return true; }
+            }
+            if (overConfirm(x, y)) { pressing = true; return true; }
+            return super.mouseClicked(event, doubleClick);
+        }, false);
     }
 
     @Override
     public boolean mouseScrolled(double mx, double my, double dx, double dy) {
-        scroll += dy < 0 ? 1 : -1;
-        return true;
+        return com.brightwebs.brightcore.api.util.Safe.call("RaceSelectScreen.mouseScrolled", () -> {
+            scroll += dy < 0 ? 1 : -1;
+            return true;
+        }, false);
     }
 
     @Override public boolean shouldCloseOnEsc() { return false; }

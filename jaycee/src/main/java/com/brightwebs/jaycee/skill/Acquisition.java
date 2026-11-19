@@ -41,25 +41,29 @@ public final class Acquisition {
 
     @SubscribeEvent
     public static void onTick(PlayerTickEvent.Post event) {
-        if (!(event.getEntity() instanceof ServerPlayer p) || p.tickCount % 40 != 0) return;
-        if (RaceAPI.race(p).isEmpty()) return;
-        if (StatusData.counter(p, "beta_fireball") == 0) { StatusData.addCounter(p, "beta_fireball", 1); learn(p, "fireball"); }
-        if (StatusData.counter(p, "mana_spent") >= 300) learn(p, "magic_perception");
-        if (StatusData.counter(p, "healed") >= 200) learn(p, "self_regeneration");
-        if (StatusData.counter(p, "physical_taken") >= 150) learn(p, "body_armor");
-        Ability sage = skill("great_sage"), raphael = skill("raphael");
-        if (sage != null && raphael != null && AbilityAPI.has(p, sage) && AbilityAPI.isMastered(p, sage)
-                && EnergyAPI.get(p).ep() >= 1_000_000) {
-            AbilityAPI.forget(p, sage);
-            AbilityAPI.learn(p, raphael);
-            p.sendSystemMessage(Component.translatable("jaycee.skill.raphael_evolved").withStyle(ChatFormatting.GOLD));
-        }
-        merfolk(p);
+        com.brightwebs.brightcore.api.util.Safe.run("Acquisition.onTick", () -> {
+            if (!(event.getEntity() instanceof ServerPlayer p) || p.tickCount % 40 != 0) return;
+            if (RaceAPI.race(p).isEmpty()) return;
+            if (StatusData.counter(p, "beta_fireball") == 0) { StatusData.addCounter(p, "beta_fireball", 1); learn(p, "fireball"); }
+            if (StatusData.counter(p, "mana_spent") >= 300) learn(p, "magic_perception");
+            if (StatusData.counter(p, "healed") >= 200) learn(p, "self_regeneration");
+            if (StatusData.counter(p, "physical_taken") >= 150) learn(p, "body_armor");
+            Ability sage = skill("great_sage"), raphael = skill("raphael");
+            if (sage != null && raphael != null && AbilityAPI.has(p, sage) && AbilityAPI.isMastered(p, sage)
+                    && EnergyAPI.get(p).ep() >= 1_000_000) {
+                AbilityAPI.forget(p, sage);
+                AbilityAPI.learn(p, raphael);
+                p.sendSystemMessage(Component.translatable("jaycee.skill.raphael_evolved").withStyle(ChatFormatting.GOLD));
+            }
+            merfolk(p);
+        });
     }
 
     @SubscribeEvent
     public static void onEvolve(RaceEvent.Evolve event) {
-        StatusData.addCounter(event.getPlayer(), "evolutions", 1);
+        com.brightwebs.brightcore.api.util.Safe.run("Acquisition.onEvolve", () -> {
+            StatusData.addCounter(event.getPlayer(), "evolutions", 1);
+        });
     }
 
     /** Starting Merfolk keep their tail: strong in water, slow on land, and they dry out. */

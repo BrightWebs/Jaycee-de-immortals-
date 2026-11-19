@@ -24,29 +24,31 @@ public final class SkillEvents {
 
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onIncomingDamage(LivingIncomingDamageEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer player) || event.getAmount() <= 0) return;
-        for (DamageKind kind : DamageKind.values()) {
-            if (!kind.matches(event.getSource())) continue;
-            ResistanceSkill nul = BrightSkills.nullification(kind), res = BrightSkills.resistance(kind);
-            if (res == null || nul == null) continue;
-            ResistanceSkill best = AbilityAPI.has(player, nul) ? nul : AbilityAPI.has(player, res) ? res : null;
-
-            if (best == null) {
-                learnByEndurance(player, kind, res, event.getAmount());
-            } else {
-                float reduced = best.reduce(event.getAmount(), player.getHealth(), AbilityAPI.masteryFraction(player, best));
-                event.setAmount(reduced);
-                AbilityAPI.addMastery(player, best, 1);
-                if (best == res && AbilityAPI.isMastered(player, res)
-                        && EnergyAPI.get(player).ep() >= BrightSkills.EP_FOR_NULLIFICATION && AbilityAPI.learn(player, nul)) {
-                    player.sendSystemMessage(Component.translatable("brightcore.message.acquired", nul.name()));
+        com.brightwebs.brightcore.api.util.Safe.run("SkillEvents.onIncomingDamage", () -> {
+            if (!(event.getEntity() instanceof ServerPlayer player) || event.getAmount() <= 0) return;
+            for (DamageKind kind : DamageKind.values()) {
+                if (!kind.matches(event.getSource())) continue;
+                ResistanceSkill nul = BrightSkills.nullification(kind), res = BrightSkills.resistance(kind);
+                if (res == null || nul == null) continue;
+                ResistanceSkill best = AbilityAPI.has(player, nul) ? nul : AbilityAPI.has(player, res) ? res : null;
+    
+                if (best == null) {
+                    learnByEndurance(player, kind, res, event.getAmount());
+                } else {
+                    float reduced = best.reduce(event.getAmount(), player.getHealth(), AbilityAPI.masteryFraction(player, best));
+                    event.setAmount(reduced);
+                    AbilityAPI.addMastery(player, best, 1);
+                    if (best == res && AbilityAPI.isMastered(player, res)
+                            && EnergyAPI.get(player).ep() >= BrightSkills.EP_FOR_NULLIFICATION && AbilityAPI.learn(player, nul)) {
+                        player.sendSystemMessage(Component.translatable("brightcore.message.acquired", nul.name()));
+                    }
+                }
+                if (event.getAmount() <= 0) {
+                    event.setCanceled(true);
+                    return;
                 }
             }
-            if (event.getAmount() <= 0) {
-                event.setCanceled(true);
-                return;
-            }
-        }
+        });
     }
 
     private static void learnByEndurance(ServerPlayer player, DamageKind kind, ResistanceSkill res, float amount) {

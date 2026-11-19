@@ -25,42 +25,50 @@ public final class EnergyEvents {
 
     @SubscribeEvent
     public static void onDeath(LivingDeathEvent event) {
-        LivingEntity victim = event.getEntity();
-        if (victim.level().isClientSide()) return;
-        if (!(event.getSource().getEntity() instanceof LivingEntity killer) || killer == victim) return;
-        Alignment alignment = killer instanceof Player p
-                ? RaceAPI.race(p).map(Race::alignment).orElse(Alignment.NEUTRAL)
-                : Alignment.NEUTRAL;
-        double gained = EnergyAPI.absorbKill(killer, victim, alignment);
-        if (killer instanceof ServerPlayer player && gained >= 1) {
-            player.sendOverlayMessage(Component.translatable("brightcore.energy.gained", EnergyAPI.format(gained)));
-        }
+        com.brightwebs.brightcore.api.util.Safe.run("EnergyEvents.onDeath", () -> {
+            LivingEntity victim = event.getEntity();
+            if (victim.level().isClientSide()) return;
+            if (!(event.getSource().getEntity() instanceof LivingEntity killer) || killer == victim) return;
+            Alignment alignment = killer instanceof Player p
+                    ? RaceAPI.race(p).map(Race::alignment).orElse(Alignment.NEUTRAL)
+                    : Alignment.NEUTRAL;
+            double gained = EnergyAPI.absorbKill(killer, victim, alignment);
+            if (killer instanceof ServerPlayer player && gained >= 1) {
+                player.sendOverlayMessage(Component.translatable("brightcore.energy.gained", EnergyAPI.format(gained)));
+            }
+        });
     }
 
     @SubscribeEvent
     public static void onTick(PlayerTickEvent.Post event) {
-        if (!(event.getEntity() instanceof ServerPlayer player) || player.tickCount % 10 != 0) return;
-        EnergyData d = EnergyAPI.get(player);
-        if (!d.initialized()) return; // no race yet
-        if (d.aura() >= d.maxAura() && d.mana() >= d.maxMana() && d.spirit() >= d.maxSpirit()) return;
-        EnergyAPI.set(player, d.withAura(d.aura() + d.maxAura() * AURA_REGEN)
-                .withMana(d.mana() + d.maxMana() * MANA_REGEN)
-                .withSpirit(d.spirit() + d.maxSpirit() * SPIRIT_REGEN));
+        com.brightwebs.brightcore.api.util.Safe.run("EnergyEvents.onTick", () -> {
+            if (!(event.getEntity() instanceof ServerPlayer player) || player.tickCount % 10 != 0) return;
+            EnergyData d = EnergyAPI.get(player);
+            if (!d.initialized()) return; // no race yet
+            if (d.aura() >= d.maxAura() && d.mana() >= d.maxMana() && d.spirit() >= d.maxSpirit()) return;
+            EnergyAPI.set(player, d.withAura(d.aura() + d.maxAura() * AURA_REGEN)
+                    .withMana(d.mana() + d.maxMana() * MANA_REGEN)
+                    .withSpirit(d.spirit() + d.maxSpirit() * SPIRIT_REGEN));
+        });
     }
 
     @SubscribeEvent
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        if (event.getEntity() instanceof ServerPlayer p) RaceAPI.race(p).ifPresent(r -> RaceAPI.applyBody(p, r));
+        com.brightwebs.brightcore.api.util.Safe.run("EnergyEvents.onLogin", () -> {
+            if (event.getEntity() instanceof ServerPlayer p) RaceAPI.race(p).ifPresent(r -> RaceAPI.applyBody(p, r));
+        });
     }
 
     @SubscribeEvent
     public static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
-        if (event.getEntity() instanceof ServerPlayer p) {
-            RaceAPI.race(p).ifPresent(r -> {
-                RaceAPI.applyBody(p, r);
-                p.setHealth(p.getMaxHealth());
-            });
-            EnergyAPI.set(p, EnergyAPI.get(p).refilled());
-        }
+        com.brightwebs.brightcore.api.util.Safe.run("EnergyEvents.onRespawn", () -> {
+            if (event.getEntity() instanceof ServerPlayer p) {
+                RaceAPI.race(p).ifPresent(r -> {
+                    RaceAPI.applyBody(p, r);
+                    p.setHealth(p.getMaxHealth());
+                });
+                EnergyAPI.set(p, EnergyAPI.get(p).refilled());
+            }
+        });
     }
 }

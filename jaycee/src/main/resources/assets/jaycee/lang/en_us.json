@@ -496,5 +496,12 @@
  "item.jaycee.body_armor": "Scale Armor",
  "jaycee.magic.cast_time": "Chanting %s / %s s",
  "jaycee.magic.cast_cancelled": "Chant broken off.",
- "key.brightcore.mode_switch": "Switch Mode (hold + skill key)"
+ "key.brightcore.mode_switch": "Switch Mode (hold + skill key)",
+ "jaycee.hud.empty": "Empty",
+ "jaycee.hud.mode": "Mode: %s",
+ "jaycee.hud.on": "On",
+ "jaycee.hud.off": "Off",
+ "jaycee.hud.hold": "Hold",
+ "jaycee.hud.default": "Ready",
+ "jaycee.hud.preset": "Preset %s / %s"
 }

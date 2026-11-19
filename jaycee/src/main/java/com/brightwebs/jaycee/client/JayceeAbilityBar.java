@@ -91,8 +91,7 @@ final class JayceeAbilityBar {
         }
         String name = a.name().getString();
         UI.text(g, name, tx, y + 18, UI.fitSize(name, 20, 12, 150, true), alpha | 0xFFFFFF, 0);
-        piece(g, "hud_diamond", tx - 1, y + 37, 9, 9, t);
-        UI.semi(g, Component.translatable("jaycee.hud.mode", modeLabel(a, player, data)), tx + 13, y + 42, 13, alpha | 0xEBF0FF, 0);
+        UI.semi(g, Component.translatable("jaycee.hud.mode", modeLabel(a, player, data)), tx, y + 42, 13, alpha | 0xEBF0FF, 0);
     }
 
     private static Component modeLabel(Ability a, Player player, AbilityData data) {

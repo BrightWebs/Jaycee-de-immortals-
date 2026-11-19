@@ -36,6 +36,9 @@ public class RaceSelectScreen extends Screen {
         top = Math.round((height - H * k) / 2);
     }
 
+    private int sx(float x) { return Math.round(left + x * k); }
+    private int sy(float y) { return Math.round(top + y * k); }
+
     private List<String> races() {
         return JayceeRaces.STARTING.stream().filter(id -> filter.equals("all") || JayceeRaces.INFO.get(id).group().equals(filter)).toList();
     }
@@ -79,15 +82,16 @@ public class RaceSelectScreen extends Screen {
             UI.fill(g, 1048, 250, 1053, 890, 0xFF0A2232);
             UI.fill(g, 1048, ty, 1053, ty + th, 0xFF3FE0FF);
         }
-        // the chosen race, full body
-        int[] bs = UI.size("../race/body/" + selected);
-        float bh = 600, bw = bh * bs[0] / bs[1];
-        if (bw > 300) { bw = 300; bh = bw * bs[1] / bs[0]; }
-        UI.tex(g, "../race/body/" + selected, 165 - bw / 2, 790 - bh, bw, bh);
         details(g);
         labels(g);
         confirm(g, x, y);
         g.pose().popMatrix();
+        // The left box holds only you: your own skin, standing on the ring and following the cursor.
+        var player = net.minecraft.client.Minecraft.getInstance().player;
+        if (player != null) {
+            net.minecraft.client.gui.screens.inventory.InventoryScreen.extractEntityInInventoryFollowsMouse(g,
+                    sx(40), sy(250), sx(290), sy(728), Math.max(8, Math.round(200 * k)), 0.0625f, mx, my, player);
+        }
         super.extractRenderState(g, mx, my, dt);
     }
 

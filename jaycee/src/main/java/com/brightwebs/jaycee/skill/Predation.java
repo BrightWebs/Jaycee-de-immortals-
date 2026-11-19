@@ -69,6 +69,7 @@ public final class Predation {
 
     private static final class Mist {
         final ServerPlayer owner; final Ability skill; final int blockMode; final boolean eatsProjectiles; int age;
+        float range; // grows to RANGE, holds, then shrinks (Tensura's PredatorMistProjectile)
         Mist(ServerPlayer owner, Ability skill, int blockMode, boolean eatsProjectiles) {
             this.owner = owner; this.skill = skill; this.blockMode = blockMode; this.eatsProjectiles = eatsProjectiles;
         }
@@ -88,6 +89,7 @@ public final class Predation {
             StatusData.addCounter(p, "predator_block_mode", next - mode);
             String key = next == 1 ? "none" : next == 2 ? "blocks" : next == 3 ? "fluid" : "all";
             p.sendOverlayMessage(Component.translatable("jaycee.skill.predator.block_mode." + key, a.name()).withStyle(ChatFormatting.DARK_AQUA));
+            p.level().playSound(null, p.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1, 1);
             return true;
         }
         MISTS.add(new Mist(p, a, (int) StatusData.counter(p, "predator_block_mode"), Tk.mastered(p, a)));
@@ -108,32 +110,56 @@ public final class Predation {
         });
     }
 
+    /**
+     * Tensura's mist: it grows out 0.25 blocks a tick to its 3-block reach and devours for its first
+     * 31 ticks (creatures, experience orbs, projectiles when mastered, and blocks or fluids by the
+     * block mode), then shrinks away. Creatures are always devoured, whatever the block mode.
+     */
     private static void tickMist(Mist m) {
         ServerPlayer p = m.owner;
         ServerLevel level = (ServerLevel) p.level();
+        boolean active = MIST_LIFE - m.age >= 29;
+        if (!active && m.range > 1) m.range = Math.max(1, m.range - RANGE / 30f);
+        else if (m.range < RANGE) m.range = Math.min(RANGE, m.range + 0.25f);
         Vec3 eye = p.getEyePosition(), look = p.getLookAngle();
-        // the mist: a dark cloud rolling out in front of you
         for (int i = 0; i < 3; i++) {
-            double d = 0.8 + p.getRandom().nextDouble() * RANGE;
+            double d = 0.6 + p.getRandom().nextDouble() * m.range;
             Vec3 at = eye.add(look.scale(d));
-            level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y - 0.2, at.z, 2, 0.25 * d, 0.2 * d, 0.25 * d, 0.005);
+            level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y - 0.2, at.z, 2, 0.2 * d, 0.16 * d, 0.2 * d, 0.005);
         }
-        if (m.age % 6 == 0) level.sendParticles(ParticleTypes.SCULK_SOUL, eye.x + look.x * 2, eye.y + look.y * 2 - 0.2, eye.z + look.z * 2, 2, 0.6, 0.4, 0.6, 0.01);
-        AABB box = p.getBoundingBox().inflate(RANGE + 1);
+        if (m.age % 6 == 0) level.sendParticles(ParticleTypes.SCULK_SOUL, eye.x + look.x * m.range * 0.7, eye.y + look.y * 2 - 0.2, eye.z + look.z * m.range * 0.7, 2, 0.5, 0.4, 0.5, 0.01);
+        if (!active) return;
+        AABB box = p.getBoundingBox().inflate(m.range + 1);
         if (m.age % 10 == 0) {
             for (LivingEntity t : level.getEntitiesOfClass(LivingEntity.class, box, e -> e != p && e.isAlive())) {
-                Vec3 to = t.position().add(0, t.getBbHeight() / 2, 0).subtract(eye);
-                if (to.length() > RANGE + t.getBbWidth() || to.normalize().dot(look) < 0.4) continue;
-                bite(p, m.skill, level, t);
+                if (inMist(eye, look, m.range, t.position().add(0, t.getBbHeight() / 2, 0), t.getBbWidth())) bite(p, m.skill, level, t);
             }
+        }
+        for (net.minecraft.world.entity.ExperienceOrb orb : level.getEntitiesOfClass(net.minecraft.world.entity.ExperienceOrb.class, box, e -> true)) {
+            if (inMist(eye, look, m.range, orb.position(), 0.5f)) orb.playerTouch(p);
         }
         if (m.eatsProjectiles) {
             for (Projectile pr : level.getEntitiesOfClass(Projectile.class, box, e -> e.getOwner() != p)) {
+                if (!inMist(eye, look, m.range, pr.position(), 0.5f)) continue;
                 level.sendParticles(ParticleTypes.SQUID_INK, pr.getX(), pr.getY(), pr.getZ(), 6, 0.1, 0.1, 0.1, 0.01);
                 pr.discard();
             }
         }
-        if (m.age % 5 == 0 && m.blockMode >= 2) eatBlock(p, level, m.blockMode);
+        if (m.blockMode >= 2) {
+            float cone = (float) (Math.PI / 6);
+            for (int i = 0; i < m.range; i++) {
+                Vec3 ray = look.normalize()
+                        .xRot(p.getRandom().nextFloat() * cone * 2 - cone)
+                        .yRot(p.getRandom().nextFloat() * cone * 2 - cone)
+                        .zRot(p.getRandom().nextFloat() * cone * 2 - cone);
+                eatBlock(p, level, m.blockMode, ray, m.range);
+            }
+        }
+    }
+
+    private static boolean inMist(Vec3 eye, Vec3 look, float range, Vec3 at, float width) {
+        Vec3 to = at.subtract(eye);
+        return to.length() <= range + width && to.normalize().dot(look) >= 0.4;
     }
 
     /** One bite: damage, drain magicules, and take one of the target's skills. */
@@ -205,8 +231,8 @@ public final class Predation {
     }
 
     /** Blocks (mode 2/4) go into the Stomach; fluid sources (mode 3/4) are drunk. */
-    private static void eatBlock(ServerPlayer p, ServerLevel level, int blockMode) {
-        Vec3 eye = p.getEyePosition(), end = eye.add(p.getLookAngle().scale(RANGE + 1));
+    private static void eatBlock(ServerPlayer p, ServerLevel level, int blockMode, Vec3 ray, float range) {
+        Vec3 eye = p.getEyePosition(), end = eye.add(ray.scale(range + 1));
         boolean fluids = blockMode == 3 || blockMode == 4, blocks = blockMode == 2 || blockMode == 4;
         BlockHitResult hit = level.clip(new ClipContext(eye, end, ClipContext.Block.OUTLINE,
                 fluids ? ClipContext.Fluid.SOURCE_ONLY : ClipContext.Fluid.NONE, p));

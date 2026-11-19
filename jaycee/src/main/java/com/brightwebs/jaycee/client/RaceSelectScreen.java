@@ -101,7 +101,7 @@ public class RaceSelectScreen extends Screen {
         int[] s = UI.size(tex);
         UI.tex(g, tex, x, y);
         Component word = Component.translatable("jaycee.ui.difficulty." + diff);
-        String text = (full ? Component.translatable("jaycee.ui.difficulty").getString() + ": " : "") + word.getString().toUpperCase(java.util.Locale.ROOT);
+        String text = ((full ? Component.translatable("jaycee.ui.difficulty").getString() + ": " : "") + word.getString()).toUpperCase(java.util.Locale.ROOT);
         UI.text(g, text, x + s[0] / 2f, y + s[1] / 2f, full ? 13 : 12, 0xFF0A1A10, 1);
     }
 

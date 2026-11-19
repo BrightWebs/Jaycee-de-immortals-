@@ -96,7 +96,7 @@ public final class RaceSkills {
             setFlight(p, on);
             toggleStored(p, "race_flight", on);
             p.level().playSound(null, p.blockPosition(), on ? SoundEvents.PHANTOM_FLAP : SoundEvents.ARMOR_EQUIP_ELYTRA.value(), SoundSource.PLAYERS, 0.8f, 1.2f);
-            ((ServerLevel) p.level()).sendParticles(ParticleTypes.CLOUD, p.getX(), p.getY() + 0.2, p.getZ(), 8, 0.3, 0.1, 0.3, 0.02);
+            com.brightwebs.brightcore.fx.Fx.ring((ServerLevel) p.level(), com.brightwebs.brightcore.fx.BrightParticles.GUST, p.position().add(0, 0.2, 0), 0.6, 14, on ? 0.15 : -0.05);
         }
         @Override public void tick(ServerPlayer p) { keepFlight(p, "race_flight"); }
     };
@@ -115,7 +115,7 @@ public final class RaceSkills {
                 p.setDeltaMovement(new Vec3(d.x * (0.3f + upward), dy, d.z * (0.3f + upward)));
                 sync(p);
                 startGlide(p);
-                ((ServerLevel) p.level()).sendParticles(ParticleTypes.CLOUD, p.getX(), p.getY(), p.getZ(), 14, 0.5, 0.1, 0.5, 0.05);
+                com.brightwebs.brightcore.fx.Fx.ring((ServerLevel) p.level(), com.brightwebs.brightcore.fx.BrightParticles.GUST, p.position(), 0.5, 16, 0.3); com.brightwebs.brightcore.fx.Fx.burst((ServerLevel) p.level(), com.brightwebs.brightcore.fx.BrightParticles.PETAL, p.position().add(0, 1, 0), 10, 0.2);
                 p.level().playSound(null, p.blockPosition(), SoundEvents.PHANTOM_FLAP, SoundSource.PLAYERS, 1, 1);
             }
             @Override public void tick(ServerPlayer p) { glide(p); }
@@ -139,7 +139,7 @@ public final class RaceSkills {
                 RaceAbilities.setCooldown(p, 3);
                 sync(p);
                 startGlide(p);
-                ((ServerLevel) p.level()).sendParticles(ParticleTypes.FLAME, p.getX(), p.getY() + 0.5, p.getZ(), 16, 0.4, 0.3, 0.4, 0.03);
+                com.brightwebs.brightcore.fx.Fx.cone((ServerLevel) p.level(), com.brightwebs.brightcore.fx.BrightParticles.FLAME, p.position().add(0, 0.8, 0), p.getLookAngle().reverse(), 0.3, 0.5, 18); com.brightwebs.brightcore.fx.Fx.shockwave((ServerLevel) p.level(), p.position().add(0, 0.5, 0), 1);
                 p.level().playSound(null, p.blockPosition(), SoundEvents.ENDER_DRAGON_FLAP, SoundSource.PLAYERS, 0.8f, 1.1f);
             }
             @Override public void tick(ServerPlayer p) { glide(p); }
@@ -173,7 +173,7 @@ public final class RaceSkills {
                 int c = Math.min(t + 1, maxCharge);
                 p.sendOverlayMessage(Component.translatable("jaycee.race.power_scale",
                         String.format("%.1f/%.1f", Math.round(c * 10 / 20.0) / 10.0, maxCharge / 20.0)).withStyle(ChatFormatting.DARK_GREEN));
-                if (t % 5 == 0) ((ServerLevel) p.level()).sendParticles(ParticleTypes.ITEM_SLIME, p.getX(), p.getY() + 0.1, p.getZ(), 4, 0.3, 0, 0.3, 0);
+                if (t % 4 == 0) com.brightwebs.brightcore.fx.Fx.ring((ServerLevel) p.level(), com.brightwebs.brightcore.fx.BrightParticles.BUBBLE, p.position().add(0, 0.1, 0), 0.4 + c / (float) maxCharge * 0.6, 8, 0);
                 return true;
             }
             @Override public void release(ServerPlayer p, int t) {
@@ -203,14 +203,14 @@ public final class RaceSkills {
                 if (target.hurtServer((ServerLevel) p.level(), p.damageSources().playerAttack(p), 2.0f)) {
                     p.heal(2.0f);
                     p.getFoodData().eat(2, 0.0f);
-                    ((ServerLevel) p.level()).sendParticles(ParticleTypes.DAMAGE_INDICATOR, target.getX(), target.getY() + target.getBbHeight() / 2, target.getZ(), 6, 0.2, 0.2, 0.2, 0.1);
+                    com.brightwebs.brightcore.fx.Fx.beam((ServerLevel) p.level(), com.brightwebs.brightcore.fx.BrightParticles.BLOOD, target.position().add(0, target.getBbHeight() / 2, 0), p.position().add(0, 1.2, 0), 0.3);
                     p.level().playSound(null, p.blockPosition(), SoundEvents.GENERIC_DRINK.value(), SoundSource.PLAYERS, 1, 0.7f);
                 }
                 return;
             }
             toggleStored(p, "bat_mode", true);
             setFlight(p, true);
-            ((ServerLevel) p.level()).sendParticles(ParticleTypes.SMOKE, p.getX(), p.getY() + 1, p.getZ(), 30, 0.4, 0.6, 0.4, 0.02);
+            com.brightwebs.brightcore.fx.Fx.burst((ServerLevel) p.level(), com.brightwebs.brightcore.fx.BrightParticles.VOID, p.position().add(0, 1, 0), 24, 0.25); com.brightwebs.brightcore.fx.Fx.cloud((ServerLevel) p.level(), com.brightwebs.brightcore.fx.BrightParticles.MIST, p.position().add(0, 1, 0), 10, 0.4);
             p.level().playSound(null, p.blockPosition(), SoundEvents.BAT_TAKEOFF, SoundSource.PLAYERS, 1, 1);
             p.sendOverlayMessage(Component.translatable("jaycee.race.bat_mode.on"));
         }

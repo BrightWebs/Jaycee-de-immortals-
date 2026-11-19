@@ -147,10 +147,11 @@ public final class RaceAPI {
 
     private static void celebrate(ServerPlayer player, Race race) {
         ServerLevel level = (ServerLevel) player.level();
-        level.sendParticles(ParticleTypes.TOTEM_OF_UNDYING, player.getX(), player.getY() + 1, player.getZ(),
-                80, 0.6, 1.0, 0.6, 0.35);
-        level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1, player.getZ(),
-                40, 0.4, 1.2, 0.4, 0.05);
+        // Evolution: light spirals up through the body and bursts outward
+        com.brightwebs.brightcore.fx.Fx.spiral(level, com.brightwebs.brightcore.fx.BrightParticles.HOLY, player.position(), 0.9, 2.6, 3, 60, 0);
+        com.brightwebs.brightcore.fx.Fx.spiral(level, com.brightwebs.brightcore.fx.BrightParticles.SPIRIT, player.position(), 0.9, 2.6, 3, 60, Math.PI);
+        com.brightwebs.brightcore.fx.Fx.shockwave(level, player.position().add(0, 1, 0), 1.5);
+        com.brightwebs.brightcore.fx.Fx.burst(level, com.brightwebs.brightcore.fx.BrightParticles.HOLY, player.position().add(0, 1, 0), 30, 0.35);
         level.playSound(null, player.blockPosition(), SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 0.8f, 1.2f);
         player.sendSystemMessage(Component.translatable("brightcore.race.evolved", race.name()));
     }

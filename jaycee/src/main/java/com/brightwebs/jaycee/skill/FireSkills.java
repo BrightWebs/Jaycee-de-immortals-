@@ -50,8 +50,8 @@ public final class FireSkills {
         for (int i = 1; i <= BREATH_RANGE; i++) {
             Vec3 at = eye.add(look.scale(i * 0.9));
             double s = 0.06 * i;
-            l.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z, 2 + i / 2, s, s, s, 0.02);
-            if (i > 3 && held % 2 == 0) l.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y + 0.2, at.z, 1, s, s, s, 0.01);
+            if (i == 1) com.brightwebs.brightcore.fx.Fx.cone(l, com.brightwebs.brightcore.fx.BrightParticles.FLAME, at, look, 0.45, 0.22, 4);
+            if (i > 3 && held % 3 == 0) com.brightwebs.brightcore.fx.Fx.move(l, com.brightwebs.brightcore.fx.BrightParticles.EMBER, at, look.scale(0.2));
         }
         if (held % 2 == 0) l.playSound(null, p.blockPosition(), SoundEvents.BLAZE_BURN, SoundSource.PLAYERS, 0.75f, 1.0f);
         if (held % 5 == 0) {
@@ -84,9 +84,9 @@ public final class FireSkills {
             Vec3 c = p.position().add(0, 0.05, 0);
             for (int i = 0; i < 3; i++) {
                 double ang = (held * 0.25) + i * Math.PI * 2 / 3;
-                l.sendParticles(ParticleTypes.FLAME, c.x + Math.cos(ang) * r, c.y, c.z + Math.sin(ang) * r, 1, 0, 0, 0, 0);
+                com.brightwebs.brightcore.fx.Fx.move(l, com.brightwebs.brightcore.fx.BrightParticles.FLAME, new Vec3(c.x + Math.cos(ang) * r, c.y, c.z + Math.sin(ang) * r), new Vec3(0, 0.02, 0));
             }
-            if (held % 5 == 0) Tk.ring(l, ParticleTypes.SMALL_FLAME, c, r, 16, 0);
+            if (held % 5 == 0) com.brightwebs.brightcore.fx.Fx.magicCircle(l, com.brightwebs.brightcore.fx.BrightParticles.EMBER, c, r, held);
         }
         boolean mastered = Tk.mastered(p, a);
         double shown = Math.min(held, mastered ? full : cast) / 20.0, of = (mastered && held >= cast ? full : cast) / 20.0;
@@ -141,9 +141,8 @@ public final class FireSkills {
         boolean touched = !b.level.getEntitiesOfClass(LivingEntity.class, sweep, e -> e != b.owner && e.isAlive()).isEmpty();
         // the ball itself
         double s = b.size * 0.18;
-        b.level.sendParticles(ParticleTypes.FLAME, end.x, end.y, end.z, (int) (6 * b.size), s, s, s, 0.01);
-        b.level.sendParticles(ParticleTypes.LAVA, end.x, end.y, end.z, 1, s, s, s, 0);
-        b.level.sendParticles(ParticleTypes.SMOKE, b.pos.x, b.pos.y, b.pos.z, 2, s, s, s, 0.01);
+        com.brightwebs.brightcore.fx.Fx.sphere(b.level, com.brightwebs.brightcore.fx.BrightParticles.FLAME, end, s, (int) (5 * b.size));
+        com.brightwebs.brightcore.fx.Fx.move(b.level, com.brightwebs.brightcore.fx.BrightParticles.EMBER, b.pos, b.vel.scale(-0.1));
         if (hit.getType() == HitResult.Type.BLOCK || touched) { burst(b, end); return true; }
         b.pos = next;
         return false;
@@ -151,9 +150,10 @@ public final class FireSkills {
 
     private static void burst(Ball b, Vec3 at) {
         ServerLevel l = b.level;
-        l.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y, at.z, (int) (2 * b.radius), b.radius * 0.4, b.radius * 0.4, b.radius * 0.4, 0);
-        l.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z, (int) (40 * b.radius), b.radius * 0.4, b.radius * 0.4, b.radius * 0.4, 0.15);
-        l.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y, at.z, (int) (10 * b.radius), b.radius * 0.3, b.radius * 0.3, b.radius * 0.3, 0.05);
+        l.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y, at.z, 1, 0, 0, 0, 0);
+        com.brightwebs.brightcore.fx.Fx.shockwave(l, at, b.radius / 3);
+        com.brightwebs.brightcore.fx.Fx.burst(l, com.brightwebs.brightcore.fx.BrightParticles.FLAME, at, (int) (24 * b.radius), 0.12 * b.radius);
+        com.brightwebs.brightcore.fx.Fx.burst(l, com.brightwebs.brightcore.fx.BrightParticles.EMBER, at, (int) (12 * b.radius), 0.18 * b.radius);
         l.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.2f, 1.1f);
         for (LivingEntity t : l.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(b.radius), e -> e != b.owner && e.isAlive())) {
             if (t.position().distanceTo(at) > b.radius + t.getBbWidth()) continue;

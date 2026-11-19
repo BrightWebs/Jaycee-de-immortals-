@@ -127,6 +127,7 @@ public final class GreatSage {
             p.sendOverlayMessage(Component.translatable(on ? "jaycee.skill.analytical.on" : "jaycee.skill.analytical.off").withStyle(ChatFormatting.DARK_AQUA));
         }
         p.level().playSound(null, p.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1, 1.4f);
+        com.brightwebs.brightcore.fx.Fx.ring((ServerLevel) p.level(), com.brightwebs.brightcore.fx.BrightParticles.RUNE, p.position().add(0, p.getBbHeight() + 0.3, 0), 0.5, 10, 0);
         return true;
     }
 
@@ -232,7 +233,7 @@ public final class GreatSage {
         } else {
             Tk.fail(p, "jaycee.skill.activation_failed");
         }
-        level.sendParticles(ParticleTypes.ENCHANT, target.getX(), target.getY() + target.getBbHeight() / 2, target.getZ(), 40, 0.4, 0.6, 0.4, 0.8);
+        com.brightwebs.brightcore.fx.Fx.beam(level, com.brightwebs.brightcore.fx.BrightParticles.RUNE, p.getEyePosition(), target.position().add(0, target.getBbHeight() / 2, 0), 0.5); com.brightwebs.brightcore.fx.Fx.sphere(level, ok ? com.brightwebs.brightcore.fx.BrightParticles.HOLY : com.brightwebs.brightcore.fx.BrightParticles.SPIRIT, target.position().add(0, target.getBbHeight() / 2, 0), target.getBbWidth(), 16);
         level.playSound(null, p.blockPosition(), ok ? SoundEvents.PLAYER_LEVELUP : SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.8f, ok ? 1.4f : 1.6f);
         AbilityAPI.setCooldown(p, a, (ok ? COPY_CD_SUCCESS : COPY_CD_FAIL) * 20);
         return true;

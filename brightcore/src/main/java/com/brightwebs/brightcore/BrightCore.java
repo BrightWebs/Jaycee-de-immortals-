@@ -27,6 +27,7 @@ public final class BrightCore {
 
     public BrightCore(IEventBus modBus) {
         AbilityRegistry.init(modBus);
+        com.brightwebs.brightcore.fx.BrightParticles.init(modBus);
         RaceRegistry.init(modBus);
         BrightAttachments.init(modBus);
         com.brightwebs.brightcore.api.skill.BrightSkills.init(modBus);

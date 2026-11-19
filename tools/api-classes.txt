@@ -1,2 +1,13 @@
-net.minecraft.client.Screenshot
-net.minecraft.client.Minecraft
+net.minecraft.world.item.crafting.RecipeManager
+net.minecraft.world.item.crafting.SingleRecipeInput
+net.minecraft.world.item.crafting.AbstractCookingRecipe
+net.minecraft.world.item.crafting.RecipeHolder
+net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket
+net.minecraft.network.syncher.SynchedEntityData$DataValue
+net.minecraft.network.syncher.SynchedEntityData
+net.minecraft.world.item.component.CustomData
+net.minecraft.world.item.component.DyedItemColor
+net.neoforged.neoforge.event.entity.item.ItemTossEvent
+net.minecraft.server.level.ServerLevel
+net.minecraft.world.level.Explosion$BlockInteraction
+net.minecraft.world.level.Level$ExplosionInteraction

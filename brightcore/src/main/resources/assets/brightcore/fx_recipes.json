@@ -1,0 +1,7940 @@
+{
+"abaddon": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"ahura_mazda": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"amalthea": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"amaterasu": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"amon": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"angra_mainyu": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"asmodeus": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"astaroth": {
+"families": [
+"acid",
+"mist"
+],
+"shape": "awaken"
+},
+"astarte": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "awaken"
+},
+"azathoth": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"azazel": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"azi_dahaka": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"azrael": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"beelzebuth": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"belial": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"belphegor": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"cthugha": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"cthulhu": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"deus_ex_machina": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"djibril": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"faust": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"fortuna": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"gabriel": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"hamiel": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"haniel": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"hastur": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"indra": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"israfil": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"jibril": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"leviathan": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"lucifer": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"mammon": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"mephisto": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"metatron": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"metis": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"michael": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"nodens": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"nyarlathotep": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"raguel": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"raphael": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"rex": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"samael": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"sandalphon": {
+"families": [
+"shard",
+"spark"
+],
+"shape": "awaken"
+},
+"sariel": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"satanael": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"sephirot": {
+"families": [
+"acid",
+"mist"
+],
+"shape": "awaken"
+},
+"shub_niggurath": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"small_world": {
+"families": [
+"holy",
+"void"
+],
+"shape": "area"
+},
+"surya": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"susanoo": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"terra_mater": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"true_hero": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"uriel": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"vayu": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"veldora": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"velgrynd": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"yaoyorozu": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"yog_sothoth": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"yog_sotohort": {
+"families": [
+"holy",
+"void"
+],
+"shape": "awaken"
+},
+"agastya": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"agni": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"alternative": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"melchizedek": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"multiple_weapons": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"orpheus": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"world_map": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "area"
+},
+"artist": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "awaken"
+},
+"bahamut": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "awaken"
+},
+"beelzebub": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "awaken"
+},
+"blade_transformation": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"eternal": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "awaken"
+},
+"grimoire": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "awaken"
+},
+"immortal": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "awaken"
+},
+"mood_maker": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "awaken"
+},
+"necronomicon": {
+"families": [
+"void",
+"mist"
+],
+"shape": "awaken"
+},
+"proserpina": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "awaken"
+},
+"tsukuyomi": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "awaken"
+},
+"absolute_end": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"adapter": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"all_rounder": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"analyst": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "sense"
+},
+"avenger": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"awakener": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"berserk": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "awaken"
+},
+"berserker": {
+"families": [
+"dark_spark",
+"void"
+],
+"shape": "awaken"
+},
+"bewilder": {
+"families": [
+"heal",
+"spirit"
+],
+"shape": "awaken"
+},
+"carnation": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"chef": {
+"families": [
+"heal",
+"spirit"
+],
+"shape": "awaken"
+},
+"chosen_one": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"combatant": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"commander": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"cook": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"craftsman": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"creator": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "summon"
+},
+"decipherer": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"degenerate": {
+"families": [
+"soul",
+"mist"
+],
+"shape": "awaken"
+},
+"dilettante": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"divine_berserker": {
+"families": [
+"dark_spark",
+"void"
+],
+"shape": "awaken"
+},
+"eminence": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"engorger": {
+"families": [
+"mist",
+"void"
+],
+"shape": "awaken"
+},
+"falsifier": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"fusionist": {
+"families": [
+"shockwave",
+"shard"
+],
+"shape": "awaken"
+},
+"give_me_strength": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"glutton": {
+"families": [
+"mist",
+"void"
+],
+"shape": "awaken"
+},
+"gluttony": {
+"families": [
+"mist",
+"void"
+],
+"shape": "awaken"
+},
+"gourmand": {
+"families": [
+"aura",
+"shockwave"
+],
+"shape": "awaken"
+},
+"gourmet": {
+"families": [
+"mist",
+"void"
+],
+"shape": "awaken"
+},
+"great_sage": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "sense"
+},
+"greed": {
+"families": [
+"mist",
+"void"
+],
+"shape": "awaken"
+},
+"guardian": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "guard"
+},
+"guide": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"healer": {
+"families": [
+"heal",
+"spirit"
+],
+"shape": "heal"
+},
+"imitator": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"infinity_prison": {
+"families": [
+"shockwave",
+"shard"
+],
+"shape": "area"
+},
+"intruder": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"investigator": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"leader": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"looter": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"lord_of_magewolves": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"lust": {
+"families": [
+"spark",
+"shockwave"
+],
+"shape": "awaken"
+},
+"manipulator": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"manufacturer": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"martial_master": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "awaken"
+},
+"mathematician": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"megalomania": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"merciless": {
+"families": [
+"soul",
+"mist"
+],
+"shape": "awaken"
+},
+"milim_ear": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"milim_eye": {
+"families": [
+"rune",
+"aura"
+],
+"shape": "sense"
+},
+"motherly_queen": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"murderer": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"musician": {
+"families": [
+"shockwave",
+"shard"
+],
+"shape": "awaken"
+},
+"observer": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"oppressor": {
+"families": [
+"shockwave",
+"shard"
+],
+"shape": "awaken"
+},
+"optimist": {
+"families": [
+"mist",
+"void"
+],
+"shape": "awaken"
+},
+"overcomer": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"paranoia": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"perceiver": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"planner": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"predator": {
+"families": [
+"mist",
+"void"
+],
+"shape": "awaken"
+},
+"pride": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"reaper": {
+"families": [
+"mist",
+"void"
+],
+"shape": "awaken"
+},
+"recorder": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"reflector": {
+"families": [
+"spark",
+"shockwave"
+],
+"shape": "awaken"
+},
+"regressor": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"researcher": {
+"families": [
+"rune",
+"aura"
+],
+"shape": "sense"
+},
+"responder": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"reverser": {
+"families": [
+"soul",
+"mist"
+],
+"shape": "awaken"
+},
+"royal_beast_form": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"scavenger": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"seeker": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"seer": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"sentient_being": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"severer": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "awaken"
+},
+"shadow_striker": {
+"families": [
+"void",
+"mist"
+],
+"shape": "slash"
+},
+"sloth": {
+"families": [
+"heal",
+"spirit"
+],
+"shape": "awaken"
+},
+"sniper": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"spearhead": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "projectile"
+},
+"spiral_body": {
+"families": [
+"shard",
+"spark"
+],
+"shape": "guard"
+},
+"starved": {
+"families": [
+"mist",
+"void"
+],
+"shape": "awaken"
+},
+"supporter": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"suppressor": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "awaken"
+},
+"survivor": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"tempter": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"thrower": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "awaken"
+},
+"time_traveler": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"tough_guy": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"traveler": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "awaken"
+},
+"tuner": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "awaken"
+},
+"tyrant": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"unyielding": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"usurper": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"villain": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"voracious_resurrection": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "heal"
+},
+"wisher": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "awaken"
+},
+"limiter": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "awaken"
+},
+"all_of_creation": {
+"families": [
+"aura",
+"rune"
+],
+"shape": "summon"
+},
+"all_seeing_eye": {
+"families": [
+"rune",
+"aura"
+],
+"shape": "sense"
+},
+"analytical_appraisal": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "sense"
+},
+"appraisal_eye": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "sense"
+},
+"armor_fusion": {
+"families": [
+"shard",
+"spark"
+],
+"shape": "guard"
+},
+"black_flame": {
+"families": [
+"black_flame",
+"ember"
+],
+"shape": "aura"
+},
+"black_lightning": {
+"families": [
+"dark_spark",
+"void"
+],
+"shape": "aura"
+},
+"black_thunder": {
+"families": [
+"spark",
+"shockwave"
+],
+"shape": "aura"
+},
+"body_double": {
+"families": [
+"mist",
+"void"
+],
+"shape": "guard"
+},
+"celestial_eye": {
+"families": [
+"rune",
+"aura"
+],
+"shape": "sense"
+},
+"chant_annulment": {
+"families": [
+"aura",
+"rune"
+],
+"shape": "aura"
+},
+"charm": {
+"families": [
+"aura",
+"rune"
+],
+"shape": "aura"
+},
+"danger_detection": {
+"families": [
+"rune",
+"aura"
+],
+"shape": "sense"
+},
+"demon_lord_s_haki": {
+"families": [
+"void",
+"mist"
+],
+"shape": "awaken"
+},
+"divine_strength": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "aura"
+},
+"earth_manipulation": {
+"families": [
+"shockwave",
+"shard"
+],
+"shape": "aura"
+},
+"enhanced_body_double": {
+"families": [
+"shard",
+"spark"
+],
+"shape": "guard"
+},
+"explosive_flames": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "aura"
+},
+"flame_domination": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "aura"
+},
+"flame_manipulation": {
+"families": [
+"black_flame",
+"ember"
+],
+"shape": "aura"
+},
+"frenzy": {
+"families": [
+"aura",
+"rune"
+],
+"shape": "aura"
+},
+"full_body_armorize": {
+"families": [
+"shard",
+"spark"
+],
+"shape": "guard"
+},
+"fusion": {
+"families": [
+"aura",
+"rune"
+],
+"shape": "aura"
+},
+"future_attack_prediction": {
+"families": [
+"aura",
+"rune"
+],
+"shape": "aura"
+},
+"godwolf_sense": {
+"families": [
+"rune",
+"aura"
+],
+"shape": "sense"
+},
+"gravity_domination": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "aura"
+},
+"gravity_manipulation": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "aura"
+},
+"haki": {
+"families": [
+"aura",
+"shockwave"
+],
+"shape": "aura"
+},
+"heat_source_perception": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "sense"
+},
+"heat_wave": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "aura"
+},
+"heavenly_eye": {
+"families": [
+"rune",
+"aura"
+],
+"shape": "sense"
+},
+"hero_s_haki": {
+"families": [
+"aura",
+"shockwave"
+],
+"shape": "aura"
+},
+"holy_haki": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "aura"
+},
+"holy_demonic_inversion": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "aura"
+},
+"immovable": {
+"families": [
+"aura",
+"rune"
+],
+"shape": "aura"
+},
+"infinite_regeneration": {
+"families": [
+"heal",
+"spirit"
+],
+"shape": "heal"
+},
+"iron_wall": {
+"families": [
+"shard",
+"spark"
+],
+"shape": "area"
+},
+"law_domination": {
+"families": [
+"aura",
+"rune"
+],
+"shape": "aura"
+},
+"law_manipulation": {
+"families": [
+"mist",
+"void"
+],
+"shape": "aura"
+},
+"life_domination": {
+"families": [
+"aura",
+"rune"
+],
+"shape": "aura"
+},
+"life_drain": {
+"families": [
+"drop",
+"bubble"
+],
+"shape": "area"
+},
+"magic_aura": {
+"families": [
+"aura",
+"shockwave"
+],
+"shape": "aura"
+},
+"magic_flame_transformation": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "awaken"
+},
+"majesty": {
+"families": [
+"aura",
+"rune"
+],
+"shape": "aura"
+},
+"malice_perception": {
+"families": [
+"frost",
+"bubble"
+],
+"shape": "sense"
+},
+"mana_jamming": {
+"families": [
+"aura",
+"rune"
+],
+"shape": "aura"
+},
+"mana_manipulation": {
+"families": [
+"aura",
+"rune"
+],
+"shape": "aura"
+},
+"mana_perception": {
+"families": [
+"rune",
+"aura"
+],
+"shape": "sense"
+},
+"mental_crush": {
+"families": [
+"spark",
+"shockwave"
+],
+"shape": "slash"
+},
+"metal_manipulation": {
+"families": [
+"shard",
+"spark"
+],
+"shape": "aura"
+},
+"molecular_manipulation": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "aura"
+},
+"mortal_fear": {
+"families": [
+"aura",
+"shockwave"
+],
+"shape": "aura"
+},
+"multidimensional_barrier": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "area"
+},
+"multilayer_barrier": {
+"families": [
+"drop",
+"bubble"
+],
+"shape": "area"
+},
+"observing_eye": {
+"families": [
+"rune",
+"aura"
+],
+"shape": "sense"
+},
+"parallel_calculation": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "aura"
+},
+"parallel_existence": {
+"families": [
+"aura",
+"rune"
+],
+"shape": "aura"
+},
+"parallel_thought": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "aura"
+},
+"perfect_memory": {
+"families": [
+"aura",
+"rune"
+],
+"shape": "aura"
+},
+"predictive_calculation": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "aura"
+},
+"presence_detection": {
+"families": [
+"rune",
+"aura"
+],
+"shape": "sense"
+},
+"quantum_manipulation": {
+"families": [
+"aura",
+"rune"
+],
+"shape": "aura"
+},
+"ranged_barrier": {
+"families": [
+"aura",
+"rune"
+],
+"shape": "area"
+},
+"sage": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "sense"
+},
+"self_regeneration": {
+"families": [
+"heal",
+"spirit"
+],
+"shape": "heal"
+},
+"shadow_motion": {
+"families": [
+"mist",
+"void"
+],
+"shape": "aura"
+},
+"snake_eye": {
+"families": [
+"rune",
+"aura"
+],
+"shape": "sense"
+},
+"sound_wave_perception": {
+"families": [
+"drop",
+"bubble"
+],
+"shape": "sense"
+},
+"spacetime_domination": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "aura"
+},
+"spacetime_manipulation": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "aura"
+},
+"spatial_domination": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "aura"
+},
+"spatial_manipulation": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "aura"
+},
+"spatial_motion": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "aura"
+},
+"spatial_storage": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "aura"
+},
+"spiritual_domination": {
+"families": [
+"spirit",
+"aura"
+],
+"shape": "aura"
+},
+"spiritual_manipulation": {
+"families": [
+"spirit",
+"aura"
+],
+"shape": "aura"
+},
+"steel_strength": {
+"families": [
+"drop",
+"bubble"
+],
+"shape": "aura"
+},
+"sticky_steel_thread": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "aura"
+},
+"strengthen_body": {
+"families": [
+"drop",
+"bubble"
+],
+"shape": "guard"
+},
+"temporal_manipulation": {
+"families": [
+"aura",
+"rune"
+],
+"shape": "aura"
+},
+"thought_acceleration": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "move"
+},
+"thought_domination": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "aura"
+},
+"thought_manipulation": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "aura"
+},
+"ultra_acceleration": {
+"families": [
+"aura",
+"rune"
+],
+"shape": "move"
+},
+"ultra_intuition": {
+"families": [
+"aura",
+"rune"
+],
+"shape": "aura"
+},
+"ultra_recovery": {
+"families": [
+"heal",
+"spirit"
+],
+"shape": "heal"
+},
+"ultra_sense": {
+"families": [
+"rune",
+"aura"
+],
+"shape": "sense"
+},
+"ultra_smell": {
+"families": [
+"aura",
+"rune"
+],
+"shape": "aura"
+},
+"ultra_sound_waves": {
+"families": [
+"drop",
+"bubble"
+],
+"shape": "aura"
+},
+"ultra_vibration": {
+"families": [
+"aura",
+"rune"
+],
+"shape": "aura"
+},
+"ultraspeed_action": {
+"families": [
+"aura",
+"rune"
+],
+"shape": "move"
+},
+"ultraspeed_reaction": {
+"families": [
+"aura",
+"rune"
+],
+"shape": "move"
+},
+"ultraspeed_regeneration": {
+"families": [
+"heal",
+"spirit"
+],
+"shape": "heal"
+},
+"ultraspeed_thought": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "move"
+},
+"universal_perception": {
+"families": [
+"rune",
+"aura"
+],
+"shape": "sense"
+},
+"universal_shapeshift": {
+"families": [
+"aura",
+"rune"
+],
+"shape": "move"
+},
+"water_manipulation": {
+"families": [
+"drop",
+"bubble"
+],
+"shape": "aura"
+},
+"weather_domination": {
+"families": [
+"aura",
+"rune"
+],
+"shape": "aura"
+},
+"weather_manipulation": {
+"families": [
+"aura",
+"rune"
+],
+"shape": "aura"
+},
+"wind_manipulation": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "aura"
+},
+"body_armor": {
+"families": [
+"shard",
+"spark"
+],
+"shape": "guard"
+},
+"coercion": {
+"families": [
+"shockwave",
+"shard"
+],
+"shape": "aura"
+},
+"corrosion": {
+"families": [
+"drop",
+"bubble"
+],
+"shape": "aura"
+},
+"farsight": {
+"families": [
+"rune",
+"aura"
+],
+"shape": "sense"
+},
+"gravity_flight": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "move"
+},
+"hydraulic_propulsion": {
+"families": [
+"drop",
+"bubble"
+],
+"shape": "aura"
+},
+"paralyzing_breath": {
+"families": [
+"acid",
+"mist"
+],
+"shape": "cone"
+},
+"poison_breath": {
+"families": [
+"acid",
+"mist"
+],
+"shape": "cone"
+},
+"poison_paralysis_corrosion_conferment": {
+"families": [
+"acid",
+"mist"
+],
+"shape": "aura"
+},
+"scale_armor": {
+"families": [
+"shard",
+"spark"
+],
+"shape": "guard"
+},
+"steel_thread": {
+"families": [
+"shard",
+"spark"
+],
+"shape": "aura"
+},
+"sticky_thread": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"strengthen": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"telepathy": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"thought_communication": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "aura"
+},
+"voice_cannon": {
+"families": [
+"frost",
+"bubble"
+],
+"shape": "beam"
+},
+"water_blade": {
+"families": [
+"drop",
+"bubble"
+],
+"shape": "slash"
+},
+"water_current_motion": {
+"families": [
+"drop",
+"bubble"
+],
+"shape": "aura"
+},
+"absolute_immortality": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"absorption": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"alteration": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"beast_body": {
+"families": [
+"shard",
+"spark"
+],
+"shape": "guard"
+},
+"beast_domination": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"beast_unification": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"beastialize": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"black_flame_thunder": {
+"families": [
+"black_flame",
+"ember"
+],
+"shape": "aura"
+},
+"blood_raise": {
+"families": [
+"blood",
+"mist"
+],
+"shape": "aura"
+},
+"dark_night_cycle": {
+"families": [
+"void",
+"mist"
+],
+"shape": "aura"
+},
+"dissolve": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"dragon_body": {
+"families": [
+"shard",
+"spark"
+],
+"shape": "guard"
+},
+"dragon_change": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "awaken"
+},
+"dragon_eye": {
+"families": [
+"rune",
+"aura"
+],
+"shape": "sense"
+},
+"dragon_scales": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"dragon_skin": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"dragon_spirit_haki": {
+"families": [
+"spirit",
+"aura"
+],
+"shape": "aura"
+},
+"drain": {
+"families": [
+"drop",
+"bubble"
+],
+"shape": "area"
+},
+"flame_breath": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "cone"
+},
+"flame_transformation": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "awaken"
+},
+"ice_wall_jail": {
+"families": [
+"frost",
+"bubble"
+],
+"shape": "area"
+},
+"magic_nullification": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "guard"
+},
+"magic_resistance": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "guard"
+},
+"material_creation": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "summon"
+},
+"ogre_berserker": {
+"families": [
+"dark_spark",
+"void"
+],
+"shape": "aura"
+},
+"paralyze": {
+"families": [
+"acid",
+"mist"
+],
+"shape": "aura"
+},
+"plant_whisper": {
+"families": [
+"petal",
+"heal"
+],
+"shape": "aura"
+},
+"possess": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"special_parallel_calculation": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "aura"
+},
+"summon_monster": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "summon"
+},
+"thunder_breath": {
+"families": [
+"spark",
+"shockwave"
+],
+"shape": "cone"
+},
+"transform": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "awaken"
+},
+"true_eye": {
+"families": [
+"rune",
+"aura"
+],
+"shape": "sense"
+},
+"universal_thread": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"abnormal_condition_resistance": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "guard"
+},
+"cold_resistance": {
+"families": [
+"frost",
+"bubble"
+],
+"shape": "guard"
+},
+"corrosion_resistance": {
+"families": [
+"acid",
+"mist"
+],
+"shape": "guard"
+},
+"electricity_resistance": {
+"families": [
+"spark",
+"shockwave"
+],
+"shape": "guard"
+},
+"flame_attack_resistance": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "guard"
+},
+"heat_resistance": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "guard"
+},
+"holy_demonic_attack_resistance": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "guard"
+},
+"natural_effects_resistance": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "guard"
+},
+"pain_resistance": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "guard"
+},
+"paralysis_resistance": {
+"families": [
+"acid",
+"mist"
+],
+"shape": "guard"
+},
+"physical_attack_resistance": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "guard"
+},
+"pierce_resistance": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "guard"
+},
+"poison_resistance": {
+"families": [
+"acid",
+"mist"
+],
+"shape": "guard"
+},
+"sleep_resistance": {
+"families": [
+"acid",
+"mist"
+],
+"shape": "guard"
+},
+"spiritual_attack_resistance": {
+"families": [
+"spirit",
+"aura"
+],
+"shape": "guard"
+},
+"thermal_fluctuation_resistance": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "guard"
+},
+"abnormal_condition_nullification": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "guard"
+},
+"corrosion_nullification": {
+"families": [
+"acid",
+"mist"
+],
+"shape": "guard"
+},
+"flame_attack_nullification": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "guard"
+},
+"natural_effects_nullification": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "guard"
+},
+"pain_nullification": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "guard"
+},
+"physical_attack_nullification": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "guard"
+},
+"poison_nullification": {
+"families": [
+"acid",
+"mist"
+],
+"shape": "guard"
+},
+"spiritual_attack_nullification": {
+"families": [
+"spirit",
+"aura"
+],
+"shape": "guard"
+},
+"thermal_fluctuation_nullification": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "guard"
+},
+"absolute_guard": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "guard"
+},
+"absorb_life": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "projectile"
+},
+"all_things_destruction": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"analysis": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "sense"
+},
+"armor_destruction": {
+"families": [
+"shard",
+"spark"
+],
+"shape": "guard"
+},
+"attribute_conversion": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"attribute_neutralization": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"calculation_domain": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "area"
+},
+"certain_outcome": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"charm_domination": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"control_heart": {
+"families": [
+"heal",
+"spirit"
+],
+"shape": "slash"
+},
+"danger_prediction": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"deceased_domination": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"deep_hypno": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"desire": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"elemental_communication": {
+"families": [
+"spirit",
+"aura"
+],
+"shape": "aura"
+},
+"espionage": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"eye_of_the_moon": {
+"families": [
+"rune",
+"aura"
+],
+"shape": "sense"
+},
+"fallen_catastrophe": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"fallen_hypno": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"fallen_thanatos": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"food_chain": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"godspeed_regeneration": {
+"families": [
+"heal",
+"spirit"
+],
+"shape": "heal"
+},
+"gravity_field": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "area"
+},
+"greed_flare": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"hardening_transformation": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "guard"
+},
+"imaginary_space": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "aura"
+},
+"inspire_forces": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"insta_kill": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"instant_motion": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "move"
+},
+"isolation": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"isolation_barrier": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "area"
+},
+"kin_creation": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "summon"
+},
+"leyline_manipulation": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"light_and_heat_domination": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "aura"
+},
+"mimicry": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "awaken"
+},
+"mist": {
+"families": [
+"mist",
+"void"
+],
+"shape": "aura"
+},
+"nihility_collapse": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"overdrive": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"portfolio": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"predation": {
+"families": [
+"mist",
+"void"
+],
+"shape": "aura"
+},
+"probability_manipulation": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"protection_conferment": {
+"families": [
+"acid",
+"mist"
+],
+"shape": "aura"
+},
+"punitive_domination": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"pursuit_of_truth": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"seismic_waves": {
+"families": [
+"drop",
+"bubble"
+],
+"shape": "aura"
+},
+"skill_creation": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "summon"
+},
+"skill_duplication": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"skill_steal": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"skill_storage": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"sleep": {
+"families": [
+"acid",
+"mist"
+],
+"shape": "aura"
+},
+"solicitation": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"soul_gluttony": {
+"families": [
+"soul",
+"mist"
+],
+"shape": "aura"
+},
+"sound_and_wind_domination": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "aura"
+},
+"spacetime_leap": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "move"
+},
+"spatial_suppression": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "aura"
+},
+"stomach": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"substitution": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"temptation_world": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "area"
+},
+"universal_barrier": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "area"
+},
+"water_and_thunder_domination": {
+"families": [
+"spark",
+"shockwave"
+],
+"shape": "aura"
+},
+"will_control": {
+"families": [
+"aura",
+"shockwave"
+],
+"shape": "aura"
+},
+"windbreaker_slash": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "slash"
+},
+"analyze": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "sense"
+},
+"alignment_field": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "area"
+},
+"anti_magic_area": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "area"
+},
+"anti_monster_barrier": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "area"
+},
+"anti_shock_area": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "area"
+},
+"barrier": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "area"
+},
+"isolated_battlefield": {
+"families": [
+"aura",
+"shockwave"
+],
+"shape": "area"
+},
+"magic_barrier": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "area"
+},
+"material_area": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "area"
+},
+"sealing_barrier": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "area"
+},
+"create_golem": {
+"families": [
+"shard",
+"spark"
+],
+"shape": "summon"
+},
+"conjure_earth_wall": {
+"families": [
+"shard",
+"spark"
+],
+"shape": "area"
+},
+"earth_bind": {
+"families": [
+"shard",
+"spark"
+],
+"shape": "area"
+},
+"earth_lock": {
+"families": [
+"shard",
+"spark"
+],
+"shape": "area"
+},
+"liquidize": {
+"families": [
+"shard",
+"spark"
+],
+"shape": "area"
+},
+"mud_hand": {
+"families": [
+"shard",
+"spark"
+],
+"shape": "area"
+},
+"mud_spears": {
+"families": [
+"shard",
+"spark"
+],
+"shape": "projectile"
+},
+"stone_shot": {
+"families": [
+"shard",
+"spark"
+],
+"shape": "projectile"
+},
+"stone_wall": {
+"families": [
+"shard",
+"spark"
+],
+"shape": "area"
+},
+"agility": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "aura"
+},
+"protection": {
+"families": [
+"acid",
+"mist"
+],
+"shape": "aura"
+},
+"reinforce": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "aura"
+},
+"reinforce_structure": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "aura"
+},
+"strength": {
+"families": [
+"drop",
+"bubble"
+],
+"shape": "aura"
+},
+"explosion": {
+"families": [
+"frost",
+"bubble"
+],
+"shape": "projectile"
+},
+"ultra_advanced_explosive_flame_technique": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "projectile"
+},
+"fire": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "projectile"
+},
+"fireball": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "projectile"
+},
+"fire_lance": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "beam"
+},
+"firestorm": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "area"
+},
+"fire_wall": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "area"
+},
+"napalm_burst": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "projectile"
+},
+"gravity_reduction": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "area"
+},
+"cocytus": {
+"families": [
+"frost",
+"bubble"
+],
+"shape": "projectile"
+},
+"ice_blizzard": {
+"families": [
+"frost",
+"bubble"
+],
+"shape": "area"
+},
+"ice_breaker": {
+"families": [
+"frost",
+"bubble"
+],
+"shape": "slash"
+},
+"ice_needle": {
+"families": [
+"frost",
+"bubble"
+],
+"shape": "projectile"
+},
+"icicle_lance": {
+"families": [
+"frost",
+"bubble"
+],
+"shape": "beam"
+},
+"icicle_rain": {
+"families": [
+"frost",
+"bubble"
+],
+"shape": "area"
+},
+"icicle_shot": {
+"families": [
+"frost",
+"bubble"
+],
+"shape": "projectile"
+},
+"army_move": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "summon"
+},
+"transport_technique": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "summon"
+},
+"clean_wash": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "heal"
+},
+"healthcare": {
+"families": [
+"heal",
+"spirit"
+],
+"shape": "heal"
+},
+"insect_repellent": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "heal"
+},
+"flashbang": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "move"
+},
+"floor_light": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "beam"
+},
+"light_magic_light": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "beam"
+},
+"thunder": {
+"families": [
+"spark",
+"shockwave"
+],
+"shape": "beam"
+},
+"thunder_rain": {
+"families": [
+"spark",
+"shockwave"
+],
+"shape": "area"
+},
+"abyss_annihilation": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "beam"
+},
+"bunker_break": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "slash"
+},
+"death_streak": {
+"families": [
+"void",
+"mist"
+],
+"shape": "beam"
+},
+"gravity_collapse": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "beam"
+},
+"nuclear_cannon": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "beam"
+},
+"nuclear_flame": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "beam"
+},
+"clairvoyance": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "sense"
+},
+"antidote": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "heal"
+},
+"healing_magic_recovery": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "heal"
+},
+"reduce_speed": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "move"
+},
+"dress_change": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "awaken"
+},
+"warp_portal": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "move"
+},
+"escape": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "move"
+},
+"demon_dominate": {
+"families": [
+"spirit",
+"aura"
+],
+"shape": "area"
+},
+"demon_marionette": {
+"families": [
+"spirit",
+"aura"
+],
+"shape": "area"
+},
+"hypnos": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "area"
+},
+"locking_curse": {
+"families": [
+"spirit",
+"aura"
+],
+"shape": "awaken"
+},
+"marionette_heart": {
+"families": [
+"spirit",
+"aura"
+],
+"shape": "slash"
+},
+"acid_shell": {
+"families": [
+"black_flame",
+"ember"
+],
+"shape": "area"
+},
+"sleep_mist": {
+"families": [
+"mist",
+"void"
+],
+"shape": "projectile"
+},
+"water_jail": {
+"families": [
+"drop",
+"bubble"
+],
+"shape": "area"
+},
+"drain_power": {
+"families": [
+"drop",
+"bubble"
+],
+"shape": "area"
+},
+"air_buster": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "projectile"
+},
+"air_shut": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "projectile"
+},
+"airflow_shut": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "projectile"
+},
+"tornado_blade": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "area"
+},
+"wind_cutter": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "slash"
+},
+"wind_gust": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "projectile"
+},
+"wind_protect": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "projectile"
+},
+"contract": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "aura"
+},
+"flight": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "move"
+},
+"preservation": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "aura"
+},
+"sunlight": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "aura"
+},
+"transfer": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "move"
+},
+"transportation": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "aura"
+},
+"anti_magic": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "aura"
+},
+"anti_poison": {
+"families": [
+"acid",
+"mist"
+],
+"shape": "aura"
+},
+"auto_mapping": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "aura"
+},
+"blind": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "aura"
+},
+"counter_magic": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "aura"
+},
+"cursed_poison": {
+"families": [
+"void",
+"mist"
+],
+"shape": "aura"
+},
+"dispel": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "aura"
+},
+"freezing_white_flame": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "aura"
+},
+"invisible": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "aura"
+},
+"life_search": {
+"families": [
+"rune",
+"aura"
+],
+"shape": "sense"
+},
+"limited_hell_flare": {
+"families": [
+"black_flame",
+"ember"
+],
+"shape": "area"
+},
+"magic_call": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "summon"
+},
+"membrane_creation": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "summon"
+},
+"membrane_defense": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "guard"
+},
+"mirage": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "aura"
+},
+"poison_perception": {
+"families": [
+"acid",
+"mist"
+],
+"shape": "sense"
+},
+"sacrifice": {
+"families": [
+"frost",
+"bubble"
+],
+"shape": "aura"
+},
+"search_enemy": {
+"families": [
+"rune",
+"aura"
+],
+"shape": "sense"
+},
+"silent": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "aura"
+},
+"darkness_elemental_magic": {
+"families": [
+"dark_spark",
+"void"
+],
+"shape": "projectile"
+},
+"darkness_cannon": {
+"families": [
+"dark_spark",
+"void"
+],
+"shape": "beam"
+},
+"tetanus_darkness": {
+"families": [
+"void",
+"mist"
+],
+"shape": "projectile"
+},
+"earth_elemental_magic": {
+"families": [
+"spirit",
+"aura"
+],
+"shape": "projectile"
+},
+"flame_elemental_magic": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "projectile"
+},
+"flame_breath_elemental_magic": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "cone"
+},
+"inferno_flame": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "area"
+},
+"light_elemental_magic": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "projectile"
+},
+"solar_rain": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "area"
+},
+"space_elemental_magic": {
+"families": [
+"spirit",
+"aura"
+],
+"shape": "projectile"
+},
+"time_elemental_magic": {
+"families": [
+"spirit",
+"aura"
+],
+"shape": "projectile"
+},
+"water_elemental_magic": {
+"families": [
+"spirit",
+"aura"
+],
+"shape": "projectile"
+},
+"wind_elemental_magic": {
+"families": [
+"spirit",
+"aura"
+],
+"shape": "projectile"
+},
+"aerial_blade": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "slash"
+},
+"thornbind": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "projectile"
+},
+"birthday": {
+"families": [
+"void",
+"mist"
+],
+"shape": "summon"
+},
+"curse_bind": {
+"families": [
+"soul",
+"mist"
+],
+"shape": "summon"
+},
+"immortal_legion": {
+"families": [
+"void",
+"mist"
+],
+"shape": "summon"
+},
+"raise_dead": {
+"families": [
+"void",
+"mist"
+],
+"shape": "summon"
+},
+"zombie_breath": {
+"families": [
+"void",
+"mist"
+],
+"shape": "cone"
+},
+"divination": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "aura"
+},
+"secret_of_faith_and_grace": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "aura"
+},
+"healing_magic_basic": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "heal"
+},
+"holy_bell": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "projectile"
+},
+"holy_cannon": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "beam"
+},
+"holy_field": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "area"
+},
+"prison_field": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "area"
+},
+"recovery": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "heal"
+},
+"turn_undead": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "projectile"
+},
+"disintegration": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "heal"
+},
+"multi_stage_disintegration": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "heal"
+},
+"overdrive_magic_miracles": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "heal"
+},
+"trinity_disintegration": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "heal"
+},
+"high_heal": {
+"families": [
+"heal",
+"spirit"
+],
+"shape": "heal"
+},
+"great_high_heal": {
+"families": [
+"heal",
+"spirit"
+],
+"shape": "heal"
+},
+"holy_ark": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "heal"
+},
+"holy_ray": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "beam"
+},
+"regeneration": {
+"families": [
+"heal",
+"spirit"
+],
+"shape": "heal"
+},
+"great_regeneration": {
+"families": [
+"heal",
+"spirit"
+],
+"shape": "heal"
+},
+"resurrection": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "heal"
+},
+"trinity_break": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "slash"
+},
+"sanctuary_disintegration": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "area"
+},
+"sanctuary_regeneration": {
+"families": [
+"heal",
+"spirit"
+],
+"shape": "heal"
+},
+"sanctuary_resurrection": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "heal"
+},
+"great_secret_art": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"possession": {
+"families": [
+"mist",
+"void"
+],
+"shape": "area"
+},
+"mystery_art": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"reincarnation": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "area"
+},
+"secret_art_of_implantation": {
+"families": [
+"petal",
+"heal"
+],
+"shape": "area"
+},
+"sacred_birthday": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "area"
+},
+"secret_art_of_rejuvenation": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "area"
+},
+"secret_art_of_resurrection": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "heal"
+},
+"secret_art_of_revival": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "area"
+},
+"secret_art_of_spiritualization": {
+"families": [
+"spirit",
+"aura"
+],
+"shape": "area"
+},
+"astral_bind": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "area"
+},
+"channeling": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "aura"
+},
+"confusion": {
+"families": [
+"mist",
+"void"
+],
+"shape": "aura"
+},
+"deception": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "aura"
+},
+"flame_wall": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "area"
+},
+"infiltration": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "aura"
+},
+"invisibility": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "aura"
+},
+"magic_sensor": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "aura"
+},
+"sleep_down": {
+"families": [
+"acid",
+"mist"
+],
+"shape": "aura"
+},
+"thoughtography": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "aura"
+},
+"daemon_summoning": {
+"families": [
+"void",
+"mist"
+],
+"shape": "summon"
+},
+"elemental_summoning": {
+"families": [
+"spirit",
+"aura"
+],
+"shape": "summon"
+},
+"equipment_summoning": {
+"families": [
+"aura",
+"shockwave"
+],
+"shape": "summon"
+},
+"monster_summoning": {
+"families": [
+"aura",
+"shockwave"
+],
+"shape": "summon"
+},
+"otherworlder_summoning": {
+"families": [
+"aura",
+"shockwave"
+],
+"shape": "area"
+},
+"forbidden": {
+"families": [
+"void",
+"mist"
+],
+"shape": "projectile"
+},
+"nihility": {
+"families": [
+"void",
+"mist"
+],
+"shape": "projectile"
+},
+"nihilistic_banish": {
+"families": [
+"void",
+"mist"
+],
+"shape": "projectile"
+},
+"nihilistic_parade": {
+"families": [
+"void",
+"mist"
+],
+"shape": "projectile"
+},
+"megiddo": {
+"families": [
+"drop",
+"bubble"
+],
+"shape": "projectile"
+},
+"argos": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "projectile"
+},
+"darkness_soul_magic": {
+"families": [
+"dark_spark",
+"void"
+],
+"shape": "area"
+},
+"earth_soul_magic": {
+"families": [
+"soul",
+"mist"
+],
+"shape": "area"
+},
+"flame_soul_magic": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "area"
+},
+"water_soul_magic": {
+"families": [
+"soul",
+"mist"
+],
+"shape": "area"
+},
+"wind_soul_magic": {
+"families": [
+"soul",
+"mist"
+],
+"shape": "area"
+},
+"blizzard": {
+"families": [
+"frost",
+"bubble"
+],
+"shape": "area"
+},
+"freezing_breath": {
+"families": [
+"frost",
+"bubble"
+],
+"shape": "cone"
+},
+"bloody_lava": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "cone"
+},
+"burning_breath": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "cone"
+},
+"burning_embrace": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "cone"
+},
+"cardinal_cage": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "area"
+},
+"drago_nova": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "beam"
+},
+"drago_buster": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "beam"
+},
+"invisible_barrier": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "area"
+},
+"dark_lightning": {
+"families": [
+"spark",
+"shockwave"
+],
+"shape": "area"
+},
+"death_heralding_wind": {
+"families": [
+"void",
+"mist"
+],
+"shape": "area"
+},
+"destruction_storm": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "area"
+},
+"ruin_tempest": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "area"
+},
+"thunderstorm": {
+"families": [
+"spark",
+"shockwave"
+],
+"shape": "area"
+},
+"storm_blast": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "beam"
+},
+"bound_spell": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "cone"
+},
+"crimson_lightning": {
+"families": [
+"spark",
+"shockwave"
+],
+"shape": "cone"
+},
+"devastation_storm": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "area"
+},
+"life_exorcising_wind": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "cone"
+},
+"autonomous_calculation_technique": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "aura"
+},
+"day_night_inversion": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "aura"
+},
+"executor_restraint_techniques": {
+"families": [
+"drop",
+"bubble"
+],
+"shape": "area"
+},
+"maze_mist": {
+"families": [
+"mist",
+"void"
+],
+"shape": "aura"
+},
+"zeros_sense": {
+"families": [
+"rune",
+"aura"
+],
+"shape": "sense"
+},
+"aura_slash_arts_battlewill": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"dark_eight_palms": {
+"families": [
+"spark",
+"shockwave"
+],
+"shape": "slash"
+},
+"earthshatter_kick": {
+"families": [
+"shockwave",
+"shard"
+],
+"shape": "slash"
+},
+"elephant_stampede": {
+"families": [
+"spark",
+"shockwave"
+],
+"shape": "slash"
+},
+"holy_demolisher_fist": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "slash"
+},
+"mana_bullet": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "projectile"
+},
+"death_march_dance_arts_battlewill": {
+"families": [
+"void",
+"mist"
+],
+"shape": "slash"
+},
+"deep_bullet": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "projectile"
+},
+"heaven_light_bullet": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "projectile"
+},
+"maximum_mana_bullet": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "projectile"
+},
+"ogre_sword_cannon": {
+"families": [
+"spark",
+"shockwave"
+],
+"shape": "beam"
+},
+"ogre_sword_guillotine": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"roaring_lion_punch": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"spiral_penetrator": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"tiger_talon": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"airflight": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "move"
+},
+"aura_shield": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "guard"
+},
+"aura_sword": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"diamond_path": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"formhide": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "awaken"
+},
+"haze": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"instantmove": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "move"
+},
+"modelwill": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"shukuchi": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"violent_break": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"draconic_blast": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "beam"
+},
+"draconic_cannon": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "beam"
+},
+"dragon_fang": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"dragon_roar": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"planetary_assimilation": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"black_flame_slash": {
+"families": [
+"black_flame",
+"ember"
+],
+"shape": "slash"
+},
+"flowing_water_slash": {
+"families": [
+"drop",
+"bubble"
+],
+"shape": "slash"
+},
+"gale_thunder": {
+"families": [
+"spark",
+"shockwave"
+],
+"shape": "slash"
+},
+"purple_electricity_thrust": {
+"families": [
+"spark",
+"shockwave"
+],
+"shape": "slash"
+},
+"thunder_of_heaven_and_earth": {
+"families": [
+"spark",
+"shockwave"
+],
+"shape": "slash"
+},
+"plum_blossoms_five_petals_thrust": {
+"families": [
+"petal",
+"heal"
+],
+"shape": "slash"
+},
+"pomegranate_six_petals_slash": {
+"families": [
+"petal",
+"heal"
+],
+"shape": "slash"
+},
+"willow_seven_petals_calm": {
+"families": [
+"petal",
+"heal"
+],
+"shape": "slash"
+},
+"double_cherry_blossoms_eight_petals_flash": {
+"families": [
+"petal",
+"heal"
+],
+"shape": "move"
+},
+"hundred_petals_rush": {
+"families": [
+"petal",
+"heal"
+],
+"shape": "slash"
+},
+"haze_black_flame_hundred_petals_rush": {
+"families": [
+"black_flame",
+"ember"
+],
+"shape": "slash"
+},
+"myriad_variety_petals": {
+"families": [
+"petal",
+"heal"
+],
+"shape": "slash"
+},
+"nihility_collapse_haze_myriad_variety_petals": {
+"families": [
+"petal",
+"heal"
+],
+"shape": "slash"
+},
+"the_tough": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"ace": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"aether_break": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"fortitude": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"icicle_sword": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"imaginary_blade": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"memory_end_requiem": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"nihility_eating_collapse_sword": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"rosa_espada": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"storm_break": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "area"
+},
+"apocalypse_howling": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "area"
+},
+"aura_slash_arts_mystic": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"beast_roar": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "area"
+},
+"burst_roar": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "area"
+},
+"blood_ray": {
+"families": [
+"blood",
+"mist"
+],
+"shape": "beam"
+},
+"chaotic_breath": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "cone"
+},
+"dance_with_wolves": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "area"
+},
+"dimension_cut": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "slash"
+},
+"dream_end": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "area"
+},
+"evil_blood_wave": {
+"families": [
+"void",
+"mist"
+],
+"shape": "area"
+},
+"head_shot": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "projectile"
+},
+"alignment_jacket": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "area"
+},
+"rain_maker": {
+"families": [
+"drop",
+"bubble"
+],
+"shape": "area"
+},
+"saint_barrel": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "area"
+},
+"hell_flare": {
+"families": [
+"black_flame",
+"ember"
+],
+"shape": "area"
+},
+"leopard_fang_flaming_palm": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"mystic_crimson_heaven": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "area"
+},
+"mystic_thread": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "area"
+},
+"mystic_puppet_thread": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "area"
+},
+"mystic_thread_binding": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "area"
+},
+"mystic_thread_shredder": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "area"
+},
+"mystic_thread_slash": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"mystic_thread_slicer": {
+"families": [
+"frost",
+"bubble"
+],
+"shape": "area"
+},
+"ogre_flame": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "area"
+},
+"vortex_crash": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "area"
+},
+"holy_blade": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "slash"
+},
+"melt_breaker": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"melt_slash": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"melt_strike": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"true_slash": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"fallen_crusade": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "move"
+},
+"fallen_spear": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "projectile"
+},
+"fallen_strike": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"burning_bullet": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "projectile"
+},
+"draconic_burst": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"draconic_flare": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"void_fist": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "slash"
+},
+"hadoken": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"kamehameha": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"shoryuken": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"tatsumaki_senpukyaku": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"tetsuzanko": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"absolute_offense_defense_sword_area": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "area"
+},
+"air_wall": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "area"
+},
+"alchemirror": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"anaphylaxy_shock": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"angry_splatter": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"army_destroyer_quaking_blast": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "beam"
+},
+"assassinate": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"assassination": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"binding_chaining_annihilation_prison": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "area"
+},
+"black_thunder_arts_misc": {
+"families": [
+"spark",
+"shockwave"
+],
+"shape": "slash"
+},
+"blast_blow": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "beam"
+},
+"bloody_bite": {
+"families": [
+"blood",
+"mist"
+],
+"shape": "slash"
+},
+"bloody_nail": {
+"families": [
+"blood",
+"mist"
+],
+"shape": "slash"
+},
+"body_snatch": {
+"families": [
+"shard",
+"spark"
+],
+"shape": "guard"
+},
+"breakdown_nostalgia": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"calamity_claw": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"cardinal_acceleration": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "move"
+},
+"catastrophia_eclipse": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"chaos_eater": {
+"families": [
+"void",
+"mist"
+],
+"shape": "slash"
+},
+"chaos_rush": {
+"families": [
+"void",
+"mist"
+],
+"shape": "slash"
+},
+"chaotic_fate": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"true_chaotic_fate": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "awaken"
+},
+"crazed_vendetta_expiation": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"cross_flare_storm": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "area"
+},
+"curse_perfume": {
+"families": [
+"void",
+"mist"
+],
+"shape": "slash"
+},
+"damned_blood": {
+"families": [
+"blood",
+"mist"
+],
+"shape": "slash"
+},
+"dead_end_rainbow": {
+"families": [
+"drop",
+"bubble"
+],
+"shape": "area"
+},
+"death_blessing": {
+"families": [
+"void",
+"mist"
+],
+"shape": "slash"
+},
+"death_storm": {
+"families": [
+"void",
+"mist"
+],
+"shape": "area"
+},
+"death_march_dance_arts_misc": {
+"families": [
+"void",
+"mist"
+],
+"shape": "slash"
+},
+"delete_barricade": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"green_mile": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"mini_barricade": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"my_code_nazgul": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"paradox_pierce": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"paradox_rain": {
+"families": [
+"drop",
+"bubble"
+],
+"shape": "area"
+},
+"pierce_hole_machinegun": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"tachyon_paradox": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"demon_blaster": {
+"families": [
+"void",
+"mist"
+],
+"shape": "beam"
+},
+"demon_thread": {
+"families": [
+"void",
+"mist"
+],
+"shape": "slash"
+},
+"despair_time": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "slash"
+},
+"devastator_virus": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"devastator_storm": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "area"
+},
+"devouring_fang": {
+"families": [
+"mist",
+"void"
+],
+"shape": "slash"
+},
+"dimension_ray": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "beam"
+},
+"dimension_storm": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "area"
+},
+"disrupting_slash": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"disrupting_slash_final_dance": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"dissolve_guillotine": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"distortion_field": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "area"
+},
+"dimension_fault": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "slash"
+},
+"insect_sky_territory": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "area"
+},
+"doom_enemy": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"dragon_claw": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"dream_fortress": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"eight_impervious_gates": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"einherjar": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"embrace_drain": {
+"families": [
+"drop",
+"bubble"
+],
+"shape": "area"
+},
+"end_of_world": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "area"
+},
+"end_of_world_requiem": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "area"
+},
+"eternal_twilight": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "slash"
+},
+"evil_crushing_beacon_prayer": {
+"families": [
+"void",
+"mist"
+],
+"shape": "beam"
+},
+"evil_crushing_holy_spear": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "projectile"
+},
+"evil_dragon_beast_production": {
+"families": [
+"void",
+"mist"
+],
+"shape": "slash"
+},
+"fatal_lost": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"fertile_paradox": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"flare_circle": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "area"
+},
+"flight_run": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "move"
+},
+"garuda_claw": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"godspeed_vibration": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "move"
+},
+"grandbreaker_slash": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"gravity_noa": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "slash"
+},
+"hard_rock_cannon": {
+"families": [
+"shard",
+"spark"
+],
+"shape": "beam"
+},
+"high_frequency_mince_slash": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"high_frequency_mince_strike": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"horse_ultra_spear": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "projectile"
+},
+"hundred_breaker": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"hundred_prison": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "area"
+},
+"imitation": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"imperial_suppression_stance": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"infinite_eater": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"insanity_hash": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"insulated_prison": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "area"
+},
+"invincible": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"invisible_blade": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"jail_shake": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "area"
+},
+"hammering_jail": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "area"
+},
+"jail_execution": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "area"
+},
+"megalo_jail": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "area"
+},
+"jupiter": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"knockdown": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"light_speed_slash": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "slash"
+},
+"lightning_horn": {
+"families": [
+"spark",
+"shockwave"
+],
+"shape": "slash"
+},
+"lost_entropy": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"love_energy": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"maelstrom_buster": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"magic_flame_bullet": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "projectile"
+},
+"magisteel_ultra_microwave": {
+"families": [
+"drop",
+"bubble"
+],
+"shape": "slash"
+},
+"marionette_dance": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"marionette_rush": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"martial_dance": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"maximum_blazeball": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "projectile"
+},
+"melt_breath": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "cone"
+},
+"mind_requiem": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"mirage_orage": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"mirage_re_orage": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"molecule_messer": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"mort_en_ciel": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"murder_pressing": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"nihilistic_end": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"nihility_supply": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"nine_tail_continuous_cut": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"nine_tail_piercing_strike": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"nova_break": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"photon_slaughter": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"planetes_bombing": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "projectile"
+},
+"poison_carnival": {
+"families": [
+"acid",
+"mist"
+],
+"shape": "slash"
+},
+"predator_petal": {
+"families": [
+"mist",
+"void"
+],
+"shape": "slash"
+},
+"predator_bloom": {
+"families": [
+"mist",
+"void"
+],
+"shape": "slash"
+},
+"prism_barrier": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "area"
+},
+"prismic_shotgun": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "projectile"
+},
+"prominence_acceleration": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "move"
+},
+"quantum_splash": {
+"families": [
+"drop",
+"bubble"
+],
+"shape": "slash"
+},
+"quasar_break": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"re_birth": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"reset": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"restore_life": {
+"families": [
+"heal",
+"spirit"
+],
+"shape": "heal"
+},
+"reverse_fate": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"rink_ring": {
+"families": [
+"mist",
+"void"
+],
+"shape": "slash"
+},
+"secret_method_of_the_cycle": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"celestial": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"celestial_end": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"secret_method_of_the_infinite_corridor": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"endless_loop": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"labyrinth_prison": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "area"
+},
+"severed_realm": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"shock_wave": {
+"families": [
+"shockwave",
+"shard"
+],
+"shape": "slash"
+},
+"maximum_shock_wave": {
+"families": [
+"shockwave",
+"shard"
+],
+"shape": "slash"
+},
+"skill_gift": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"sky_walk": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"snatch_bites": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"snow_crystal": {
+"families": [
+"frost",
+"bubble"
+],
+"shape": "slash"
+},
+"spacetime_connection": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "slash"
+},
+"spacetime_continuous_attack": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "slash"
+},
+"spatial_blockade": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "slash"
+},
+"spatial_connection": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "slash"
+},
+"spatial_transfer": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "move"
+},
+"spindle_kick": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"spindle_needle_spear": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "projectile"
+},
+"spiritron_torpedo": {
+"families": [
+"spirit",
+"aura"
+],
+"shape": "slash"
+},
+"spiritual_dive": {
+"families": [
+"spirit",
+"aura"
+],
+"shape": "slash"
+},
+"stardust_rain": {
+"families": [
+"drop",
+"bubble"
+],
+"shape": "area"
+},
+"steal_life": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"tatsumaki_seikentsuki": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"tempest_scale": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"tepes": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"thousand_shadow_death": {
+"families": [
+"void",
+"mist"
+],
+"shape": "slash"
+},
+"tidal_wave": {
+"families": [
+"drop",
+"bubble"
+],
+"shape": "slash"
+},
+"time_stop": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"chrono_saltation": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"time_warp": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "slash"
+},
+"vampirization": {
+"families": [
+"blood",
+"mist"
+],
+"shape": "slash"
+},
+"warp_shot": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "projectile"
+},
+"white_flare": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"whiteout_absorb": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "projectile"
+},
+"wicked_light_ray": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "beam"
+},
+"wing_blade": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"zodiarch": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"limit_break": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "slash"
+},
+"dimension_rupture": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "aura"
+},
+"eraser": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"judgment": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"necrosis": {
+"families": [
+"void",
+"mist"
+],
+"shape": "aura"
+},
+"remove": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"all_things_creation": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "summon"
+},
+"skill_synchronization": {
+"families": [
+"aura",
+"shockwave"
+],
+"shape": "aura"
+},
+"eternal_regression": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"pseudo_dragon_body": {
+"families": [
+"shard",
+"spark"
+],
+"shape": "guard"
+},
+"energy_drain": {
+"families": [
+"drop",
+"bubble"
+],
+"shape": "area"
+},
+"evolution": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"true_dragon_release_scorch_storm_frost": {
+"families": [
+"frost",
+"bubble"
+],
+"shape": "area"
+},
+"true_dragon_nucleation_scorch_storm_frost": {
+"families": [
+"frost",
+"bubble"
+],
+"shape": "area"
+},
+"true_dragon_nucleation_earth_star": {
+"families": [
+"shard",
+"spark"
+],
+"shape": "awaken"
+},
+"organic_domination": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"duplicate_mass_production": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"power_absorption": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"soul_consumption": {
+"families": [
+"soul",
+"mist"
+],
+"shape": "aura"
+},
+"after_world": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "area"
+},
+"scorch_excitation": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"dimension_leap": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "move"
+},
+"complete_fixation": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"mineral_domination": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"earth_element_manipulation": {
+"families": [
+"shard",
+"spark"
+],
+"shape": "aura"
+},
+"inverted_fusion": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"virtual_world": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "area"
+},
+"eternal_world": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "area"
+},
+"solidification": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"lightning_speed": {
+"families": [
+"spark",
+"shockwave"
+],
+"shape": "move"
+},
+"judgment_of_heaven": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"absorb": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "projectile"
+},
+"nihilistic_world": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "area"
+},
+"fantasy_world": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "area"
+},
+"armageddon": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"castle_guard": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "guard"
+},
+"regalia_dominion": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"ultimate_dominion": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"charity": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"synthesis_separation": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"weakness_identification": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"death_poison_refining": {
+"families": [
+"void",
+"mist"
+],
+"shape": "aura"
+},
+"death_world": {
+"families": [
+"void",
+"mist"
+],
+"shape": "area"
+},
+"life_extermination": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"existence_concealment": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"magicule_breeder_reactor": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"stampede": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"skill_gifting": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"action_alteration": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"nihility_counter": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"fantasy_destruction": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"survivable_space_automatic_adjustment": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "aura"
+},
+"banner_of_the_supreme_king": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "awaken"
+},
+"hero_s_action": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"hero_s_blessing": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"lucky_field": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "area"
+},
+"hero_s_charisma": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"airflow_manipulation": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "aura"
+},
+"headwind_type_magic": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "aura"
+},
+"copy": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"seize": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"force_takeover": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"time_leap": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "move"
+},
+"disguise": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"provide": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"receive": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"complete_regeneration": {
+"families": [
+"heal",
+"spirit"
+],
+"shape": "heal"
+},
+"subordination_immortality": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"knowledge_browsing": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"concept_sharing": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"destiny_alteration": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"unexpected_manipulation": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"magic_insect_domination": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"military_command": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"lethal_attack": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"diamond_body": {
+"families": [
+"shard",
+"spark"
+],
+"shape": "guard"
+},
+"weapon_destruction": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"unique_laws_ignoring": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"cooking": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "awaken"
+},
+"courageous_action": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"courage_to_stand_up_to": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"courage_not_to_run_away": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"true_love": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "awaken"
+},
+"optimal_action": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"omni_analysis": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "sense"
+},
+"transmutation": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"anti_skill": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"separation": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"synthesis": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"pseudo_degenerate": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"aesthetic_eye": {
+"families": [
+"rune",
+"aura"
+],
+"shape": "sense"
+},
+"age_determination": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"material_analysis": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "sense"
+},
+"divine_release": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "aura"
+},
+"preeminent_battlefield": {
+"families": [
+"aura",
+"shockwave"
+],
+"shape": "area"
+},
+"transformation": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "awaken"
+},
+"absolute_taste": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"absolute_pressure": {
+"families": [
+"aura",
+"shockwave"
+],
+"shape": "aura"
+},
+"ultra_instinct": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"possession_fusion": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"tribe_summon": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "summon"
+},
+"tribe_regeneration": {
+"families": [
+"heal",
+"spirit"
+],
+"shape": "heal"
+},
+"common_will_manipulation": {
+"families": [
+"aura",
+"shockwave"
+],
+"shape": "aura"
+},
+"marionette": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"remote_marionette": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"future_prediction": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"mystery": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"mana_measurement": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"magic_insect_creation": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "summon"
+},
+"silent_motion": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"instinct_evasion": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"trap_detection": {
+"families": [
+"rune",
+"aura"
+],
+"shape": "sense"
+},
+"monster_detection": {
+"families": [
+"rune",
+"aura"
+],
+"shape": "sense"
+},
+"echo_reflection": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"various_elements_nullification": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "guard"
+},
+"reality_exchange": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "awaken"
+},
+"unexpected_effects": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"destiny_change": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "awaken"
+},
+"thought_reading": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "sense"
+},
+"attack_perception": {
+"families": [
+"rune",
+"aura"
+],
+"shape": "sense"
+},
+"hostility_identification": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"accord_of_energy": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"offensive_defensive_balance_adjustment": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "projectile"
+},
+"automatic_recovery": {
+"families": [
+"heal",
+"spirit"
+],
+"shape": "heal"
+},
+"fusial_cancel": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"magazine_mirror": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"succession": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"storm_dragon_release": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "area"
+},
+"storm_dragon_restoration": {
+"families": [
+"heal",
+"spirit"
+],
+"shape": "area"
+},
+"storm_type_magic": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "area"
+},
+"storm_dragon_summon": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "area"
+},
+"scorch_dragon_release": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"scorch_dragon_restoration": {
+"families": [
+"heal",
+"spirit"
+],
+"shape": "heal"
+},
+"scorch_type_magic": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"absolute_superiority_over_magic_and_unique_skills": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"complete_concealment_of_own_powers": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"dominion_bullet": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "projectile"
+},
+"enemy_identification": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"soul_protect": {
+"families": [
+"soul",
+"mist"
+],
+"shape": "aura"
+},
+"subjugation_conquest": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"weapon_creation": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "summon"
+},
+"gallery_fake": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"future_precognition": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"heat_haze": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "aura"
+},
+"minus_break": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "slash"
+},
+"extreme_gluttony": {
+"families": [
+"mist",
+"void"
+],
+"shape": "aura"
+},
+"indiscriminate_absorption": {
+"families": [
+"aura",
+"spirit"
+],
+"shape": "aura"
+},
+"mirror_s_end": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"beginning_eden": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"initialize_heaven": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"maximum_barrier": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "area"
+},
+"sanctuary": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"spatial_severance": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "slash"
+},
+"ground_zero": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"star_barrier": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "area"
+},
+"battlewill": {
+"families": [
+"spark",
+"shockwave"
+],
+"shape": "slash"
+},
+"divine_battlewill": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "slash"
+},
+"true_battlewill": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "awaken"
+},
+"knuckle_rush": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"hazy_style": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"drago_fist": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"dragon_fist": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"phantasmal_style": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"veldora_style_killing_arts": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"hobgoblin_haze_shadow_strike": {
+"families": [
+"void",
+"mist"
+],
+"shape": "slash"
+},
+"hobgoblin_haze_wolf_fang": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"sudden_slice": {
+"families": [
+"frost",
+"bubble"
+],
+"shape": "slash"
+},
+"haze_sudden_slice": {
+"families": [
+"frost",
+"bubble"
+],
+"shape": "slash"
+},
+"cicada_flash": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "move"
+},
+"haze_style_sundering_falling_leaves": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "slash"
+},
+"haze_style_dance_of_autumn_leaves": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "slash"
+},
+"haze_style_war_god_s_roar": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "awaken"
+},
+"instant_light_slash": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "slash"
+},
+"storm_fang": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "area"
+},
+"primordial_flame": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "projectile"
+},
+"master_lock": {
+"families": [
+"aura",
+"shockwave"
+],
+"shape": "summon"
+},
+"anti_monster_field": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "area"
+},
+"counter_field": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "area"
+},
+"defense_barrier": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "area"
+},
+"simple_barrier": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "area"
+},
+"sound_isolation_barrier": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "area"
+},
+"interface_barrier": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "area"
+},
+"flame_sword": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "slash"
+},
+"ice_veil": {
+"families": [
+"frost",
+"bubble"
+],
+"shape": "projectile"
+},
+"icicle_spear": {
+"families": [
+"frost",
+"bubble"
+],
+"shape": "projectile"
+},
+"deceleration": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "area"
+},
+"transfer_gate": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "move"
+},
+"exhaustion": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "area"
+},
+"limit_end": {
+"families": [
+"void",
+"mist"
+],
+"shape": "projectile"
+},
+"summoning_magic": {
+"families": [
+"aura",
+"shockwave"
+],
+"shape": "summon"
+},
+"primitive_magic": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "projectile"
+},
+"soul_magic": {
+"families": [
+"soul",
+"mist"
+],
+"shape": "projectile"
+},
+"aspectual_magic": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "projectile"
+},
+"compound_magic": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "projectile"
+},
+"analysis_magic": {
+"families": [
+"rune",
+"holy"
+],
+"shape": "sense"
+},
+"contract_magic": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "projectile"
+},
+"creation_magic": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "summon"
+},
+"earth_magic": {
+"families": [
+"shard",
+"spark"
+],
+"shape": "projectile"
+},
+"enhancement_magic": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "projectile"
+},
+"explosive_magic": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "projectile"
+},
+"explosive_flame_magic": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "projectile"
+},
+"fire_magic": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "projectile"
+},
+"flight_magic": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "move"
+},
+"gravity_magic": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "projectile"
+},
+"heat_magic": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "projectile"
+},
+"ice_magic": {
+"families": [
+"frost",
+"bubble"
+],
+"shape": "projectile"
+},
+"legion_magic": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "summon"
+},
+"life_magic": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "projectile"
+},
+"light_magic": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "projectile"
+},
+"lightning_magic": {
+"families": [
+"spark",
+"shockwave"
+],
+"shape": "projectile"
+},
+"nuclear_magic": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "projectile"
+},
+"optical_magic": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "projectile"
+},
+"preservation_magic": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "projectile"
+},
+"recovery_magic": {
+"families": [
+"heal",
+"spirit"
+],
+"shape": "heal"
+},
+"slowing_magic": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "move"
+},
+"spatial_magic": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "projectile"
+},
+"spiritual_magic": {
+"families": [
+"spirit",
+"aura"
+],
+"shape": "projectile"
+},
+"sunlight_magic": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "projectile"
+},
+"transfer_magic": {
+"families": [
+"void",
+"dark_spark"
+],
+"shape": "move"
+},
+"transportation_magic": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "projectile"
+},
+"water_magic": {
+"families": [
+"drop",
+"bubble"
+],
+"shape": "projectile"
+},
+"weakening_magic": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "projectile"
+},
+"wind_magic": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "projectile"
+},
+"dark_magic": {
+"families": [
+"void",
+"mist"
+],
+"shape": "projectile"
+},
+"elemental_magic": {
+"families": [
+"spirit",
+"aura"
+],
+"shape": "projectile"
+},
+"holy_magic": {
+"families": [
+"holy",
+"spirit"
+],
+"shape": "projectile"
+},
+"illusion_magic": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "projectile"
+},
+"physics_magic": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "projectile"
+},
+"true_dragon_magic": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "awaken"
+},
+"evil_law_of_contract": {
+"families": [
+"void",
+"mist"
+],
+"shape": "area"
+},
+"flame_seal": {
+"families": [
+"flame",
+"ember"
+],
+"shape": "area"
+},
+"megiddo_ray": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "beam"
+},
+"megiddo_revised": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "projectile"
+},
+"accel_tempest": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "area"
+},
+"thunderstorm_ver_ii": {
+"families": [
+"spark",
+"shockwave"
+],
+"shape": "area"
+},
+"black_flame_strike": {
+"families": [
+"black_flame",
+"ember"
+],
+"shape": "slash"
+},
+"death_lightning": {
+"families": [
+"spark",
+"shockwave"
+],
+"shape": "area"
+},
+"barrier_magic": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "area"
+},
+"nihility_magic": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "projectile"
+},
+"necromancy": {
+"families": [
+"void",
+"mist"
+],
+"shape": "projectile"
+},
+"miracles_of_god": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "awaken"
+},
+"secret_arts": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "projectile"
+},
+"talisman_arts": {
+"families": [
+"slash",
+"spark"
+],
+"shape": "projectile"
+},
+"frost_magic": {
+"families": [
+"frost",
+"bubble"
+],
+"shape": "projectile"
+},
+"scorch_magic": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "projectile"
+},
+"star_magic": {
+"families": [
+"rune",
+"spirit"
+],
+"shape": "projectile"
+},
+"storm_magic": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "area"
+},
+"headwind_magic": {
+"families": [
+"gust",
+"slash"
+],
+"shape": "projectile"
+}
+}

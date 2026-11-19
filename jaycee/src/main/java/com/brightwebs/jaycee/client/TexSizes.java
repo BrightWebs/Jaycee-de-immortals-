@@ -13,6 +13,7 @@ final class TexSizes {
         S.put("../ability/flame_attack_resistance", new int[]{128, 128});
         S.put("../ability/flame_breath", new int[]{128, 128});
         S.put("../ability/great_sage", new int[]{128, 128});
+        S.put("../ability/infinite_regeneration", new int[]{128, 128});
         S.put("../ability/magic_perception", new int[]{128, 128});
         S.put("../ability/mode/great_sage_analytical_appraisal", new int[]{128, 128});
         S.put("../ability/mode/great_sage_chant_annulment", new int[]{128, 128});
@@ -26,6 +27,7 @@ final class TexSizes {
         S.put("../ability/predator", new int[]{128, 128});
         S.put("../ability/raphael", new int[]{128, 128});
         S.put("../ability/self_regeneration", new int[]{128, 128});
+        S.put("../ability/ultraspeed_regeneration", new int[]{128, 128});
         S.put("../race/body/beastfolk", new int[]{325, 420});
         S.put("../race/body/catkin", new int[]{325, 420});
         S.put("../race/body/direwolf", new int[]{327, 420});

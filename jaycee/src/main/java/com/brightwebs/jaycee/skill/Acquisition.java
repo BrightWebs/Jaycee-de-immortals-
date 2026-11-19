@@ -60,6 +60,12 @@ public final class Acquisition {
                 AbilityAPI.learn(p, raphael);
                 p.sendSystemMessage(Component.translatable("jaycee.skill.raphael_evolved").withStyle(ChatFormatting.GOLD));
             }
+            // Self-Regeneration became a toggle (on by default): switch it on once for older saves.
+            Ability regen = skill("self_regeneration");
+            if (regen != null && AbilityAPI.has(p, regen) && StatusData.counter(p, "regen_toggle_init") == 0) {
+                StatusData.addCounter(p, "regen_toggle_init", 1);
+                AbilityAPI.setToggled(p, regen, true);
+            }
             merfolk(p);
         });
     }

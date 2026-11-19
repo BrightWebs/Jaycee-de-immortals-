@@ -129,9 +129,7 @@ public class RaceSelectScreen extends Screen {
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         double x = (event.x() - left) / k, y = (event.y() - top) / k;
-        LOG.info("[Jaycee] race screen click button={} screen=({}, {}) design=({}, {}) size={}x{} k={}",
-                event.button(), event.x(), event.y(), (int) x, (int) y, width, height, k);
-        if (event.button() != 0) return false;
+        if (UI.button(event) != 0) return false;
         for (int i = 0; i < FILTERS.length; i++) {
             float cx = 328 + i * (CHIP_W + 6);
             if (x >= cx + 6 && x < cx + 6 + CHIP_W && y >= 162 && y < 206) { filter = FILTERS[i]; scroll = 0; MenuScreen.click(); return true; }

@@ -132,7 +132,7 @@ public class MenuScreen extends Screen {
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         double x = fx(event.x()), y = fy(event.y());
-        int b = event.button();
+        int b = UI.button(event);
         Page pg = pages.get(page);
         if (b == 0 && page != Id.BONDS && page != Id.RACE && page != Id.TITLES) {
             for (int i = 0; i < TABS.length; i++) {

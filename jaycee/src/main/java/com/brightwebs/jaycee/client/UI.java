@@ -33,6 +33,19 @@ public final class UI {
 
     static Font font() { return Minecraft.getInstance().font; }
 
+    /**
+     * 26.3 reads the mouse through SDL, which numbers buttons 1 = left, 2 = middle, 3 = right.
+     * Menus use 0 = left, 1 = right, 2 = middle.
+     */
+    public static int button(net.minecraft.client.input.MouseButtonEvent event) {
+        return switch (event.button()) {
+            case 1 -> 0;
+            case 3 -> 1;
+            case 2 -> 2;
+            default -> -1;
+        };
+    }
+
     public static Identifier gui(String name) {
         // Resource paths may not contain "..", so "../race/x" means textures/race/x.
         String path = name.startsWith("../") ? "textures/" + name.substring(3) : "textures/gui/" + name;

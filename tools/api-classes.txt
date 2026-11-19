@@ -1,2 +1,3 @@
-net.minecraft.client.Screenshot
-net.minecraft.client.Minecraft
+net.minecraft.client.gui.Gui
+net.minecraft.client.MouseHandler
+net.minecraft.client.gui.screens.Screen

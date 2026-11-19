@@ -50,7 +50,7 @@ public final class Stomach {
         }
     }
 
-    static void open(ServerPlayer p) {
+    static SimpleContainer open(ServerPlayer p) {
         SimpleContainer c = new SimpleContainer(items(p).toArray(new ItemStack[0])) {
             @Override public void setChanged() {
                 super.setChanged();
@@ -59,5 +59,6 @@ public final class Stomach {
         };
         p.openMenu(new SimpleMenuProvider((id, inv, who) -> ChestMenu.sixRows(id, inv, c),
                 Component.translatable("jaycee.skill.stomach.title")));
+        return c;
     }
 }

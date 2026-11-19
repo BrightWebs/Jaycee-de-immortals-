@@ -45,8 +45,13 @@ public final class Acquisition {
             if (!(event.getEntity() instanceof ServerPlayer p) || p.tickCount % 40 != 0) return;
             if (RaceAPI.race(p).isEmpty()) return;
             if (StatusData.counter(p, "beta_fireball") == 0) { StatusData.addCounter(p, "beta_fireball", 1); learn(p, "fireball"); }
-            if (StatusData.counter(p, "mana_spent") >= 300) learn(p, "magic_perception");
-            if (StatusData.counter(p, "healed") >= 200) learn(p, "self_regeneration");
+            // Tensura: Magic Sense comes to slimes, or to anyone forced to sense without sight.
+            String line = RaceAPI.race(p).map(r -> com.brightwebs.jaycee.race.JayceeRaces.lineOf(r.id().getPath())).orElse("");
+            if ("slime".equals(line) || p.hasEffect(net.minecraft.world.effect.MobEffects.DARKNESS) || p.hasEffect(net.minecraft.world.effect.MobEffects.BLINDNESS)) {
+                learn(p, "magic_perception");
+            }
+            // Tensura: Self-Regeneration after beating 500 slimes.
+            if (StatusData.counter(p, "slimes_killed") >= 500) learn(p, "self_regeneration");
             if (StatusData.counter(p, "physical_taken") >= 150) learn(p, "body_armor");
             Ability sage = skill("great_sage"), raphael = skill("raphael");
             if (sage != null && raphael != null && AbilityAPI.has(p, sage) && AbilityAPI.isMastered(p, sage)
@@ -54,6 +59,12 @@ public final class Acquisition {
                 AbilityAPI.forget(p, sage);
                 AbilityAPI.learn(p, raphael);
                 p.sendSystemMessage(Component.translatable("jaycee.skill.raphael_evolved").withStyle(ChatFormatting.GOLD));
+            }
+            // Self-Regeneration became a toggle (on by default): switch it on once for older saves.
+            Ability regen = skill("self_regeneration");
+            if (regen != null && AbilityAPI.has(p, regen) && StatusData.counter(p, "regen_toggle_init") == 0) {
+                StatusData.addCounter(p, "regen_toggle_init", 1);
+                AbilityAPI.setToggled(p, regen, true);
             }
             merfolk(p);
         });

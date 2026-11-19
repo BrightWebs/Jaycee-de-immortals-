@@ -52,4 +52,12 @@ public abstract class AbilityEvent extends Event {
     public static final class Forget extends AbilityEvent {
         public Forget(ServerPlayer player, Ability ability) { super(player, ability); }
     }
+
+    /** Mastery points about to be added for one use. Listeners may raise or lower the amount. */
+    public static final class MasteryGain extends AbilityEvent {
+        private double points;
+        public MasteryGain(ServerPlayer player, Ability ability, double points) { super(player, ability); this.points = points; }
+        public double getPoints() { return points; }
+        public void setPoints(double points) { this.points = Math.max(0, points); }
+    }
 }

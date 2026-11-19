@@ -93,6 +93,16 @@ public final class AbilityAPI {
         set(player, get(player).withPage(page));
     }
 
+    /** Starts a cooldown of the given length now (skills that set their own, like chanted spells). */
+    public static void setCooldown(ServerPlayer player, Ability ability, int ticks) {
+        long now = player.level().getGameTime();
+        set(player, get(player).withCooldown(ability.id(), ticks <= 0 ? 0 : now + ticks));
+    }
+
+    public static boolean onCooldown(ServerPlayer player, Ability ability) {
+        return get(player).cooldownLeft(ability.id(), player.level().getGameTime()) > 0;
+    }
+
     public static void resetCooldown(ServerPlayer player, Ability ability) {
         set(player, get(player).withCooldown(ability.id(), 0));
     }
@@ -129,6 +139,20 @@ public final class AbilityAPI {
             player.sendSystemMessage(Component.translatable("brightcore.message.mastered", ability.name()));
         }
     }
+
+    /**
+     * One "mastery point" for using a skill, after listeners adjust it (Great Sage multiplies it).
+     * Fractions carry over so small gains still count.
+     */
+    public static void addMasteryPoint(ServerPlayer player, Ability ability) {
+        double pts = NeoForge.EVENT_BUS.post(new AbilityEvent.MasteryGain(player, ability, 1)).getPoints();
+        double carried = MASTERY_REST.getOrDefault(player.getUUID(), 0.0) + pts;
+        int whole = (int) Math.floor(carried);
+        MASTERY_REST.put(player.getUUID(), carried - whole);
+        if (whole > 0) addMastery(player, ability, whole);
+    }
+
+    private static final java.util.Map<java.util.UUID, Double> MASTERY_REST = new java.util.concurrent.ConcurrentHashMap<>();
 
     public static void setMastery(ServerPlayer player, Ability ability, int points) {
         set(player, get(player).withMastery(ability.id(), Math.min(points, ability.maxMastery())));
@@ -174,6 +198,11 @@ public final class AbilityAPI {
         get(player).slot(slot).map(AbilityRegistry::get).ifPresent(a -> tryActivate(player, a));
     }
 
+    /** The client let go of a slot key: ends a held skill started from that slot. */
+    public static void releaseSlot(ServerPlayer player, int slot) {
+        get(player).slot(slot).map(AbilityRegistry::get).ifPresent(a -> AbilityHolds.release(player, a));
+    }
+
     public static boolean tryActivate(ServerPlayer player, Ability ability) {
         if (player.isSpectator() || !player.isAlive()) return false;
         AbilityData data = get(player);
@@ -194,7 +223,7 @@ public final class AbilityAPI {
         ServerLevel level = (ServerLevel) player.level();
         long now = level.getGameTime();
 
-        long left = data.cooldownLeft(id, now);
+        long left = ability.ignoresCooldown(player, modeIndex) ? 0 : data.cooldownLeft(id, now);
         if (left > 0) {
             player.sendOverlayMessage(Component.translatable("brightcore.message.cooldown",
                     ability.name(), String.format("%.1f", left / 20f)));
@@ -215,6 +244,9 @@ public final class AbilityAPI {
 
         if (ability.isToggle()) {
             setToggled(player, ability, true);
+        } else if (ability.isHeld()) {
+            if (!com.brightwebs.brightcore.api.util.Safe.call("ability " + id, () -> ability.activate(player, level, modeIndex), false)) return false;
+            AbilityHolds.start(player, ability, modeIndex);
         } else if (!com.brightwebs.brightcore.api.util.Safe.call("ability " + id, () -> ability.activate(player, level, modeIndex), false)) {
             return false;
         }
@@ -224,7 +256,7 @@ public final class AbilityAPI {
         AbilityData after = get(player); // the skill itself may have changed the data
         if (mode.cooldownTicks() > 0) after = after.withCooldown(id, now + mode.cooldownTicks());
         set(player, after);
-        addMastery(player, ability, 1);
+        // Skills grant their own mastery points (as in Tensura), so nothing is added here.
 
         NeoForge.EVENT_BUS.post(new AbilityEvent.Activated(player, ability, manaCost, auraCost));
         return true;

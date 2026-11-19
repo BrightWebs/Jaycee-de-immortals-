@@ -25,6 +25,8 @@ public final class BrightSkills {
 
     /** Damage of one kind a player must take (in hit points) to learn its Resistance. */
     public static final double DAMAGE_TO_LEARN = 200;
+    /** Tensura's medium resistances (flame and the like): 15 damage per point, 10x pool, 500 points. */
+    public static final double HIT_FOR_POINT = 15, POOL_MULTIPLIER = 10, POINTS_TO_LEARN = 500;
     /** EP needed, with the Resistance mastered, for it to become a Nullification. */
     public static final double EP_FOR_NULLIFICATION = 1_000_000;
 

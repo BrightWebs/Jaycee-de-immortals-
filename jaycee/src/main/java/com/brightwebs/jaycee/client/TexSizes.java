@@ -283,6 +283,14 @@ final class TexSizes {
         S.put("fill_hp", new int[]{483, 23});
         S.put("fill_mana", new int[]{357, 23});
         S.put("fill_spirit", new int[]{285, 23});
+        S.put("hud_card", new int[]{540, 164});
+        S.put("hud_chev_l", new int[]{72, 60});
+        S.put("hud_chev_r", new int[]{72, 60});
+        S.put("hud_diamond", new int[]{40, 40});
+        S.put("hud_frame", new int[]{180, 172});
+        S.put("hud_frame_empty", new int[]{180, 172});
+        S.put("hud_key", new int[]{132, 132});
+        S.put("hud_preset", new int[]{464, 108});
         S.put("icon_bonds", new int[]{72, 54});
         S.put("icon_editor", new int[]{66, 59});
         S.put("icon_lock", new int[]{45, 53});

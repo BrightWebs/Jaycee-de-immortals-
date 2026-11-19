@@ -99,6 +99,8 @@ public final class StatusData {
             if (!(event.getSource().getEntity() instanceof ServerPlayer killer) || killer == event.getEntity()) return;
             if (hasSoul(event.getEntity())) killer.setData(SOULS, souls(killer) + 1);
             if (event.getEntity() instanceof Enemy) addCounter(killer, "monsters_killed", 1);
+            String type = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(event.getEntity().getType()).getPath();
+            if (type.contains("slime")) addCounter(killer, "slimes_killed", 1);
         });
     }
 

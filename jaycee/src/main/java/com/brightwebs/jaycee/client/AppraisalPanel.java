@@ -48,7 +48,7 @@ final class AppraisalPanel {
         AppraisalInfo info = JayceeNetwork.lastAppraisal;
         if (info.entity() == -1) return; // scan off
         Minecraft mc = Minecraft.getInstance();
-        if (mc.level == null || mc.player == null || mc.options.hideGui) return;
+        if (mc.level == null || mc.player == null) return;
         float k = sw / DESIGN_W;
         boolean fresh = info.entity() >= 0 && System.currentTimeMillis() - JayceeNetwork.lastAppraisalAt < 1200;
         Entity e = fresh ? mc.level.getEntity(info.entity()) : null;

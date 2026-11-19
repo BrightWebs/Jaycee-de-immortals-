@@ -23,7 +23,8 @@ public final class AbilityTicker {
     
             AbilityData owned = AbilityAPI.get(player);
             for (Ability ability : AbilityAPI.owned(player)) {
-                if (!ability.isToggle() || owned.isToggled(ability.id())) ability.tick(player, level);
+                if (ability.isSwitchable()) { if (AbilityAPI.isSwitchedOn(player, ability)) ability.tick(player, level); }
+                else if (!ability.isToggle() || owned.isToggled(ability.id())) ability.tick(player, level);
             }
     
             if (player.tickCount % 20 == 0) {

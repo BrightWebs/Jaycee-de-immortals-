@@ -180,6 +180,31 @@ public final class AbilityAPI {
         set(player, get(player).withMode(ability.id(), mode));
     }
 
+    /**
+     * Whether a switchable skill's passives are on. Stored inverted in the toggle set so that every
+     * switchable skill starts on, older saves included.
+     */
+    public static boolean isSwitchedOn(Player player, Ability ability) {
+        return has(player, ability) && (!ability.isSwitchable() || !get(player).isToggled(ability.id()));
+    }
+
+    public static void setSwitchedOn(ServerPlayer player, Ability ability, boolean on) {
+        if (!ability.isSwitchable() || !has(player, ability) || isSwitchedOn(player, ability) == on) return;
+        set(player, get(player).withToggled(ability.id(), !on));
+        ability.onSwitch(player, on);
+        player.sendOverlayMessage(Component.translatable(on ? "brightcore.message.toggle_on" : "brightcore.message.toggle_off", ability.name()));
+    }
+
+    /** The menu switch: passives for switchable skills, on/off for toggles. */
+    public static void flipSwitch(ServerPlayer player, Ability ability) {
+        if (!has(player, ability)) return;
+        if (ability.isSwitchable()) setSwitchedOn(player, ability, !isSwitchedOn(player, ability));
+        else if (ability.isToggle()) {
+            if (isToggled(player, ability)) setToggled(player, ability, false);
+            else tryActivate(player, ability);
+        }
+    }
+
     public static boolean isToggled(Player player, Ability ability) {
         return get(player).isToggled(ability.id());
     }

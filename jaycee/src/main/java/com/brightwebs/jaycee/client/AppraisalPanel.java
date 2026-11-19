@@ -49,15 +49,16 @@ final class AppraisalPanel {
         if (info.entity() == -1) return; // scan off
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || mc.player == null) return;
-        float k = sw / DESIGN_W;
+        float k = sw / DESIGN_W * 0.65f; // smaller panel, kept against the right edge
+        float px = sw / k - (DESIGN_W - X);
         boolean fresh = info.entity() >= 0 && System.currentTimeMillis() - JayceeNetwork.lastAppraisalAt < 1200;
         Entity e = fresh ? mc.level.getEntity(info.entity()) : null;
-        if (e instanceof LivingEntity le) { creature(g, k, info, le); return; }
+        if (e instanceof LivingEntity le) { creature(g, k, px, info, le); return; }
         if (info.scanMode() == 1) return; // creatures only
         HitResult hit = mc.hitResult;
         if (hit instanceof BlockHitResult bh && hit.getType() == HitResult.Type.BLOCK
                 && bh.getLocation().distanceTo(mc.player.getEyePosition()) <= Math.max(5, info.radius())) {
-            block(g, k, bh.getBlockPos());
+            block(g, k, px, bh.getBlockPos());
         }
     }
 
@@ -68,10 +69,10 @@ final class AppraisalPanel {
 
     // ---- creature -------------------------------------------------------------
 
-    private static void creature(GuiGraphicsExtractor g, float k, AppraisalInfo info, LivingEntity le) {
+    private static void creature(GuiGraphicsExtractor g, float k, float px, AppraisalInfo info, LivingEntity le) {
         g.pose().pushMatrix();
         g.pose().scale(k, k);
-        g.pose().translate(X, Y);
+        g.pose().translate(px, Y);
         piece(g, "appr_frame_e", 0, 0, 460, 532);
         header(g);
         piece(g, "appr_portrait", 24, 56, 90, 90);
@@ -109,7 +110,7 @@ final class AppraisalPanel {
         g.pose().popMatrix();
 
         // the creature itself, live in the portrait
-        int x1 = Math.round((X + 28) * k), y1 = Math.round((Y + 60) * k), x2 = Math.round((X + 110) * k), y2 = Math.round((Y + 142) * k);
+        int x1 = Math.round((px + 28) * k), y1 = Math.round((Y + 60) * k), x2 = Math.round((px + 110) * k), y2 = Math.round((Y + 142) * k);
         float tall = Math.max(le.getBbHeight(), le.getBbWidth());
         int size = Math.max(4, Math.round((y2 - y1) * 0.8f / Math.max(0.5f, tall)));
         InventoryScreen.extractEntityInInventoryFollowsMouse(g, x1, y1, x2, y2, size, 0.0625f, (x1 + x2) / 2f, (y1 + y2) / 2f, le);
@@ -134,7 +135,7 @@ final class AppraisalPanel {
 
     // ---- block ---------------------------------------------------------------
 
-    private static void block(GuiGraphicsExtractor g, float k, BlockPos pos) {
+    private static void block(GuiGraphicsExtractor g, float k, float px, BlockPos pos) {
         Minecraft mc = Minecraft.getInstance();
         BlockState st = mc.level.getBlockState(pos);
         float hardness = st.getBlock().defaultDestroyTime();
@@ -157,7 +158,7 @@ final class AppraisalPanel {
         float h = 104 + rows.size() * 34;
         g.pose().pushMatrix();
         g.pose().scale(k, k);
-        g.pose().translate(X, Y);
+        g.pose().translate(px, Y);
         UI.tex(g, "appr_frame_b", -10, -10, 480, h + 20);
         header(g);
         String name = st.getBlock().getName().getString();

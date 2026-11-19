@@ -55,7 +55,7 @@ public class MenuScreen extends Screen {
     @Override
     protected void init() {
         // Fit the frame to ~88% of the screen height (and never wider than 94% of the width).
-        k = Math.min(width * 0.94f / W, height * 0.88f / H);
+        k = Math.min(width * 0.74f / W, height * 0.70f / H); // about 3/4 of the old size
         left = Math.round((width - W * k) / 2);
         top = Math.round((height - H * k) / 2);
     }

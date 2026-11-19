@@ -71,7 +71,7 @@ public final class JayceeRaces {
             for (String i : intrinsics) p.intrinsic(Identifier.parse(i));
             for (E e : evolutions) {
                 Identifier to = Identifier.fromNamespaceAndPath(JayceeMod.ID, e.target());
-                var reqs = TensuraRequirements.BY_TARGET.get(e.target());
+                var reqs = TensuraRequirements.BY_EDGE.getOrDefault(id + ">" + e.target(), TensuraRequirements.BY_TARGET.get(e.target()));
                 if (reqs != null) p.evolvesTo(to, reqs); else p.evolvesTo(to, e.ep(), 0);
             }
             return new Race(p);
@@ -103,7 +103,7 @@ public final class JayceeRaces {
         info("elemental","spiritual","hard","",2,4,7,2,0.8f,1.0f,Alignment.NEUTRAL);
         info("phantom","spiritual","extreme","",2,5,5,5,0.8f,1.0f,Alignment.NEUTRAL);
         info("pixie","spiritual","intermediate","",1,5,5,2,0.7f,0.6f,Alignment.NEUTRAL);
-        f("human","human",1,true,false,"human",new String[]{},new E[]{new E("enlightened_human",100000)});
+        f("human","human",1,true,false,"human",new String[]{},new E[]{new E("enlightened_human",100000),new E("vampire",0)});
         f("elf","elf",1,true,false,"elf",new String[]{},new E[]{new E("enlightened_elf",100000)});
         f("dwarf","dwarf",1,true,false,"dwarf",new String[]{},new E[]{new E("enlightened_dwarf",100000)});
         f("goblin","goblin",1,true,false,"goblin",new String[]{},new E[]{new E("hobgoblin",2000)});
@@ -120,7 +120,7 @@ public final class JayceeRaces {
         f("skeleton","skeleton",1,true,false,"skeleton",new String[]{},new E[]{new E("death_knight",100000)});
         f("zombie","zombie",1,true,false,"zombie",new String[]{},new E[]{new E("deathman",100000)});
         f("ghoul","ghoul",1,true,false,"ghoul",new String[]{},new E[]{new E("vampire",50000)});
-        f("wight","wight",1,true,false,"wight",new String[]{},new E[]{new E("wight_king",200000)});
+        f("wight","wight",1,true,false,"wight",new String[]{},new E[]{new E("human",0),new E("wight_king",200000)});
         f("vampire","vampire",1,true,false,"vampire",new String[]{},new E[]{new E("vampire_overcomer",150000)});
         f("lesser_daemon","lesser_daemon",1,true,false,"lesser_daemon",new String[]{"jaycee:flame_breath"},new E[]{new E("greater_daemon",20000)});
         f("lesser_angel","lesser_angel",1,true,false,"lesser_angel",new String[]{},new E[]{new E("angel",50000)});
@@ -150,7 +150,7 @@ public final class JayceeRaces {
         f("mystic_oni","ogre",3,false,false,"mystic_oni",new String[]{},new E[]{new E("spirit_oni",400000)});
         f("wicked_oni","ogre",3,false,false,"wicked_oni",new String[]{},new E[]{new E("death_oni",400000)});
         f("spirit_oni","ogre",4,false,false,"spirit_oni",new String[]{},new E[]{new E("divine_oni",2000000)});
-        f("death_oni","ogre",4,false,false,"death_oni",new String[]{},new E[]{new E("divine_fighter",2000000)});
+        f("death_oni","ogre",4,false,false,"death_oni",new String[]{},new E[]{new E("divine_oni",2000000),new E("divine_fighter",2000000)});
         f("divine_oni","ogre",5,false,true,"divine_oni",new String[]{},new E[]{});
         f("divine_fighter","ogre",5,false,true,"divine_fighter",new String[]{},new E[]{});
         f("high_orc","orc",2,false,false,"high_orc",new String[]{},new E[]{new E("orc_lord",200000),new E("spirit_boar",400000)});

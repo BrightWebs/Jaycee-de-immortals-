@@ -101,6 +101,7 @@ public final class StatusData {
             if (event.getEntity() instanceof Enemy) addCounter(killer, "monsters_killed", 1);
             String type = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(event.getEntity().getType()).getPath();
             if (type.contains("slime")) addCounter(killer, "slimes_killed", 1);
+            if (type.equals("elder_guardian")) addCounter(killer, "sea_boss_killed", 1); // Tensura: Charybdis
         });
     }
 

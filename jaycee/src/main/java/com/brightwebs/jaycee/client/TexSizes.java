@@ -13,6 +13,7 @@ final class TexSizes {
         S.put("../ability/flame_attack_resistance", new int[]{128, 128});
         S.put("../ability/flame_breath", new int[]{128, 128});
         S.put("../ability/great_sage", new int[]{128, 128});
+        S.put("../ability/infinite_regeneration", new int[]{128, 128});
         S.put("../ability/magic_perception", new int[]{128, 128});
         S.put("../ability/mode/great_sage_analytical_appraisal", new int[]{128, 128});
         S.put("../ability/mode/great_sage_chant_annulment", new int[]{128, 128});
@@ -26,6 +27,7 @@ final class TexSizes {
         S.put("../ability/predator", new int[]{128, 128});
         S.put("../ability/raphael", new int[]{128, 128});
         S.put("../ability/self_regeneration", new int[]{128, 128});
+        S.put("../ability/ultraspeed_regeneration", new int[]{128, 128});
         S.put("../race/body/beastfolk", new int[]{325, 420});
         S.put("../race/body/catkin", new int[]{325, 420});
         S.put("../race/body/direwolf", new int[]{327, 420});
@@ -295,6 +297,15 @@ final class TexSizes {
         S.put("fill_hp", new int[]{483, 23});
         S.put("fill_mana", new int[]{357, 23});
         S.put("fill_spirit", new int[]{285, 23});
+        S.put("hh_bar", new int[]{432, 76});
+        S.put("hh_hex", new int[]{180, 120});
+        S.put("hh_i_air", new int[]{34, 34});
+        S.put("hh_i_food", new int[]{32, 32});
+        S.put("hh_panel", new int[]{860, 352});
+        S.put("hh_pill_l", new int[]{324, 128});
+        S.put("hh_pill_r", new int[]{864, 128});
+        S.put("hh_portrait", new int[]{420, 420});
+        S.put("hh_xp", new int[]{1320, 92});
         S.put("hud_card", new int[]{540, 164});
         S.put("hud_chev_l", new int[]{72, 60});
         S.put("hud_chev_r", new int[]{72, 60});

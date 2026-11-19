@@ -26,7 +26,7 @@
  "ability.jaycee.magic_perception": "Magic Sense",
  "ability.jaycee.magic_perception.desc": "Press to sense magicules: living things nearby glow through walls, for you alone. Costs 5 magicules a second; mastered, it reaches twice as far.",
  "ability.jaycee.self_regeneration": "Self-Regeneration",
- "ability.jaycee.self_regeneration.desc": "On once learned. While hurt you regenerate 2 HP a second (4 mastered) for 100 magicules every 5 seconds. Learned by defeating 500 slimes.",
+ "ability.jaycee.self_regeneration.desc": "On once learned. While hurt you regenerate 2 HP a second for 100 magicules every 5 seconds; mastered, 4 HP and 8 spiritual health a second. Learned by defeating 500 slimes. Evolves into Ultraspeed Regeneration.",
  "ability.jaycee.flame_breath": "Flame Breath",
  "ability.jaycee.flame_breath.desc": "Hold to breathe a stream of fire: 8 damage a second (16 mastered) for 30 magicules a second.",
  "ability.jaycee.body_armor": "Body Armor",
@@ -526,5 +526,9 @@
  "jaycee.appraisal.light": "Light level",
  "jaycee.appraisal.growth": "Growth",
  "jaycee.command.fx.unknown": "No particle recipe for %s.",
- "jaycee.command.fx.played": "%s: %s + %s, %s"
+ "jaycee.command.fx.played": "%s: %s + %s, %s",
+ "ability.jaycee.ultraspeed_regeneration": "Ultraspeed Regeneration",
+ "ability.jaycee.ultraspeed_regeneration.desc": "Wounds close instantly: all missing health at once, for 100 magicules per HP (60 mastered). Learned with Self-Regeneration mastered, the sea's great beast defeated (Elder Guardian) and over 300,000 EP.",
+ "ability.jaycee.infinite_regeneration": "Infinite Regeneration",
+ "ability.jaycee.infinite_regeneration.desc": "The peak of regeneration: body and spiritual health restored instantly. Learned with Ultraspeed Regeneration and over 2,000,000 EP."
 }

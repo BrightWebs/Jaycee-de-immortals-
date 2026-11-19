@@ -52,6 +52,11 @@ public final class Acquisition {
             }
             // Tensura: Self-Regeneration after beating 500 slimes.
             if (StatusData.counter(p, "slimes_killed") >= 500) learn(p, "self_regeneration");
+            // Tensura's regeneration chain
+            Ability selfRegen = skill("self_regeneration"), ultra = skill("ultraspeed_regeneration");
+            double ep = EnergyAPI.get(p).ep();
+            if (selfRegen != null && AbilityAPI.isMastered(p, selfRegen) && StatusData.counter(p, "sea_boss_killed") > 0 && ep > 300_000) learn(p, "ultraspeed_regeneration");
+            if (ultra != null && AbilityAPI.has(p, ultra) && ep > 2_000_000) learn(p, "infinite_regeneration");
             if (StatusData.counter(p, "physical_taken") >= 150) learn(p, "body_armor");
             Ability sage = skill("great_sage"), raphael = skill("raphael");
             if (sage != null && raphael != null && AbilityAPI.has(p, sage) && AbilityAPI.isMastered(p, sage)

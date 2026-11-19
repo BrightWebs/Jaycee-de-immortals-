@@ -131,6 +131,7 @@ public final class JayceeSkills {
     public static final DeferredHolder<Ability, Ability> SELF_REGENERATION = SKILLS.register("self_regeneration", () ->
             new Ability(new Ability.Properties().type(SkillType.COMMON).category(AbilityCategory.DEFENSE).toggle()) {
                 @Override public void tick(ServerPlayer p, ServerLevel l) {
+                    if (Regeneration.overridden(p, "ultraspeed_regeneration") || Regeneration.overridden(p, "infinite_regeneration")) return;
                     boolean hurt = p.getHealth() < p.getMaxHealth();
                     if (p.tickCount % Tk.SKILL_TICK == 0 && hurt) {
                         if (!Tk.spend(p, this, 100)) {
@@ -142,7 +143,9 @@ public final class JayceeSkills {
                         Tk.activatedTime(p, this);
                     }
                     if (hurt && p.tickCount % 20 == 0 && REGEN_UNTIL.getOrDefault(p.getUUID(), 0L) > p.tickCount) {
-                        p.heal(Tk.mastered(p, this) ? 4 : 2);
+                        boolean m = Tk.mastered(p, this);
+                        p.heal(m ? 4 : 2);
+                        if (m) Regeneration.restoreSpirit(p, 8); // Tensura: mastered also restores spiritual health
                         com.brightwebs.brightcore.fx.Fx.aura(l, com.brightwebs.brightcore.fx.BrightParticles.HEAL, p, 4);
                     }
                 }
@@ -150,6 +153,18 @@ public final class JayceeSkills {
                 @Override public void onToggle(ServerPlayer p, boolean on) { if (!on) REGEN_UNTIL.remove(p.getUUID()); }
             });
     private static final java.util.Map<java.util.UUID, Long> REGEN_UNTIL = new java.util.HashMap<>();
+
+    /** Tensura: instant regeneration; all missing health at once for 100 magicules per HP (60 mastered). */
+    public static final DeferredHolder<Ability, Ability> ULTRASPEED_REGENERATION = SKILLS.register("ultraspeed_regeneration", () ->
+            new Ability(new Ability.Properties().type(SkillType.EXTRA).category(AbilityCategory.DEFENSE).passive().switchable()) {
+                @Override public void tick(ServerPlayer p, ServerLevel l) { Regeneration.instant(p, this, false); }
+            });
+
+    /** Tensura: the top of the chain; instant regeneration that also restores spiritual health. */
+    public static final DeferredHolder<Ability, Ability> INFINITE_REGENERATION = SKILLS.register("infinite_regeneration", () ->
+            new Ability(new Ability.Properties().type(SkillType.EXTRA).category(AbilityCategory.DEFENSE).passive().switchable()) {
+                @Override public void tick(ServerPlayer p, ServerLevel l) { Regeneration.instant(p, this, true); }
+            });
 
     // ---------------- INTRINSIC ----------------
 

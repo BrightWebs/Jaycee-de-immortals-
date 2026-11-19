@@ -45,9 +45,9 @@ final class AppraisalPanel {
             return;
         }
         UI.text(g, info.name(), 160, 85, UI.fitSize(info.name(), 26, 14, 178, true), 0xFFFFFFFF, 0);
-        UI.semi(g, UI.fit(info.race(), 18, 120, false), 218, 129, 18, 0xFFFFFFFF, 0);
+        UI.semi(g, UI.fit(info.race(), 18, 116, false), 223, 129, 18, 0xFFFFFFFF, 0);
         UI.text(g, StatusData.rank(info.ep()), 418, 128, 26, 0xFFC86BFF, 1);
-        UI.text(g, UI.num(info.ep()), 248, 182, 24, 0xFFFFFFFF, 0);
+        UI.text(g, UI.num(info.ep()), 254, 182, 24, 0xFFFFFFFF, 0);
         float[][] v = {{info.hp(), info.maxHp()}, {info.spirit(), info.maxSpirit()}, {info.mana(), info.maxMana()}, {info.aura(), info.maxAura()}};
         for (int i = 0; i < 4; i++) {
             float frac = v[i][1] <= 0 ? 0 : Math.min(1, v[i][0] / v[i][1]);
@@ -61,7 +61,7 @@ final class AppraisalPanel {
             String val = EnergyAPI.format(v[i][0]) + " / " + EnergyAPI.format(v[i][1]);
             UI.semi(g, val, 436, y, UI.fitSize(val, 15, 10, 82, false), 0xFFFFFFFF, 2);
         }
-        UI.semi(g, String.valueOf(info.armor()), 150, 367, 18, 0xFFFFFFFF, 0);
+        UI.semi(g, String.valueOf(info.armor()), 157, 367, 18, 0xFFFFFFFF, 0);
         skills(g, info);
         g.pose().popMatrix();
 

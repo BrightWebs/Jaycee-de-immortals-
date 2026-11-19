@@ -15,6 +15,7 @@ import java.util.List;
 
 /** Reincarnation: pick one of the 24 starting races. Shown on first join (and if your race is gone). */
 public class RaceSelectScreen extends Screen {
+    private static final org.slf4j.Logger LOG = com.mojang.logging.LogUtils.getLogger();
     private static final int W = 1586, H = 992;
     private static final String[] FILTERS = {"all", "humans", "demihumans", "beastfolk", "monsters", "undead", "spiritual"};
     private static final int[][] COLS = {{335, 497}, {513, 675}, {691, 853}, {869, 1031}};
@@ -128,6 +129,8 @@ public class RaceSelectScreen extends Screen {
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         double x = (event.x() - left) / k, y = (event.y() - top) / k;
+        LOG.info("[Jaycee] race screen click button={} screen=({}, {}) design=({}, {}) size={}x{} k={}",
+                event.button(), event.x(), event.y(), (int) x, (int) y, width, height, k);
         if (event.button() != 0) return false;
         for (int i = 0; i < FILTERS.length; i++) {
             float cx = 328 + i * (CHIP_W + 6);
@@ -141,6 +144,7 @@ public class RaceSelectScreen extends Screen {
             if (x >= c[0] && x < c[1] && y >= r[0] && y < r[1]) { selected = list.get(idx); MenuScreen.click(); return true; }
         }
         if (x >= 1115 && x < 1530 && y >= 838 && y < 908) {
+            LOG.info("[Jaycee] confirm race {}", selected);
             ClientPacketDistributor.sendToServer(new BrightNetwork.ChooseRace(JayceeMod.ID + ":" + selected));
             MenuScreen.click();
             onClose();

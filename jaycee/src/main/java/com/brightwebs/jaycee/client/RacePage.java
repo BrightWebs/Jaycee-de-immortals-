@@ -227,8 +227,7 @@ final class RacePage extends Page {
         }
     }
 
-    @Override
-    /** "62%: EP 400,000 (50%) · 4 bosses (50%)" in Tensura's weighted style. */
+    /** "62%: EP 400k + 4 bosses" in Tensura's weighted style. */
     static String requirementText(LocalPlayer p, Race.Evolution evo) {
         StringBuilder b = new StringBuilder(String.format("%.0f%%: ", RaceAPI.progress(p, evo)));
         for (int i = 0; i < evo.requirements().size(); i++) {
@@ -238,7 +237,7 @@ final class RacePage extends Page {
                 case "ep" -> "EP " + UI.shortNum(r.amount());
                 case "boss" -> (int) r.amount() + " boss" + (r.amount() > 1 ? "es" : "");
                 case "item_consume", "item_carry" -> (int) r.amount() + " " + net.minecraft.core.registries.BuiltInRegistries.ITEM
-                        .getValue(Identifier.parse(r.arg())).getName().getString() + (r.type().equals("item_carry") ? " (carried)" : "");
+                        .getValue(Identifier.parse(r.arg())).getDefaultInstance().getHoverName().getString() + (r.type().equals("item_carry") ? " (carried)" : "");
                 case "awaken" -> "True Demon Lord";
                 case "named" -> "Named (title)";
                 case "physical" -> "Physical body";
@@ -251,6 +250,7 @@ final class RacePage extends Page {
         return b.toString();
     }
 
+    @Override
     boolean click(double fx, double fy, int b) {
         double x = TF.x(fx), y = TF.y(fy);
         LocalPlayer p = player();

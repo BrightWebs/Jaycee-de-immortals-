@@ -2,13 +2,15 @@ name: Fetch tools
 on:
   push:
     branches: ['feature/tools']
+permissions:
+  contents: write
 jobs:
   fetch:
     runs-on: ubuntu-latest
     steps:
       - run: curl -sSfL -o vineflower.jar https://repo1.maven.org/maven2/org/vineflower/vineflower/1.10.1/vineflower-1.10.1.jar
-      - uses: actions/upload-artifact@v4
-        with:
-          name: vineflower
-          path: vineflower.jar
-          retention-days: 1
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete tools-tmp -y --cleanup-tag -R ${{ github.repository }} || true
+          gh release create tools-tmp vineflower.jar -R ${{ github.repository }} --prerelease --title "temp tools" --notes "Temporary; deleted after use." --target ${{ github.sha }}

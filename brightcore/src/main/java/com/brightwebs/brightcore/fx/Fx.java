@@ -25,7 +25,7 @@ public final class Fx {
 
     /** A puff of particles flying outward from a point. */
     public static void burst(ServerLevel l, Supplier<SimpleParticleType> type, Vec3 at, int count, double speed) {
-        for (int i = 0; i < count; i++) move(l, type, at, randomDir(l).scale(speed * (0.4 + l.random.nextDouble() * 0.6)));
+        for (int i = 0; i < count; i++) move(l, type, at, randomDir(l).scale(speed * (0.4 + l.getRandom().nextDouble() * 0.6)));
     }
 
     /** Particles scattered in a box around a point, drifting. */
@@ -64,8 +64,8 @@ public final class Fx {
     /** A column rising from the ground (pillars, healing, ascension). */
     public static void column(ServerLevel l, Supplier<SimpleParticleType> type, Vec3 base, double radius, int count, double speed) {
         for (int i = 0; i < count; i++) {
-            double a = l.random.nextDouble() * Math.PI * 2, r = l.random.nextDouble() * radius;
-            move(l, type, base.add(Math.cos(a) * r, 0, Math.sin(a) * r), new Vec3(0, speed * (0.5 + l.random.nextDouble()), 0));
+            double a = l.getRandom().nextDouble() * Math.PI * 2, r = l.getRandom().nextDouble() * radius;
+            move(l, type, base.add(Math.cos(a) * r, 0, Math.sin(a) * r), new Vec3(0, speed * (0.5 + l.getRandom().nextDouble()), 0));
         }
     }
 
@@ -73,7 +73,7 @@ public final class Fx {
     public static void cone(ServerLevel l, Supplier<SimpleParticleType> type, Vec3 from, Vec3 dir, double speed, double spread, int count) {
         Vec3 n = dir.normalize();
         for (int i = 0; i < count; i++) {
-            Vec3 v = n.add(randomDir(l).scale(spread)).normalize().scale(speed * (0.6 + l.random.nextDouble() * 0.6));
+            Vec3 v = n.add(randomDir(l).scale(spread)).normalize().scale(speed * (0.6 + l.getRandom().nextDouble() * 0.6));
             move(l, type, from, v);
         }
     }
@@ -99,7 +99,7 @@ public final class Fx {
     }
 
     private static Vec3 randomDir(ServerLevel l) {
-        double u = l.random.nextDouble() * 2 - 1, a = l.random.nextDouble() * Math.PI * 2, s = Math.sqrt(1 - u * u);
+        double u = l.getRandom().nextDouble() * 2 - 1, a = l.getRandom().nextDouble() * Math.PI * 2, s = Math.sqrt(1 - u * u);
         return new Vec3(s * Math.cos(a), u, s * Math.sin(a));
     }
 }

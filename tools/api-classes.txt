@@ -1,2 +1,4 @@
-net.minecraft.client.Screenshot
-net.minecraft.client.Minecraft
+net.neoforged.neoforge.client.gui.VanillaGuiLayers
+net.neoforged.neoforge.client.event.RenderGuiLayerEvent$Pre
+net.neoforged.neoforge.client.event.RenderGuiLayerEvent
+net.minecraft.world.entity.player.Player

@@ -91,7 +91,7 @@ public final class Predation {
             return true;
         }
         MISTS.add(new Mist(p, a, (int) StatusData.counter(p, "predator_block_mode"), Tk.mastered(p, a)));
-        p.swing(InteractionHand.MAIN_HAND, true);
+        p.swing(InteractionHand.MAIN_HAND);
         p.level().playSound(null, p.blockPosition(), SoundEvents.SCULK_SHRIEKER_SHRIEK, SoundSource.PLAYERS, 0.5f, 1.6f);
         AbilityAPI.addMasteryPoint(p, a);
         AbilityAPI.setCooldown(p, a, (Tk.mastered(p, a) ? 3 : 5) * 20);
@@ -250,7 +250,7 @@ public final class Predation {
             if (removed == 0) return false;
             level.sendParticles(ParticleTypes.SQUID_INK, who.getX(), who.getY() + who.getBbHeight() * 0.66, who.getZ(), 30, who.getBbWidth(), 0.3, who.getBbWidth(), 0.02);
             level.sendParticles(ParticleTypes.SMOKE, who.getX(), who.getY() + who.getBbHeight() * 0.33, who.getZ(), 30, who.getBbWidth() * 1.2, 0.2, who.getBbWidth() * 1.2, 0.02);
-            p.swing(InteractionHand.MAIN_HAND, true);
+            p.swing(InteractionHand.MAIN_HAND);
             AbilityAPI.setCooldown(p, a, (Tk.mastered(p, a) ? ISOLATION_CD_MASTERED : ISOLATION_CD) * 20);
             level.playSound(null, p.blockPosition(), SoundEvents.BREWING_STAND_BREW, SoundSource.PLAYERS, 1, 0.6f);
             return true;
@@ -265,7 +265,7 @@ public final class Predation {
         p.heal((float) (food.nutrition() * DISSOLVE_HEALTH / 2));
         AbilityAPI.addMasteryPoint(p, a);
         held.shrink(1);
-        p.swing(InteractionHand.MAIN_HAND, true);
+        p.swing(InteractionHand.MAIN_HAND);
         level.sendParticles(ParticleTypes.SQUID_INK, p.getX(), p.getY() + 1, p.getZ(), 15, 0.3, 0.3, 0.3, 0.02);
         level.playSound(null, p.blockPosition(), SoundEvents.GENERIC_EAT.value(), SoundSource.PLAYERS, 0.8f, 0.6f);
         return true;

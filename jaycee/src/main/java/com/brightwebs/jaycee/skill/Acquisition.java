@@ -51,8 +51,7 @@ public final class Acquisition {
                 learn(p, "magic_perception");
             }
             // Tensura: Self-Regeneration after beating 500 slimes.
-            int slimes = p.getStats().getValue(net.minecraft.stats.Stats.ENTITY_KILLED.get(net.minecraft.world.entity.EntityType.SLIME));
-            if (slimes >= 500) learn(p, "self_regeneration");
+            if (StatusData.counter(p, "slimes_killed") >= 500) learn(p, "self_regeneration");
             if (StatusData.counter(p, "physical_taken") >= 150) learn(p, "body_armor");
             Ability sage = skill("great_sage"), raphael = skill("raphael");
             if (sage != null && raphael != null && AbilityAPI.has(p, sage) && AbilityAPI.isMastered(p, sage)

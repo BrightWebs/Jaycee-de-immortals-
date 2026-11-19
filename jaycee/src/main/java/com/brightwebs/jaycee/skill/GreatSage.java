@@ -177,7 +177,7 @@ public final class GreatSage {
             Tk.fail(p, "jaycee.targeting.not_allowed");
             return false;
         }
-        p.swing(net.minecraft.world.InteractionHand.MAIN_HAND, true);
+        p.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
         double chance = Tk.mastered(p, a) ? COPY_CHANCE_MASTERED : COPY_CHANCE;
         boolean ok = false;
         if (p.getRandom().nextInt(100) <= chance) {

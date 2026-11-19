@@ -84,7 +84,7 @@ public final class Refining {
             SingleRecipeInput input = new SingleRecipeInput(in.copyWithCount(1));
             var recipe = level.recipeAccess().getRecipeFor(RecipeType.SMELTING, input, level);
             if (recipe.isEmpty()) continue;
-            ItemStack out = recipe.get().value().assemble(input, level.registryAccess());
+            ItemStack out = recipe.get().value().assemble(input);
             if (out.isEmpty() || !c.canAddItem(out)) continue;
             in.shrink(1);
             c.addItem(out.copy());

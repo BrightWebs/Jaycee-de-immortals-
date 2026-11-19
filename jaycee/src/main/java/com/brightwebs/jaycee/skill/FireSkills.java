@@ -107,7 +107,7 @@ public final class FireSkills {
         BALLS.add(new Ball(p, (ServerLevel) p.level(), p.getEyePosition().add(0, -0.25, 0).add(dir), dir.scale(SPEED),
                 charged ? FIRE_CHARGED : FIRE, charged ? MAGIC_CHARGED : MAGIC, charged ? RADIUS_CHARGED : RADIUS, charged ? 3 : 2));
         p.level().playSound(null, p.blockPosition(), SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 1, charged ? 0.7f : 1.0f);
-        p.swing(InteractionHand.MAIN_HAND, true);
+        p.swing(InteractionHand.MAIN_HAND);
         AbilityAPI.addMasteryPoint(p, a);
         AbilityAPI.setCooldown(p, a, (Tk.mastered(p, a) ? CD_MASTERED : CD) * 20);
     }
@@ -158,9 +158,7 @@ public final class FireSkills {
         l.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.2f, 1.1f);
         for (LivingEntity t : l.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(b.radius), e -> e != b.owner && e.isAlive())) {
             if (t.position().distanceTo(at) > b.radius + t.getBbWidth()) continue;
-            t.hurtServer(l, b.owner.damageSources().playerAttack(b.owner), b.magic);
-            t.invulnerableTime = 0;
-            t.hurtServer(l, l.damageSources().inFire(), b.fire);
+            t.hurtServer(l, b.owner.damageSources().playerAttack(b.owner), b.magic + b.fire);
             t.igniteForTicks(BURN);
         }
     }

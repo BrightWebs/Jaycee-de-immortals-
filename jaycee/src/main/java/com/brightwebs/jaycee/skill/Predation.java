@@ -115,6 +115,38 @@ public final class Predation {
      * 31 ticks (creatures, experience orbs, projectiles when mastered, and blocks or fluids by the
      * block mode), then shrinks away. Creatures are always devoured, whatever the block mode.
      */
+    /**
+     * Tensura draws the mist as a black vortex: rings of black streaks swirling along the reach,
+     * flowing back into the user, capped by a spinning seven-armed swirl at the mouth.
+     */
+    private static void mistVisual(ServerLevel level, Mist m, Vec3 eye, Vec3 look) {
+        var type = com.brightwebs.brightcore.fx.BrightParticles.PREDATOR_MIST;
+        Vec3 up = Math.abs(look.y) > 0.95 ? new Vec3(1, 0, 0) : new Vec3(0, 1, 0);
+        Vec3 u = look.cross(up).normalize(), v = u.cross(look).normalize();
+        Vec3 base = eye.add(0, -0.25, 0);
+        double phase = m.age * 0.35, mouth = 0.3 + m.range * 0.5;
+        // the swirl at the mouth: seven curved arms
+        Vec3 front = base.add(look.scale(m.range));
+        for (int arm = 0; arm < 7; arm++) {
+            for (int s = 0; s < 4; s++) {
+                double t = (s + 1) / 4.0, a = phase + arm * (Math.PI * 2 / 7) + t * 1.3, r = mouth * t;
+                Vec3 off = u.scale(Math.cos(a) * r).add(v.scale(Math.sin(a) * r));
+                Vec3 tangent = u.scale(-Math.sin(a)).add(v.scale(Math.cos(a)));
+                com.brightwebs.brightcore.fx.Fx.move(level, type, front.add(off), tangent.scale(0.06).add(look.scale(-0.04)));
+            }
+        }
+        // the body: rings of streaks swirling along the reach, drawn in toward the user
+        for (double d = 1.2; d < m.range; d += 0.55) {
+            double r = 0.15 + (d / Math.max(1, m.range)) * mouth;
+            for (int k = 0; k < 4; k++) {
+                double a = phase * 1.4 + d * 1.7 + k * (Math.PI / 2);
+                Vec3 off = u.scale(Math.cos(a) * r).add(v.scale(Math.sin(a) * r));
+                Vec3 tangent = u.scale(-Math.sin(a)).add(v.scale(Math.cos(a)));
+                com.brightwebs.brightcore.fx.Fx.move(level, type, base.add(look.scale(d)).add(off), tangent.scale(0.05).add(look.scale(-0.07)));
+            }
+        }
+    }
+
     private static void tickMist(Mist m) {
         ServerPlayer p = m.owner;
         ServerLevel level = (ServerLevel) p.level();
@@ -122,12 +154,7 @@ public final class Predation {
         if (!active && m.range > 1) m.range = Math.max(1, m.range - RANGE / 30f);
         else if (m.range < RANGE) m.range = Math.min(RANGE, m.range + 0.25f);
         Vec3 eye = p.getEyePosition(), look = p.getLookAngle();
-        for (int i = 0; i < 3; i++) {
-            double d = 0.6 + p.getRandom().nextDouble() * m.range;
-            Vec3 at = eye.add(look.scale(d));
-            com.brightwebs.brightcore.fx.Fx.move(level, com.brightwebs.brightcore.fx.BrightParticles.MIST, at.add(0, -0.2, 0), look.scale(0.05));
-        }
-        if (m.age % 6 == 0) com.brightwebs.brightcore.fx.Fx.cloud(level, com.brightwebs.brightcore.fx.BrightParticles.VOID, eye.add(look.scale(m.range * 0.7)), 2, 0.5);
+        mistVisual(level, m, eye, look);
         if (!active) return;
         AABB box = p.getBoundingBox().inflate(m.range + 1);
         if (m.age % 10 == 0) {
@@ -141,7 +168,7 @@ public final class Predation {
         if (m.eatsProjectiles) {
             for (Projectile pr : level.getEntitiesOfClass(Projectile.class, box, e -> e.getOwner() != p)) {
                 if (!inMist(eye, look, m.range, pr.position(), 0.5f)) continue;
-                com.brightwebs.brightcore.fx.Fx.burst(level, com.brightwebs.brightcore.fx.BrightParticles.MIST, pr.position(), 6, 0.05);
+                com.brightwebs.brightcore.fx.Fx.burst(level, com.brightwebs.brightcore.fx.BrightParticles.PREDATOR_MIST, pr.position(), 6, 0.05);
                 pr.discard();
             }
         }
@@ -172,7 +199,7 @@ public final class Predation {
         BEING_DEVOURED.add(t.getUUID());
         t.hurtServer(level, p.damageSources().playerAttack(p), DAMAGE);
         BEING_DEVOURED.remove(t.getUUID());
-        com.brightwebs.brightcore.fx.Fx.burst(level, com.brightwebs.brightcore.fx.BrightParticles.MIST, t.position().add(0, t.getBbHeight() / 2, 0), 10, 0.08); com.brightwebs.brightcore.fx.Fx.beam(level, com.brightwebs.brightcore.fx.BrightParticles.SOUL, t.position().add(0, t.getBbHeight() / 2, 0), p.position().add(0, 1, 0), 0.6);
+        com.brightwebs.brightcore.fx.Fx.burst(level, com.brightwebs.brightcore.fx.BrightParticles.PREDATOR_MIST, t.position().add(0, t.getBbHeight() / 2, 0), 10, 0.08); com.brightwebs.brightcore.fx.Fx.beam(level, com.brightwebs.brightcore.fx.BrightParticles.SOUL, t.position().add(0, t.getBbHeight() / 2, 0), p.position().add(0, 1, 0), 0.6);
     }
 
     private static void devourRandomSkill(ServerPlayer p, Player target) {
@@ -213,7 +240,7 @@ public final class Predation {
             double ep = EnergyAPI.ep(t) * EP_STEAL;
             if (ep > 0) Tk.gainMana(p, ep, true);
             ServerLevel level = (ServerLevel) p.level();
-            com.brightwebs.brightcore.fx.Fx.sphere(level, com.brightwebs.brightcore.fx.BrightParticles.MIST, t.position().add(0, t.getBbHeight() / 2, 0), t.getBbWidth() + 0.3, 30); com.brightwebs.brightcore.fx.Fx.burst(level, com.brightwebs.brightcore.fx.BrightParticles.SOUL, t.position().add(0, t.getBbHeight() / 2, 0), 12, 0.15);
+            com.brightwebs.brightcore.fx.Fx.sphere(level, com.brightwebs.brightcore.fx.BrightParticles.PREDATOR_MIST, t.position().add(0, t.getBbHeight() / 2, 0), t.getBbWidth() + 0.3, 30); com.brightwebs.brightcore.fx.Fx.burst(level, com.brightwebs.brightcore.fx.BrightParticles.SOUL, t.position().add(0, t.getBbHeight() / 2, 0), 12, 0.15);
             level.playSound(null, t.blockPosition(), SoundEvents.GENERIC_EAT.value(), SoundSource.PLAYERS, 1, 0.5f);
             p.sendOverlayMessage(Component.translatable("jaycee.skill.predation.done", t.getDisplayName()));
         });
@@ -251,7 +278,7 @@ public final class Predation {
             level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
             if (!item.isEmpty()) Stomach.store(p, item);
         } else return;
-        com.brightwebs.brightcore.fx.Fx.burst(level, com.brightwebs.brightcore.fx.BrightParticles.MIST, net.minecraft.world.phys.Vec3.atCenterOf(pos), 8, 0.06);
+        com.brightwebs.brightcore.fx.Fx.burst(level, com.brightwebs.brightcore.fx.BrightParticles.PREDATOR_MIST, net.minecraft.world.phys.Vec3.atCenterOf(pos), 8, 0.06);
         level.playSound(null, pos, SoundEvents.GENERIC_EAT.value(), SoundSource.PLAYERS, 0.6f, 0.7f);
     }
 
@@ -273,7 +300,7 @@ public final class Predation {
                 removed++;
             }
             if (removed == 0) return false;
-            com.brightwebs.brightcore.fx.Fx.ring(level, com.brightwebs.brightcore.fx.BrightParticles.MIST, who.position().add(0, who.getBbHeight() * 0.66, 0), who.getBbWidth() * 1.2, 20, -0.04);
+            com.brightwebs.brightcore.fx.Fx.ring(level, com.brightwebs.brightcore.fx.BrightParticles.PREDATOR_MIST, who.position().add(0, who.getBbHeight() * 0.66, 0), who.getBbWidth() * 1.2, 20, -0.04);
             com.brightwebs.brightcore.fx.Fx.ring(level, com.brightwebs.brightcore.fx.BrightParticles.DARK_SPARK, who.position().add(0, who.getBbHeight() * 0.33, 0), who.getBbWidth() * 1.5, 12, -0.05);
             AbilityAPI.setCooldown(p, a, (Tk.mastered(p, a) ? ISOLATION_CD_MASTERED : ISOLATION_CD) * 20);
             level.playSound(null, p.blockPosition(), SoundEvents.BREWING_STAND_BREW, SoundSource.PLAYERS, 1, 0.6f);
@@ -289,7 +316,7 @@ public final class Predation {
         p.heal((float) (food.nutrition() * DISSOLVE_HEALTH / 2));
         AbilityAPI.addMasteryPoint(p, a);
         held.shrink(1);
-        com.brightwebs.brightcore.fx.Fx.burst(level, com.brightwebs.brightcore.fx.BrightParticles.MIST, p.position().add(0, 1.2, 0).add(p.getLookAngle().scale(0.6)), 12, 0.05);
+        com.brightwebs.brightcore.fx.Fx.burst(level, com.brightwebs.brightcore.fx.BrightParticles.PREDATOR_MIST, p.position().add(0, 1.2, 0).add(p.getLookAngle().scale(0.6)), 12, 0.05);
         level.playSound(null, p.blockPosition(), SoundEvents.GENERIC_EAT.value(), SoundSource.PLAYERS, 0.8f, 0.6f);
         return true;
     }

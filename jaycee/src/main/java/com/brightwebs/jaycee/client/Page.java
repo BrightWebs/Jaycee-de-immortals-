@@ -23,6 +23,14 @@ abstract class Page {
 
     boolean scroll(double mx, double my, double dy) { return false; }
 
+    /** Drawn in screen space before the scaled page content (live 3D previews). */
+    void drawScreen(GuiGraphicsExtractor g, int mx, int my) {}
+
+    /** Mouse moved with the left button held; dx/dy in frame design pixels. */
+    boolean drag(double mx, double my, double dx, double dy) { return false; }
+
+    boolean release(double mx, double my) { return false; }
+
     boolean typed(int codepoint) { return false; }
 
     boolean key(int key) { return false; }

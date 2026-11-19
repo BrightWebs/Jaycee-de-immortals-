@@ -98,6 +98,14 @@ public final class JayceeNetwork {
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     }
 
+    /** Character Editor: Apply Changes. The server keeps only what the race may wear. */
+    public record ApplyLook(java.util.Map<String, String> look) implements CustomPacketPayload {
+        public static final Type<ApplyLook> TYPE = new Type<>(Identifier.fromNamespaceAndPath(JayceeMod.ID, "apply_look"));
+        public static final StreamCodec<ByteBuf, ApplyLook> CODEC = StreamCodec.composite(
+                ByteBufCodecs.map(java.util.HashMap::new, ByteBufCodecs.stringUtf8(64), ByteBufCodecs.stringUtf8(64), 128), ApplyLook::look, ApplyLook::new);
+        @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
+    }
+
     /** Set on the client by OpenNaming; the client opens the pop-up. */
     public static volatile java.util.function.Consumer<OpenNaming> openNaming = p -> {};
 
@@ -107,11 +115,12 @@ public final class JayceeNetwork {
 
     @SubscribeEvent
     public static void register(RegisterPayloadHandlersEvent event) {
-        var r = event.registrar("3");
+        var r = event.registrar("4");
         r.playToClient(AppraisalInfo.TYPE, AppraisalInfo.CODEC, (p, c) -> { lastAppraisal = p; lastAppraisalAt = System.currentTimeMillis(); });
         r.playToClient(OpenNaming.TYPE, OpenNaming.CODEC, (p, c) -> openNaming.accept(p));
         r.playToServer(NamingKey.TYPE, NamingKey.CODEC, (p, c) -> { if (c.player() instanceof ServerPlayer sp) com.brightwebs.brightcore.api.util.Safe.run("NamingKey", () -> com.brightwebs.jaycee.bonds.Naming.key(sp, p.shift())); });
         r.playToServer(NameRequest.TYPE, NameRequest.CODEC, (p, c) -> { if (c.player() instanceof ServerPlayer sp) com.brightwebs.brightcore.api.util.Safe.run("NameRequest", () -> com.brightwebs.jaycee.bonds.Naming.name(sp, p.entity(), p.name(), p.namingType())); });
+        r.playToServer(ApplyLook.TYPE, ApplyLook.CODEC, (p, c) -> { if (c.player() instanceof ServerPlayer sp) com.brightwebs.brightcore.api.util.Safe.run("ApplyLook", () -> com.brightwebs.jaycee.appearance.Appearance.apply(sp, p.look())); });
         r.playToServer(SubCommand.TYPE, SubCommand.CODEC, (p, c) -> { if (c.player() instanceof ServerPlayer sp) com.brightwebs.brightcore.api.util.Safe.run("SubCommand", () -> com.brightwebs.jaycee.bonds.Bonds.command(sp, p.uuid(), p.command())); });
         r.playToServer(EquipTitle.TYPE, EquipTitle.CODEC, (p, c) -> { if (c.player() instanceof ServerPlayer sp) Titles.equip(sp, p.title()); });
         r.playToServer(TitlePublic.TYPE, TitlePublic.CODEC, (p, c) -> { if (c.player() instanceof ServerPlayer sp) Titles.setPublic(sp, p.on()); });

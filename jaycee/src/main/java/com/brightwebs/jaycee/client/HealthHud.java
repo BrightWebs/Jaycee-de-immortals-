@@ -18,16 +18,15 @@ import java.util.Set;
 
 /**
  * The health HUD from the approved mock-up (docs/designs/health_hud.png): your whole character in
- * a glowing circle, HP / SHP / MP / AP bars, armor, hunger with air bubbles, and a neon XP bar with
- * the level in a hexagon. Minecraft's own hearts, armor, hunger, air and XP bar are hidden.
+ * a glowing circle, HP / SHP / MP / AP bars, armor, hunger with air bubbles, 
+ * Minecraft's own hearts, armor, hunger and air are hidden; its XP bar stays as it is.
  * Coordinates are design pixels of the 1672 x 941 mock-up.
  */
 @EventBusSubscriber(modid = JayceeMod.ID, value = Dist.CLIENT)
 public final class HealthHud {
     static final float DESIGN_W = 1672, SCALE = 0.72f;
     private static final Set<Identifier> HIDDEN = Set.of(VanillaGuiLayers.PLAYER_HEALTH, VanillaGuiLayers.ARMOR_LEVEL,
-            VanillaGuiLayers.FOOD_LEVEL, VanillaGuiLayers.AIR_LEVEL, VanillaGuiLayers.EXPERIENCE_LEVEL,
-            VanillaGuiLayers.CONTEXTUAL_INFO_BAR, VanillaGuiLayers.CONTEXTUAL_INFO_BAR_BACKGROUND);
+            VanillaGuiLayers.FOOD_LEVEL, VanillaGuiLayers.AIR_LEVEL);
     private static final String[] ICON = {"heart", "spirit", "mana", "aura"};
     private static final int[][] BAR = {{0xFFC8162A, 0xFFFF5A6A}, {0xFFE07010, 0xFFFFD070}, {0xFF1A6AE6, 0xFF52D6FF}, {0xFFE0A800, 0xFFFFF27A}};
 
@@ -91,7 +90,6 @@ public final class HealthHud {
         int x1 = Math.round(48 * k), y1 = Math.round(34 * k), x2 = Math.round(178 * k), y2 = Math.round(198 * k);
         InventoryScreen.extractEntityInInventoryFollowsMouse(g, x1, y1, x2, y2, Math.max(6, Math.round(78 * k)), 0.0625f,
                 (x1 + x2) / 2f, (y1 + y2) / 2f - 20, p);
-        xpBar(g, sw, sh, p);
     }
 
     /** The neon XP bar, centred above the hotbar, with the level in a hexagon. */

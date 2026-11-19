@@ -27,6 +27,17 @@ public class RaceSelectScreen extends Screen {
     private float k;
     private int left, top;
 
+    /** When a race was last confirmed; the menu stays closed for a few seconds while the server syncs it. */
+    static volatile long chosenAt;
+
+    /** The world the race was confirmed in: once confirmed there, never ask again in that session. */
+    static volatile Object chosenIn;
+
+    static boolean awaitingServer() {
+        return System.currentTimeMillis() - chosenAt < 6000
+                || (chosenIn != null && chosenIn == net.minecraft.client.Minecraft.getInstance().level);
+    }
+
     public RaceSelectScreen() { super(Component.translatable("jaycee.menu.title")); }
 
     @Override
@@ -147,6 +158,8 @@ public class RaceSelectScreen extends Screen {
             if (was && UI.button(event) == 0 && overConfirm(x, y)) {
                 LOG.info("[Jaycee] confirm race {}", selected);
                 ClientPacketDistributor.sendToServer(new BrightNetwork.ChooseRace(JayceeMod.ID + ":" + selected));
+                chosenAt = System.currentTimeMillis(); // don't reopen while the server's answer is on its way
+                chosenIn = net.minecraft.client.Minecraft.getInstance().level;
                 MenuScreen.click();
                 onClose();
                 return true;

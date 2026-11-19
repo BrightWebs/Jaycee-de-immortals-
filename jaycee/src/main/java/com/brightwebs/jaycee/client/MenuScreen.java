@@ -22,7 +22,7 @@ public class MenuScreen extends Screen {
     static final int[][] TABS = {{116, 128, 454, 200}, {466, 128, 780, 200}, {794, 128, 1118, 200}, {1132, 128, 1452, 200}};
     static final int SIDE_X = 1504, SIDE_Y = 286, SIDE_STEP = 108;
 
-    enum Id { STATUS, STATS, SKILLS, MAGIC, RACE, TITLES, BONDS }
+    enum Id { STATUS, STATS, SKILLS, MAGIC, RACE, TITLES, BONDS, EDITOR }
 
     private static Id remembered = Id.STATUS;
     private Id page, back = Id.STATUS;
@@ -39,18 +39,21 @@ public class MenuScreen extends Screen {
         pages.put(Id.RACE, new RacePage(this));
         pages.put(Id.TITLES, new TitlesPage(this));
         pages.put(Id.BONDS, new BondsPage(this));
-        page = remembered == Id.RACE || remembered == Id.TITLES || remembered == Id.BONDS ? Id.STATUS : remembered;
+        pages.put(Id.EDITOR, new EditorPage(this));
+        page = remembered == Id.RACE || remembered == Id.TITLES || remembered == Id.BONDS || remembered == Id.EDITOR ? Id.STATUS : remembered;
     }
 
     LocalPlayer player() { return Minecraft.getInstance().player; }
 
     void open(Id id) {
-        if (id == Id.BONDS || id == Id.RACE || id == Id.TITLES) back = page;
+        if (id == Id.BONDS || id == Id.RACE || id == Id.TITLES || id == Id.EDITOR) back = page;
         page = id;
         if (id.ordinal() <= Id.MAGIC.ordinal()) remembered = id;
     }
 
     Id current() { return page; }
+
+    float k() { return k; }
 
     @Override
     protected void init() {
@@ -85,6 +88,7 @@ public class MenuScreen extends Screen {
             drawSideBar(g, fx, fy);
             g.pose().popMatrix();
     
+            pg.drawScreen(g, mx, my);
             if (pg.showsPlayer()) {
                 // Your own skin, armour and look, turning to follow the cursor.
                 InventoryScreen.extractEntityInInventoryFollowsMouse(g, sx(140), sy(270), sx(420), sy(752),
@@ -106,7 +110,7 @@ public class MenuScreen extends Screen {
     private void drawSideBar(GuiGraphicsExtractor g, double fx, double fy) {
         for (int i = 0; i < 4; i++) {
             float y = SIDE_Y + i * SIDE_STEP;
-            boolean on = i == 0 && page == Id.BONDS;
+            boolean on = (i == 0 && page == Id.BONDS) || (i == 1 && page == Id.EDITOR);
             boolean hover = Page.in(fx, fy, SIDE_X, y, SIDE_X + 118, y + 104);
             if (on) UI.tex(g, "side_on", SIDE_X - 3, y - 3);
             else UI.tex(g, i < 2 ? "side_cyan" : "side_off", SIDE_X, y, 118, i < 2 ? 104 : 106, hover ? 0xFFFFFFFF : 0xFFE6F0F8);
@@ -146,7 +150,7 @@ public class MenuScreen extends Screen {
                 float sy = SIDE_Y + i * SIDE_STEP;
                 if (b == 0 && Page.in(x, y, SIDE_X, sy, SIDE_X + 118, sy + 104)) {
                     if (i == 0) open(page == Id.BONDS ? back : Id.BONDS);
-                    else if (i == 1 && player() != null) player().sendOverlayMessage(Component.translatable("jaycee.ui.editor_soon"));
+                    else if (i == 1) open(page == Id.EDITOR ? back : Id.EDITOR);
                     click();
                     return true;
                 }
@@ -159,6 +163,22 @@ public class MenuScreen extends Screen {
     static void click() {
         Minecraft.getInstance().getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(
                 net.minecraft.sounds.SoundEvents.UI_BUTTON_CLICK.value(), 1.0f, 0.35f));
+    }
+
+    @Override
+    public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
+        return com.brightwebs.brightcore.api.util.Safe.call("MenuScreen.mouseDragged", () -> {
+            if (UI.button(event) == 0 && pages.get(page).drag(fx(event.x()), fy(event.y()), dx / k, dy / k)) return true;
+            return super.mouseDragged(event, dx, dy);
+        }, false);
+    }
+
+    @Override
+    public boolean mouseReleased(MouseButtonEvent event) {
+        return com.brightwebs.brightcore.api.util.Safe.call("MenuScreen.mouseReleased", () -> {
+            if (pages.get(page).release(fx(event.x()), fy(event.y()))) return true;
+            return super.mouseReleased(event);
+        }, false);
     }
 
     @Override
@@ -191,7 +211,7 @@ public class MenuScreen extends Screen {
     public void onClose() {
         switch (page) {
             case STATUS -> super.onClose();
-            case BONDS -> page = back;
+            case BONDS, EDITOR -> page = back;
             default -> page = Id.STATUS;
         }
     }

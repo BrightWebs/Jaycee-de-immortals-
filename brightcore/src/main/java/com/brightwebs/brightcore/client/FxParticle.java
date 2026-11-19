@@ -48,6 +48,7 @@ public final class FxParticle extends SingleQuadParticle {
             Map.entry("blood", new Style(28, 10, 0.06f, 0.98f, 0.09f, 1f, 0, false, false)),
             Map.entry("drop", new Style(28, 10, 0.06f, 0.98f, 0.09f, 1f, 0, false, false)),
             Map.entry("acid", new Style(28, 10, 0.06f, 0.98f, 0.1f, 1f, 0, true, false)),
+            Map.entry("predator_mist", new Style(12, 6, 0, 0.86f, 0.42f, 1.9f, 0.09f, false, false)),
             Map.entry("slash", new Style(6, 2, 0, 0.9f, 0.8f, 1.3f, 0, true, true)));
 
     private final SpriteSet sprites;

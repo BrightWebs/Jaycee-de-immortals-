@@ -80,6 +80,21 @@ public final class BrightKeys {
         });
     }
 
+    /** Hold Switch Mode (Alt) and scroll: next / previous preset, instead of moving the hotbar. */
+    @SubscribeEvent
+    public static void onScroll(net.neoforged.neoforge.client.event.InputEvent.MouseScrollingEvent event) {
+        com.brightwebs.brightcore.api.util.Safe.run("BrightKeys.onScroll", () -> {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.player == null || mc.gui.screen() != null || !MODE_SWITCH.isDown()) return;
+            double dy = event.getScrollDeltaY();
+            if (dy == 0) return;
+            int pages = AbilityData.PAGES, page = AbilityAPI.get(mc.player).page();
+            int next = Math.floorMod(page + (dy < 0 ? 1 : -1), pages);
+            ClientPacketDistributor.sendToServer(new BrightNetwork.SetPage(next));
+            event.setCanceled(true);
+        });
+    }
+
     /** The key's current binding as a short label, e.g. "R". */
     public static String label(int slot) {
         return ABILITY[slot].getTranslatedKeyMessage().getString();

@@ -22,7 +22,7 @@ public final class ResistanceSkill extends Ability {
     private final boolean nullification;
 
     public ResistanceSkill(DamageKind kind, boolean nullification) {
-        super(new Properties().type(nullification ? SkillType.NULLIFICATION : SkillType.RESISTANCE)
+        super(new Properties().switchable().type(nullification ? SkillType.NULLIFICATION : SkillType.RESISTANCE)
                 .category(AbilityCategory.DEFENSE).passive());
         this.kind = kind;
         this.nullification = nullification;

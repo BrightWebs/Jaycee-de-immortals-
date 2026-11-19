@@ -69,5 +69,8 @@
   "key.brightcore.skill_slot_2": "Skill slot 2",
   "key.brightcore.skill_slot_3": "Skill slot 3",
   "key.brightcore.skill_slot_4": "Skill slot 4",
-  "key.brightcore.mode_switch": "Switch Mode (hold + skill key)"
+  "key.brightcore.mode_switch": "Switch Mode (hold + skill key)",
+  "key.brightcore.race_ability": "Race Ability",
+  "brightcore.race.no_ability": "Your race has no ability of its own.",
+  "brightcore.race.cooldown": "Race ability ready in %ss"
 }

@@ -49,7 +49,7 @@ public final class JayceeSkills {
 
     /** Tensura modes: Analytical Appraisal, Analysis, Refine. The bonuses are always on while owned. */
     public static final DeferredHolder<Ability, Ability> GREAT_SAGE = SKILLS.register("great_sage", () ->
-            new Ability(new Ability.Properties().type(SkillType.UNIQUE).category(AbilityCategory.SUPPORT)
+            new Ability(new Ability.Properties().type(SkillType.UNIQUE).category(AbilityCategory.SUPPORT).switchable()
                     .mode("analytical_appraisal", 0, 0, 0)
                     .mode("analysis", 0, 0, 0)
                     .mode("refine", 0, 0, 0)) {
@@ -63,6 +63,7 @@ public final class JayceeSkills {
                 }
                 @Override public void tick(ServerPlayer p, ServerLevel l) { GreatSage.tick(p, this); }
                 @Override public void onForgotten(ServerPlayer p) { GreatSage.forgotten(p); }
+                @Override public void onSwitch(ServerPlayer p, boolean on) { if (!on) GreatSage.switchedOff(p); }
             });
 
     /** Tensura modes: Predation, Analysis, Stomach, Mimicry, Isolation. */
@@ -90,7 +91,7 @@ public final class JayceeSkills {
 
     /** Not part of Tensura: Reincarnated, so it keeps its own design (Great Sage's bonuses apply too). */
     public static final DeferredHolder<Ability, Ability> RAPHAEL = SKILLS.register("raphael", () ->
-            new Ability(new Ability.Properties().type(SkillType.ULTIMATE).category(AbilityCategory.SUPPORT)
+            new Ability(new Ability.Properties().type(SkillType.ULTIMATE).category(AbilityCategory.SUPPORT).switchable()
                     .mode("thought_acceleration", 60, 0, 25)
                     .mode("analytical_appraisal", 0, 0, 0)
                     .mode("future_attack_prediction", 80, 0, 60)) {
@@ -108,9 +109,10 @@ public final class JayceeSkills {
                     };
                 }
                 @Override public void tick(ServerPlayer p, ServerLevel l) {
-                    if (GreatSage.sage() == null || !AbilityAPI.has(p, GreatSage.sage())) GreatSage.tick(p, this);
+                    if (GreatSage.sage() == null || !AbilityAPI.isSwitchedOn(p, GreatSage.sage())) GreatSage.tick(p, this);
                 }
                 @Override public void onForgotten(ServerPlayer p) { GreatSage.forgotten(p); }
+                @Override public void onSwitch(ServerPlayer p, boolean on) { if (!on && !GreatSage.hasSage(p)) GreatSage.switchedOff(p); }
             });
 
     // ---------------- EXTRA ----------------

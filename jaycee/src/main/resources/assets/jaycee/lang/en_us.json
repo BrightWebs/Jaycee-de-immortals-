@@ -503,5 +503,10 @@
  "jaycee.hud.off": "Off",
  "jaycee.hud.hold": "Hold",
  "jaycee.hud.default": "Ready",
- "jaycee.hud.preset": "Preset %s / %s"
+ "jaycee.hud.preset": "Preset %s / %s",
+ "jaycee.race.too_hungry": "Too hungry to take flight.",
+ "jaycee.race.power_scale": "Power: %s",
+ "jaycee.race.bat_mode.on": "Bat form: flight on",
+ "jaycee.race.bat_mode.off": "Bat form: flight off",
+ "jaycee.ui.passives": "Passives"
 }

@@ -61,7 +61,7 @@ public final class GreatSage {
     /** Great Sage or Raphael owned: the analytical bonuses apply. */
     static boolean hasSage(Player p) {
         Ability s = sage(), r = raphael();
-        return (s != null && AbilityAPI.has(p, s)) || (r != null && AbilityAPI.has(p, r));
+        return (s != null && AbilityAPI.isSwitchedOn(p, s)) || (r != null && AbilityAPI.isSwitchedOn(p, r));
     }
 
     /** How much faster spells chant (Great Sage doubles it). */
@@ -86,6 +86,14 @@ public final class GreatSage {
         if (cur != null && cur.amount() == amount) return;
         if (cur != null) inst.removeModifier(MOD);
         inst.addTransientModifier(new AttributeModifier(MOD, amount, AttributeModifier.Operation.ADD_VALUE));
+    }
+
+    /** Switched off in the menu: the passives stop (attributes back to normal, no auto-refining, scan off). */
+    static void switchedOff(ServerPlayer p) {
+        AttributeInstance s = p.getAttribute(Attributes.MOVEMENT_SPEED), at = p.getAttribute(Attributes.ATTACK_SPEED);
+        if (s != null) s.removeModifier(MOD);
+        if (at != null) at.removeModifier(MOD);
+        StatusData.addCounter(p, "sage_scan", -StatusData.counter(p, "sage_scan"));
     }
 
     static void forgotten(ServerPlayer p) {

@@ -61,6 +61,9 @@ public class Ability {
     /** Runs every tick: always for passives, only while toggled on for toggles. */
     public void tick(ServerPlayer player, ServerLevel level) {}
 
+    /** A switchable skill's passives were switched on or off in the menu. */
+    public void onSwitch(ServerPlayer player, boolean on) {}
+
     /** A toggle was switched on or off. */
     public void onToggle(ServerPlayer player, boolean on) {}
 
@@ -79,6 +82,11 @@ public class Ability {
     public boolean isToggle() { return properties.toggle; }
     /** Held skills work while the key is down (breaths, chanted spells). */
     public boolean isHeld() { return properties.held; }
+    /**
+     * Switchable skills have an on/off switch in the skill menu for their passive effects (Tensura's
+     * toggle for Great Sage, resistances and so on). They start switched on.
+     */
+    public boolean isSwitchable() { return properties.switchable; }
     public List<Mode> modes() { return List.copyOf(properties.modes); }
     public Mode mode(int index) { return properties.modes.get(Math.floorMod(index, properties.modes.size())); }
     public int maxMastery() { return properties.type.maxMastery(); }
@@ -125,7 +133,7 @@ public class Ability {
         private int manaCost = 0, auraCost = 0, cooldownTicks = 0;
         private SkillType type = SkillType.COMMON;
         private AbilityCategory category = AbilityCategory.OFFENSE;
-        private boolean passive = false, toggle = false, held = false;
+        private boolean passive = false, toggle = false, held = false, switchable = false;
         private final List<Mode> modes = new ArrayList<>();
         private String magicClass = "", school = "";
         private int castTicks = 0, range = 0;
@@ -145,6 +153,8 @@ public class Ability {
         public Properties toggle() { this.toggle = true; return this; }
         /** The skill keeps working while its key is held, and hears when it is released. */
         public Properties held() { this.held = true; return this; }
+        /** Gives the skill an on/off switch for its passives (on by default). */
+        public Properties switchable() { this.switchable = true; return this; }
         /** Add a mode. Skills with no modes get one from manaCost/auraCost/cooldown. */
         public Properties mode(String key, int mana, int aura, float cooldownSeconds) {
             modes.add(Mode.of(key, mana, aura, cooldownSeconds));

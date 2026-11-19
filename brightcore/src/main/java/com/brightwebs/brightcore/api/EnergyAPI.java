@@ -22,6 +22,8 @@ import java.util.function.Function;
  */
 public final class EnergyAPI {
     public static final double BASE_GAIN = 0.01, MAX_GAIN = 0.10;
+    /** Tensura defaults: 1% gain rate, at most 90% reduction for weak prey, 5% cap when killing players. */
+    public static final double GAIN_PERCENT = 1.0, MAX_EP_REDUCTION = 0.90, DEATH_PENALTY = 0.05;
 
     /** Starting energy for creatures that aren't players: {aura, mana}. Content mods add entries. */
     private static final Map<EntityType<?>, double[]> CREATURE_ENERGY = new HashMap<>();
@@ -103,16 +105,29 @@ public final class EnergyAPI {
     }
 
     /**
-     * The killer takes a share of the victim's power.
+     * Tensura: Reincarnated's kill formula.
+     *  gained EP = victim EP x (1 - 1% for every time the killer's EP fits into the victim's, at most 90%)
+     *  max aura  += gained x 1% x alignment aura factor   (neutral 2, everyone else 1)
+     *  max mana  += gained x 1% x alignment mana factor   (neutral 1, everyone else 2)
+     * Killing a player can't give more than 5% of that player's EP.
      * @return the EP gained
      */
     public static double absorbKill(LivingEntity killer, LivingEntity victim, Alignment alignment) {
         EnergyData k = get(killer), v = get(victim);
-        double ratio = v.ep() / Math.max(1, k.ep());
-        double share = Math.clamp(MAX_GAIN * ratio, BASE_GAIN, MAX_GAIN) * alignment.gainMultiplier();
-        double gainAura = v.maxAura() * share, gainMana = v.maxMana() * share;
-        EnergyData grown = k.withMax(k.maxAura() + gainAura, k.maxMana() + gainMana, k.maxSpirit());
-        set(killer, grown.withAura(grown.aura() + gainAura).withMana(grown.mana() + gainMana));
+        double victimEP = v.ep();
+        if (victimEP <= 0) return 0;
+        int times = (int) (k.ep() / victimEP);
+        double reduction = Math.clamp(0.01 * times, 0, MAX_EP_REDUCTION);
+        double total = victimEP * (1 - reduction);
+        boolean neutral = alignment == Alignment.NEUTRAL;
+        double gainAura = total * GAIN_PERCENT / 100 * (neutral ? 2 : 1);
+        double gainMana = total * GAIN_PERCENT / 100 * (neutral ? 1 : 2);
+        if (victim instanceof Player && gainAura + gainMana > victimEP * DEATH_PENALTY) {
+            double cap = victimEP * DEATH_PENALTY, sum = gainAura + gainMana;
+            gainAura = cap * gainAura / sum;
+            gainMana = cap * gainMana / sum;
+        }
+        set(killer, k.withMax(k.maxAura() + gainAura, k.maxMana() + gainMana, k.maxSpirit()).withAura(k.aura()).withMana(k.mana()));
         return gainAura + gainMana;
     }
 

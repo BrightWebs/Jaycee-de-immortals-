@@ -30,9 +30,11 @@ public final class SkillEvents {
                 if (!kind.matches(event.getSource())) continue;
                 ResistanceSkill nul = BrightSkills.nullification(kind), res = BrightSkills.resistance(kind);
                 if (res == null || nul == null) continue;
-                ResistanceSkill best = AbilityAPI.has(player, nul) ? nul : AbilityAPI.has(player, res) ? res : null;
+                // Only switched-on skills protect (Tensura: resistances work while toggled).
+                ResistanceSkill best = AbilityAPI.isSwitchedOn(player, nul) ? nul : AbilityAPI.isSwitchedOn(player, res) ? res : null;
     
                 if (best == null) {
+                    if (AbilityAPI.has(player, res)) continue; // owned but switched off: no learning either
                     learnByEndurance(player, kind, res, event.getAmount());
                 } else {
                     float reduced = best.reduce(event.getAmount(), player.getHealth(), AbilityAPI.masteryFraction(player, best));

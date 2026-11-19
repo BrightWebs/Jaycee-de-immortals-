@@ -135,6 +135,24 @@ final class LibraryPage extends Page {
         l.t().pop(g);
     }
 
+    /** Tensura's toggle: switches a skill's passives (or a toggle skill) on and off. */
+    static final float SW_X1 = 1386, SW_Y1 = 384, SW_X2 = 1490, SW_Y2 = 410;
+
+    static boolean switchOn(LocalPlayer p, Ability a) {
+        return a.isSwitchable() ? AbilityAPI.isSwitchedOn(p, a) : AbilityAPI.isToggled(p, a);
+    }
+
+    private void switchButton(GuiGraphicsExtractor g, LocalPlayer p, Ability a) {
+        boolean on = switchOn(p, a);
+        UI.fill(g, SW_X1, SW_Y1, SW_X2, SW_Y2, on ? 0xE0123A22 : 0xE0181C28);
+        UI.rect(g, SW_X1, SW_Y1, SW_X2, SW_Y2, 2, on ? 0xFF5FE07A : 0xFF5A6478);
+        float knob = on ? SW_X2 - 24 : SW_X1 + 4;
+        UI.fill(g, knob, SW_Y1 + 4, knob + 20, SW_Y2 - 4, on ? 0xFF5FE07A : 0xFF8A94A8);
+        UI.text(g, Component.translatable(on ? "jaycee.hud.on" : "jaycee.hud.off"), on ? SW_X1 + 38 : SW_X2 - 38, (SW_Y1 + SW_Y2) / 2f, 15, 0xFFFFFFFF, 1);
+        String label = Component.translatable(a.isSwitchable() ? "jaycee.ui.passives" : "jaycee.ui.toggle").getString();
+        UI.semi(g, label, SW_X1 - 10, (SW_Y1 + SW_Y2) / 2f, 15, 0xFF50E6FF, 2);
+    }
+
     private void details(GuiGraphicsExtractor g, LocalPlayer p, Ability a) {
         UI.abilityIcon(g, a, l.detIconX(), l.detIconY(), l.detIcon());
         float ns = UI.fitSize(a.name().getString(), magic ? 30 : 32, 18, l.nameMax(), true);
@@ -150,7 +168,8 @@ final class LibraryPage extends Page {
                     : a.isToggle() ? Component.translatable("jaycee.ui.toggle").getString()
                     : Component.translatable("jaycee.ui.active").getString()
                     + (a.modes().size() > 1 ? " · " + Component.translatable("jaycee.ui.modes", a.modes().size()).getString() : "");
-            UI.text(g, act, 1488, 397, 18, 0xFF50E6FF, 2);
+            if (a.isSwitchable() || a.isToggle()) switchButton(g, p, a);
+            else UI.text(g, act, 1488, 397, 18, 0xFF50E6FF, 2);
             // main functions = modes
             int[][] fx = {{1058, 1194}, {1209, 1346}, {1361, 1494}};
             int cur = AbilityAPI.modeOf(p, a), n = Math.min(3, a.modes().size());
@@ -224,6 +243,10 @@ final class LibraryPage extends Page {
             if (b == 0 && in(x, y, l.cardX(), top, l.cardX() + 380, top + 112)) { pick(list.get(r + scroll).id()); return true; }
         }
         Ability sel = selected(p);
+        if (!magic && sel != null && b == 0 && (sel.isSwitchable() || sel.isToggle()) && in(x, y, SW_X1, SW_Y1, SW_X2, SW_Y2)) {
+            ClientPacketDistributor.sendToServer(new BrightNetwork.FlipSwitch(sel.id().toString()));
+            return true;
+        }
         if (!magic && sel != null && b == 0 && sel.modes().size() > 1) {
             int[][] mx = {{1058, 1194}, {1209, 1346}, {1361, 1494}};
             for (int i = 0; i < Math.min(3, sel.modes().size()); i++) {

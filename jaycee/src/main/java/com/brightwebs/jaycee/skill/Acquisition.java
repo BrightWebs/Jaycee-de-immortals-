@@ -66,6 +66,7 @@ public final class Acquisition {
                 StatusData.addCounter(p, "regen_toggle_init", 1);
                 AbilityAPI.setToggled(p, regen, true);
             }
+            com.brightwebs.jaycee.race.RaceSkills.raceChanged(p);
             merfolk(p);
         });
     }

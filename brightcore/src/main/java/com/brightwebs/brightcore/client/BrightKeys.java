@@ -29,6 +29,9 @@ public final class BrightKeys {
     public static final KeyMapping[] ABILITY = new KeyMapping[AbilityData.SLOTS_PER_PAGE];
     /** Held together with a skill key to switch that skill's mode, like Tensura: Reincarnated. */
     public static final KeyMapping MODE_SWITCH = new KeyMapping("key.brightcore.mode_switch", InputConstants.KEY_LALT, CATEGORY);
+    /** Uses your race's own ability (Tensura: Reincarnated's R). */
+    public static final KeyMapping RACE_ABILITY = new KeyMapping("key.brightcore.race_ability", InputConstants.KEY_R, CATEGORY);
+    private static boolean raceDown;
     public static final KeyMapping NEXT_PAGE = new KeyMapping("key.brightcore.next_page", InputConstants.KEY_Y, CATEGORY);
 
     static {
@@ -46,6 +49,7 @@ public final class BrightKeys {
         event.registerCategory(CATEGORY);
         for (KeyMapping key : ABILITY) event.register(key);
         event.register(MODE_SWITCH);
+        event.register(RACE_ABILITY);
         event.register(NEXT_PAGE);
     }
 
@@ -64,6 +68,12 @@ public final class BrightKeys {
                             : new BrightNetwork.ActivateSlot(i));
                 }
             }
+            boolean r = RACE_ABILITY.isDown();
+            if (r != raceDown) {
+                raceDown = r;
+                if (mc.gui.screen() == null || !r) ClientPacketDistributor.sendToServer(new BrightNetwork.RaceKey(r));
+            }
+            while (RACE_ABILITY.consumeClick()) { /* handled by the down/up edge above */ }
             while (NEXT_PAGE.consumeClick()) {
                 ClientPacketDistributor.sendToServer(new BrightNetwork.SetPage(AbilityAPI.get(mc.player).page() + 1));
             }

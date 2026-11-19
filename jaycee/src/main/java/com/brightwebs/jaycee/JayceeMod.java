@@ -22,6 +22,7 @@ public final class JayceeMod {
         JayceeSkills.init(bus);
         IchorAPI.init(bus);
         JayceeRaces.init(bus);
+        com.brightwebs.jaycee.race.RaceSkills.init();
         com.brightwebs.jaycee.status.StatusData.init(bus);
         com.brightwebs.jaycee.skill.Stomach.init(bus);
         com.brightwebs.jaycee.skill.Refining.init(bus);

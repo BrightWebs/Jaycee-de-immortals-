@@ -70,6 +70,22 @@ public final class BrightNetwork {
     }
 
     /** "I choose this race" from the first-join menu. "random" picks one of the starting races. */
+    /** The skill menu's on/off switch. */
+    public record FlipSwitch(String ability) implements CustomPacketPayload {
+        public static final Type<FlipSwitch> TYPE = new Type<>(BrightCore.id("flip_switch"));
+        public static final StreamCodec<ByteBuf, FlipSwitch> CODEC =
+                StreamCodec.composite(ByteBufCodecs.STRING_UTF8, FlipSwitch::ability, FlipSwitch::new);
+        @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
+    }
+
+    /** The Race Ability key (R) went down or up. */
+    public record RaceKey(boolean down) implements CustomPacketPayload {
+        public static final Type<RaceKey> TYPE = new Type<>(BrightCore.id("race_key"));
+        public static final StreamCodec<ByteBuf, RaceKey> CODEC =
+                StreamCodec.composite(ByteBufCodecs.BOOL, RaceKey::down, RaceKey::new);
+        @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
+    }
+
     /** A slot key was let go (ends held skills). */
     public record ReleaseSlot(int slot) implements CustomPacketPayload {
         public static final Type<ReleaseSlot> TYPE = new Type<>(BrightCore.id("release_slot"));
@@ -96,12 +112,21 @@ public final class BrightNetwork {
     @SubscribeEvent
     public static void register(RegisterPayloadHandlersEvent event) {
         // Bump this whenever a packet's format changes.
-        PayloadRegistrar registrar = event.registrar("5");
+        PayloadRegistrar registrar = event.registrar("7");
         registrar.playToServer(ActivateSlot.TYPE, ActivateSlot.CODEC, BrightNetwork::onActivate);
         registrar.playToServer(ReleaseSlot.TYPE, ReleaseSlot.CODEC, (payload, context) -> com.brightwebs.brightcore.api.util.Safe.run("BrightNetwork.release", () -> {
             if (context.player() instanceof ServerPlayer player
                     && payload.slot() >= 0 && payload.slot() < AbilityData.SLOTS_PER_PAGE) {
                 AbilityAPI.releaseSlot(player, payload.slot());
+            }
+        }));
+        registrar.playToServer(RaceKey.TYPE, RaceKey.CODEC, (payload, context) -> com.brightwebs.brightcore.api.util.Safe.run("BrightNetwork.raceKey", () -> {
+            if (context.player() instanceof ServerPlayer player) com.brightwebs.brightcore.api.race.RaceAbilities.key(player, payload.down());
+        }));
+        registrar.playToServer(FlipSwitch.TYPE, FlipSwitch.CODEC, (payload, context) -> com.brightwebs.brightcore.api.util.Safe.run("BrightNetwork.flipSwitch", () -> {
+            if (context.player() instanceof ServerPlayer player) {
+                var a = AbilityRegistry.get(Identifier.tryParse(payload.ability()));
+                if (a != null) AbilityAPI.flipSwitch(player, a);
             }
         }));
         registrar.playToServer(SetPage.TYPE, SetPage.CODEC, BrightNetwork::onSetPage);

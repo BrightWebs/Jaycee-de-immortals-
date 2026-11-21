@@ -114,7 +114,7 @@ public final class MoreSkills {
         hand.shrink(1);
         AbilityAPI.addMasteryPoint(p, a);
         ItemStack flesh = new ItemStack(Items.ROTTEN_FLESH);
-        if (!p.addItem(flesh)) p.drop(flesh, false);
+        if (!p.addItem(flesh)) p.spawnAtLocation((ServerLevel) p.level(), flesh);
         p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.LAVA_EXTINGUISH, SoundSource.PLAYERS, 1, 1);
         return true;
     }

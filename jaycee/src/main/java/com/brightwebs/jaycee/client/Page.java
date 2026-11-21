@@ -3,7 +3,7 @@ package com.brightwebs.jaycee.client;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
 
-/** One page of the Existence System. Coordinates passed in are frame design pixels. */
+// one page of the existence system. coords passed in are frame design pixels
 abstract class Page {
     final MenuScreen menu;
 
@@ -11,10 +11,10 @@ abstract class Page {
 
     LocalPlayer player() { return menu.player(); }
 
-    /** Background texture (under textures/gui/). */
+    // background texture (in textures/gui/)
     abstract String background();
 
-    /** Whether the live player model stands in the left portrait. */
+    // does the live player model stand in the left portrait
     boolean showsPlayer() { return true; }
 
     abstract void draw(GuiGraphicsExtractor g, double mx, double my);
@@ -23,10 +23,10 @@ abstract class Page {
 
     boolean scroll(double mx, double my, double dy) { return false; }
 
-    /** Drawn in screen space before the scaled page content (live 3D previews). */
+    // drawn in screen space before the scaled page stuff (live 3D previews)
     void drawScreen(GuiGraphicsExtractor g, int mx, int my) {}
 
-    /** Mouse moved with the left button held; dx/dy in frame design pixels. */
+    // mouse moved with left click held, dx/dy in frame design pixels
     boolean drag(double mx, double my, double dx, double dy) { return false; }
 
     boolean release(double mx, double my) { return false; }

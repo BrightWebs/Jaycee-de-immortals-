@@ -14,7 +14,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 
-/** Analytical Appraisal (Great Sage, Raphael) and Analysis (Predator). */
+// analytical appraisal (great sage, raphael) and analysis (predator)
 final class Appraisal {
     private Appraisal() {}
 

@@ -12,26 +12,26 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
-/** Menu actions for Jaycee's own systems. The server checks everything. */
+// menu actions for jaycee's own stuff. the server checks everything
 @EventBusSubscriber(modid = JayceeMod.ID)
 public final class JayceeNetwork {
     private JayceeNetwork() {}
 
-    /** Equip a title you own ("" to take it off). */
+    // equip a title you own ("" takes it off)
     public record EquipTitle(String title) implements CustomPacketPayload {
         public static final Type<EquipTitle> TYPE = new Type<>(Identifier.fromNamespaceAndPath(JayceeMod.ID, "equip_title"));
         public static final StreamCodec<ByteBuf, EquipTitle> CODEC = StreamCodec.composite(ByteBufCodecs.STRING_UTF8, EquipTitle::title, EquipTitle::new);
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     }
 
-    /** Show or hide your title above your name. */
+    // show or hide your title above your name
     public record TitlePublic(boolean on) implements CustomPacketPayload {
         public static final Type<TitlePublic> TYPE = new Type<>(Identifier.fromNamespaceAndPath(JayceeMod.ID, "title_public"));
         public static final StreamCodec<ByteBuf, TitlePublic> CODEC = StreamCodec.composite(ByteBufCodecs.BOOL, TitlePublic::on, TitlePublic::new);
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     }
 
-    /** Analytical Appraisal's reading of the creature you're looking at (entity -1 clears it). */
+    // what analytical appraisal reads off the mob you're looking at (entity -1 clears it)
     public record AppraisalInfo(int entity, String name, String race, double ep, float hp, float maxHp,
                                 float spirit, float maxSpirit, float mana, float maxMana, float aura, float maxAura,
                                 int armor, java.util.List<String> skills, int radius, int scanMode) implements CustomPacketPayload {
@@ -54,23 +54,23 @@ public final class JayceeNetwork {
                     int radius = b.readVarInt(), scanMode = b.readVarInt();
                     return new AppraisalInfo(e, n, r, ep, hp, mh, sp, ms, mp, mm, ap, ma, armor, skills, radius, scanMode);
                 });
-        /** Scan on and no creature in sight: the client reads blocks itself within radius. scanMode 0 both, 1 creatures, 2 blocks. */
+        // scan on but no mob in sight: the client reads blocks itself in the radius. scanMode 0 both, 1 mobs, 2 blocks
         public static AppraisalInfo idle(int radius, int scanMode) {
             return new AppraisalInfo(-2, "", "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, java.util.List.of(), radius, scanMode);
         }
-        /** Scan off. */
+        // scan off
         public static final AppraisalInfo NONE = new AppraisalInfo(-1, "", "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, java.util.List.of(), 0, 0);
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     }
 
-    /** N pressed (shift: toggle your nameable status). */
+    // N pressed (shift: flip your nameable status)
     public record NamingKey(boolean shift) implements CustomPacketPayload {
         public static final Type<NamingKey> TYPE = new Type<>(Identifier.fromNamespaceAndPath(JayceeMod.ID, "naming_key"));
         public static final StreamCodec<ByteBuf, NamingKey> CODEC = StreamCodec.composite(ByteBufCodecs.BOOL, NamingKey::shift, NamingKey::new);
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     }
 
-    /** Server -> client: open the naming pop-up for this creature, with what each choice gives and costs. */
+    // server -> client: open the naming pop up for this mob, with what each choice gives and costs
     public record OpenNaming(int entity, String name, String race, double ep, float hp,
                              double gain0, double gain1, double gain2, double cost0, double cost1, double cost2) implements CustomPacketPayload {
         public static final Type<OpenNaming> TYPE = new Type<>(Identifier.fromNamespaceAndPath(JayceeMod.ID, "open_naming"));
@@ -82,7 +82,7 @@ public final class JayceeNetwork {
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     }
 
-    /** The pop-up's Name button. type 0 Subdue, 1 Evolve, 2 Endow. */
+    // name button in the pop up. type 0 subdue, 1 evolve, 2 endow
     public record NameRequest(int entity, String name, int namingType) implements CustomPacketPayload {
         public static final Type<NameRequest> TYPE = new Type<>(Identifier.fromNamespaceAndPath(JayceeMod.ID, "name_request"));
         public static final StreamCodec<ByteBuf, NameRequest> CODEC = StreamCodec.composite(ByteBufCodecs.VAR_INT, NameRequest::entity,
@@ -90,7 +90,7 @@ public final class JayceeNetwork {
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     }
 
-    /** Bonds page: follow / stay / release a subordinate. */
+    // bonds page: follow / stay / release a subordinate
     public record SubCommand(String uuid, String command) implements CustomPacketPayload {
         public static final Type<SubCommand> TYPE = new Type<>(Identifier.fromNamespaceAndPath(JayceeMod.ID, "sub_command"));
         public static final StreamCodec<ByteBuf, SubCommand> CODEC = StreamCodec.composite(ByteBufCodecs.STRING_UTF8, SubCommand::uuid,
@@ -98,7 +98,7 @@ public final class JayceeNetwork {
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     }
 
-    /** Character Editor: Apply Changes. The server keeps only what the race may wear. */
+    // character editor apply button. the server only keeps what your race can wear
     public record ApplyLook(java.util.Map<String, String> look) implements CustomPacketPayload {
         public static final Type<ApplyLook> TYPE = new Type<>(Identifier.fromNamespaceAndPath(JayceeMod.ID, "apply_look"));
         public static final StreamCodec<ByteBuf, ApplyLook> CODEC = StreamCodec.composite(
@@ -106,10 +106,10 @@ public final class JayceeNetwork {
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     }
 
-    /** Set on the client by OpenNaming; the client opens the pop-up. */
+    // the client sets this so OpenNaming opens the pop up
     public static volatile java.util.function.Consumer<OpenNaming> openNaming = p -> {};
 
-    /** The latest reading on this client, and when it arrived (read by the HUD). */
+    // the latest reading on this client and when it came in (the HUD reads it)
     public static volatile AppraisalInfo lastAppraisal = AppraisalInfo.NONE;
     public static volatile long lastAppraisalAt;
 

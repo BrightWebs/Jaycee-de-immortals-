@@ -15,11 +15,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-/**
- * Plays an ability's particle recipe (assets/brightcore/fx_recipes.json: two particle families and
- * a shape for every ability in the Tensura list). New abilities get their look with one call:
- *   FxRecipes.play(level, "fire_ball", caster, targetPosition);
- */
+// plays a skill's particle recipe from assets/brightcore/fx_recipes.json
+// (two particle kinds and a shape for every skill on the tensura list)
+// new skills get their look with one line: FxRecipes.play(level, "fire_ball", caster, targetPosition);
 public final class FxRecipes {
     public record Recipe(String primary, String accent, String shape) {}
     private static Map<String, Recipe> recipes;
@@ -53,7 +51,7 @@ public final class FxRecipes {
         return h != null ? h : BrightParticles.AURA;
     }
 
-    /** Plays the recipe for an ability. target may be null (self-centred effects). */
+    // plays the recipe for a skill. target can be null for stuff centred on yourself
     public static void play(ServerLevel l, String abilityId, LivingEntity caster, Vec3 target) {
         com.brightwebs.brightcore.api.util.Safe.run("FxRecipes.play " + abilityId, () -> {
             Recipe r = get(abilityId);

@@ -1,9 +1,7 @@
 package com.brightwebs.brightcore.api.race;
 
-/**
- * A race's nature. Sets how much of a slain being's power it takes in (its soul share),
- * and later, how holy, demonic and undead damage treat it.
- */
+// what a race is (holy, demonic etc). changes how much power it takes from kills,
+// and later how holy/demonic/undead damage hits it
 public enum Alignment {
     HOLY("Holy", 0.8f, 0xFFF3CF82),
     NEUTRAL("Neutral", 1.0f, 0xFFB5D9F4),
@@ -22,7 +20,7 @@ public enum Alignment {
     }
 
     public String label() { return label; }
-    /** Multiplies the EP taken from kills. Darker natures feed harder. */
+    // multiplies EP from kills, darker races take more
     public float gainMultiplier() { return gainMultiplier; }
     public int color() { return color; }
 }

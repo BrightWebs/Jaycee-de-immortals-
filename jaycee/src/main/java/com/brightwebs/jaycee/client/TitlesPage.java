@@ -10,7 +10,7 @@ import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 import java.util.List;
 
-/** Titles: the titles you have earned, their effects, and which one you wear (opened from the Title field). */
+// titles: what you've earned, what they do, and which one you have on (opened from the title field)
 final class TitlesPage extends Page {
     private static final T TF = new T(474f, 241.214f, 0.81513f, 332, 140);
     private static final int ROWS = 6, TOP = 270, STEP = 98;

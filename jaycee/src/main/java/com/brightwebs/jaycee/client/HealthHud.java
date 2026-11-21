@@ -16,12 +16,10 @@ import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
 import java.util.Set;
 
-/**
- * The health HUD from the approved mock-up (docs/designs/health_hud.png): your whole character in
- * a glowing circle, HP / SHP / MP / AP bars, armor, hunger with air bubbles, 
- * Minecraft's own hearts, armor, hunger and air are hidden; its XP bar stays as it is.
- * Coordinates are design pixels of the 1672 x 941 mock-up.
- */
+// the health HUD from the mockup (docs/designs/health_hud.png): your whole character in
+// a glowing circle, HP / SHP / MP / AP bars, armor, hunger with air bubbles
+// vanilla hearts, armor, hunger and air are hidden, the XP bar stays normal
+// coords are design pixels from the 1672 x 941 mockup
 @EventBusSubscriber(modid = JayceeMod.ID, value = Dist.CLIENT)
 public final class HealthHud {
     static final float DESIGN_W = 1672, SCALE = 0.72f;
@@ -48,7 +46,7 @@ public final class HealthHud {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer p = mc.player;
         if (p == null || p.isSpectator() || p.isCreative()) return;
-        float k = sw / DESIGN_W * SCALE;
+        float k = Math.min(0.32f, sw / DESIGN_W * SCALE);  // follows GUI scale
         EnergyData e = EnergyAPI.get(p);
         g.pose().pushMatrix();
         g.pose().scale(k, k);
@@ -84,7 +82,7 @@ public final class HealthHud {
             UI.rect(g, cx - 9, cy - 9, cx + 9, cy + 9, 2, 0xFF7FB8D8);
             if (i < Math.round(air)) UI.fill(g, cx - 6, cy - 6, cx + 6, cy + 6, 0xFF3FC8FF);
         }
-        // portrait: the whole character, live
+        // portrait, the whole character live
         piece(g, "hh_portrait", 18, 20, 190, 190);
         g.pose().popMatrix();
         int x1 = Math.round(48 * k), y1 = Math.round(34 * k), x2 = Math.round(178 * k), y2 = Math.round(198 * k);
@@ -92,9 +90,9 @@ public final class HealthHud {
                 (x1 + x2) / 2f, (y1 + y2) / 2f - 20, p);
     }
 
-    /** The neon XP bar, centred above the hotbar, with the level in a hexagon. */
+    // old neon XP bar with the level in a hexagon (not used, the vanilla bar is back)
     private static void xpBar(GuiGraphicsExtractor g, int sw, int sh, LocalPlayer p) {
-        float k = sw / DESIGN_W * SCALE;
+        float k = Math.min(0.32f, sw / DESIGN_W * SCALE);  // follows GUI scale
         float w = 640, cx = sw / k / 2, y = sh / k - 112 / SCALE * 0.9f;
         g.pose().pushMatrix();
         g.pose().scale(k, k);

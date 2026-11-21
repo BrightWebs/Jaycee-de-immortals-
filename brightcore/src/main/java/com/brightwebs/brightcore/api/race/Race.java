@@ -6,13 +6,11 @@ import net.minecraft.resources.Identifier;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * A race (or one form of a race line). Register instances with a DeferredRegister on
- * {@link RaceRegistry#REGISTRY}. Everything is data; there are no hooks to override yet.
- *
- * Aura and Mana are rolled between min and max when a player becomes this race.
- * Body stats are absolute values (health 20 = ten hearts, speed 0.1 = a normal player).
- */
+// a race, or one form in a race line. register it on RaceRegistry.REGISTRY
+// it's all just data for now, nothing to override
+//
+// aura and mana get rolled between min and max when you become it
+// body stats are the real values (health 20 = ten hearts, speed 0.1 = normal player)
 public final class Race {
     private final Properties p;
 
@@ -32,14 +30,14 @@ public final class Race {
     public double knockbackResistance() { return p.knockback; }
     public double size() { return p.size; }
     public Alignment alignment() { return p.alignment; }
-    /** Shown in the race menu on first join. */
+    // shows up in the race menu when you first join
     public boolean isStarting() { return p.starting; }
-    /** The last form of a line: a being of divinity. */
+    // the last form in a line, a divine being
     public boolean isDivine() { return p.divine; }
-    /** 1 for a starting race, then 2, 3... up the line. */
+    // 1 for starting races, then 2, 3... going up
     public int tier() { return p.tier; }
     public List<Evolution> evolutions() { return List.copyOf(p.evolutions); }
-    /** Skills every member of this form has. Learned on becoming it. */
+    // skills every member of this form gets when they become it
     public List<Identifier> intrinsics() { return List.copyOf(p.intrinsics); }
 
     public Identifier id() {
@@ -48,7 +46,7 @@ public final class Race {
         return id;
     }
 
-    /** race.<namespace>.<path> and race.<namespace>.<path>.desc */
+    // race.<namespace>.<path> and race.<namespace>.<path>.desc
     public String descriptionId() {
         Identifier id = id();
         return "race." + id.getNamespace() + "." + id.getPath();
@@ -57,25 +55,18 @@ public final class Race {
     public Component name() { return Component.translatable(descriptionId()); }
     public Component description() { return Component.translatable(descriptionId() + ".desc"); }
 
-    /**
-     * One way this race can evolve.
-     *
-     * @param target    the race it becomes
-     * @param epNeeded  EP (max Aura + max Mana) needed
-     * @param xpLevels  experience levels needed (spent on evolving)
-     */
+    // one way this race can evolve
+    // target = what it turns into, epNeeded = EP needed, xpLevels = levels spent on evolving
     public record Evolution(Identifier target, double epNeeded, int xpLevels, List<Requirement> requirements) {
         public Evolution(Identifier target, double epNeeded, int xpLevels) {
             this(target, epNeeded, xpLevels, List.of(new Requirement("ep", "", epNeeded, 100)));
         }
     }
 
-    /**
-     * One part of an evolution's requirements (Tensura: Reincarnated's weighted requirements).
-     * Parts are worth weight percent each; the evolution opens at 100%.
-     * Types: ep (amount), item_consume / item_carry (arg = item id, amount), skill (arg = ability id),
-     * plus any a content mod registers (boss, awaken, named...).
-     */
+    // one part of an evolution's requirements, tensura style. each part is worth weight %
+    // and you can evolve at 100%
+    // types: ep, item_consume / item_carry (arg = item id), skill (arg = skill id),
+    // plus whatever the content mod adds (boss, awaken, named...)
     public record Requirement(String type, String arg, double amount, float weight) {}
 
     public static final class Properties {

@@ -6,15 +6,15 @@ import java.util.Map;
 
 import static com.brightwebs.jaycee.appearance.Features.*;
 
-/** Eyes, skin markings, accessories, outfit pieces and the General tab's whole looks. */
+// eyes, markings, accessories, outfit stuff and the general tab's full looks
 final class Extras {
     private Extras() {}
 
-    /** The face is at z = -4; eyes sit on row y -4..-3 like a default skin's. */
+    // the face is at z = -4, eyes go on row y -4..-3 like a normal skin
     private static final float FZ = -4.12f;
 
     static void register() {
-        // ---- eyes ----
+        // eyes
         add("eyes", "none", View.FACE, ANY, null, null, b().done());
         add("eyes", "round", View.FACE, ANY, "#3A7BFF", "#FFFFFF", eyes(b(), 2, 1, false).done());
         add("eyes", "anime", View.FACE, ANY, "#3A7BFF", "#FFFFFF", b()
@@ -42,7 +42,7 @@ final class Extras {
         add("eyes", "starry", View.FACE, ANY, "#B46CFF", "#FFE27A", eyes(b(), 2, 1, false)
                 .box(HEAD, -2.3f, -3.8f, FZ - 0.04f, 0.6f, 0.6f, 0.12f, SECONDARY).box(HEAD, 1.7f, -3.8f, FZ - 0.04f, 0.6f, 0.6f, 0.12f, SECONDARY).done());
 
-        // ---- skin markings ----
+        // markings
         add("markings", "none", View.FACE, ANY, null, null, b().done());
         add("markings", "cheek_marks", View.FACE, ANY, "#C0303A", "#C0303A", b()
                 .box(HEAD, -3.6f, -2.6f, FZ, 1.6f, 0.3f, 0.12f, PRIMARY).box(HEAD, -3.6f, -2.0f, FZ, 1.6f, 0.3f, 0.12f, PRIMARY)
@@ -65,7 +65,7 @@ final class Extras {
                 .box(HEAD, -0.6f, -6.8f, FZ, 1.2f, 1.6f, 0.12f, PRIMARY)
                 .box(BODY, -2.0f, 2.0f, -2.15f, 4.0f, 0.4f, 0.12f, PRIMARY).box(BODY, -0.2f, 2.0f, -2.15f, 0.4f, 4.0f, 0.12f, PRIMARY).done());
 
-        // ---- accessories ----
+        // accessories
         add("acc_head", "none", View.HEAD, ANY, null, null, b().done());
         add("acc_head", "crown", View.HEAD, ANY, "#F0C040", "#C0303A", b()
                 .box(HEAD, -4.8f, -9.6f, -4.8f, 9.6f, 1.2f, 0.6f, PRIMARY).box(HEAD, -4.8f, -9.6f, 4.2f, 9.6f, 1.2f, 0.6f, PRIMARY)
@@ -111,7 +111,7 @@ final class Extras {
                 .box(RIGHT_ARM, -3.6f, -2.6f, -2.6f, 5.0f, 2.6f, 5.2f, PRIMARY).box(RIGHT_ARM, -3.7f, -0.4f, -2.7f, 5.2f, 0.6f, 5.4f, SECONDARY)
                 .box(LEFT_ARM, -1.4f, -2.6f, -2.6f, 5.0f, 2.6f, 5.2f, PRIMARY).box(LEFT_ARM, -1.5f, -0.4f, -2.7f, 5.2f, 0.6f, 5.4f, SECONDARY).done());
 
-        // ---- outfit ----
+        // outfit
         add("cape", "none", View.BACK, ANY, null, null, b().done());
         add("cape", "short", View.BACK, ANY, "#2A2E5A", "#F0C040", b()
                 .rot(BODY, 0, 0, 2.2f, 8, 0, 0, -4.6f, 0, 0, 9.2f, 9.0f, 0.4f, PRIMARY).rot(BODY, 0, 0, 2.2f, 8, 0, 0, -4.6f, 8.6f, 0.05f, 9.2f, 0.6f, 0.4f, SECONDARY).done());
@@ -135,7 +135,7 @@ final class Extras {
                 .box(BODY, -4.3f, 9.6f, -2.3f, 8.6f, 1.0f, 4.6f, SECONDARY)
                 .box(RIGHT_LEG, -2.3f, -1.4f, -2.4f, 4.4f, 4.4f, 0.4f, PRIMARY).box(LEFT_LEG, -2.1f, -1.4f, -2.4f, 4.4f, 4.4f, 0.4f, PRIMARY).done());
 
-        // ---- General: whole looks ----
+        // general tab, full looks
         look("keep_skin", Map.of());
         look("adventurer", Map.of("bangs", "swept", "back", "short", "acc_neck", "scarf", "waist", "belt", "cape", "short"));
         look("sage", Map.of("bangs", "curtain", "back", "very_long", "acc_head", "tiara", "eyes", "anime", "cape", "long"));

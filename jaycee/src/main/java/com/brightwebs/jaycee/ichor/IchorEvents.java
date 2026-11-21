@@ -9,14 +9,14 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-/** First-join Birthright, and the faint gold glow of the divine Grades. */
+// first join birthright, and the faint gold glow on the divine grades
 @EventBusSubscriber(modid = JayceeMod.ID)
 public final class IchorEvents {
     private static final DustParticleOptions GOLD = new DustParticleOptions(0xF3CF82, 0.8f);
 
     private IchorEvents() {}
 
-    /** Paused while the race system comes first; the Greek layer returns later. */
+    // paused while we do the race system first, the greek stuff comes back later
     public static final boolean BIRTHRIGHT_ENABLED = false;
 
     @SubscribeEvent
@@ -29,10 +29,8 @@ public final class IchorEvents {
         });
     }
 
-    /**
-     * Demigod: a few gold motes now and then. Lesser God and up: a little more.
-     * Kept subtle on purpose; a god's full True Form comes later as an ability.
-     */
+    // demigod: a few gold specks now and then. lesser god and up: a bit more
+    // kept subtle on purpose, a god's full true form comes later as an ability
     @SubscribeEvent
     public static void onTick(PlayerTickEvent.Post event) {
         com.brightwebs.brightcore.api.util.Safe.run("IchorEvents.onTick", () -> {

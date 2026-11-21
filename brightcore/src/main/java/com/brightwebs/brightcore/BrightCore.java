@@ -9,17 +9,14 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import org.slf4j.Logger;
 
-/**
- * Bright Core: the framework Jaycee is built on.
- *
- * It owns the systems every content mod needs and nothing content-specific:
- *   api/      Ability, the registry, AbilityAPI (all rules) and events
- *   api/race/ races: forms, evolutions, alignment, body stats
- *   data/     abilities (10 pages x 5 slots), energy (Aura, Mana, Spirit = EP) and race, per entity
- *   network/  the client only ever says "I pressed slot N" or "switch page"; the server decides
- *   client/   ability keys and the bottom-right ability bar (its look can be replaced)
- *   command/  /<root> ability | race | ep, for testing and admins (root set by the content mod)
- */
+// Bright Core, the base that Jaycee runs on.
+// It has all the general systems (skills, races, energy) but no actual content:
+//   api/      skills, the registry, AbilityAPI and events
+//   api/race/ races, evolutions, alignment, body stats
+//   data/     what each entity has: skills (10 pages of 5), energy (aura + mana = EP), race
+//   network/  client only says "i pressed slot N" or "next page", server decides the rest
+//   client/   the skill keys and the default skill bar
+//   command/  /<root> ability | race | ep for testing
 @Mod(BrightCore.ID)
 public final class BrightCore {
     public static final String ID = "brightcore";
@@ -35,10 +32,10 @@ public final class BrightCore {
 
     private static String commandRoot = ID;
 
-    /** The root for Bright Core's commands: /<root> ability|race|ep. Content mods set their own. */
+    // command root, so it's /<root> ability|race|ep. the content mod picks the name
     public static String commandRoot() { return commandRoot; }
 
-    /** Call from your mod's constructor, before commands are registered. */
+    // call this from the mod constructor before commands get registered
     public static void setCommandRoot(String root) { commandRoot = root; }
 
     public static Identifier id(String path) {

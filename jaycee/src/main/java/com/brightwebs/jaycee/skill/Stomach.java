@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-/** Predator's Stomach: 54 slots of storage that only its owner can open, kept through death. */
+// predator's stomach: 54 slots only the owner can open, kept on death
 public final class Stomach {
     public static final int SIZE = 54;
     private static final DeferredRegister<AttachmentType<?>> ATTACHMENTS =
@@ -39,7 +39,7 @@ public final class Stomach {
         return list;
     }
 
-    /** Puts an item in the Stomach; if it's full, drops it at the player's feet. */
+    // puts an item in the stomach, drops it at your feet if it's full
     static void store(ServerPlayer p, ItemStack stack) {
         SimpleContainer c = new SimpleContainer(items(p).toArray(new ItemStack[0]));
         ItemStack left = c.addItem(stack);

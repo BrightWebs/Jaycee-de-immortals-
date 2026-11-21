@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-/** Skills held down (breaths, chanted spells): ticks them while the key is down and tells them on release. */
+// skills you hold down (breaths, chanted spells). ticks them while held and tells them when you let go
 @EventBusSubscriber(modid = BrightCore.ID)
 public final class AbilityHolds {
     private static final class Hold {
@@ -28,7 +28,7 @@ public final class AbilityHolds {
         HOLDS.put(player.getUUID(), new Hold(ability, mode));
     }
 
-    /** The skill this player is holding right now, or null. */
+    // what this player is holding right now, or null
     public static Ability holding(ServerPlayer player) {
         Hold h = HOLDS.get(player.getUUID());
         return h == null ? null : h.ability;
@@ -46,7 +46,7 @@ public final class AbilityHolds {
         Safe.run("release " + ability.id(), () -> h.ability.onRelease(player, (ServerLevel) player.level(), h.mode, h.ticks));
     }
 
-    /** Stops a hold without the release effect (death, leaving, out of energy). */
+    // stops a hold without the release part (death, logging out, ran out of energy)
     public static void cancel(ServerPlayer player) {
         HOLDS.remove(player.getUUID());
     }

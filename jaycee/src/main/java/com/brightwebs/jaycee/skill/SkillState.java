@@ -26,7 +26,7 @@ import java.util.UUID;
 
 import static com.brightwebs.jaycee.skill.SkillHelper.give;
 
-/** Short-lived skill state: spell casting delays, Chant Annulment and Future Attack Prediction. */
+// short lived skill state: spell cast delays, chant annulment and future attack prediction
 @EventBusSubscriber(modid = JayceeMod.ID)
 public final class SkillState {
     private record Cast(ServerPlayer player, long at, Runnable effect) {}
@@ -38,7 +38,7 @@ public final class SkillState {
 
     private static long now(ServerPlayer p) { return p.level().getGameTime(); }
 
-    /** Thought Acceleration: the world slows around you, you speed up. */
+    // thought acceleration: the world slows down around you, you speed up
     static void accelerate(ServerPlayer p, double radius, int seconds, int slow, int haste) {
         for (LivingEntity e : SkillHelper.around(p, radius)) give(e, MobEffects.SLOWNESS, seconds, slow);
         give(p, MobEffects.SPEED, seconds, haste);
@@ -51,14 +51,14 @@ public final class SkillState {
     static void chantAnnulment(ServerPlayer p, int seconds) { CHANT.put(p.getUUID(), now(p) + seconds * 20L); }
     static void foresight(ServerPlayer p, int seconds) { FORESIGHT.put(p.getUUID(), now(p) + seconds * 20L); }
 
-    /** True when spells cast instantly: Chant Annulment is active, or the player has Raphael. */
+    // true when spells cast instantly: chant annulment is on or you have raphael
     public static boolean instantCast(ServerPlayer p) {
         if (CHANT.getOrDefault(p.getUUID(), 0L) > now(p)) return true;
         Ability raphael = AbilityRegistry.get(JayceeSkills.id("raphael"));
         return raphael != null && AbilityAPI.has(p, raphael);
     }
 
-    /** Runs a spell's effect after its casting time (or now, if casting is instant). */
+    // runs a spell's effect after its cast time (or right away if it's instant)
     static void cast(ServerPlayer p, Ability spell, Runnable effect) {
         int ticks = instantCast(p) ? 0 : spell.castTicks();
         if (ticks <= 0) { effect.run(); return; }
@@ -77,7 +77,7 @@ public final class SkillState {
         });
     }
 
-    /** Future Attack Prediction: a 50% chance to see an attack coming and dodge it. */
+    // future attack prediction: 50% chance to see an attack coming and dodge it
     @SubscribeEvent
     public static void onIncoming(LivingIncomingDamageEvent event) {
         com.brightwebs.brightcore.api.util.Safe.run("SkillState.onIncoming", () -> {

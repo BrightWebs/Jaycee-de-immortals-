@@ -13,7 +13,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
-/** /jaycee fx <ability>: plays any ability's particle recipe where you're looking, to preview it. */
+// /jaycee fx <ability>: plays any skill's particle recipe where you're looking so you can see it
 @EventBusSubscriber(modid = JayceeMod.ID)
 public final class FxCommand {
     private FxCommand() {}

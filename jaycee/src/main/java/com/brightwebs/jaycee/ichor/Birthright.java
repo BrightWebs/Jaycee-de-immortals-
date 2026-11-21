@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 
-/** The card a player is dealt on first join. Odds from the Ichor: Foundation doc. */
+// the card you get on first join. odds come from the ichor foundation doc
 public enum Birthright implements StringRepresentable {
     UNDRAWN("undrawn", "Undrawn", 0, 0, 0),
     MORTAL_BORN("mortal_born", "Mortal-born", 950, 3, 8),
@@ -14,7 +14,7 @@ public enum Birthright implements StringRepresentable {
     public static final Codec<Birthright> CODEC = StringRepresentable.fromEnum(Birthright::values);
 
     private final String id, label;
-    /** Out of 1000. */
+    // out of 1000
     private final int weight;
     private final int minIchor, maxIchor;
 
@@ -33,7 +33,7 @@ public enum Birthright implements StringRepresentable {
         return minIchor + random.nextInt(maxIchor - minIchor + 1);
     }
 
-    /** 95% Mortal-born, 4.5% Oracle-born, 0.5% Godblood. */
+    // 95% mortal born, 4.5% oracle born, 0.5% godblood
     public static Birthright draw(RandomSource random) {
         int roll = random.nextInt(1000);
         for (Birthright b : values()) {

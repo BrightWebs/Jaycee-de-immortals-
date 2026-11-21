@@ -12,14 +12,14 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 
-/** Registers the ability bar as a HUD layer and holds the renderer that draws it. */
+// registers the skill bar as a HUD layer and keeps the renderer for it
 @EventBusSubscriber(modid = BrightCore.ID, value = Dist.CLIENT)
 public final class BrightCoreClient {
     private static AbilityBarRenderer barRenderer = BrightCoreClient::defaultBar;
 
     private BrightCoreClient() {}
 
-    /** Content mods call this during client setup to give the bar their own look. */
+    // content mods call this in client setup to give the bar their own look
     public static void setBarRenderer(AbilityBarRenderer renderer) {
         barRenderer = renderer;
     }
@@ -28,14 +28,14 @@ public final class BrightCoreClient {
     public static void registerLayers(RegisterGuiLayersEvent event) {
         event.registerAboveAll(BrightCore.id("ability_bar"), (g, delta) -> {
             Minecraft mc = Minecraft.getInstance();
-            if (mc.player == null || mc.player.isSpectator()) return; // TODO: also hide when F1 hides the HUD
+            if (mc.player == null || mc.player.isSpectator()) return;  // TODO hide it when F1 hides the HUD too
             barRenderer.render(g, g.guiWidth(), g.guiHeight(), mc.player, AbilityAPI.get(mc.player));
         });
     }
 
-    // ---- helpers for renderers -------------------------------------------------
+    // helpers for renderers
 
-    /** 0 = ready, 1 = just used. */
+    // 0 = ready, 1 = just used
     public static float cooldownFraction(Ability ability, AbilityData data) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || ability.cooldownTicks() <= 0) return 0;
@@ -43,7 +43,7 @@ public final class BrightCoreClient {
         return Math.min(1f, left / (float) ability.cooldownTicks());
     }
 
-    /** Whole seconds of cooldown left, rounded up. */
+    // seconds of cooldown left, rounded up
     public static int cooldownSeconds(Ability ability, AbilityData data) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) return 0;
@@ -54,7 +54,7 @@ public final class BrightCoreClient {
         return data.slot(slot).map(AbilityRegistry::get).orElse(null);
     }
 
-    /** A plain bar used until a content mod provides its own. Bottom-right corner. */
+    // plain bar until a content mod gives its own, bottom right
     private static void defaultBar(GuiGraphicsExtractor g, int sw, int sh, net.minecraft.world.entity.player.Player player, AbilityData data) {
         var font = Minecraft.getInstance().font;
         int size = 20, gap = 2, n = AbilityData.SLOTS_PER_PAGE;

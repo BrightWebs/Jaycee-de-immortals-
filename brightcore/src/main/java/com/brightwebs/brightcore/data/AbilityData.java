@@ -15,13 +15,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-/**
- * A player's skills: what they own, mastery, which toggles are on, each skill's selected mode,
- * cooldowns, damage taken toward learning resistances, and the ability bar's 10 pages x 5 slots
- * (stored flat: slot index = page * 5 + slot). Mana and Aura live in {@link EnergyData}.
- *
- * Immutable: changes go through AbilityAPI so they save and sync.
- */
+// a player's skills: what they own, mastery, which toggles are on, each skill's mode,
+// cooldowns, damage taken toward resistances, and the bar's 10 pages of 5 slots
+// (stored flat, slot index = page * 5 + slot). mana and aura are in EnergyData
+// don't change it directly, go through AbilityAPI so it saves and syncs
 public record AbilityData(Set<Identifier> owned,
                           Map<Identifier, Long> cooldowns,
                           List<String> slots,
@@ -67,7 +64,7 @@ public record AbilityData(Set<Identifier> owned,
         damageTaken = Map.copyOf(damageTaken);
     }
 
-    // ---- reads -------------------------------------------------------------------
+    // reads
 
     public boolean has(Identifier ability) { return owned.contains(ability); }
     public boolean isToggled(Identifier ability) { return toggled.contains(ability); }
@@ -80,7 +77,7 @@ public record AbilityData(Set<Identifier> owned,
         return s.isEmpty() ? Optional.empty() : Optional.ofNullable(Identifier.tryParse(s));
     }
 
-    /** One of the 5 slots on the current page. */
+    // one of the 5 slots on this page
     public Optional<Identifier> slot(int slot) {
         if (slot < 0 || slot >= SLOTS_PER_PAGE) return Optional.empty();
         return slotAt(page * SLOTS_PER_PAGE + slot);
@@ -90,7 +87,7 @@ public record AbilityData(Set<Identifier> owned,
         return Math.max(0, cooldowns.getOrDefault(ability, 0L) - gameTime);
     }
 
-    // ---- copies with one change ---------------------------------------------------------
+    // copies with one thing changed
 
     private AbilityData with(Set<Identifier> owned, Map<Identifier, Long> cooldowns, List<String> slots, int page,
                              Map<Identifier, Integer> mastery, Set<Identifier> toggled, Map<Identifier, Integer> modes,

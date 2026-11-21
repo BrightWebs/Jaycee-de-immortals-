@@ -12,16 +12,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
-/**
- * The regeneration chain from Tensura: Reincarnated.
- *  Self-Regeneration (Common): 2 HP a second while hurt (4 + 8 spiritual health mastered), 100 magicules every 5 s.
- *  Ultraspeed Regeneration (Extra): all missing HP at once, 100 magicules per HP (60 mastered).
- *    Learned with Self-Regeneration mastered, the sea boss defeated (Tensura: Charybdis; here the
- *    Elder Guardian) and more than 300,000 EP.
- *  Infinite Regeneration (Extra): the same, and spiritual health too. Learned with Ultraspeed
- *    Regeneration and more than 2,000,000 EP.
- * The stronger one takes over: a lower link does nothing while a higher one is switched on.
- */
+// tensura's regen chain
+//   self regeneration (common): 2 HP a second while hurt (4 + 8 spiritual health mastered), 100 magicules every 5s
+//   ultraspeed regeneration (extra): all missing HP at once, 100 magicules per HP (60 mastered)
+//     you get it with self regen mastered, the sea boss beaten (charybdis in tensura, the elder guardian here)
+//     and over 300,000 EP
+//   infinite regeneration (extra): same thing plus spiritual health. you get it with ultraspeed and over 2,000,000 EP
+// the stronger one takes over, a lower one does nothing while a higher one is on
 final class Regeneration {
     static final double COST = 100, COST_MASTERED = 60;
     private Regeneration() {}

@@ -12,10 +12,8 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Skills Bright Core ships itself (one Resistance and one Nullification per damage kind),
- * plus the pool of Unique skills a player can be born with, which content mods fill.
- */
+// skills bright core has itself (one resistance and one nullification per damage kind)
+// plus the pool of uniques you can be born with, which content mods fill
 public final class BrightSkills {
     private static final DeferredRegister<Ability> SKILLS = DeferredRegister.create(AbilityRegistry.REGISTRY, BrightCore.ID);
 
@@ -23,17 +21,15 @@ public final class BrightSkills {
     private static final Map<DamageKind, Identifier> NULLIFICATION = new EnumMap<>(DamageKind.class);
     private static final List<Identifier> STARTING_UNIQUES = new ArrayList<>();
 
-    /** Damage of one kind a player must take (in hit points) to learn its Resistance. */
+    // how much damage of one kind you have to take to learn its resistance
     public static final double DAMAGE_TO_LEARN = 200;
-    /** Tensura's medium resistances (flame and the like): 15 damage per point, 10x pool, 500 points. */
+    // tensura's medium resistances (flame etc): 15 damage a point, 10x pool, 500 points
     public static final double HIT_FOR_POINT = 15, POOL_MULTIPLIER = 10, POINTS_TO_LEARN = 500;
-    /** EP needed, with the Resistance mastered, for it to become a Nullification. */
+    // EP you need, with the resistance mastered, for it to turn into a nullification
     public static final double EP_FOR_NULLIFICATION = 1_000_000;
 
-    /**
-     * A content mod registers the Resistance and Nullification for a damage kind with its own
-     * register and names. Kinds nobody registers simply have no resistance.
-     */
+    // content mod registers the resistance and nullification for a damage kind with its own names
+    // if nobody registers one that kind just has no resistance
     public static void register(DeferredRegister<Ability> register, DamageKind kind, String resistance, String nullification) {
         register.register(resistance, () -> new ResistanceSkill(kind, false));
         register.register(nullification, () -> new ResistanceSkill(kind, true));
@@ -57,7 +53,7 @@ public final class BrightSkills {
         return id == null ? null : (ResistanceSkill) AbilityRegistry.get(id);
     }
 
-    /** Content mods add the Unique skills a newly reborn player can roll. */
+    // content mods add the uniques a reborn player can roll
     public static void addStartingUnique(Identifier skill) {
         if (!STARTING_UNIQUES.contains(skill)) STARTING_UNIQUES.add(skill);
     }

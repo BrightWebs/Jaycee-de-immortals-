@@ -54,12 +54,10 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-/**
- * Natural training. Every gain is computed on the server from what the player actually did:
- * real distance moved (running into a wall moves nothing), damage really dealt to things that
- * fight back, mana really spent. Gains are scaled by racial talent, capped per second (macros
- * can't pile it up), shrink on the same target over and over, and stop at the race's level cap.
- */
+// natural training. every gain is worked out on the server from what you actually did:
+// real distance moved (running into a wall doesn't count), real damage to stuff that fights back,
+// mana you actually spent. gains scale with racial talent, are capped per second so macros can't
+// stack it, get smaller on the same target over and over, and stop at the race's level cap
 @EventBusSubscriber(modid = JayceeMod.ID)
 public final class Training {
     private static final DeferredRegister<AttachmentType<?>> ATTACHMENTS =
@@ -71,7 +69,7 @@ public final class Training {
                     .sync((holder, to) -> holder == to, TrainingData.STREAM_CODEC)
                     .build());
 
-    /** Server-side, per player, not saved. */
+    // server side, per player, not saved
     private static final class Live {
         final Map<String, Integer> levels = new HashMap<>();
         final Map<String, Double> exp = new HashMap<>();
@@ -87,7 +85,7 @@ public final class Training {
     private static final Map<UUID, Live> LIVE = new HashMap<>();
 
     private static final double MAX_PER_SECOND = 80;
-    private static final int FEED_TICKS = 100; // an entry stays 5 seconds after the activity stops
+    private static final int FEED_TICKS = 100;  // an entry stays 5 seconds after you stop
 
     private Training() {}
 
@@ -105,7 +103,7 @@ public final class Training {
         return l;
     }
 
-    // ---- gaining -------------------------------------------------------------------
+    // gaining
 
     public static void gain(ServerPlayer p, Attr a, double amount, String activity) {
         if (amount <= 0 || p.isSpectator()) return;
@@ -147,7 +145,7 @@ public final class Training {
         l.dirty = false;
     }
 
-    // ---- permanent body bonuses ------------------------------------------------------
+    // permanent body bonuses
 
     private record Bonus(Attr attr, Holder<Attribute> attribute, double perLevel, AttributeModifier.Operation op) {}
     private static final List<Bonus> BONUSES = List.of(
@@ -181,7 +179,7 @@ public final class Training {
         }
     }
 
-    // ---- activity hooks -----------------------------------------------------------------
+    // activity hooks
 
     @SubscribeEvent
     public static void onTick(PlayerTickEvent.Post event) {
@@ -211,7 +209,7 @@ public final class Training {
             long ck = p.chunkPosition().pack();
             if (l.chunks.add(ck)) gain(p, Attr.PERCEPTION, 3, "exploring");
             if (l.chunks.size() > 4096) l.chunks.clear();
-            // sensing enemies and enduring pressure from stronger beings
+            // sensing enemies and handling pressure from stronger things
             double myEp = Math.max(1, EnergyAPI.get(p).ep());
             int enemies = 0; double pressure = 0, aura = 0;
             for (LivingEntity e : p.level().getEntitiesOfClass(LivingEntity.class, p.getBoundingBox().inflate(16), e -> e != p && e.isAlive())) {
@@ -222,14 +220,14 @@ public final class Training {
             if (enemies > 0) gain(p, Attr.PERCEPTION, Math.min(3, enemies) * 0.5, "sensing_enemies");
             if (pressure > 0) gain(p, Attr.MENTAL_FORTITUDE, pressure, "pressure");
             if (aura > 1) gain(p, Attr.AURA_CONTROL, Math.min(aura, 6), "aura_exposure");
-            // natural recovery
+            // natural healing
             float hp = p.getHealth();
             if (l.lastHealth >= 0 && hp > l.lastHealth && !p.hasEffect(MobEffects.REGENERATION)) {
                 gain(p, Attr.REGENERATION, (hp - l.lastHealth) * 4, "recovering");
                 StatusData.addCounter(p, "healed", hp - l.lastHealth);
             }
             l.lastHealth = hp;
-            // Regeneration's own bonus: faster natural healing
+            // regen's own bonus, faster natural healing
             int regen = l.levels.getOrDefault(Attr.REGENERATION.key(), 0);
             if (regen > 0 && p.tickCount % 100 == 0 && hp < p.getMaxHealth() && p.getFoodData().getFoodLevel() > 6) p.heal(0.05f * regen);
         });
@@ -287,7 +285,7 @@ public final class Training {
         });
     }
 
-    /** Archery and Targeting make projectiles hit harder; Mental Fortitude blunts magic. */
+    // archery and targeting make projectiles hit harder, mental fortitude cuts magic damage
     @SubscribeEvent
     public static void onIncoming(LivingIncomingDamageEvent event) {
         com.brightwebs.brightcore.api.util.Safe.run("Training.onIncoming", () -> {
@@ -302,7 +300,7 @@ public final class Training {
         });
     }
 
-    /** Magic Control makes skills and spells cheaper. */
+    // magic control makes skills and spells cheaper
     @SubscribeEvent
     public static void onActivate(AbilityEvent.Activate event) {
         com.brightwebs.brightcore.api.util.Safe.run("Training.onActivate", () -> {

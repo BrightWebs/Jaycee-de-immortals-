@@ -24,13 +24,10 @@ import net.minecraft.world.phys.HitResult;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Analytical Appraisal, drawn as UI in the style of the approved mock-up. Like Tensura it only
- * shows while you look at something: a creature (read by the server: race, rank, EP, HP / SHP /
- * MP / AP, armor, skills) or a block (read here: hardness, whether your held tool can mine and
- * drop it, explosion resistance, light, growth). Nothing in sight, nothing on screen.
- * Coordinates are design pixels of the 1672 x 941 mock-up.
- */
+// analytical appraisal, drawn as actual UI like the mockup. like tensura it only shows when
+// you're looking at something: a mob (the server sends race, rank, EP, HP / SHP / MP / AP, armor, skills)
+// or a block (read here: hardness, can your tool mine it and drop it, blast resistance, light, growth)
+// looking at nothing = nothing on screen. coords are design pixels from the 1672 x 941 mockup
 final class AppraisalPanel {
     private static final float DESIGN_W = 1672, X = 1175, Y = 120, W = 460;
     private static final int[][] BAR = {{0xFFB81A2A, 0xFFFF5A6A}, {0xFFE07010, 0xFFFFD070}, {0xFF1A5AE0, 0xFF46CCFF}, {0xFFE0A000, 0xFFFFF070}};
@@ -39,22 +36,22 @@ final class AppraisalPanel {
 
     private AppraisalPanel() {}
 
-    /** Draws a glow-margin sprite (10 px margin around its shape). */
+    // draws a sprite that has a 10 px glow margin around it
     private static void piece(GuiGraphicsExtractor g, String tex, float x, float y, float w, float h) {
         UI.tex(g, tex, x - 10, y - 10, w + 20, h + 20);
     }
 
     static void render(GuiGraphicsExtractor g, int sw, int sh) {
         AppraisalInfo info = JayceeNetwork.lastAppraisal;
-        if (info.entity() == -1) return; // scan off
+        if (info.entity() == -1) return;  // scan off
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || mc.player == null) return;
-        float k = sw / DESIGN_W * 0.65f; // smaller panel, kept against the right edge
+        float k = Math.min(0.28f, sw / DESIGN_W * 0.65f);  // follows GUI scale, stuck to the right edge
         float px = sw / k - (DESIGN_W - X);
         boolean fresh = info.entity() >= 0 && System.currentTimeMillis() - JayceeNetwork.lastAppraisalAt < 1200;
         Entity e = fresh ? mc.level.getEntity(info.entity()) : null;
         if (e instanceof LivingEntity le) { creature(g, k, px, info, le); return; }
-        if (info.scanMode() == 1) return; // creatures only
+        if (info.scanMode() == 1) return;  // mobs only
         HitResult hit = mc.hitResult;
         if (hit instanceof BlockHitResult bh && hit.getType() == HitResult.Type.BLOCK
                 && bh.getLocation().distanceTo(mc.player.getEyePosition()) <= Math.max(5, info.radius())) {
@@ -67,7 +64,7 @@ final class AppraisalPanel {
         UI.text(g, Component.translatable("jaycee.appraisal.header"), W / 2, 14, 20, 0xFFF4ECFF, 1);
     }
 
-    // ---- creature -------------------------------------------------------------
+    // mob
 
     private static void creature(GuiGraphicsExtractor g, float k, float px, AppraisalInfo info, LivingEntity le) {
         g.pose().pushMatrix();
@@ -109,7 +106,7 @@ final class AppraisalPanel {
         skills(g, info);
         g.pose().popMatrix();
 
-        // the creature itself, live in the portrait
+        // the mob itself, live in the portrait
         int x1 = Math.round((px + 28) * k), y1 = Math.round((Y + 60) * k), x2 = Math.round((px + 110) * k), y2 = Math.round((Y + 142) * k);
         float tall = Math.max(le.getBbHeight(), le.getBbWidth());
         int size = Math.max(4, Math.round((y2 - y1) * 0.8f / Math.max(0.5f, tall)));
@@ -133,7 +130,7 @@ final class AppraisalPanel {
         }
     }
 
-    // ---- block ---------------------------------------------------------------
+    // block
 
     private static void block(GuiGraphicsExtractor g, float k, float px, BlockPos pos) {
         Minecraft mc = Minecraft.getInstance();

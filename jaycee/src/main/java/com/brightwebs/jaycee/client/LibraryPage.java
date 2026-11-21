@@ -16,12 +16,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * Skills and Magic: categories, a searchable library, the selected entry's details and the
- * shared ability presets. Only what the player owns is listed. Equip: pick an entry, click a slot.
- */
+// skills and magic: categories, a library you can search, the details of what you picked
+// and the ability presets. only shows what you own. to equip, pick something then click a slot
 final class LibraryPage extends Page {
-    /** Everything that differs between the two layouts, in each reference's own pixels. */
+    // everything that's different between the two layouts, in each mockup's own pixels
     private record L(T t, String bg, String[] cats, int[] catY, int catX1, int catX2, String catSel, int catSelW, int catSelH,
                      int listX, int listTop, int listStep, int rows, String card, String cardSel, int cardX, int cardSelX,
                      int iconX, int nameX, int lvX, int barX, int barW, int pillX, int searchX1, int searchY1, int searchX2, int searchY2,
@@ -135,7 +133,7 @@ final class LibraryPage extends Page {
         l.t().pop(g);
     }
 
-    /** Tensura's toggle: switches a skill's passives (or a toggle skill) on and off. */
+    // the toggle from tensura, turns a skill's passives (or a toggle skill) on and off
     static final float SW_X1 = 1386, SW_Y1 = 384, SW_X2 = 1490, SW_Y2 = 410;
 
     static boolean switchOn(LocalPlayer p, Ability a) {
@@ -293,6 +291,6 @@ final class LibraryPage extends Page {
         if (!searching) return false;
         if (key == 259 && !search.isEmpty()) { search = search.substring(0, search.length() - 1); return true; }
         if (key == 257) { searching = false; return true; }
-        return true; // swallow keys while typing so ability keys don't fire
+        return true;  // eat key presses while typing so the skill keys don't go off
     }
 }

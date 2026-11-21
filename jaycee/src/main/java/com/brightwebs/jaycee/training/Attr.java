@@ -1,6 +1,6 @@
 package com.brightwebs.jaycee.training;
 
-/** The trainable attributes, in Stats-menu order. Names, descriptions and sources live in the lang file. */
+// the trainable attributes in stats menu order. names, descriptions and sources are in the lang file
 public enum Attr {
     PHYSICAL_STRENGTH, SPEED, AGILITY, ENDURANCE, VITALITY, LUNG_CAPACITY, SWIMMING_SPEED, PERCEPTION,
     TARGETING, ARCHERY, COMBAT_MASTERY, MAGIC_CONTROL, AURA_CONTROL, MENTAL_FORTITUDE, REGENERATION;

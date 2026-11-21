@@ -3,7 +3,7 @@ package com.brightwebs.jaycee.client;
 import com.brightwebs.brightcore.api.Ability;
 import com.brightwebs.brightcore.api.SkillType;
 
-/** Which texture family an ability uses (card, badge, pill), by its rank. */
+// which texture set a skill uses (card, badge, pill), by its rank
 final class Skin {
     private Skin() {}
 
@@ -20,7 +20,7 @@ final class Skin {
         };
     }
 
-    /** The outline pill shown in libraries: the rank for skills, the classification for magic. */
+    // the outline pill in the libraries: rank for skills, classification for magic
     static String pill(Ability a) {
         return a.isMagic() ? (a.magicClass().isEmpty() ? "other" : a.magicClass()) : rank(a);
     }

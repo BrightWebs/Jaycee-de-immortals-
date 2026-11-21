@@ -6,13 +6,9 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
-/**
- * A player's Ichor. Immutable; changes go through IchorAPI so they save and sync.
- *
- * @param ichor     the true amount
- * @param birthright what they were dealt on first join
- * @param revealed  the amount the player last learned by praying (-1 = never prayed)
- */
+// a player's ichor. go through IchorAPI to change it so it saves and syncs
+// ichor = the real amount, birthright = what they got on first join,
+// revealed = what they last found out by praying (-1 = never prayed)
 public record IchorData(int ichor, Birthright birthright, int revealed) {
 
     public static final IchorData EMPTY = new IchorData(0, Birthright.UNDRAWN, -1);
@@ -32,7 +28,7 @@ public record IchorData(int ichor, Birthright birthright, int revealed) {
 
     public Grade grade() { return Grade.of(ichor); }
 
-    /** Through the Mist: from Seer on, you always know your own Ichor. */
+    // through the mist: from seer up you always know your own ichor
     public boolean seesOwnIchor() { return ichor >= Grade.SIGHT_THRESHOLD; }
 
     public IchorData withIchor(int value) { return new IchorData(value, birthright, revealed); }

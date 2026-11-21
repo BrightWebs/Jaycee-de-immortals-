@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-/** The race registry. Races get ids like "jaycee:human". Synced so the client can show the race menu. */
+// the race registry, ids like "jaycee:human". synced so the client can show the race menu
 public final class RaceRegistry {
     public static final ResourceKey<Registry<Race>> KEY = ResourceKey.createRegistryKey(BrightCore.id("races"));
     public static final Registry<Race> REGISTRY = new RegistryBuilder<>(KEY).sync(true).create();
@@ -27,7 +27,7 @@ public final class RaceRegistry {
         return id == null ? null : REGISTRY.getValue(id);
     }
 
-    /** Races offered on first join, in a stable order. */
+    // races you can pick on first join, always in the same order
     public static List<Race> starting() {
         List<Race> list = new ArrayList<>();
         for (Race r : REGISTRY) if (r.isStarting()) list.add(r);

@@ -17,12 +17,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-/**
- * A player's look from the Character Editor, kept apart from progression (race, EP, skills).
- * Keys: a slot -> option id (bangs, back, ears, tail...), "&lt;group&gt;.c1/.c2/.c3" -> colour
- * (RRGGBB), "hair.hl" / "hair.tip" -> "1" when highlights / coloured tips are on.
- * Synced to everyone so all players see it; saved with the player and kept through death.
- */
+// a player's look from the character editor, kept separate from race, EP and skills
+// keys: slot -> option id (bangs, back, ears, tail...), "<group>.c1/.c2/.c3" -> color RRGGBB,
+// "hair.hl" / "hair.tip" -> "1" when highlights / colored tips are on
+// synced to everyone so other players see it, saved with the player and kept on death
 public final class Appearance {
     private static final DeferredRegister<AttachmentType<?>> ATTACHMENTS =
             DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, JayceeMod.ID);
@@ -32,7 +30,7 @@ public final class Appearance {
                     .serialize(Codec.unboundedMap(Codec.STRING, Codec.STRING).fieldOf("look")).copyOnDeath()
                     .sync(ByteBufCodecs.map(HashMap::new, ByteBufCodecs.STRING_UTF8, ByteBufCodecs.STRING_UTF8)).build());
 
-    /** Slots the renderer draws, back to front. */
+    // slots the renderer draws, back to front
     public static final List<String> WORN = List.of("tail", "wings", "cape", "back", "bangs", "hair_extra", "ears", "horns",
             "race_extra", "eyes", "markings", "acc_head", "acc_face", "acc_neck", "waist");
 
@@ -49,10 +47,8 @@ public final class Appearance {
         return RaceAPI.race(p).map(r -> r.id().getPath()).orElse("human");
     }
 
-    /**
-     * Keeps only what the race may wear and puts back what it can't take off (a young Merfolk's
-     * tail). Presets and edits pass through here, so hiding a natural form can't dodge its weakness.
-     */
+    // only keeps what the race is allowed to wear and adds back what it can't take off (young merfolk tail)
+    // presets and edits all go through this so you can't hide a natural form to dodge its weakness
     public static Map<String, String> sanitize(Map<String, String> in, String raceId) {
         Map<String, String> out = new LinkedHashMap<>();
         int n = 0;
@@ -73,20 +69,20 @@ public final class Appearance {
         return out;
     }
 
-    /** The editor's Apply Changes. */
+    // apply changes button in the editor
     public static void apply(ServerPlayer p, Map<String, String> look) {
         p.setData(LOOK, Map.copyOf(sanitize(look, raceId(p))));
     }
 
-    /** After an evolution: drop what the new form can't have, add what it must. */
+    // after evolving: drop what the new form can't have, add what it has to have
     public static void raceChanged(ServerPlayer p) {
         Map<String, String> now = of(p), clean = sanitize(now, raceId(p));
         if (!clean.equals(now)) p.setData(LOOK, Map.copyOf(clean));
     }
 
-    // ---- colours ----------------------------------------------------------------------
+    // colors
 
-    /** The colour a box with this tint takes, as 0xFFRRGGBB. */
+    // the color a box with this tint gets, 0xFFRRGGBB
     public static int color(Map<String, String> look, Features.Option o, int tint) {
         String g = Features.colorGroup(o.slot());
         return switch (tint) {

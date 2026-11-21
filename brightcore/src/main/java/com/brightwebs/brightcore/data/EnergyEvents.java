@@ -15,10 +15,10 @@ import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-/** EP from kills, regeneration, and keeping the race's body across logins and respawns. */
+// EP from kills, regen, and keeping your race's body through logins and respawns
 @EventBusSubscriber(modid = BrightCore.ID)
 public final class EnergyEvents {
-    /** Per half second, as a fraction of the maximum. */
+    // per half second, as a fraction of the max
     public static final double AURA_REGEN = 0.005, MANA_REGEN = 0.005, SPIRIT_REGEN = 0.0025;
 
     private EnergyEvents() {}
@@ -34,7 +34,7 @@ public final class EnergyEvents {
                     : Alignment.NEUTRAL;
             double gained = EnergyAPI.absorbKill(killer, victim, alignment);
             if (gained >= 1 && victim.level() instanceof net.minecraft.server.level.ServerLevel sl) {
-                // Tensura's souls: wisps leave the body and drift to the one who took its power
+                // souls like tensura: wisps come out of the body and float to whoever killed it
                 var from = victim.position().add(0, victim.getBbHeight() / 2, 0);
                 com.brightwebs.brightcore.fx.Fx.burst(sl, com.brightwebs.brightcore.fx.BrightParticles.SOUL, from, 6, 0.08);
                 com.brightwebs.brightcore.fx.Fx.beam(sl, com.brightwebs.brightcore.fx.BrightParticles.SOUL, from, killer.position().add(0, killer.getBbHeight() * 0.6, 0), 0.7);
@@ -50,7 +50,7 @@ public final class EnergyEvents {
         com.brightwebs.brightcore.api.util.Safe.run("EnergyEvents.onTick", () -> {
             if (!(event.getEntity() instanceof ServerPlayer player) || player.tickCount % 10 != 0) return;
             EnergyData d = EnergyAPI.get(player);
-            if (!d.initialized()) return; // no race yet
+            if (!d.initialized()) return;  // no race yet
             if (d.aura() >= d.maxAura() && d.mana() >= d.maxMana() && d.spirit() >= d.maxSpirit()) return;
             EnergyAPI.set(player, d.withAura(d.aura() + d.maxAura() * AURA_REGEN)
                     .withMana(d.mana() + d.maxMana() * MANA_REGEN)

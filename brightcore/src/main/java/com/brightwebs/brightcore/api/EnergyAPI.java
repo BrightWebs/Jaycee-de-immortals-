@@ -13,21 +13,18 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 
-/**
- * Aura, Mana, Spirit and EP for every living being.
- *
- * Kills give the killer a share of the victim's power, added to max Aura and max Mana:
- * 10% when the victim is at least as strong, falling with the gap to a floor of 1%
- * (Manas Reborn-style diminishing returns, so weak prey stops mattering).
- */
+// aura, mana, spirit and EP for anything alive
+//
+// killing stuff adds part of its power to your max aura and max mana
+// (the exact math is in absorbKill)
 public final class EnergyAPI {
     public static final double BASE_GAIN = 0.01, MAX_GAIN = 0.10;
-    /** Tensura defaults: 1% gain rate, at most 90% reduction for weak prey, 5% cap when killing players. */
+    // tensura's defaults: 1% gain, weak prey cuts it by up to 90%, killing a player gives 5% at most
     public static final double GAIN_PERCENT = 1.0, MAX_EP_REDUCTION = 0.90, DEATH_PENALTY = 0.05;
 
-    /** Starting energy for creatures that aren't players: {aura, mana}. Content mods add entries. */
+    // starting energy for mobs: {aura, mana}. content mods add their own
     private static final Map<EntityType<?>, double[]> CREATURE_ENERGY = new HashMap<>();
-    /** Fallback for creatures with no entry, from their max health. */
+    // if a mob isn't in the list, base it on its max health
     private static Function<LivingEntity, double[]> fallback = e -> {
         double hp = e.getMaxHealth();
         return new double[]{hp * 40, hp * 10};
@@ -35,7 +32,7 @@ public final class EnergyAPI {
 
     private EnergyAPI() {}
 
-    /** Sets a creature type's starting Aura and Mana. */
+    // sets a mob type's starting aura and mana
     public static void setCreatureEnergy(EntityType<?> type, double aura, double mana) {
         CREATURE_ENERGY.put(type, new double[]{aura, mana});
     }
@@ -44,15 +41,15 @@ public final class EnergyAPI {
         fallback = f;
     }
 
-    // ---- reading ---------------------------------------------------------------
+    // reading
 
-    /** The being's energy, rolling a creature's starting values the first time (server side). */
+    // this thing's energy. rolls a mob's starting numbers the first time (server side)
     public static EnergyData get(LivingEntity entity) {
         EnergyData data = entity.getData(BrightAttachments.ENERGY);
         if (!data.initialized() && !(entity instanceof Player) && !entity.level().isClientSide()) {
             double[] base = CREATURE_ENERGY.getOrDefault(entity.getType(), null);
             if (base == null) base = fallback.apply(entity);
-            // +-15% so no two wolves are identical
+            // +-15% so two wolves aren't exactly the same
             double roll = 0.85 + entity.getRandom().nextDouble() * 0.3;
             double spirit = Math.max(10, entity.getMaxHealth() * 5);
             data = EnergyData.EMPTY.withMax(base[0] * roll, base[1] * roll, spirit).refilled();
@@ -69,7 +66,7 @@ public final class EnergyAPI {
         entity.setData(BrightAttachments.ENERGY, data);
     }
 
-    // ---- changing --------------------------------------------------------------
+    // changing
 
     public static boolean spendMana(LivingEntity entity, double amount) {
         if (amount <= 0) return true;
@@ -87,7 +84,7 @@ public final class EnergyAPI {
         return true;
     }
 
-    /** Rolls a fresh body for a new race: Aura and Mana within its ranges, full pools. */
+    // new race: roll aura and mana in its range, start full
     public static void rollFor(LivingEntity entity, Race race) {
         var r = entity.getRandom();
         double aura = race.minAura() + r.nextDouble() * (race.maxAura() - race.minAura());
@@ -95,7 +92,7 @@ public final class EnergyAPI {
         set(entity, EnergyData.EMPTY.withMax(aura, mana, race.spirit()).refilled());
     }
 
-    /** On evolving: pools rise to at least the new race's floor, never fall, then refill. */
+    // evolving: pools go up to at least the new race's minimum, never down, then refill
     public static void raiseFor(LivingEntity entity, Race race) {
         EnergyData d = get(entity);
         var r = entity.getRandom();
@@ -104,14 +101,12 @@ public final class EnergyAPI {
         set(entity, d.withMax(aura, mana, Math.max(d.maxSpirit(), race.spirit())).refilled());
     }
 
-    /**
-     * Tensura: Reincarnated's kill formula.
-     *  gained EP = victim EP x (1 - 1% for every time the killer's EP fits into the victim's, at most 90%)
-     *  max aura  += gained x 1% x alignment aura factor   (neutral 2, everyone else 1)
-     *  max mana  += gained x 1% x alignment mana factor   (neutral 1, everyone else 2)
-     * Killing a player can't give more than 5% of that player's EP.
-     * @return the EP gained
-     */
+    // tensura's kill formula
+    //   gained EP = victim EP x (1 - 1% for each time your EP fits in theirs, max 90%)
+    //   max aura += gained x 1% x aura factor (neutral 2, everyone else 1)
+    //   max mana += gained x 1% x mana factor (neutral 1, everyone else 2)
+    // killing a player can't give more than 5% of their EP
+    // returns the EP gained
     public static double absorbKill(LivingEntity killer, LivingEntity victim, Alignment alignment) {
         EnergyData k = get(killer), v = get(victim);
         double victimEP = v.ep();
@@ -131,9 +126,9 @@ public final class EnergyAPI {
         return gainAura + gainMana;
     }
 
-    // ---- display ---------------------------------------------------------------
+    // display
 
-    /** 950, 12.4k, 3.10M, 1.00B */
+    // 950, 12.4k, 3.10M, 1.00B
     public static String format(double v) {
         if (v < 1_000) return String.valueOf(Math.round(v));
         if (v < 1_000_000) return String.format(Locale.ROOT, "%.1fk", v / 1_000);

@@ -14,7 +14,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
 
-/** Stats: trainable attributes, their details and racial potential, and the live training feed. */
+// stats: trainable attributes, their details, racial potential and the live training feed
 final class StatsPage extends Page {
     private static final T TOP = new T(474f, 222.417f, 0.86996f, 385, 166);
     private static final T BOT_L = new T(474f, 755.70f, 0.67361f, 60, 782);

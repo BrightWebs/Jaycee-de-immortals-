@@ -33,23 +33,21 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Great Sage, as in Tensura: Reincarnated.
- *  Always on while owned: chant speed x2, Thought Acceleration (+0.01 speed, +0.2 attack speed)
- *  and +9 mastery per point earned by any skill.
- *  Mode 1 Analytical Appraisal: press to switch the scan on/off; Shift+press cycles entity / block / both.
- *  Mode 2 Analysis: copy a Common, Extra or Intrinsic skill from a target within 10 blocks
- *         (25% chance, 50% mastered; 10 s cooldown on success, 5 s on failure).
- *  Mode 3 Refine: opens the Sage's storage, where smeltable items are refined over time.
- */
+// great sage like tensura
+//   always on while you have it: chant speed x2, thought acceleration (+0.01 speed, +0.2 attack speed)
+//   and +9 mastery for every point any skill earns
+//   mode 1 analytical appraisal: press to turn the scan on/off, shift + press cycles mob / block / both
+//   mode 2 analysis: copy a common, extra or intrinsic skill from something within 10 blocks
+//          (25% chance, 50% mastered. 10s cooldown if it works, 5s if not)
+//   mode 3 refine: opens the sage's storage where smeltable stuff gets refined over time
 @EventBusSubscriber(modid = JayceeMod.ID)
 public final class GreatSage {
-    // Tensura defaults (UniqueSkillConfig.GreatSage).
+    // tensura defaults (UniqueSkillConfig.GreatSage)
     static final double CHANT_SPEED = 2.0, LEARNING_POINT = 9, MASTERY_POINT = 9;
     static final int ANALYSIS_LEVEL = 8, ANALYSIS_LEVEL_MASTERED = 18, RADIUS = 15, RADIUS_MASTERED = 25;
     static final float COPY_RANGE = 10, COPY_CHANCE = 25, COPY_CHANCE_MASTERED = 50;
     static final int COPY_CD_SUCCESS = 10, COPY_CD_FAIL = 5;
-    // ThoughtAcceleration (ExtraSkillConfig).
+    // thought acceleration (ExtraSkillConfig)
     static final double TA_SPEED = 0.01, TA_SPEED_MASTERED = 0.02, TA_ATTACK = 0.2, TA_ATTACK_MASTERED = 0.4;
     private static final Identifier MOD = Identifier.fromNamespaceAndPath(JayceeMod.ID, "great_sage");
 
@@ -58,16 +56,16 @@ public final class GreatSage {
     static Ability sage() { return AbilityRegistry.get(JayceeSkills.id("great_sage")); }
     static Ability raphael() { return AbilityRegistry.get(JayceeSkills.id("raphael")); }
 
-    /** Great Sage or Raphael owned: the analytical bonuses apply. */
+    // you have great sage or raphael, so the analysis bonuses apply
     static boolean hasSage(Player p) {
         Ability s = sage(), r = raphael();
         return (s != null && AbilityAPI.isSwitchedOn(p, s)) || (r != null && AbilityAPI.isSwitchedOn(p, r));
     }
 
-    /** How much faster spells chant (Great Sage doubles it). */
+    // how much faster spells chant (great sage doubles it)
     static double chantSpeed(Player p) { return hasSage(p) ? CHANT_SPEED : 1.0; }
 
-    // ---- passive ----------------------------------------------------------------
+    // passive
 
     static void tick(ServerPlayer p, Ability a) {
         if (p.tickCount % 20 == 0) {
@@ -88,7 +86,7 @@ public final class GreatSage {
         inst.addTransientModifier(new AttributeModifier(MOD, amount, AttributeModifier.Operation.ADD_VALUE));
     }
 
-    /** Switched off in the menu: the passives stop (attributes back to normal, no auto-refining, scan off). */
+    // switched off in the menu: passives stop (stats back to normal, no auto refining, scan off)
     static void switchedOff(ServerPlayer p) {
         send(p, com.brightwebs.jaycee.network.JayceeNetwork.AppraisalInfo.NONE);
         AttributeInstance s = p.getAttribute(Attributes.MOVEMENT_SPEED), at = p.getAttribute(Attributes.ATTACK_SPEED);
@@ -104,7 +102,7 @@ public final class GreatSage {
         StatusData.addCounter(p, "sage_scan", -StatusData.counter(p, "sage_scan"));
     }
 
-    /** +9 mastery per point, for every skill, while Great Sage is owned. */
+    // +9 mastery per point for every skill while you have great sage
     @SubscribeEvent
     public static void onMastery(AbilityEvent.MasteryGain event) {
         Safe.run("GreatSage.onMastery", () -> {
@@ -112,11 +110,11 @@ public final class GreatSage {
         });
     }
 
-    // ---- mode 1: Analytical Appraisal ----------------------------------------
+    // mode 1: analytical appraisal
 
     static boolean appraisal(ServerPlayer p, Ability a) {
         if (p.isShiftKeyDown()) {
-            int next = ((int) StatusData.counter(p, "sage_scan_mode") + 1) % 3; // 0 both, 1 entity, 2 block
+            int next = ((int) StatusData.counter(p, "sage_scan_mode") + 1) % 3;  // 0 both, 1 mob, 2 block
             StatusData.addCounter(p, "sage_scan_mode", next - StatusData.counter(p, "sage_scan_mode"));
             p.sendOverlayMessage(Component.translatable("jaycee.skill.analytical.mode." + (next == 1 ? "entity" : next == 2 ? "block" : "both"))
                     .withStyle(ChatFormatting.DARK_AQUA));
@@ -131,7 +129,7 @@ public final class GreatSage {
         return true;
     }
 
-    /** While the scan is on, whatever you look at is analysed on screen. Mastery widens and deepens it. */
+    // while the scan is on whatever you look at gets analyzed on screen. mastery makes it reach further and show more
     private static void scan(ServerPlayer p, Ability a) {
         boolean m = Tk.mastered(p, a) || hasRaphael(p);
         int radius = m ? RADIUS_MASTERED : RADIUS, level = m ? ANALYSIS_LEVEL_MASTERED : ANALYSIS_LEVEL;
@@ -140,16 +138,14 @@ public final class GreatSage {
             LivingEntity t = SkillHelper.targetQuiet(p, radius);
             if (t != null) { send(p, reading(p, t, level, radius, mode)); return; }
         }
-        // no creature: the client analyses the block in sight itself
+        // no mob, so the client handles the block you're looking at
         send(p, com.brightwebs.jaycee.network.JayceeNetwork.AppraisalInfo.idle(radius, mode));
     }
 
     private static final java.util.Map<java.util.UUID, Integer> SHOWING = new java.util.HashMap<>();
 
-    /**
-     * Sends the panel's reading. A creature's reading is refreshed every half second; IDLE (on, nothing
-     * targeted) and NONE (off) are sent only when the state changes.
-     */
+    // sends the panel's reading. a mob's reading refreshes every half second,
+    // IDLE (on but nothing targeted) and NONE (off) only get sent when it changes
     static void send(ServerPlayer p, com.brightwebs.jaycee.network.JayceeNetwork.AppraisalInfo info) {
         int key = info.entity() < 0 ? info.entity() * 1000 - info.scanMode() * 100 - info.radius() : info.entity();
         Integer before = SHOWING.put(p.getUUID(), key);
@@ -191,9 +187,9 @@ public final class GreatSage {
                 Component.translatable("jaycee.appraisal.threat." + threat), skills).withStyle(ChatFormatting.AQUA);
     }
 
-    // ---- mode 2: Analysis (copy) ---------------------------------------------
+    // mode 2: analysis (copy)
 
-    /** Tensura copies Intrinsic, Common and Extra skills only. */
+    // tensura only copies intrinsic, common and extra skills
     static boolean copiable(Ability s) {
         SkillType t = s.type();
         return t == SkillType.INTRINSIC || t == SkillType.COMMON || t == SkillType.EXTRA;

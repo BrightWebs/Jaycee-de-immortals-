@@ -15,13 +15,11 @@ import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 
 import java.util.Map;
 
-/** How each particle family moves and fades. */
+// how each kind of particle moves and fades
 @EventBusSubscriber(modid = BrightCore.ID, value = Dist.CLIENT)
 public final class FxParticle extends SingleQuadParticle {
-    /**
-     * life in ticks (min, extra random), gravity (negative rises), friction, start size, end size
-     * (relative), spin per tick, glow (full bright), animate (frames over life) or pick a random frame.
-     */
+    // life in ticks (min, extra random), gravity (negative goes up), friction, start size, end size,
+    // spin per tick, glow (full bright), animate (play frames over its life) or just pick a random frame
     public record Style(int life, int lifeRand, float gravity, float friction, float size, float endSize,
                         float spin, boolean glow, boolean animate) {}
 

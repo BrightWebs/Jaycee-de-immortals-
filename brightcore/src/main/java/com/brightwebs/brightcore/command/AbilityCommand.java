@@ -22,7 +22,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
-/** /ability learn | learnall | forget | slot | list. For testing and admins. */
+// /ability learn | learnall | forget | slot | list, for testing
 @EventBusSubscriber(modid = BrightCore.ID)
 public final class AbilityCommand {
     private static final DynamicCommandExceptionType UNKNOWN =

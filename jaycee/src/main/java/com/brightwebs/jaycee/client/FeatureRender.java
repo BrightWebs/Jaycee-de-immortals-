@@ -32,11 +32,9 @@ import net.neoforged.neoforge.client.renderstate.RegisterRenderStateModifiersEve
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Draws Character Editor features (hair, ears, tails, horns, wings...) on every player, attached to
- * the model's head, body, arms and legs so they move with Minecraft's animations. A fish tail
- * replaces the legs. Everyone sees them: the look is synced data on the player.
- */
+// draws the character editor stuff (hair, ears, tails, horns, wings...) on every player, stuck to
+// the model's head, body, arms and legs so it moves with the normal animations. a fish tail
+// replaces the legs. everyone sees it since the look is synced on the player
 @EventBusSubscriber(modid = JayceeMod.ID, value = Dist.CLIENT)
 public final class FeatureRender {
     public record Look(Map<String, String> map) {}
@@ -67,10 +65,8 @@ public final class FeatureRender {
         }
     }
 
-    /**
-     * What the player shows right now. A Merfolk past its first form adapts: the tail shows only in
-     * water and legs return on land. A young Merfolk always has its tail.
-     */
+    // what the player shows right now. merfolk past their first form adapt: tail only in water,
+    // legs on land. a young merfolk always has the tail
     static Map<String, String> worn(Player p, Map<String, String> look) {
         if (!"fish".equals(look.get("tail"))) return look;
         String race = Appearance.raceId(p);
@@ -82,7 +78,7 @@ public final class FeatureRender {
         return look;
     }
 
-    /** Puts a look on a render state (also used by the editor's live preview). */
+    // puts a look on a render state (the editor preview uses this too)
     static void apply(AvatarRenderState state, Map<String, String> look) {
         state.setRenderData(KEY, new Look(look));
         if ("fish".equals(look.get("tail"))) {

@@ -4,10 +4,8 @@ import java.util.function.Predicate;
 
 import static com.brightwebs.jaycee.appearance.Features.*;
 
-/**
- * Race Features: ears, tails, horns, wings and the rest, each offered only to the races (and
- * evolutions) that have them. Natural forms a race can't hide yet are listed with require().
- */
+// race features: ears, tails, horns, wings and the rest. each one only shows for the races
+// (and evolutions) that actually have it. stuff a race can't hide yet goes in require()
 final class RaceParts {
     private RaceParts() {}
 
@@ -27,7 +25,7 @@ final class RaceParts {
     static final Predicate<String> DRYAD = races("dryad");
 
     static void register() {
-        // ---- ears ----
+        // ears
         add("ears", "none", View.HEAD, ANY, null, null, b().done());
         add("ears", "elf", View.FACE, ELF, "#E8C4A8", "#D9A88C", b()
                 .rot(HEAD, 4.0f, -4.6f, 0.4f, 0, -10, -22, 0, -0.8f, -0.5f, 3.4f, 1.8f, 1.0f, PRIMARY)
@@ -69,7 +67,7 @@ final class RaceParts {
         add("ears", "daemon", View.FACE, DAEMON, "#B7A0A8", "#7A5A66", b()
                 .rot(HEAD, 4.0f, -4.6f, 0.4f, 0, -15, -30, 0, -0.6f, -0.5f, 3.6f, 1.2f, 0.8f, PRIMARY).mirror().done());
 
-        // ---- tails ----
+        // tails
         add("tail", "none", View.BACK, ANY, null, null, b().done());
         add("tail", "wolf", View.BACK, WOLF, "#6E6A72", "#E9D9D0", b().chain(BODY, 0, 10.5f, 1.8f, new float[][]{
                 {3, 2.4f, -40, 0, PRIMARY}, {4, 3.2f, -50, 0, PRIMARY}, {3, 2.6f, -65, 0, PRIMARY}, {1.6f, 1.6f, -70, 0, SECONDARY}}).done());
@@ -99,7 +97,7 @@ final class RaceParts {
                 .rot(BODY, 0, 25.4f, 0, 0, 0, 140, -0.4f, -1.0f, -1.2f, 6.0f, 1.0f, 2.4f, SECONDARY).done());
         require("merfolk", "tail", "fish");
 
-        // ---- horns ----
+        // horns
         add("horns", "none", View.HEAD, ANY, null, null, b().done());
         add("horns", "oni_single", View.FACE, OGRE, "#F2E6D0", "#C8B48C", b()
                 .box(HEAD, -0.7f, -10.6f, -3.4f, 1.4f, 2.0f, 1.4f, PRIMARY).box(HEAD, -0.45f, -11.8f, -3.2f, 0.9f, 1.2f, 0.9f, SECONDARY).done());
@@ -117,7 +115,7 @@ final class RaceParts {
         add("horns", "lizard_crest", View.HEAD, LIZARD, "#4E8A4A", "#C9D98A", b()
                 .box(HEAD, -0.5f, -9.6f, -3f, 1, 1.2f, 2, PRIMARY).box(HEAD, -0.5f, -9.8f, 0, 1, 1.4f, 2, PRIMARY).box(HEAD, -0.5f, -9.4f, 3, 1, 1.0f, 1.8f, PRIMARY).done());
 
-        // ---- wings ----
+        // wings
         add("wings", "none", View.BACK, ANY, null, null, b().done());
         add("wings", "angel", View.BACK, ANGEL, "#F8F6F0", "#E2DCD0", feathered(10, 7, 6));
         add("wings", "angel_grand", View.BACK, HIGH_ANGEL, "#F8F6F0", "#F0D890", feathered(13, 10, 8));
@@ -130,7 +128,7 @@ final class RaceParts {
                 .rot(BODY, 1.0f, 5.0f, 2.2f, 0, -20, 20, 0, 0, 0, 5, 4, 0.2f, GLOW).mirror().done());
         require("harpy", "wings", "harpy");
 
-        // ---- other race features ----
+        // other race stuff
         add("race_extra", "none", View.HEAD, ANY, null, null, b().done());
         add("race_extra", "halo", View.HEAD, HIGH_ANGEL, "#FFE27A", "#FFF6C8", halo());
         add("race_extra", "beard_short", View.FACE, DWARF, "#8A5A2E", "#B07A44", b()
@@ -168,7 +166,7 @@ final class RaceParts {
                 .box(HEAD, -0.6f, -11.6f, -0.6f, 1.2f, 1.2f, 1.2f, GLOW).box(BODY, -0.5f, 5.5f, -2.4f, 1, 1, 0.3f, GLOW).done());
     }
 
-    /** Feathered wings: an arm spreading back and up, with a row of hanging feathers. */
+    // feathered wings: an arm going back and up with feathers hanging off it
     static java.util.List<Box> feathered(float span, float drop, int feathers) {
         B b = b();
         b.rot(BODY, 1.5f, 2.6f, 2.2f, 0, -28, -18, 0, -0.6f, -0.6f, span, 1.4f, 1.2f, PRIMARY);
@@ -180,7 +178,7 @@ final class RaceParts {
         return b.mirror().done();
     }
 
-    /** Membrane wings (bat, dragon): finger bones with a thin skin between them. */
+    // bat and dragon wings: finger bones with thin skin between them
     static java.util.List<Box> membrane(float span, float drop) {
         B b = b();
         b.rot(BODY, 1.5f, 2.6f, 2.2f, 0, -25, -22, 0, -0.6f, -0.5f, span, 1.2f, 1.0f, PRIMARY);

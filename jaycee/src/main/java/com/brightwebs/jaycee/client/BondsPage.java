@@ -3,17 +3,14 @@ package com.brightwebs.jaycee.client;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 
-/**
- * Bonds: subordinates, allies and party. Naming and recruiting arrive in a later update, so the
- * list is empty for now; the page, its commands and the side bar are in place.
- */
+// bonds: subordinates, allies and party. you get subordinates by naming stuff with N
 final class BondsPage extends Page {
     BondsPage(MenuScreen m) { super(m); }
 
     @Override String background() { return "bg_bonds"; }
     @Override boolean showsPlayer() { return false; }
 
-    /** The bonds layout sits inside the Existence System's content area (same frame as Status). */
+    // the bonds layout sits inside the same frame as status
     private static final T TF = new T(96, 228, 0.911f, 24, 150);
 
     @Override

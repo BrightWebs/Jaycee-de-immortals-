@@ -18,7 +18,7 @@ import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import java.util.List;
 import java.util.Locale;
 
-/** Status: Individual card, Existence Points, Parameters, Souls, Ability Presets and the Z/X/C/V cards. */
+// status: individual card, EP, parameters, souls, ability presets and the Z/X/C/V cards
 final class StatusPage extends Page {
     static final int[] PRESET_X = {887, 960, 1022, 1086, 1150, 1212, 1276, 1339, 1401};
     static final int[] CARD_X = {849, 1003, 1153, 1302}, CARD_CX = {922, 1075, 1225, 1373};
@@ -33,7 +33,7 @@ final class StatusPage extends Page {
     void draw(GuiGraphicsExtractor g, double mx, double my) {
         LocalPlayer p = player();
         EnergyData e = EnergyAPI.get(p);
-        // Individual
+        // individual
         UI.text(g, UI.fit(p.getName().getString(), 30, 282, true), 509, 357, 30, 0xFFFFFFFF, 0);
         Component race = RaceAPI.race(p).map(r -> r.name()).orElse(Component.translatable("jaycee.ui.no_race"));
         UI.text(g, UI.fit(race.getString(), 28, 186, true), 578, 454, 28, 0xFFFFFFFF, 0);
@@ -45,13 +45,13 @@ final class StatusPage extends Page {
             UI.text(g, rank.substring(rank.length() - 1), 537, 649, 24, 0xFF281800, 1);
             UI.text(g, rank, 580, 647, 30, 0xFFFFC81A, 0);
         }
-        // Existence Points: smaller as the number grows; short form from a billion
+        // EP gets smaller as the number grows, short form from a billion up
         double ep = e.ep();
         String eps = ep < 1_000_000_000 ? UI.num(ep) : UI.shortNum(ep);
         float size = UI.fitSize(eps, 40, 24, 222, true);
         UI.text(g, eps, 566, 773, size, 0xFF5FF4FF, 0);
         if (ep >= 1_000_000_000 && Page.in(mx, my, 560, 745, 800, 800)) tooltip(g, UI.num(ep) + " EP", mx, my);
-        // Parameters
+        // parameters
         double[][] v = {{p.getHealth(), p.getMaxHealth()}, {e.spirit(), e.maxSpirit()}, {e.mana(), e.maxMana()}, {e.aura(), e.maxAura()}};
         String[] fills = {"fill_hp", "fill_spirit", "fill_mana", "fill_aura"};
         int[] cy = {284, 340, 396, 452}, by = {297, 353, 409, 465};
@@ -64,7 +64,7 @@ final class StatusPage extends Page {
             if (w > 1) UI.tex(g, fills[i], 935, by[i], w, 23);
         }
         UI.text(g, UI.num(StatusData.souls(p)), 1414, 518, 36, 0xFFD860F0, 2);
-        // Ability presets
+        // ability presets
         AbilityData d = AbilityAPI.get(p);
         UI.tex(g, "st_preset_on", PRESET_X[d.page()] - 39, 603);
         for (int i = 0; i < 9; i++) UI.semi(g, String.valueOf(i + 1), PRESET_X[i], 633, 30, 0xFFF0FAFF, 1);

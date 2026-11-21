@@ -17,15 +17,13 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-/**
- * How the beta's skills are earned, Tensura style: by doing things, not by buying them.
- *   Magic Perception    spend 300 mana in total
- *   Self-Regeneration   recover 200 HP naturally
- *   Body Armor          endure 150 damage from attacks
- *   Raphael             Great Sage mastered and 1,000,000 EP: Great Sage evolves
- *   Fireball            every reincarnated soul knows this basic spell (beta)
- * Also: Merfolk's natural form (tail) until it evolves.
- */
+// how you get the beta skills, tensura style: by doing stuff, not buying them
+//   magic perception    spend 300 mana total
+//   self regeneration   heal 200 HP naturally
+//   body armor          take 150 damage from attacks
+//   raphael             great sage mastered and 1,000,000 EP, great sage evolves
+//   fireball            every reincarnated soul knows this one (beta)
+// also merfolk keep their tail until they evolve
 @EventBusSubscriber(modid = JayceeMod.ID)
 public final class Acquisition {
     private Acquisition() {}
@@ -45,14 +43,14 @@ public final class Acquisition {
             if (!(event.getEntity() instanceof ServerPlayer p) || p.tickCount % 40 != 0) return;
             if (RaceAPI.race(p).isEmpty()) return;
             if (StatusData.counter(p, "beta_fireball") == 0) { StatusData.addCounter(p, "beta_fireball", 1); learn(p, "fireball"); }
-            // Tensura: Magic Sense comes to slimes, or to anyone forced to sense without sight.
+            // tensura: slimes get magic sense, or anyone forced to sense stuff without seeing
             String line = RaceAPI.race(p).map(r -> com.brightwebs.jaycee.race.JayceeRaces.lineOf(r.id().getPath())).orElse("");
             if ("slime".equals(line) || p.hasEffect(net.minecraft.world.effect.MobEffects.DARKNESS) || p.hasEffect(net.minecraft.world.effect.MobEffects.BLINDNESS)) {
                 learn(p, "magic_perception");
             }
-            // Tensura: Self-Regeneration after beating 500 slimes.
+            // tensura: self regen after killing 500 slimes
             if (StatusData.counter(p, "slimes_killed") >= 500) learn(p, "self_regeneration");
-            // Tensura's regeneration chain
+            // tensura's regen chain
             Ability selfRegen = skill("self_regeneration"), ultra = skill("ultraspeed_regeneration");
             double ep = EnergyAPI.get(p).ep();
             if (selfRegen != null && AbilityAPI.isMastered(p, selfRegen) && StatusData.counter(p, "sea_boss_killed") > 0 && ep > 300_000) learn(p, "ultraspeed_regeneration");
@@ -65,14 +63,14 @@ public final class Acquisition {
                 AbilityAPI.learn(p, raphael);
                 p.sendSystemMessage(Component.translatable("jaycee.skill.raphael_evolved").withStyle(ChatFormatting.GOLD));
             }
-            // Self-Regeneration became a toggle (on by default): switch it on once for older saves.
+            // self regen is a toggle now (on by default), turn it on once for old saves
             Ability regen = skill("self_regeneration");
             if (regen != null && AbilityAPI.has(p, regen) && StatusData.counter(p, "regen_toggle_init") == 0) {
                 StatusData.addCounter(p, "regen_toggle_init", 1);
                 AbilityAPI.setToggled(p, regen, true);
             }
             com.brightwebs.jaycee.race.RaceSkills.raceChanged(p);
-            if (p.tickCount % 20 == 0) com.brightwebs.jaycee.appearance.Appearance.raceChanged(p); // keep the look valid for the current form
+            if (p.tickCount % 20 == 0) com.brightwebs.jaycee.appearance.Appearance.raceChanged(p);  // keep the look valid for the form you're in
             merfolk(p);
         });
     }
@@ -84,7 +82,7 @@ public final class Acquisition {
         });
     }
 
-    /** Starting Merfolk keep their tail: strong in water, slow on land, and they dry out. */
+    // starting merfolk keep the tail: strong in water, slow on land, and they dry out
     private static void merfolk(ServerPlayer p) {
         var race = RaceAPI.race(p).orElse(null);
         if (race == null || !JayceeRaces.lineOf(race.id().getPath()).equals("merfolk")) return;
@@ -94,7 +92,7 @@ public final class Acquisition {
             StatusData.addCounter(p, "dry", -StatusData.counter(p, "dry"));
             return;
         }
-        if (race.tier() > 1) return; // evolved Merfolk adapt to land
+        if (race.tier() > 1) return;  // evolved merfolk can handle land
         SkillHelper.keep(p, MobEffects.SLOWNESS, 1);
         if (p.isInWaterOrRain()) { StatusData.addCounter(p, "dry", -StatusData.counter(p, "dry")); return; }
         double dry = StatusData.addCounter(p, "dry", 2);

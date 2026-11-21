@@ -4,7 +4,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.ICancellableEvent;
 
-/** Race events on NeoForge.EVENT_BUS. */
+// race events on NeoForge.EVENT_BUS
 public abstract class RaceEvent extends Event {
     private final ServerPlayer player;
 
@@ -12,7 +12,7 @@ public abstract class RaceEvent extends Event {
 
     public ServerPlayer getPlayer() { return player; }
 
-    /** Before an evolution. Cancel to block it (for example, a god refusing the ascension). */
+    // before an evolution. cancel it to block it (like a god saying no)
     public static final class Evolve extends RaceEvent implements ICancellableEvent {
         private final Race from, to;
 

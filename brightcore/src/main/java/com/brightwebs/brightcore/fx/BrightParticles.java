@@ -11,11 +11,8 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
- * Bright Core's particle library: one family per element or effect, drawn for this mod. Every
- * ability's visuals are built from these (see {@link Fx}). Textures live in
- * assets/brightcore/textures/particle, behaviour in the client's FxParticle styles.
- */
+// bright core's particles, one set per element or effect. every skill's visuals use these (see Fx)
+// textures are in assets/brightcore/textures/particle, how they move is in FxParticle
 public final class BrightParticles {
     private static final DeferredRegister<ParticleType<?>> TYPES = DeferredRegister.create(Registries.PARTICLE_TYPE, BrightCore.ID);
     public static final Map<String, DeferredHolder<ParticleType<?>, SimpleParticleType>> ALL = new LinkedHashMap<>();

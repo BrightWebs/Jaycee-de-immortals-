@@ -10,10 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.ToIntFunction;
 
-/**
- * Gallery thumbnails: the option's voxels drawn in a three-quarter view on a plain mannequin,
- * each visible cube face filled as a shaded parallelogram (painter's order, far to near).
- */
+// gallery thumbnails: the option's voxels drawn at a 3/4 angle on a plain dummy head/body,
+// each visible cube face filled in as a shaded shape, drawn far to near
 final class Thumb {
     private Thumb() {}
 
@@ -22,7 +20,7 @@ final class Thumb {
 
     private record Face(float depth, Vector3f p0, Vector3f p1, Vector3f p3, int color) {}
 
-    /** The mannequin under the features: a pale head, and for body views a body, arms and legs. */
+    // the dummy under the features: pale head, plus body, arms and legs for body views
     private static List<Features.Box> mannequin(Features.View view, boolean legs) {
         List<Features.Box> m = new ArrayList<>();
         int skin = Features.WHITE;
@@ -39,9 +37,7 @@ final class Thumb {
         return m;
     }
 
-    /**
-     * Draws boxes into the rectangle. color maps a box to ARGB; the mannequin uses pale and dark greys.
-     */
+    // draws the boxes into the rectangle. color gives each box its color, the dummy is pale and dark grey
     static void draw(GuiGraphicsExtractor g, List<Features.Box> boxes, ToIntFunction<Features.Box> color, Features.View view,
                      float x, float y, float w, float h) {
         boolean legs = boxes.stream().noneMatch(b -> b.part() == Features.BODY && b.y() > 10 && b.h() > 6 && b.w() > 7);
@@ -88,16 +84,16 @@ final class Thumb {
             cam.transform(v);
             c[i] = v;
         }
-        // each face: origin corner, two edge corners (corner index bits: 1 = +x, 2 = +y, 4 = +z)
-        int[][] f = {{0, 4, 2}, {1, 3, 5}, {0, 1, 4}, {2, 6, 3}, {0, 2, 1}, {4, 5, 6}}; // wound so the cross product points outward
+        // each face: corner, then its two edge corners (corner bits: 1 = +x, 2 = +y, 4 = +z)
+        int[][] f = {{0, 4, 2}, {1, 3, 5}, {0, 1, 4}, {2, 6, 3}, {0, 2, 1}, {4, 5, 6}};  // ordered so the cross product points out
         for (int[] q : f) {
             Vector3f p0 = c[q[0]], p1 = c[q[1]], p3 = c[q[2]];
             Vector3f n = new Vector3f(p1).sub(p0).cross(new Vector3f(p3).sub(p0));
             if (n.lengthSquared() < 1e-6f) continue;
             n.normalize();
-            if (n.z >= 0) continue; // faces away from the viewer (who looks along +z)
+            if (n.z >= 0) continue;  // facing away from us (we look along +z)
             float lit = 0.55f + 0.45f * Math.max(0, n.dot(LIGHT));
-            float depth = Math.max(Math.max(p0.z, p1.z), Math.max(p3.z, p1.z + p3.z - p0.z)); // farthest corner: keeps decals on big faces
+            float depth = Math.max(Math.max(p0.z, p1.z), Math.max(p3.z, p1.z + p3.z - p0.z));  // use the farthest corner so stuff flat on a big face still shows
             out.add(new Face(depth, p0, p1, p3, shade(argb, lit)));
         }
     }

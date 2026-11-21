@@ -13,7 +13,7 @@ import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 import java.util.List;
 
-/** Reincarnation: pick one of the 24 starting races. Shown on first join (and if your race is gone). */
+// reincarnation: pick one of the 24 starting races. shows on first join (or if your race is gone)
 public class RaceSelectScreen extends Screen {
     private static final org.slf4j.Logger LOG = com.mojang.logging.LogUtils.getLogger();
     private static final int W = 1586, H = 992;
@@ -27,10 +27,10 @@ public class RaceSelectScreen extends Screen {
     private float k;
     private int left, top;
 
-    /** When a race was last confirmed; the menu stays closed for a few seconds while the server syncs it. */
+    // when you last confirmed a race. the menu stays shut a few seconds while the server catches up
     static volatile long chosenAt;
 
-    /** The world the race was confirmed in: once confirmed there, never ask again in that session. */
+    // the world you confirmed a race in. once you did, it won't ask again that session
     static volatile Object chosenIn;
 
     static boolean awaitingServer() {
@@ -42,7 +42,7 @@ public class RaceSelectScreen extends Screen {
 
     @Override
     protected void init() {
-        k = Math.min(width * 0.76f / W, height * 0.73f / H);
+        k = Math.min(0.30f, Math.min(width * 0.94f / W, height * 0.92f / H));  // same deal as the main menu, follows GUI scale
         left = Math.round((width - W * k) / 2);
         top = Math.round((height - H * k) / 2);
     }
@@ -98,7 +98,7 @@ public class RaceSelectScreen extends Screen {
             labels(g);
             confirm(g, x, y);
             g.pose().popMatrix();
-            // The left box holds only you: your own skin, standing on the ring and following the cursor.
+            // the left box only has you in it: your own skin standing on the ring, following the mouse
             var player = net.minecraft.client.Minecraft.getInstance().player;
             if (player != null) {
                 net.minecraft.client.gui.screens.inventory.InventoryScreen.extractEntityInInventoryFollowsMouse(g,
@@ -108,7 +108,7 @@ public class RaceSelectScreen extends Screen {
         });
     }
 
-    /** Difficulty pill: the blank pill art with its word drawn live. */
+    // difficulty pill: blank pill art with the word drawn on top
     private static void pill(GuiGraphicsExtractor g, String prefix, String diff, float x, float y, boolean full) {
         String tex = prefix + diff;
         int[] s = UI.size(tex);
@@ -118,13 +118,13 @@ public class RaceSelectScreen extends Screen {
         UI.text(g, text, x + s[0] / 2f, y + s[1] / 2f, full ? 13 : 12, 0xFF0A1A10, 1);
     }
 
-    /** The fixed headings, drawn as text so they stay sharp at any size. */
+    // the headings, drawn as text so they stay sharp at any size
     private static void labels(GuiGraphicsExtractor g) {
         UI.semi(g, Component.translatable("jaycee.ui.rs.subtitle"), 788, 110, 26, 0xFFFFFFFF, 1);
         UI.text(g, Component.translatable("jaycee.ui.rs.lifeform"), 1112, 208, 20, 0xFF3FEFFF, 0);
         String[] heads = {"strengths", "limitations", "potential", "intrinsic"};
         float[] hy = {344, 455.5f, 565.5f, 752};
-        float[] hw = {104, 134, 158, 230}; // inside of each header chip
+        float[] hw = {104, 134, 158, 230};  // inside of each header chip
         for (int i = 0; i < 4; i++) {
             Component h = Component.translatable("jaycee.ui.rs." + heads[i]);
             UI.text(g, h, 1136, hy[i], UI.fitSize(h.getString(), 23, 14, hw[i], true), 0xFFFFFFFF, 0);
@@ -141,7 +141,7 @@ public class RaceSelectScreen extends Screen {
 
     private static boolean overConfirm(double x, double y) { return x >= 1115 && x < 1530 && y >= 838 && y < 908; }
 
-    /** Confirm Race: its own button, brighter under the mouse and pressed in while held. */
+    // confirm race button: brighter when you hover it, pushed in while you hold it
     private void confirm(GuiGraphicsExtractor g, double x, double y) {
         boolean hov = overConfirm(x, y), down = hov && pressing;
         float off = down ? 2 : 0;
@@ -158,7 +158,7 @@ public class RaceSelectScreen extends Screen {
             if (was && UI.button(event) == 0 && overConfirm(x, y)) {
                 LOG.info("[Jaycee] confirm race {}", selected);
                 ClientPacketDistributor.sendToServer(new BrightNetwork.ChooseRace(JayceeMod.ID + ":" + selected));
-                chosenAt = System.currentTimeMillis(); // don't reopen while the server's answer is on its way
+                chosenAt = System.currentTimeMillis();  // don't reopen while we wait for the server
                 chosenIn = net.minecraft.client.Minecraft.getInstance().level;
                 MenuScreen.click();
                 onClose();

@@ -22,11 +22,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-/**
- * Magic Sense, as in Tensura: press to toggle. While on it costs 5 magicules a second and grants
- * Presence Sense: living things nearby glow through walls, but only for you. Mastered, the sense
- * reaches twice as far.
- */
+// magic sense like tensura: press to toggle. while it's on it costs 5 magicules a second and gives
+// presence sense: living stuff nearby glows through walls, but only for you. mastered it reaches twice as far
 final class MagicSense {
     static final double COST_PER_SECOND = 5, PRESENCE = 0.5, PRESENCE_MASTERED = 1.0;
     private static final Map<UUID, Set<Integer>> SHOWN = new HashMap<>();
@@ -60,7 +57,7 @@ final class MagicSense {
         if (p.tickCount % 10 == 0) Safe.run("MagicSense.glow", () -> glow(p, a));
     }
 
-    /** Sends the glowing flag for nearby creatures to this one player only. */
+    // sends the glowing flag for nearby mobs to just this one player
     private static void glow(ServerPlayer p, Ability a) {
         double radius = 16 * (Tk.mastered(p, a) ? PRESENCE_MASTERED : PRESENCE) * 2;
         ServerLevel level = (ServerLevel) p.level();

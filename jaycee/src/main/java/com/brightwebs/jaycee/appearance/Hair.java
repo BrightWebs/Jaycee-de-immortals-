@@ -7,14 +7,14 @@ import java.util.Map;
 
 import static com.brightwebs.jaycee.appearance.Features.*;
 
-/** Voxel hairstyles: bangs, back and extra pieces, and finished styles built from them. */
+// voxel hairstyles: bangs, back and extra pieces, and full styles made from them
 final class Hair {
     private Hair() {}
 
     private static final Map<String, List<Box>> BANGS = new LinkedHashMap<>(), BACKS = new LinkedHashMap<>(), EXTRAS = new LinkedHashMap<>();
 
     static void register() {
-        // ---- bangs (front) ----
+        // bangs (front)
         bang("none", b -> {});
         bang("straight", b -> fringe(b, -4.75f, f(1.6f, 1.5f, 1.6f, 1.6f, 1.5f, 1.6f), f(2.4f, 2.6f, 2.5f, 2.6f, 2.4f, 2.6f)));
         bang("swept", b -> fringe(b, -4.75f, f(1.6f, 1.6f, 1.5f, 1.5f, 1.5f, 1.7f), f(3.6f, 3.2f, 2.8f, 2.2f, 1.6f, 1.2f)));
@@ -45,7 +45,7 @@ final class Hair {
             b.rot(HEAD, 2f, -8.6f, -4.5f, -25, 0, 15, -0.8f, -1.5f, 0, 1.6f, 1.6f, 1.0f, HIGHLIGHT);
         });
 
-        // ---- back ----
+        // back
         back("none", b -> {});
         back("short", b -> backPlate(b, 4.2f, false));
         back("medium", b -> backPlate(b, 8.4f, false));
@@ -97,7 +97,7 @@ final class Hair {
             for (int i = 0; i < 4; i++) b.box(HEAD, i % 2 == 0 ? -4.9f : 3.9f, -1 + i * 2.6f, 3.0f, 1.0f, 2.8f, 1.9f, HIGHLIGHT);
         });
 
-        // ---- extras ----
+        // extras
         extra("none", b -> {});
         extra("ahoge", b -> {
             b.rot(HEAD, 0, -8.8f, -1.0f, 0, 0, 20, -0.5f, -3.4f, -0.4f, 1.0f, 3.4f, 0.8f, PRIMARY);
@@ -123,7 +123,7 @@ final class Hair {
         for (Map.Entry<String, List<Box>> e : BACKS.entrySet()) add("back", e.getKey(), View.BACK, ANY, null, null, withCap(e.getValue(), !e.getKey().equals("none")));
         for (Map.Entry<String, List<Box>> e : EXTRAS.entrySet()) add("hair_extra", e.getKey(), View.HEAD, ANY, null, null, e.getValue());
 
-        // ---- finished styles (Style tab) ----
+        // full styles (style tab)
         style("none", "none", "none", "none");
         style("classic", "straight", "short", "none");
         style("swept_short", "swept", "short", "none");
@@ -172,7 +172,7 @@ final class Hair {
         return b.done();
     }
 
-    /** The cap is drawn once by the renderer for whichever piece is worn; the style's thumbnail shows all three. */
+    // the base gets drawn once by the renderer for whatever piece you have on, the style thumbnail shows all three
     private static void style(String id, String bangs, String back, String extra) {
         List<Box> all = new ArrayList<>();
         boolean any = !bangs.equals("none") || !back.equals("none");

@@ -10,7 +10,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-/** Server-side upkeep: passive ticks, on-hit hooks, cooldown cleanup. */
+// server side upkeep: passive ticks, on-hit hooks, clearing cooldowns
 @EventBusSubscriber(modid = BrightCore.ID)
 public final class AbilityTicker {
     private AbilityTicker() {}

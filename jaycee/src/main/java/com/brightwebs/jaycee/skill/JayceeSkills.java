@@ -31,23 +31,21 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 import static com.brightwebs.jaycee.skill.SkillHelper.*;
 
-/**
- * The beta's ten abilities, working as they do in Tensura: Reincarnated 2.0.1.4 (Raphael excepted).
- *
- *  Unique    Great Sage, Predator          (one is granted at random on rebirth)
- *  Ultimate  Raphael                       (Great Sage evolves into it: mastered + 1M EP)
- *  Extra     Magic Sense
- *  Common    Self-Regeneration
- *  Intrinsic Flame Breath (Lizardman and Lesser Daemon lines), Body Armor
- *  Resist    Flame Attack Resistance -> Flame Attack Nullification (learned by enduring fire)
- *  Magic     Fireball                      (Aspectual / Fire Magic)
- */
+// the beta's ten skills, working like they do in tensura 2.0.1.4 (except raphael)
+//
+//   unique    great sage, predator         (you get one at random when you're reborn)
+//   ultimate  raphael                      (great sage evolves into it: mastered + 1M EP)
+//   extra     magic sense
+//   common    self regeneration
+//   intrinsic flame breath (lizardman and lesser daemon lines), body armor
+//   resist    flame attack resistance -> flame attack nullification (learned by taking fire)
+//   magic     fireball                     (aspectual / fire magic)
 public final class JayceeSkills {
     private static final DeferredRegister<Ability> SKILLS = DeferredRegister.create(AbilityRegistry.REGISTRY, JayceeMod.ID);
 
-    // ---------------- UNIQUE ----------------
+    // unique
 
-    /** Tensura modes: Analytical Appraisal, Analysis, Refine. The bonuses are always on while owned. */
+    // tensura modes: analytical appraisal, analysis, refine. the bonuses are always on while you have it
     public static final DeferredHolder<Ability, Ability> GREAT_SAGE = SKILLS.register("great_sage", () ->
             new Ability(new Ability.Properties().type(SkillType.UNIQUE).category(AbilityCategory.SUPPORT).switchable()
                     .mode("analytical_appraisal", 0, 0, 0)
@@ -66,7 +64,7 @@ public final class JayceeSkills {
                 @Override public void onSwitch(ServerPlayer p, boolean on) { if (!on) GreatSage.switchedOff(p); }
             });
 
-    /** Tensura modes: Predation, Analysis, Stomach, Mimicry, Isolation. */
+    // tensura modes: predation, analysis, stomach, mimicry, isolation
     public static final DeferredHolder<Ability, Ability> PREDATOR = SKILLS.register("predator", () ->
             new Ability(new Ability.Properties().type(SkillType.UNIQUE).category(AbilityCategory.OFFENSE)
                     .mode("predation", 0, 0, 0)
@@ -87,9 +85,9 @@ public final class JayceeSkills {
                 @Override public boolean ignoresCooldown(ServerPlayer player, int mode) { return mode == 0 && player.isShiftKeyDown(); }
             });
 
-    // ---------------- ULTIMATE ----------------
+    // ultimate
 
-    /** Not part of Tensura: Reincarnated, so it keeps its own design (Great Sage's bonuses apply too). */
+    // not in tensura so it's our own design (great sage's bonuses still apply)
     public static final DeferredHolder<Ability, Ability> RAPHAEL = SKILLS.register("raphael", () ->
             new Ability(new Ability.Properties().type(SkillType.ULTIMATE).category(AbilityCategory.SUPPORT).switchable()
                     .mode("thought_acceleration", 60, 0, 25)
@@ -115,19 +113,17 @@ public final class JayceeSkills {
                 @Override public void onSwitch(ServerPlayer p, boolean on) { if (!on && !GreatSage.hasSage(p)) GreatSage.switchedOff(p); }
             });
 
-    // ---------------- EXTRA ----------------
+    // extra
 
-    /** Tensura's Magic Sense: a toggle; 5 magicules a second; living things glow through walls for you. */
+    // tensura's magic sense: a toggle, 5 magicules a second, living things glow through walls for you
     public static final DeferredHolder<Ability, Ability> MAGIC_PERCEPTION = SKILLS.register("magic_perception", () ->
             new Ability(new Ability.Properties().type(SkillType.EXTRA).category(AbilityCategory.SUPPORT).toggle().manaCost(5)) {
                 @Override public void tick(ServerPlayer p, ServerLevel l) { MagicSense.tick(p, this); }
                 @Override public void onToggle(ServerPlayer p, boolean on) { MagicSense.toggled(p, on); }
             });
 
-    /**
-     * Tensura's Self-Regeneration: a toggle, on once learned. While hurt it regenerates 2 HP a second
-     * (4 mastered) for 100 magicules every 5 seconds, and switches off when magicules run out.
-     */
+    // tensura's self regen: a toggle, on once you learn it. while you're hurt it heals 2 HP a second
+    // (4 mastered) for 100 magicules every 5 seconds, and turns off when you run out
     public static final DeferredHolder<Ability, Ability> SELF_REGENERATION = SKILLS.register("self_regeneration", () ->
             new Ability(new Ability.Properties().type(SkillType.COMMON).category(AbilityCategory.DEFENSE).toggle()) {
                 @Override public void tick(ServerPlayer p, ServerLevel l) {
@@ -145,7 +141,7 @@ public final class JayceeSkills {
                     if (hurt && p.tickCount % 20 == 0 && REGEN_UNTIL.getOrDefault(p.getUUID(), 0L) > p.tickCount) {
                         boolean m = Tk.mastered(p, this);
                         p.heal(m ? 4 : 2);
-                        if (m) Regeneration.restoreSpirit(p, 8); // Tensura: mastered also restores spiritual health
+                        if (m) Regeneration.restoreSpirit(p, 8);  // tensura: mastered also heals spiritual health
                         com.brightwebs.brightcore.fx.Fx.aura(l, com.brightwebs.brightcore.fx.BrightParticles.HEAL, p, 4);
                     }
                 }
@@ -154,37 +150,37 @@ public final class JayceeSkills {
             });
     private static final java.util.Map<java.util.UUID, Long> REGEN_UNTIL = new java.util.HashMap<>();
 
-    /** Tensura: instant regeneration; all missing health at once for 100 magicules per HP (60 mastered). */
+    // tensura: instant regen, all missing health at once for 100 magicules per HP (60 mastered)
     public static final DeferredHolder<Ability, Ability> ULTRASPEED_REGENERATION = SKILLS.register("ultraspeed_regeneration", () ->
             new Ability(new Ability.Properties().type(SkillType.EXTRA).category(AbilityCategory.DEFENSE).passive().switchable()) {
                 @Override public void tick(ServerPlayer p, ServerLevel l) { Regeneration.instant(p, this, false); }
             });
 
-    /** Tensura: the top of the chain; instant regeneration that also restores spiritual health. */
+    // tensura: the top of the chain, instant regen that heals spiritual health too
     public static final DeferredHolder<Ability, Ability> INFINITE_REGENERATION = SKILLS.register("infinite_regeneration", () ->
             new Ability(new Ability.Properties().type(SkillType.EXTRA).category(AbilityCategory.DEFENSE).passive().switchable()) {
                 @Override public void tick(ServerPlayer p, ServerLevel l) { Regeneration.instant(p, this, true); }
             });
 
-    // ---------------- INTRINSIC ----------------
+    // intrinsic
 
-    /** Tensura: hold to breathe fire, 8 damage a second (16 mastered), 30 magicules a second. */
+    // tensura: hold to breathe fire, 8 damage a second (16 mastered), 30 magicules a second
     public static final DeferredHolder<Ability, Ability> FLAME_BREATH = SKILLS.register("flame_breath", () ->
             new Ability(new Ability.Properties().type(SkillType.INTRINSIC).category(AbilityCategory.OFFENSE).held()) {
                 @Override public boolean activate(ServerPlayer p, ServerLevel l) { return true; }
                 @Override public boolean onHeld(ServerPlayer p, ServerLevel l, int mode, int held) { return FireSkills.breathHeld(p, this, held); }
             });
 
-    /** Tensura: press for scale armor in every empty armor slot (50 magicules); press again to shed it. */
+    // tensura: press for scale armor in every empty armor slot (50 magicules), press again to shed it
     public static final DeferredHolder<Ability, Ability> BODY_ARMOR = SKILLS.register("body_armor", () ->
             new Ability(new Ability.Properties().type(SkillType.INTRINSIC).category(AbilityCategory.DEFENSE)) {
                 @Override public boolean activate(ServerPlayer p, ServerLevel l) { return BodyArmor.press(p, this); }
                 @Override public void tick(ServerPlayer p, ServerLevel l) { BodyArmor.tick(p, this); }
             });
 
-    // ---------------- MAGIC ----------------
+    // magic
 
-    /** Tensura: hold to chant (3 s, 1 s mastered), release to fire; 30,000 magicules (50,000 charged). */
+    // tensura: hold to chant (3s, 1s mastered), let go to fire. 30,000 magicules (50,000 charged)
     public static final DeferredHolder<Ability, Ability> FIREBALL = SKILLS.register("fireball", () ->
             new Ability(new Ability.Properties().magic("aspectual", "fire", 3f, 40).category(AbilityCategory.OFFENSE).held()) {
                 @Override public boolean activate(ServerPlayer p, ServerLevel l) { return true; }

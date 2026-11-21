@@ -27,11 +27,11 @@ import net.neoforged.neoforge.common.NeoForge;
 import java.util.List;
 import java.util.Optional;
 
-/** Choosing, evolving and applying races. Server side unless noted. */
+// picking races, evolving, applying stats. server side unless it says otherwise
 public final class RaceAPI {
     private RaceAPI() {}
 
-    // ---- reading (client too) --------------------------------------------------
+    // reading, works on the client too
 
     public static RaceData data(Player player) {
         return player.getData(BrightAttachments.RACE);
@@ -41,8 +41,8 @@ public final class RaceAPI {
         return data(player).raceId().map(RaceRegistry::get);
     }
 
-    /** What stands between the player and an evolution, or empty if they can take it now. */
-    /** Checks a requirement part: 0..1 progress. Content mods add types (boss, awaken, named...). */
+    // what's stopping the player from this evolution, or empty if they're good
+    // checks one requirement part, 0 to 1. content mods add their own types
     @FunctionalInterface public interface RequirementCheck { float progress(Player player, Race.Requirement r); }
     private static final java.util.Map<String, RequirementCheck> CHECKS = new java.util.HashMap<>();
 
@@ -59,7 +59,7 @@ public final class RaceAPI {
         return n;
     }
 
-    /** 0..1 progress for one requirement part. */
+    // 0 to 1 progress for one part
     public static float progress(Player player, Race.Requirement r) {
         return switch (r.type()) {
             case "ep" -> r.amount() <= 0 ? 1 : (float) Math.min(1, EnergyAPI.get(player).ep() / r.amount());
@@ -72,7 +72,7 @@ public final class RaceAPI {
         };
     }
 
-    /** Total progress in percent (capped at 100), as Tensura weighs it. */
+    // total progress in %, max 100, weighted like tensura
     public static float progress(Player player, Race.Evolution evo) {
         float total = 0;
         for (Race.Requirement r : evo.requirements()) total += r.weight() * progress(player, r);
@@ -91,7 +91,7 @@ public final class RaceAPI {
         return Optional.empty();
     }
 
-    /** Items an evolution consumes are taken when it happens. */
+    // takes the items an evolution eats when it happens
     static void consume(ServerPlayer player, Race.Evolution evo) {
         if (player.isCreative()) return;
         for (Race.Requirement r : evo.requirements()) {
@@ -108,23 +108,23 @@ public final class RaceAPI {
         }
     }
 
-    // ---- changing ----------------------------------------------------------------
+    // changing
 
-    /** First-join choice. Ignored if the player already chose. */
+    // first join pick. does nothing if they already picked
     public static boolean choose(ServerPlayer player, Race race) {
-        // A saved race that no longer exists (an older version of the mod) counts as no race.
+        // a saved race that doesn't exist anymore (old version) counts as no race
         if ((data(player).chosen() && race(player).isPresent()) || !race.isStarting()) return false;
         become(player, race, true);
         grantStartingUnique(player);
         return true;
     }
 
-    /** Admin/command: force a race and roll a fresh body for it. */
+    // admin/command: force a race and roll a new body for it
     public static void set(ServerPlayer player, Race race) {
         become(player, race, true);
     }
 
-    /** Evolves into one of the current race's listed evolutions, if every requirement is met. */
+    // evolve into one of the current race's evolutions if everything's met
     public static boolean evolve(ServerPlayer player, Identifier targetId) {
         Optional<Race> current = race(player);
         if (current.isEmpty()) return false;
@@ -160,7 +160,7 @@ public final class RaceAPI {
         }
     }
 
-    /** Reincarnation's gift: one random Unique skill from the pool content mods fill. */
+    // reincarnation gift: one random unique skill from the pool
     private static void grantStartingUnique(ServerPlayer player) {
         List<Identifier> pool = BrightSkills.startingUniques();
         if (pool.isEmpty()) return;
@@ -170,7 +170,7 @@ public final class RaceAPI {
         }
     }
 
-    // ---- the body ----------------------------------------------------------------
+    // body stats
 
     private static final Identifier HEALTH = BrightCore.id("race_health");
     private static final Identifier ATTACK = BrightCore.id("race_attack");
@@ -179,7 +179,7 @@ public final class RaceAPI {
     private static final Identifier KNOCKBACK = BrightCore.id("race_knockback");
     private static final Identifier SIZE = BrightCore.id("race_size");
 
-    /** Sets the player's body stats to the race's, as modifiers on top of vanilla's defaults. */
+    // sets body stats to the race's as modifiers on top of vanilla
     public static void applyBody(Player player, Race race) {
         modify(player, Attributes.MAX_HEALTH, HEALTH, race.health() - 20);
         modify(player, Attributes.ATTACK_DAMAGE, ATTACK, race.attack() - 1);
@@ -201,7 +201,7 @@ public final class RaceAPI {
 
     private static void celebrate(ServerPlayer player, Race race) {
         ServerLevel level = (ServerLevel) player.level();
-        // Evolution: light spirals up through the body and bursts outward
+        // evolving: light spirals up the body then bursts out
         com.brightwebs.brightcore.fx.Fx.spiral(level, com.brightwebs.brightcore.fx.BrightParticles.HOLY, player.position(), 0.9, 2.6, 3, 60, 0);
         com.brightwebs.brightcore.fx.Fx.spiral(level, com.brightwebs.brightcore.fx.BrightParticles.SPIRIT, player.position(), 0.9, 2.6, 3, 60, Math.PI);
         com.brightwebs.brightcore.fx.Fx.shockwave(level, player.position().add(0, 1, 0), 1.5);
@@ -210,7 +210,7 @@ public final class RaceAPI {
         player.sendSystemMessage(Component.translatable("brightcore.race.evolved", race.name()));
     }
 
-    /** All races in a line, for menus: the forms this race can become next. */
+    // everything in a line for the menus, what this race can become next
     public static List<Race.Evolution> next(Player player) {
         return race(player).map(Race::evolutions).orElse(List.of());
     }

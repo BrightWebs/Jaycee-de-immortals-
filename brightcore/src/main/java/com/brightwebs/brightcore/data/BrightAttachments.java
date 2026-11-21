@@ -8,12 +8,12 @@ import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 import java.util.function.Supplier;
 
-/** Data attachments Bright Core keeps on entities. */
+// data bright core keeps on entities
 public final class BrightAttachments {
     private static final DeferredRegister<AttachmentType<?>> ATTACHMENTS =
             DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, BrightCore.ID);
 
-    /** Abilities, loadout and cooldowns (players). */
+    // skills, loadout and cooldowns (players)
     public static final Supplier<AttachmentType<AbilityData>> ABILITIES = ATTACHMENTS.register("abilities",
             () -> AttachmentType.builder(() -> AbilityData.EMPTY)
                     .serialize(AbilityData.CODEC.fieldOf("data"))
@@ -21,7 +21,7 @@ public final class BrightAttachments {
                     .sync(AbilityData.STREAM_CODEC)
                     .build());
 
-    /** Aura, Mana and Spirit (every living being). Only synced to the player it belongs to. */
+    // aura, mana and spirit (anything alive). only synced to the player it belongs to
     public static final Supplier<AttachmentType<EnergyData>> ENERGY = ATTACHMENTS.register("energy",
             () -> AttachmentType.builder(() -> EnergyData.EMPTY)
                     .serialize(EnergyData.CODEC.fieldOf("data"))
@@ -29,7 +29,7 @@ public final class BrightAttachments {
                     .sync((holder, to) -> holder == to, EnergyData.STREAM_CODEC)
                     .build());
 
-    /** The player's race. */
+    // the player's race
     public static final Supplier<AttachmentType<RaceData>> RACE = ATTACHMENTS.register("race",
             () -> AttachmentType.builder(() -> RaceData.EMPTY)
                     .serialize(RaceData.CODEC.fieldOf("data"))

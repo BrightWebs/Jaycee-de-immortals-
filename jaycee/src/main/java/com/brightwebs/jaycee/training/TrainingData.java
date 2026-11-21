@@ -10,10 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Attribute levels and EXP (saved), plus the recent-training feed for the Stats menu (synced to
- * the owner only, not saved). The feed lists what trained recently, by which activity.
- */
+// attribute levels and EXP (saved), plus the recent training feed for the stats menu
+// (synced to the owner only, not saved). the feed lists what trained recently and from what
 public record TrainingData(Map<String, Integer> levels, Map<String, Double> exp, List<Recent> recent) {
     public record Recent(String attr, String activity, int gained, long lastTick) {
         static final StreamCodec<ByteBuf, Recent> STREAM = StreamCodec.composite(

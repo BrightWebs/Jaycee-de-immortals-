@@ -10,10 +10,8 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
-/**
- * The naming pop-up (N on a creature), Tensura's naming menu in the Existence System's style:
- * type a name (or roll one), choose Subdue / Evolve / Endow, then Name.
- */
+// the naming pop up (N on something), tensura's naming menu but in our style:
+// type a name (or roll one), pick subdue / evolve / endow, then hit name
 public class NamingScreen extends Screen {
     private static final float W = 560, H = 360;
     private static final String[] RANDOM = {"Ranga", "Gobta", "Benimaru", "Shuna", "Souei", "Hakurou", "Shion", "Geld",
@@ -33,7 +31,7 @@ public class NamingScreen extends Screen {
 
     @Override
     protected void init() {
-        k = Math.min(width * 0.6f / W, height * 0.6f / H);
+        k = Math.min(0.42f, Math.min(width * 0.9f / W, height * 0.9f / H));  // follows GUI scale
         left = (width - W * k) / 2;
         top = (height - H * k) / 2;
     }
@@ -63,7 +61,7 @@ public class NamingScreen extends Screen {
             UI.semi(g, info.name() + "  •  " + info.race(), W / 2, 76, 17, 0xFFB8E8F8, 1);
             UI.semi(g, Component.translatable("jaycee.naming.target_ep", UI.num(info.ep())), W / 2, 98, 15, 0xFF9FB8C8, 1);
 
-            // name field + dice
+            // name box + dice
             boolean fieldHover = Page.in(x, y, 60, 118, 440, 160);
             UI.fill(g, 60, 118, 440, 160, 0xFF0A1424);
             UI.rect(g, 60, 118, 440, 160, 2, fieldHover ? 0xFF9AF4FF : 0xFF4FE3FF);
@@ -76,7 +74,7 @@ public class NamingScreen extends Screen {
             UI.rect(g, 452, 118, 500, 160, 2, 0xFFB46CFF);
             UI.text(g, "⚄", 476, 139, 26, 0xFFFFFFFF, 1);
 
-            // three choices
+            // the three choices
             for (int i = 0; i < 3; i++) {
                 float bx = 40 + i * 166, by = 178;
                 boolean hover = Page.in(x, y, bx, by, bx + 148, by + 96), sel = type == i;
@@ -136,11 +134,11 @@ public class NamingScreen extends Screen {
 
     @Override
     public boolean keyPressed(KeyEvent event) {
-        if (event.key() == 259) { // backspace
+        if (event.key() == 259) {  // backspace
             if (!name.isEmpty()) name = name.substring(0, name.offsetByCodePoints(name.length(), -1));
             return true;
         }
-        if (event.key() == 257 || event.key() == 335) { // enter
+        if (event.key() == 257 || event.key() == 335) {  // enter
             if (type >= 0 && !name.isBlank()) {
                 ClientPacketDistributor.sendToServer(new JayceeNetwork.NameRequest(info.entity(), name.strip(), type));
                 onClose();

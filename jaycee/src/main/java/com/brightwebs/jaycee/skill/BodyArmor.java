@@ -23,11 +23,9 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.item.ItemTossEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 
-/**
- * Body Armor, as in Tensura: press to grow a set of scale armor into every empty armor slot
- * (50 magicules); press again with all four slots filled to shed it. The scales are not real
- * items: they vanish if taken off, thrown or dropped. Each worn piece earns mastery over time.
- */
+// body armor like tensura: press to grow scale armor into every empty armor slot (50 magicules),
+// press again with all four filled to shed it. the scales aren't real items, they disappear if you
+// take them off, throw them or drop them. each piece you wear gives mastery over time
 @EventBusSubscriber(modid = JayceeMod.ID)
 public final class BodyArmor {
     static final double COST = 50;
@@ -71,14 +69,14 @@ public final class BodyArmor {
         return true;
     }
 
-    /** Mastery for each worn scale piece, and scales outside the armor slots disappear. */
+    // mastery for each scale piece worn, and scales outside the armor slots disappear
     static void tick(ServerPlayer p, Ability a) {
         if (p.tickCount % Tk.SKILL_TICK == 0) {
             for (EquipmentSlot slot : SLOTS) if (isScale(p.getItemBySlot(slot))) Tk.activatedTime(p, a);
         }
         if (p.tickCount % 10 == 0) {
             var inv = p.getInventory();
-            for (int i = 0; i < 36; i++) if (isScale(inv.getItem(i))) inv.setItem(i, ItemStack.EMPTY); // hotbar + main
+            for (int i = 0; i < 36; i++) if (isScale(inv.getItem(i))) inv.setItem(i, ItemStack.EMPTY);  // hotbar + main
             if (isScale(p.getOffhandItem())) p.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
             if (isScale(p.containerMenu.getCarried())) p.containerMenu.setCarried(ItemStack.EMPTY);
         }

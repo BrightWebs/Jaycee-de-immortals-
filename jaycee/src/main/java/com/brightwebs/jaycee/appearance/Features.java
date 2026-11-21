@@ -9,34 +9,32 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
-/**
- * Every Character Editor option: voxel parts attached to the player's model (hair, ears, tails,
- * horns, wings...) plus whole-look presets. Pure data, shared by server (validation) and client
- * (rendering and thumbnails). Add options with {@link #add}; nothing else needs to change.
- *
- * Geometry is in model pixels, using the player model's own spaces: head pivot at the neck
- * (head cube -4..4, -8..0, -4..4, face toward -z), body pivot at the neck (-4..4, 0..12, -2..2).
- */
+// every character editor option: voxel parts stuck on the player model (hair, ears, tails,
+// horns, wings...) plus full look presets. it's just data so the server can check it and the client
+// can draw it and the thumbnails. add options with add(), nothing else needs changing
+//
+// sizes are in model pixels using the player model's spaces: head pivot is at the neck
+// (head cube -4..4, -8..0, -4..4, face toward -z), body pivot at the neck too (-4..4, 0..12, -2..2)
 public final class Features {
     private Features() {}
 
-    // ---- parts and colours -------------------------------------------------------------
+    // parts and colors
     public static final int HEAD = 0, BODY = 1, RIGHT_ARM = 2, LEFT_ARM = 3, RIGHT_LEG = 4, LEFT_LEG = 5;
-    /** Tints: the slot's colours, or a fixed colour. */
+    // tints: the slot's colors, or a fixed color
     public static final int PRIMARY = 0, HIGHLIGHT = 1, TIP = 2, SECONDARY = 3, WHITE = 4, DARK = 5, GOLD = 6, GLOW = 7;
 
-    /** One cube. Coordinates are relative to its own pivot (px,py,pz), rotated by rx,ry,rz degrees. */
+    // one cube. coords are from its own pivot (px,py,pz), rotated by rx,ry,rz in degrees
     public record Box(int part, float px, float py, float pz, float rx, float ry, float rz,
                       float x, float y, float z, float w, float h, float d, int tint) {}
 
-    /** How a thumbnail frames the option. */
+    // how the thumbnail frames it
     public enum View { HEAD, FACE, BACK, BODY }
 
     public record Option(String slot, String id, List<Box> boxes, Predicate<String> race, View view, String c1, String c2) {
         public String key() { return slot + ":" + id; }
     }
 
-    /** Editor categories, each with its tabs (slots). */
+    // editor categories and their tabs
     public record Category(String id, List<String> slots) {}
 
     public static final List<Category> CATEGORIES = List.of(
@@ -48,7 +46,7 @@ public final class Features {
             new Category("accessories", List.of("acc_head", "acc_face", "acc_neck")),
             new Category("outfit", List.of("cape", "waist")));
 
-    /** Which colour set a slot uses. All hair pieces share the hair colours. */
+    // which color set a slot uses. all the hair pieces share the hair colors
     public static String colorGroup(String slot) {
         return switch (slot) {
             case "style", "bangs", "back", "hair_extra", "look" -> "hair";
@@ -58,9 +56,9 @@ public final class Features {
 
     private static final Map<String, Option> ALL = new LinkedHashMap<>();
     private static final Map<String, List<Option>> BY_SLOT = new LinkedHashMap<>();
-    /** Hair styles and whole looks: which pieces they set. */
+    // hair styles and full looks, which pieces they set
     private static final Map<String, Map<String, String>> COMBOS = new LinkedHashMap<>();
-    /** Slots a race must keep (natural form): race line -> slot -> option id. */
+    // what a race has to keep (natural form): race line -> slot -> option id
     private static final Map<String, Map<String, String>> REQUIRED = new LinkedHashMap<>();
 
     public static Option get(String slot, String id) { return ALL.get(slot + ":" + id); }
@@ -73,13 +71,13 @@ public final class Features {
         return out;
     }
 
-    /** Whether the race has any choice in this slot (tabs and categories hide when it doesn't). */
+    // does the race have anything to pick here (tabs and categories hide if not)
     public static boolean hasChoices(String slot, String raceId) {
         for (Option o : of(slot)) if (!o.id().equals("none") && o.race().test(raceId)) return true;
         return false;
     }
 
-    /** The option this race must wear in the slot, or null. */
+    // what this race has to wear in this slot, or null
     public static String required(String raceId, String slot) {
         Map<String, String> m = REQUIRED.get(raceId);
         if (m == null) m = REQUIRED.get(JayceeRaces.lineOf(raceId) + "*");
@@ -99,7 +97,7 @@ public final class Features {
         return o;
     }
 
-    // ---- race filters ------------------------------------------------------------------
+    // race filters
     static final Predicate<String> ANY = r -> true;
 
     static Predicate<String> line(String... lines) {
@@ -112,7 +110,7 @@ public final class Features {
         return s::contains;
     }
 
-    // ---- geometry helpers ------------------------------------------------------------
+    // geometry helpers
     static final class B {
         final List<Box> list = new ArrayList<>();
         B box(int part, float x, float y, float z, float w, float h, float d, int tint) {
@@ -123,10 +121,8 @@ public final class Features {
             list.add(new Box(part, px, py, pz, rx, ry, rz, x, y, z, w, h, d, tint));
             return this;
         }
-        /**
-         * A jointed limb (tails, horns, curls): each segment {length, width, pitch, yaw, tint} starts
-         * where the last ended. Pitch tilts it up (+) or down (-) from pointing straight back (+z).
-         */
+        // a jointed piece (tails, horns, curls). each segment {length, width, pitch, yaw, tint}
+        // starts where the last one ended. pitch tilts it up (+) or down (-) from pointing straight back (+z)
         B chain(int part, float px, float py, float pz, float[][] segs) {
             for (float[] s : segs) {
                 float len = s[0], w = s[1], pitch = s[2], yaw = s[3];
@@ -138,7 +134,7 @@ public final class Features {
             }
             return this;
         }
-        /** Mirror every box added so far across x = 0 (pairs: ears, horns, wings). */
+        // mirror everything added so far across x = 0 (pairs like ears, horns, wings)
         B mirror() {
             List<Box> copy = new ArrayList<>(list);
             for (Box b : copy) {
@@ -153,7 +149,7 @@ public final class Features {
 
     static B b() { return new B(); }
 
-    /** A row of hanging strands across the forehead: widths and lengths in pixels, every other one highlighted. */
+    // row of strands across the forehead. widths and lengths in pixels, every other one is a highlight
     static void fringe(B b, float z, float[] widths, float[] lengths) {
         float x = -4.6f;
         for (int i = 0; i < widths.length; i++) {
@@ -165,14 +161,14 @@ public final class Features {
         }
     }
 
-    /** The crown every hairstyle sits on: top and sides, open at the face. */
+    // the base every hairstyle sits on, top and sides, open at the face
     static void cap(B b) {
         b.box(HEAD, -4.7f, -8.8f, -4.7f, 9.4f, 1.6f, 9.4f, PRIMARY);
         b.box(HEAD, 3.9f, -7.4f, -4.7f, 0.8f, 3.6f, 9.4f, PRIMARY);
         b.box(HEAD, -4.7f, -7.4f, -4.7f, 0.8f, 3.6f, 9.4f, PRIMARY);
     }
 
-    /** Hair down the back of the head (and past it): length below the crown. */
+    // hair down the back of the head and past it, length is from the crown down
     static void backPlate(B b, float length, boolean layered) {
         float main = Math.max(1, length - 1.6f);
         b.box(HEAD, -4.7f, -7.4f, 3.9f, 9.4f, main, 0.9f, PRIMARY);
@@ -187,14 +183,14 @@ public final class Features {
         }
     }
 
-    // ---- the catalogue -----------------------------------------------------------------
+    // all the options
     static {
         Hair.register();
         RaceParts.register();
         Extras.register();
     }
 
-    /** Called once from mod setup so the catalogue loads early. */
+    // called once in mod setup so everything loads early
     public static void bootstrap() {}
 
     static void combo(String slot, String id, Map<String, String> pieces) {

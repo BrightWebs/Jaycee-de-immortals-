@@ -38,6 +38,11 @@ public final class BrightCore {
     // call this from the mod constructor before commands get registered
     public static void setCommandRoot(String root) { commandRoot = root; }
 
+    // the basic test commands (ability, race, ep). a content mod with its own commands turns these off
+    private static boolean legacyCommands = true;
+    public static boolean legacyCommands() { return legacyCommands; }
+    public static void setLegacyCommands(boolean on) { legacyCommands = on; }
+
     public static Identifier id(String path) {
         return Identifier.fromNamespaceAndPath(ID, path);
     }

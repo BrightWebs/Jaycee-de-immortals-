@@ -100,6 +100,7 @@ public final class StatusData {
             if (!(event.getSource().getEntity() instanceof ServerPlayer killer) || killer == event.getEntity()) return;
             DemonLord.onKill(killer, event.getEntity());
             if (event.getEntity() instanceof Enemy) addCounter(killer, "monsters_killed", 1);
+            if (hasSoul(event.getEntity())) addCounter(killer, "human_kills", 1);
             String type = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(event.getEntity().getType()).getPath();
             if (type.contains("slime")) addCounter(killer, "slimes_killed", 1);
             if (type.equals("elder_guardian")) addCounter(killer, "sea_boss_killed", 1);  // tensura: charybdis
@@ -129,16 +130,7 @@ public final class StatusData {
                             p.setData(TITLES, List.of());
                             c.getSource().sendSuccess(() -> Component.translatable("jaycee.command.title.clear", p.getDisplayName()), true);
                             return 1;
-                        }))))
-                .then(Commands.literal("souls")
-                        .then(Commands.literal("add").then(Commands.argument("player", EntityArgument.player())
-                                .then(Commands.argument("amount", IntegerArgumentType.integer()).executes(c -> {
-                                    ServerPlayer p = EntityArgument.getPlayer(c, "player");
-                                    int n = Math.max(0, souls(p) + IntegerArgumentType.getInteger(c, "amount"));
-                                    p.setData(SOULS, n);
-                                    c.getSource().sendSuccess(() -> Component.translatable("jaycee.command.souls", p.getDisplayName(), n), true);
-                                    return n;
-                                }))))));
+                        }))))));
     }
 
     static List<String> withAdded(List<String> list, String id) {

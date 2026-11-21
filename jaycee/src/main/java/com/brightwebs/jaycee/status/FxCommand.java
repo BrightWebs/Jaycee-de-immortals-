@@ -22,11 +22,6 @@ public final class FxCommand {
     public static void register(RegisterCommandsEvent event) {
         event.getDispatcher().register(Commands.literal(BrightCore.commandRoot())
                 .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
-                .then(Commands.literal("harvest").executes(c -> {
-                    ServerPlayer p = c.getSource().getPlayerOrException();
-                    if (!DemonLord.begin(p)) { c.getSource().sendFailure(Component.translatable("jaycee.demon_lord.cannot")); return 0; }
-                    return 1;
-                }))
                 .then(Commands.literal("fx").then(Commands.argument("ability", StringArgumentType.word())
                         .suggests((c, b) -> SharedSuggestionProvider.suggest(FxRecipes.ids(), b))
                         .executes(c -> {

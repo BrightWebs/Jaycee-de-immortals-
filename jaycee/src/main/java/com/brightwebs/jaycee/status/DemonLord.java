@@ -52,7 +52,15 @@ public final class DemonLord {
     public static boolean isTrue(Player p) { return StatusData.counter(p, "true_demon_lord") > 0; }
     public static double soulPoints(Player p) { return StatusData.counter(p, "soul_points"); }
 
-    private static void setFlag(ServerPlayer p, String key, double v) { StatusData.addCounter(p, key, v - StatusData.counter(p, key)); }
+    public static void setFlag(ServerPlayer p, String key, double v) { StatusData.addCounter(p, key, v - StatusData.counter(p, key)); }
+
+    /** for commands, sets soul points straight up */
+    public static void setSoulPoints(ServerPlayer p, double points) {
+        setFlag(p, "soul_points", Math.max(0, points));
+        syncSouls(p);
+    }
+
+    public static void forceAwaken(ServerPlayer p) { awaken(p); }
 
     private static void syncSouls(ServerPlayer p) { p.setData(StatusData.SOULS, (int) Math.min(Integer.MAX_VALUE, soulPoints(p) / 1000)); }
 

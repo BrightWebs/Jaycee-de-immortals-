@@ -16,6 +16,7 @@ public final class JayceeMod {
     public JayceeMod(IEventBus bus) {
         // all the cheat commands go under /jaycee
         com.brightwebs.brightcore.BrightCore.setCommandRoot(ID);
+        com.brightwebs.brightcore.BrightCore.setLegacyCommands(false);  // we use the tensura style ones in command/JayceeCommands
         JayceeSkills.init(bus);
         IchorAPI.init(bus);
         JayceeRaces.init(bus);

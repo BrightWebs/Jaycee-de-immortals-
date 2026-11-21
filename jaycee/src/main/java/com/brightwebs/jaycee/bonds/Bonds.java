@@ -80,7 +80,7 @@ public final class Bonds {
         return !owner(e).isEmpty() && owner(e).equals(owner.getStringUUID());
     }
 
-    static void add(ServerPlayer owner, LivingEntity sub, String name) {
+    public static void add(ServerPlayer owner, LivingEntity sub, String name) {
         List<Sub> l = new ArrayList<>(subs(owner));
         l.removeIf(s -> s.uuid().equals(sub.getStringUUID()));
         l.add(new Sub(sub.getStringUUID(), name, BuiltInRegistries.ENTITY_TYPE.getKey(sub.getType()).toString(), EnergyAPI.ep(sub), "follow"));

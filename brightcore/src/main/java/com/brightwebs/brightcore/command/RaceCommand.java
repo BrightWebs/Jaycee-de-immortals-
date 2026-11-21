@@ -31,6 +31,7 @@ public final class RaceCommand {
 
     @SubscribeEvent
     public static void register(RegisterCommandsEvent event) {
+        if (!BrightCore.legacyCommands()) return;  // content mod has its own commands
         var d = event.getDispatcher();
         d.register(Commands.literal(BrightCore.commandRoot()).requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).then(Commands.literal("race")
                 .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))

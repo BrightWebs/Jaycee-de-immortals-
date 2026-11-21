@@ -46,7 +46,7 @@ public final class HealthHud {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer p = mc.player;
         if (p == null || p.isSpectator() || p.isCreative()) return;
-        float k = Math.min(0.32f, sw / DESIGN_W * SCALE);  // follows GUI scale
+        float k = Math.min(0.24f, sw / DESIGN_W * SCALE);  // follows GUI scale, kept small up in the corner
         EnergyData e = EnergyAPI.get(p);
         g.pose().pushMatrix();
         g.pose().scale(k, k);
@@ -92,7 +92,7 @@ public final class HealthHud {
 
     // old neon XP bar with the level in a hexagon (not used, the vanilla bar is back)
     private static void xpBar(GuiGraphicsExtractor g, int sw, int sh, LocalPlayer p) {
-        float k = Math.min(0.32f, sw / DESIGN_W * SCALE);  // follows GUI scale
+        float k = Math.min(0.24f, sw / DESIGN_W * SCALE);  // follows GUI scale, kept small up in the corner
         float w = 640, cx = sw / k / 2, y = sh / k - 112 / SCALE * 0.9f;
         g.pose().pushMatrix();
         g.pose().scale(k, k);

@@ -103,6 +103,9 @@ public final class StatusData {
             if (hasSoul(event.getEntity())) addCounter(killer, "human_kills", 1);
             String type = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(event.getEntity().getType()).getPath();
             if (type.contains("slime")) addCounter(killer, "slimes_killed", 1);
+            if (type.equals("cave_spider")) addCounter(killer, "cave_spiders_killed", 1);
+            if (type.equals("spider") || type.equals("cave_spider")) addCounter(killer, "spiders_killed", 1);
+            if (type.equals("magma_cube")) addCounter(killer, "magma_cubes_killed", 1);
             if (type.equals("elder_guardian")) addCounter(killer, "sea_boss_killed", 1);  // tensura: charybdis
             if (type.equals("wither") || type.equals("ender_dragon") || type.equals("elder_guardian") || type.equals("warden")) addCounter(killer, "bosses_killed", 1);
             if (type.equals("warden")) addCounter(killer, "warden_killed", 1);
@@ -130,7 +133,7 @@ public final class StatusData {
                             p.setData(TITLES, List.of());
                             c.getSource().sendSuccess(() -> Component.translatable("jaycee.command.title.clear", p.getDisplayName()), true);
                             return 1;
-                        }))))));
+                        })))));
     }
 
     static List<String> withAdded(List<String> list, String id) {

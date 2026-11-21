@@ -32,6 +32,7 @@ final class JayceeAbilityBar {
     private static float lerp(float a, float b, float t) { return a + (b - a) * t; }
 
     static void render(GuiGraphicsExtractor g, int sw, int sh, Player player, AbilityData data) {
+        com.brightwebs.brightcore.api.util.Safe.run("FearOverlay.render", () -> FearOverlay.render(g, sw, sh));
         com.brightwebs.brightcore.api.util.Safe.run("HealthHud.render", () -> HealthHud.render(g, sw, sh));
         com.brightwebs.brightcore.api.util.Safe.run("AppraisalPanel.render", () -> AppraisalPanel.render(g, sw, sh));
         com.brightwebs.brightcore.api.util.Safe.run("JayceeAbilityBar.render", () -> {

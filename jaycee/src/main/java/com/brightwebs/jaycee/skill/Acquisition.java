@@ -37,6 +37,30 @@ public final class Acquisition {
         }
     }
 
+    // the newer batch, same conditions as tensura where we have the same stuff.
+    // tensura uses its own mobs for some of these, so we swap in vanilla ones:
+    //   paralysis  tensura: 500 evil centipedes      here: 50 cave spiders
+    //   poison     tensura: 100 spider eyes or 100 black spiders   here: 100 spider eyes or 100 spiders
+    //   corrosion  tensura: 100 rotten flesh eaten (or a tempest serpent / orc lord)
+    //   sense heat source  rimuru got it from the tempest serpent, here: 30 magma cubes
+    //   universal perception  magic sense and sense heat source both mastered
+    private static void more(ServerPlayer p, double ep) {
+        Pressure.learnChecks(p);
+        if (ep > 3_000) learn(p, "strength");
+        if (ep > 8_000) learn(p, "thought_acceleration");
+        if (ep > 10_000) { learn(p, "voice_cannon"); learn(p, "water_blade"); learn(p, "hydraulic_propulsion"); learn(p, "gravity_flight"); }
+        if (ep > 15_000) learn(p, "strengthen_body");
+        if (ep > 20_000) learn(p, "steel_strength");
+        var stats = p.getStats();
+        if (StatusData.counter(p, "cave_spiders_killed") >= 50) learn(p, "paralysis");
+        if (stats.getValue(net.minecraft.stats.Stats.ITEM_USED.get(net.minecraft.world.item.Items.SPIDER_EYE)) >= 100
+                || StatusData.counter(p, "spiders_killed") >= 100) learn(p, "poison");
+        if (stats.getValue(net.minecraft.stats.Stats.ITEM_USED.get(net.minecraft.world.item.Items.ROTTEN_FLESH)) >= 100) learn(p, "corrosion");
+        if (StatusData.counter(p, "magma_cubes_killed") >= 30) learn(p, "sense_heat_source");
+        Ability sense = skill("magic_perception"), heat = skill("sense_heat_source");
+        if (sense != null && heat != null && AbilityAPI.isMastered(p, sense) && AbilityAPI.isMastered(p, heat)) learn(p, "universal_perception");
+    }
+
     @SubscribeEvent
     public static void onTick(PlayerTickEvent.Post event) {
         com.brightwebs.brightcore.api.util.Safe.run("Acquisition.onTick", () -> {
@@ -56,6 +80,7 @@ public final class Acquisition {
             if (selfRegen != null && AbilityAPI.isMastered(p, selfRegen) && StatusData.counter(p, "sea_boss_killed") > 0 && ep > 300_000) learn(p, "ultraspeed_regeneration");
             if (ultra != null && AbilityAPI.has(p, ultra) && ep > 2_000_000) learn(p, "infinite_regeneration");
             if (StatusData.counter(p, "physical_taken") >= 150) learn(p, "body_armor");
+            more(p, ep);
             Ability sage = skill("great_sage"), raphael = skill("raphael");
             if (sage != null && raphael != null && AbilityAPI.has(p, sage) && AbilityAPI.isMastered(p, sage)
                     && EnergyAPI.get(p).ep() >= 1_000_000) {

@@ -59,7 +59,11 @@ final class MagicSense {
 
     // sends the glowing flag for nearby mobs to just this one player
     private static void glow(ServerPlayer p, Ability a) {
-        double radius = 16 * (Tk.mastered(p, a) ? PRESENCE_MASTERED : PRESENCE) * 2;
+        glowAround(p, 16 * (Tk.mastered(p, a) ? PRESENCE_MASTERED : PRESENCE) * 2);
+    }
+
+    // the other senses (heat source, universal perception) use this too, just with their own range
+    static void glowAround(ServerPlayer p, double radius) {
         ServerLevel level = (ServerLevel) p.level();
         List<LivingEntity> near = level.getEntitiesOfClass(LivingEntity.class, p.getBoundingBox().inflate(radius), e -> e != p && e.isAlive());
         Set<Integer> now = new HashSet<>();
@@ -79,6 +83,12 @@ final class MagicSense {
             EntityDataAccessor<Byte> acc = flags();
             p.connection.send(new ClientboundSetEntityDataPacket(e.getId(), List.of(SynchedEntityData.DataValue.create(acc, e.getEntityData().get(acc)))));
         });
+    }
+
+    // turns the glow back off for everything this player was seeing
+    static void clear(ServerPlayer p) {
+        Set<Integer> shown = SHOWN.remove(p.getUUID());
+        if (shown != null) for (int id : shown) restore(p, ((ServerLevel) p.level()).getEntity(id));
     }
 
     static void toggled(ServerPlayer p, boolean on) {

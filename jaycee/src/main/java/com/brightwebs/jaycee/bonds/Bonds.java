@@ -29,17 +29,15 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-/**
- * Subordinates (Tensura: named monsters serve their namer). The owner keeps a list for the Bonds
- * page; each subordinate keeps its owner and its standing order (follow or stay).
- * Subordinates never target their owner or each other, defend their owner, and join the owner's fights.
- */
+// subordinates. in tensura if you name a monster it serves you
+// the owner keeps a list for the bonds page, each subordinate keeps its owner and its order (follow or stay)
+// they never target their owner or each other, they protect the owner and jump into the owner's fights
 @EventBusSubscriber(modid = JayceeMod.ID)
 public final class Bonds {
     private static final DeferredRegister<AttachmentType<?>> ATTACHMENTS =
             DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, JayceeMod.ID);
 
-    /** One subordinate as its owner's list shows it. */
+    // one subordinate like it shows in the owner's list
     public record Sub(String uuid, String name, String type, double ep, String order) {
         public static final Codec<Sub> CODEC = RecordCodecBuilder.create(i -> i.group(
                 Codec.STRING.fieldOf("uuid").forGetter(Sub::uuid),
@@ -54,20 +52,20 @@ public final class Bonds {
         Sub withEp(double e) { return new Sub(uuid, name, type, e, order); }
     }
 
-    /** The owner's subordinates. Synced to the owner for the Bonds page. */
+    // the owner's subordinates, synced to the owner for the bonds page
     public static final Supplier<AttachmentType<List<Sub>>> SUBORDINATES = ATTACHMENTS.register("subordinates",
             () -> AttachmentType.<List<Sub>>builder(() -> List.of()).serialize(Sub.CODEC.listOf().fieldOf("subs")).copyOnDeath()
                     .sync((holder, to) -> holder == to, Sub.STREAM.apply(ByteBufCodecs.list())).build());
-    /** On a named being: the name it was given ("" when unnamed). Synced so everyone sees it. */
+    // on something that got named: the name ("" if none). synced so everyone sees it
     public static final Supplier<AttachmentType<String>> NAME = ATTACHMENTS.register("given_name",
             () -> AttachmentType.builder(() -> "").serialize(Codec.STRING.fieldOf("name")).copyOnDeath().sync(ByteBufCodecs.STRING_UTF8).build());
-    /** On a subordinate: its owner's UUID ("" for none). */
+    // on a subordinate: its owner's UUID ("" if none)
     public static final Supplier<AttachmentType<String>> OWNER = ATTACHMENTS.register("owner",
             () -> AttachmentType.builder(() -> "").serialize(Codec.STRING.fieldOf("owner")).copyOnDeath().sync(ByteBufCodecs.STRING_UTF8).build());
-    /** On a subordinate: "follow" or "stay". */
+    // on a subordinate: "follow" or "stay"
     public static final Supplier<AttachmentType<String>> ORDER = ATTACHMENTS.register("order",
             () -> AttachmentType.builder(() -> "follow").serialize(Codec.STRING.fieldOf("order")).copyOnDeath().build());
-    /** On a player: whether others may name them (Shift + N toggles; Tensura's nameable status). */
+    // on a player: can other people name them. shift + N flips it (tensura's nameable status)
     public static final Supplier<AttachmentType<Boolean>> NAMEABLE = ATTACHMENTS.register("nameable",
             () -> AttachmentType.builder(() -> true).serialize(Codec.BOOL.fieldOf("nameable")).copyOnDeath().build());
 
@@ -82,14 +80,14 @@ public final class Bonds {
         return !owner(e).isEmpty() && owner(e).equals(owner.getStringUUID());
     }
 
-    static void add(ServerPlayer owner, LivingEntity sub, String name) {
+    public static void add(ServerPlayer owner, LivingEntity sub, String name) {
         List<Sub> l = new ArrayList<>(subs(owner));
         l.removeIf(s -> s.uuid().equals(sub.getStringUUID()));
         l.add(new Sub(sub.getStringUUID(), name, BuiltInRegistries.ENTITY_TYPE.getKey(sub.getType()).toString(), EnergyAPI.ep(sub), "follow"));
         owner.setData(SUBORDINATES, List.copyOf(l));
     }
 
-    /** Follow / stay / release, from the Bonds page. */
+    // follow / stay / release from the bonds page
     public static void command(ServerPlayer owner, String uuid, String cmd) {
         List<Sub> l = new ArrayList<>(subs(owner));
         for (int i = 0; i < l.size(); i++) {
@@ -119,9 +117,9 @@ public final class Bonds {
         }
     }
 
-    // ---- behaviour ---------------------------------------------------------------
+    // behaviour
 
-    /** Never turn on your owner or a fellow subordinate. */
+    // never go after your owner or another subordinate
     @SubscribeEvent
     public static void onTarget(LivingChangeTargetEvent event) {
         com.brightwebs.brightcore.api.util.Safe.run("Bonds.onTarget", () -> {
@@ -132,7 +130,7 @@ public final class Bonds {
         });
     }
 
-    /** Subordinates defend their owner and join the owner's fights. */
+    // subordinates protect their owner and help in the owner's fights
     @SubscribeEvent
     public static void onHurt(LivingIncomingDamageEvent event) {
         com.brightwebs.brightcore.api.util.Safe.run("Bonds.onHurt", () -> {
@@ -149,7 +147,7 @@ public final class Bonds {
         }
     }
 
-    /** Followers keep near their owner: walk back past 10 blocks, catch up instantly past 24. */
+    // followers stay close: walk back if they're past 10 blocks, teleport over if past 24
     @SubscribeEvent
     public static void onTick(PlayerTickEvent.Post event) {
         if (!(event.getEntity() instanceof ServerPlayer owner) || owner.tickCount % 20 != 0) return;

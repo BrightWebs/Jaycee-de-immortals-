@@ -6,19 +6,17 @@ import com.brightwebs.jaycee.race.JayceeRaces;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 
-/**
- * Jaycee: Di Immortales. Built on Bright Core.
- *
- * Bright Core supplies the ability system and ability bar; this mod supplies the content:
- * the menu, the ability bar's look, and (step by step) the Ichor system, realms and beings.
- */
+// Jaycee: Di Immortales, built on Bright Core
+// bright core does the skill system and skill bar, this mod is the actual content:
+// the menu, how the bar looks, and slowly the ichor system, realms and beings
 @Mod(JayceeMod.ID)
 public final class JayceeMod {
     public static final String ID = "jaycee";
 
     public JayceeMod(IEventBus bus) {
-        // Every cheat command lives under /jaycee.
+        // all the cheat commands go under /jaycee
         com.brightwebs.brightcore.BrightCore.setCommandRoot(ID);
+        com.brightwebs.brightcore.BrightCore.setLegacyCommands(false);  // we use the tensura style ones in command/JayceeCommands
         JayceeSkills.init(bus);
         IchorAPI.init(bus);
         JayceeRaces.init(bus);
@@ -31,5 +29,6 @@ public final class JayceeMod {
         com.brightwebs.jaycee.race.CreatureEnergy.init(bus);
         com.brightwebs.jaycee.bonds.Bonds.init(bus);
         com.brightwebs.jaycee.appearance.Appearance.init(bus);
+        com.brightwebs.jaycee.effect.JayceeEffects.init(bus);
     }
 }

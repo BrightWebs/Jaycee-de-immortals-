@@ -23,16 +23,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-/**
- * Race abilities on the Race Ability key (R), as Tensura: Reincarnated 2.0.1.4 defines them:
- *  Lesser / Greater Daemon   toggle flight (we extend it to the rest of the daemon line)
- *  Harpy line                wing boost upward into a glide (cooldown 3 s)
- *  Dragonewt line            dash along your look into a glide, costs hunger (cooldown 3 s)
- *  Slime line                hold to charge a jump, release to leap where you look
- *  Vampire line              drain blood from a target in reach, otherwise switch bat flight
- * Not in Tensura (our own lines): Pixie and Lesser Angel lines fly like daemons; the lesser
- * dragon line dashes like dragonewts.
- */
+// race abilities on the R key, how tensura 2.0.1.4 does them:
+//   lesser / greater daemon   toggle flight (we gave it to the rest of the daemon line too)
+//   harpy line                wing boost up into a glide (3s cooldown)
+//   dragonewt line            dash where you look into a glide, costs hunger (3s cooldown)
+//   slime line                hold to charge a jump, let go to leap where you look
+//   vampire line              drain blood from something close, otherwise bat flight
+// not in tensura (our own): pixie and lesser angel lines fly like daemons, lesser dragon dashes like dragonewts
 public final class RaceSkills {
     private static final Set<UUID> GLIDING = new HashSet<>();
 
@@ -53,7 +50,7 @@ public final class RaceSkills {
 
     private static void reg(String race, RaceAbility a) { RaceAbilities.register(id(race), a); }
 
-    /** Tensura's riptide push: a shove along where you're looking. */
+    // tensura's riptide push, shoves you where you're looking
     static void riptidePush(LivingEntity e, float level) {
         float yaw = e.getYHeadRot(), pitch = e.getXRot();
         float x = -Mth.sin(yaw * Mth.DEG_TO_RAD) * Mth.cos(pitch * Mth.DEG_TO_RAD);
@@ -63,7 +60,7 @@ public final class RaceSkills {
         e.push(x * f / len, y * f / len, z * f / len);
     }
 
-    /** Players move on their own client, so a changed velocity has to be sent to them. */
+    // players move on their own client so a new velocity has to be sent to them
     static void sync(ServerPlayer p) {
         p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket(p));
     }
@@ -75,7 +72,7 @@ public final class RaceSkills {
         p.onUpdateAbilities();
     }
 
-    /** Keeps race flight through respawns and relogs, which reset it. */
+    // keeps race flight through respawns and relogs since those reset it
     private static void keepFlight(ServerPlayer p, String key) {
         if (p.tickCount % 20 == 0 && StatusData.counter(p, key) > 0 && !p.getAbilities().mayfly && !p.isCreative() && !p.isSpectator()) {
             p.getAbilities().mayfly = true;
@@ -87,7 +84,7 @@ public final class RaceSkills {
         StatusData.addCounter(p, key, (on ? 1 : 0) - StatusData.counter(p, key));
     }
 
-    // ---- flight toggle (Lesser Daemon) ---------------------------------------------
+    // flight toggle (lesser daemon)
 
     static final RaceAbility FLIGHT = new RaceAbility() {
         @Override public void press(ServerPlayer p) {
@@ -101,7 +98,7 @@ public final class RaceSkills {
         @Override public void tick(ServerPlayer p) { keepFlight(p, "race_flight"); }
     };
 
-    // ---- wings and dashes (Harpy, Dragonewt) ---------------------------------------------
+    // wings and dashes (harpy, dragonewt)
 
     private static RaceAbility harpy(float upward) {
         return new RaceAbility() {
@@ -148,10 +145,8 @@ public final class RaceSkills {
 
     private static void startGlide(ServerPlayer p) { GLIDING.add(p.getUUID()); }
 
-    /**
-     * Tensura starts an elytra glide here. Without an elytra the game won't hold one, so the glide
-     * is kept by hand: a slow fall that carries your speed until you land, swim or sneak.
-     */
+    // tensura starts an elytra glide here. without an elytra the game won't keep it going, so we
+    // do it by hand: a slow fall that keeps your speed until you land, swim or sneak
     private static void glide(ServerPlayer p) {
         if (!GLIDING.contains(p.getUUID())) return;
         if (p.onGround() || p.isInWater() || p.isShiftKeyDown() || p.getAbilities().flying) { GLIDING.remove(p.getUUID()); return; }
@@ -163,7 +158,7 @@ public final class RaceSkills {
         sync(p);
     }
 
-    // ---- charge jump (Slime) ---------------------------------------------
+    // charge jump (slime)
 
     private static RaceAbility slime(int maxCharge) {
         return new RaceAbility() {
@@ -188,7 +183,7 @@ public final class RaceSkills {
         };
     }
 
-    // ---- blood drain / bat flight (Vampire) ---------------------------------------------
+    // blood drain / bat flight (vampire)
 
     static final RaceAbility VAMPIRE = new RaceAbility() {
         @Override public void press(ServerPlayer p) {
@@ -217,7 +212,7 @@ public final class RaceSkills {
         @Override public void tick(ServerPlayer p) { keepFlight(p, "bat_mode"); }
     };
 
-    /** Undead and constructs have no blood (Tensura's RaceUtils.isBloodless). */
+    // undead and constructs don't have blood (tensura's RaceUtils.isBloodless)
     private static boolean bloodless(LivingEntity e) {
         return e.isInvertedHealAndHarm()
                 || net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(e.getType()).getPath().contains("golem");
@@ -234,7 +229,7 @@ public final class RaceSkills {
         return best;
     }
 
-    /** Leaving a flying race turns its flight off. */
+    // leaving a flying race turns the flight off
     public static void raceChanged(Player p) {
         if (p instanceof ServerPlayer sp) {
             RaceAbility now = RaceAbilities.of(sp);

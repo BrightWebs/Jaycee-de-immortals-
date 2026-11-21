@@ -22,7 +22,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
-/** /ability learn | learnall | forget | slot | list. For testing and admins. */
+// /ability learn | learnall | forget | slot | list, for testing
 @EventBusSubscriber(modid = BrightCore.ID)
 public final class AbilityCommand {
     private static final DynamicCommandExceptionType UNKNOWN =
@@ -32,6 +32,7 @@ public final class AbilityCommand {
 
     @SubscribeEvent
     public static void register(RegisterCommandsEvent event) {
+        if (!BrightCore.legacyCommands()) return;  // content mod has its own commands
         CommandDispatcher<CommandSourceStack> d = event.getDispatcher();
         d.register(Commands.literal(BrightCore.commandRoot()).requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).then(Commands.literal("ability")
                 .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))

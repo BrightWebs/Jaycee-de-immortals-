@@ -10,9 +10,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
-/**
- * /jaycee ichor for testing: get, set, add, pray (stand-in until the temple exists), reroll (draws a new Birthright).
- */
+// /jaycee ichor for testing: get, set, add, pray (until the temple exists), reroll (new birthright)
 @EventBusSubscriber(modid = JayceeMod.ID)
 public final class IchorCommand {
     private IchorCommand() {}

@@ -11,22 +11,19 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 
-/**
- * The skill HUD on the left of the screen, drawn to the approved mock-ups.
- * Resting: each key (Z X C V) in its octagon with the skill's icon beside it.
- * Holding Switch Mode (Left Alt): the slots slide out into cards with the skill's name and mode,
- * and the preset switcher appears underneath.
- *
- * Coordinates are design pixels of the 1672 x 941 mock-up, scaled to the window.
- */
+// skill HUD on the left side, drawn like the mockups
+// resting: each key (Z X C V) in its octagon with the skill icon next to it
+// holding alt: the slots slide out into cards with the skill's name and mode, and the preset
+// switcher shows up under them
+// coords are design pixels from the 1672 x 941 mockup, scaled to the window
 final class JayceeAbilityBar {
     private static final float DESIGN_W = 1672, PITCH = 76, TOP_FRACTION = 298f / 941f;
-    private static float open; // 0 resting .. 1 expanded
+    private static float open;  // 0 resting, 1 opened up
     private static long lastNanos;
 
     private JayceeAbilityBar() {}
 
-    /** Draws a sprite made with a 10 px glow margin around its shape. */
+    // draws a sprite that has a 10 px glow margin around it
     private static void piece(GuiGraphicsExtractor g, String tex, float x, float y, float w, float h, float alpha) {
         int a = Math.round(Math.max(0, Math.min(1, alpha)) * 255);
         UI.tex(g, tex, x - 10, y - 10, w + 20, h + 20, (a << 24) | 0xFFFFFF);
@@ -35,6 +32,7 @@ final class JayceeAbilityBar {
     private static float lerp(float a, float b, float t) { return a + (b - a) * t; }
 
     static void render(GuiGraphicsExtractor g, int sw, int sh, Player player, AbilityData data) {
+        com.brightwebs.brightcore.api.util.Safe.run("FearOverlay.render", () -> FearOverlay.render(g, sw, sh));
         com.brightwebs.brightcore.api.util.Safe.run("HealthHud.render", () -> HealthHud.render(g, sw, sh));
         com.brightwebs.brightcore.api.util.Safe.run("AppraisalPanel.render", () -> AppraisalPanel.render(g, sw, sh));
         com.brightwebs.brightcore.api.util.Safe.run("JayceeAbilityBar.render", () -> {
@@ -44,9 +42,9 @@ final class JayceeAbilityBar {
             float target = BrightKeys.MODE_SWITCH.isDown() ? 1 : 0;
             open += (target - open) * Math.min(1, dt * 14);
             if (Math.abs(target - open) < 0.01f) open = target;
-            float t = open * open * (3 - 2 * open); // smoothstep
+            float t = open * open * (3 - 2 * open);  // smoothstep
 
-            float k = sw / DESIGN_W * 0.72f; // smaller skill bar
+            float k = Math.min(0.32f, sw / DESIGN_W * 0.72f);  // follows GUI scale
             float top = (sh / k) * TOP_FRACTION;
             EnergyData energy = EnergyAPI.get(player);
 
@@ -66,7 +64,7 @@ final class JayceeAbilityBar {
         });
     }
 
-    /** The icon tile: cooldown shade, red when unaffordable, green line while toggled on. */
+    // the icon tile: dark while on cooldown, red when you can't pay for it, green line while it's on
     private static void slot(GuiGraphicsExtractor g, Ability a, Player player, AbilityData data, EnergyData energy, float x, float y) {
         piece(g, a == null ? "hud_frame_empty" : "hud_frame", x, y - 4, 70, 66, 1);
         if (a == null) return;
@@ -81,10 +79,10 @@ final class JayceeAbilityBar {
         if (a.isToggle() && data.isToggled(a.id())) UI.fill(g, x + 8, y + 57, x + 62, y + 59, 0xFF5FE07A);
     }
 
-    /** The name card that slides out while Switch Mode is held. */
+    // the name card that slides out while holding alt
     private static void card(GuiGraphicsExtractor g, Ability a, Player player, AbilityData data, float x, float y, float t) {
         piece(g, "hud_card", x, y - 2, 250, 62, t);
-        if (t < 0.12f) return; // text colours with almost no alpha would draw fully opaque
+        if (t < 0.12f) return;  // colors with almost no alpha would draw fully solid
         int alpha = Math.round(t * 255) << 24;
         float tx = x + 86;
         if (a == null) {
@@ -103,7 +101,7 @@ final class JayceeAbilityBar {
         return Component.translatable("jaycee.hud.default");
     }
 
-    /** "Preset 1 / 9" with its arrows. */
+    // "Preset 1 / 9" with its arrows
     private static void preset(GuiGraphicsExtractor g, AbilityData data, float y, float t) {
         int alpha = Math.round(t * 255) << 24;
         piece(g, "hud_preset", 45, y, 212, 34, t);

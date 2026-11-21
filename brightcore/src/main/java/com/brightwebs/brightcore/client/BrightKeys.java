@@ -14,11 +14,9 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
-/**
- * Four ability keys (Z, X, C, V by default) and a preset key (Y), all rebindable under
- * Controls > "Abilities". Hold Switch Mode (Left Alt) and press a skill key to switch that skill's mode. Pressing one only sends the
- * slot number; the server does the rest.
- */
+// four skill keys (Z X C V) and a preset key (Y), you can rebind them under Controls > Abilities
+// hold switch mode (left alt) and press a skill key to change that skill's mode
+// pressing one only sends the slot number, the server does the rest
 @EventBusSubscriber(modid = BrightCore.ID, value = Dist.CLIENT)
 public final class BrightKeys {
     public static final KeyMapping.Category CATEGORY = new KeyMapping.Category(BrightCore.id("abilities"));
@@ -27,9 +25,9 @@ public final class BrightKeys {
             InputConstants.KEY_Z, InputConstants.KEY_X, InputConstants.KEY_C, InputConstants.KEY_V};
 
     public static final KeyMapping[] ABILITY = new KeyMapping[AbilityData.SLOTS_PER_PAGE];
-    /** Held together with a skill key to switch that skill's mode, like Tensura: Reincarnated. */
+    // hold this with a skill key to change its mode, like tensura
     public static final KeyMapping MODE_SWITCH = new KeyMapping("key.brightcore.mode_switch", InputConstants.KEY_LALT, CATEGORY);
-    /** Uses your race's own ability (Tensura: Reincarnated's R). */
+    // your race's own ability, the R key from tensura
     public static final KeyMapping RACE_ABILITY = new KeyMapping("key.brightcore.race_ability", InputConstants.KEY_R, CATEGORY);
     private static boolean raceDown;
     public static final KeyMapping NEXT_PAGE = new KeyMapping("key.brightcore.next_page", InputConstants.KEY_Y, CATEGORY);
@@ -80,7 +78,7 @@ public final class BrightKeys {
         });
     }
 
-    /** Hold Switch Mode (Alt) and scroll: next / previous preset, instead of moving the hotbar. */
+    // hold alt and scroll to change presets instead of the hotbar
     @SubscribeEvent
     public static void onScroll(net.neoforged.neoforge.client.event.InputEvent.MouseScrollingEvent event) {
         com.brightwebs.brightcore.api.util.Safe.run("BrightKeys.onScroll", () -> {
@@ -95,7 +93,7 @@ public final class BrightKeys {
         });
     }
 
-    /** The key's current binding as a short label, e.g. "R". */
+    // what the key is bound to right now, like "R"
     public static String label(int slot) {
         return ABILITY[slot].getTranslatedKeyMessage().getString();
     }

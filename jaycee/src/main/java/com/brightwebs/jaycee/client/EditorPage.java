@@ -27,14 +27,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-/**
- * The Character Editor (side button 2), laid out to the approved design: a live 3D preview you can
- * drag to turn and scroll to zoom, the categories, a thumbnail gallery, the colour panel, quick
- * presets, and Reset / Randomize / Apply. Changes show at once in the preview; Apply sends them to
- * the server, which checks them against your race before everyone sees them.
- */
+// the character editor (side button 2), laid out like the design: live 3D preview you can drag
+// to turn and scroll to zoom, categories, the thumbnail gallery, color panel, quick presets,
+// and reset / randomize / apply. changes show right away in the preview, apply sends them to
+// the server and it checks them against your race before everyone sees them
 final class EditorPage extends Page {
-    // ---- layout (design pixels of the 1536 x 1024 frame) ----
+    // layout, design pixels of the 1536 x 1024 frame
     private static final float PV_X1 = 100, PV_Y1 = 286, PV_X2 = 430, PV_Y2 = 878;
     private static final float CAT_X = 446, CAT_Y = 292, CAT_W = 170, CAT_H = 52, CAT_STEP = 62;
     private static final float GAL_X = 630, GAL_Y = 286, TILE_W = 82, TILE_H = 84, TILE_X0 = 648, TILE_Y0 = 372, TILE_SX = 88, TILE_SY = 92;
@@ -62,7 +60,7 @@ final class EditorPage extends Page {
     @Override String background() { return "bg_editor"; }
     @Override boolean showsPlayer() { return false; }
 
-    // ---- state helpers ---------------------------------------------------------------
+    // state helpers
     private String race() { return player() == null ? "human" : Appearance.raceId(player()); }
 
     private void syncFromPlayer() {
@@ -170,9 +168,9 @@ final class EditorPage extends Page {
         while (recent.size() > 7) recent.remove(recent.size() - 1);
     }
 
-    // ---- drawing -------------------------------------------------------------------------
+    // drawing
 
-    /** The live preview is drawn in screen space, before the scaled page content. */
+    // the live preview gets drawn in screen space, before the scaled page stuff
     @Override
     void drawScreen(GuiGraphicsExtractor g, int mx, int my) {
         syncFromPlayer();
@@ -330,7 +328,7 @@ final class EditorPage extends Page {
         UI.fill(g, 1086, 372, 1090, 640, 0x60346080);
         float barH = 268f / pages;
         UI.fill(g, 1085, 372 + pageNo * barH, 1091, 372 + (pageNo + 1) * barH, 0xFF52D6FF);
-        // pager
+        // pages
         button(g, mx, my, 790, 652, 44, 32, false, null, Component.literal("‹"));
         button(g, mx, my, 894, 652, 44, 32, false, null, Component.literal("›"));
         UI.text(g, (pageNo + 1) + " / " + pages, 864, 668, 17, 0xFFFFFFFF, 1);
@@ -365,7 +363,7 @@ final class EditorPage extends Page {
         boolean hair = grp.equals("hair");
         UI.text(g, Component.translatable("jaycee.editor.color"), 1132, 308, 21, 0xFFFFFFFF, 0);
         UI.semi(g, Component.translatable("jaycee.editor.color_of", Component.translatable("jaycee.editor.group." + grp)), CP_X, 334, 15, 0xFFE6F4FF, 0);
-        // primary: saturation/value square + hue bar
+        // main color: saturation/value square + hue bar
         int c1 = colorOf(1);
         float[] hsv = hsv(c1);
         if (hsv[1] > 0.05f && hsv[2] > 0.05f) hue[1] = hsv[0];
@@ -379,7 +377,7 @@ final class EditorPage extends Page {
         float kx = CP_X + hsv[1] * (SQ_X2 - CP_X), ky = SQ_Y1 + (1 - hsv[2]) * (SQ_Y2 - SQ_Y1);
         UI.rect(g, kx - 5, ky - 5, kx + 5, ky + 5, 2, 0xFFFFFFFF);
         hueBar(g, SQ_Y1, SQ_Y2, hue[1]);
-        // recent colours
+        // recent colors
         UI.semi(g, Component.translatable("jaycee.editor.recent"), CP_X, 452, 14, 0xFFCFE8F5, 0);
         for (int i = 0; i < 7; i++) {
             float x = CP_X + i * 30;
@@ -390,7 +388,7 @@ final class EditorPage extends Page {
         boolean plusHover = in(mx, my, CP_X + 214, 464, CP_X + 240, 486);
         UI.rect(g, CP_X + 214, 464, CP_X + 240, 486, 2, plusHover ? 0xFF9AF4FF : 0xFF4FE3FF);
         UI.text(g, "+", CP_X + 227, 475, 18, 0xFFFFFFFF, 1);
-        // row 2: highlights (hair) or secondary
+        // row 2: highlights for hair, secondary for everything else
         UI.semi(g, Component.translatable(hair ? "jaycee.editor.highlights" : "jaycee.editor.secondary"), CP_X, 510, 15, 0xFFE6F4FF, 0);
         if (hair) toggle(g, 1372, 500, "1".equals(edit.get("hair.hl")));
         strip(g, 2, ST2_Y1, ST2_Y2);
@@ -399,7 +397,7 @@ final class EditorPage extends Page {
             toggle(g, 1372, 568, "1".equals(edit.get("hair.tip")));
             strip(g, 3, ST3_Y1, ST3_Y2);
         }
-        // swatch presets
+        // swatches
         for (int i = 0; i < SWATCHES.length; i++) {
             float x = CP_X + i * 32;
             UI.fill(g, x, 636, x + 28, 656, 0xFF000000 | Integer.parseInt(SWATCHES[i], 16));
@@ -432,7 +430,7 @@ final class EditorPage extends Page {
         UI.rect(g, HUE_X1 - 2, ky - 2, HUE_X2 + 2, ky + 2, 1, 0xFFFFFFFF);
     }
 
-    /** A colour strip: shades of its hue from deep to pale, with a hue bar beside it. */
+    // color strip: shades of its hue from dark to pale, with a hue bar next to it
     private void strip(GuiGraphicsExtractor g, int r, float y1, float y2) {
         int c = colorOf(r);
         float[] hsv = hsv(c);
@@ -449,7 +447,7 @@ final class EditorPage extends Page {
         hueBar(g, y1, y2, hue[r]);
     }
 
-    /** t 0..0.5: dark -> full colour; 0.5..1: full colour -> pale. */
+    // t 0..0.5 goes dark to full color, 0.5..1 goes full color to pale
     private static int shadeAt(float h, float t) {
         return t < 0.5f ? hsvToRgb(h, 0.9f, 0.15f + t * 1.7f) : hsvToRgb(h, 0.9f - (t - 0.5f) * 1.6f, 1);
     }
@@ -499,7 +497,7 @@ final class EditorPage extends Page {
         UI.text(g, Component.translatable("jaycee.editor.apply"), 1206, 906, 18, dirty ? 0xFFFFFFFF : 0xFFB8D8C8, 1);
     }
 
-    // ---- input -----------------------------------------------------------------------
+    // input
 
     @Override
     boolean click(double mx, double my, int button) {
@@ -518,7 +516,7 @@ final class EditorPage extends Page {
         }
         if (in(mx, my, 1018, 228, 1214, 264)) { savePreset(); return true; }
         if (in(mx, my, 1224, 228, 1428, 264)) { showSaved = !showSaved; return true; }
-        // preview controls
+        // preview buttons
         if (in(mx, my, 376, 672, 412, 708)) { zoom = Math.min(2.2f, zoom + 0.15f); return true; }
         if (in(mx, my, 376, 716, 412, 752)) { zoom = Math.max(0.5f, zoom - 0.15f); return true; }
         for (int i = 0; i < 3; i++) {
@@ -561,7 +559,7 @@ final class EditorPage extends Page {
             if (in(mx, my, 790, 652, 834, 684)) { pageNo = (pageNo + pages - 1) % pages; return true; }
             if (in(mx, my, 894, 652, 938, 684)) { pageNo = (pageNo + 1) % pages; return true; }
         }
-        // colour panel
+        // color panel
         if (in(mx, my, CP_X, SQ_Y1, SQ_X2, SQ_Y2) || in(mx, my, HUE_X1 - 2, SQ_Y1, HUE_X2 + 2, SQ_Y2)
                 || in(mx, my, CP_X, ST2_Y1, HUE_X2 + 2, ST2_Y2) || in(mx, my, CP_X, ST3_Y1, HUE_X2 + 2, ST3_Y2)) {
             pickColor(mx, my, true);
@@ -585,7 +583,7 @@ final class EditorPage extends Page {
             float x = 700 + i * 96;
             if (in(mx, my, x, 770, x + 84, 854)) { row = 1; setColor(1, Integer.parseInt(PALETTE[i], 16)); remember(colorOf(1)); return true; }
         }
-        // bottom
+        // bottom buttons
         if (in(mx, my, 440, 886, 650, 926)) { change(() -> { edit.clear(); edit.putAll(applied); }); return true; }
         if (in(mx, my, 710, 886, 960, 926)) { randomize(); return true; }
         if (in(mx, my, 1040, 886, 1340, 926)) {
@@ -678,7 +676,7 @@ final class EditorPage extends Page {
         });
     }
 
-    // ---- saved presets (appearance only, on this computer) ----
+    // saved presets (just the look, saved on this computer)
     private Path presetFile() { return Minecraft.getInstance().gameDirectory.toPath().resolve("jaycee_looks.json"); }
 
     private List<Map<String, String>> saved() {
@@ -703,7 +701,7 @@ final class EditorPage extends Page {
         if (player() != null) player().sendOverlayMessage(Component.translatable("jaycee.editor.saved_msg"));
     }
 
-    // ---- colour maths ----
+    // color math
     private static float clamp(float v) { return Math.max(0, Math.min(1, v)); }
 
     static int hsvToRgb(float h, float s, float v) {

@@ -3,7 +3,7 @@ package com.brightwebs.jaycee.client;
 import java.util.HashMap;
 import java.util.Map;
 
-/** Pixel sizes of the mod's GUI textures (generated). Paths are relative to textures/gui/. */
+// pixel sizes of our GUI textures (generated, don't edit by hand). paths are from textures/gui/
 final class TexSizes {
     static final Map<String, int[]> S = new HashMap<>();
     static {

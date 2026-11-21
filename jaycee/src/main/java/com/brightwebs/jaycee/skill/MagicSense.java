@@ -22,11 +22,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-/**
- * Magic Sense, as in Tensura: press to toggle. While on it costs 5 magicules a second and grants
- * Presence Sense: living things nearby glow through walls, but only for you. Mastered, the sense
- * reaches twice as far.
- */
+// magic sense like tensura: press to toggle. while it's on it costs 5 magicules a second and gives
+// presence sense: living stuff nearby glows through walls, but only for you. mastered it reaches twice as far
 final class MagicSense {
     static final double COST_PER_SECOND = 5, PRESENCE = 0.5, PRESENCE_MASTERED = 1.0;
     private static final Map<UUID, Set<Integer>> SHOWN = new HashMap<>();
@@ -60,9 +57,13 @@ final class MagicSense {
         if (p.tickCount % 10 == 0) Safe.run("MagicSense.glow", () -> glow(p, a));
     }
 
-    /** Sends the glowing flag for nearby creatures to this one player only. */
+    // sends the glowing flag for nearby mobs to just this one player
     private static void glow(ServerPlayer p, Ability a) {
-        double radius = 16 * (Tk.mastered(p, a) ? PRESENCE_MASTERED : PRESENCE) * 2;
+        glowAround(p, 16 * (Tk.mastered(p, a) ? PRESENCE_MASTERED : PRESENCE) * 2);
+    }
+
+    // the other senses (heat source, universal perception) use this too, just with their own range
+    static void glowAround(ServerPlayer p, double radius) {
         ServerLevel level = (ServerLevel) p.level();
         List<LivingEntity> near = level.getEntitiesOfClass(LivingEntity.class, p.getBoundingBox().inflate(radius), e -> e != p && e.isAlive());
         Set<Integer> now = new HashSet<>();
@@ -82,6 +83,12 @@ final class MagicSense {
             EntityDataAccessor<Byte> acc = flags();
             p.connection.send(new ClientboundSetEntityDataPacket(e.getId(), List.of(SynchedEntityData.DataValue.create(acc, e.getEntityData().get(acc)))));
         });
+    }
+
+    // turns the glow back off for everything this player was seeing
+    static void clear(ServerPlayer p) {
+        Set<Integer> shown = SHOWN.remove(p.getUUID());
+        if (shown != null) for (int id : shown) restore(p, ((ServerLevel) p.level()).getEntity(id));
     }
 
     static void toggled(ServerPlayer p, boolean on) {

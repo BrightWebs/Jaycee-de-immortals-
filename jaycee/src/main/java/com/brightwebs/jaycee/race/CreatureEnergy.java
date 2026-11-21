@@ -6,11 +6,9 @@ import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 
-/**
- * Starting Aura and Mana for creatures that would be undervalued by the default
- * (max health x 40 Aura, x 10 Mana): bosses, and creatures known for magic.
- * A fresh player starts around 1,000 EP; a zombie is about the same.
- */
+// starting aura and mana for mobs the default would undersell
+// (default is max health x 40 aura, x 10 mana): bosses and magic mobs
+// a new player starts around 1,000 EP, a zombie is about the same
 public final class CreatureEnergy {
     private CreatureEnergy() {}
 

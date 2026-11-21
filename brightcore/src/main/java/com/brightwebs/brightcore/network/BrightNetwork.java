@@ -19,15 +19,13 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
-/**
- * Client-to-server packets. The client only ever sends intentions; the server checks everything.
- * Server-to-client syncing needs no packets: the data attachment syncs itself.
- */
+// client to server packets. the client only says what it wants, the server checks everything
+// server to client doesn't need packets, the attachments sync themselves
 @EventBusSubscriber(modid = BrightCore.ID)
 public final class BrightNetwork {
     private BrightNetwork() {}
 
-    /** "I pressed ability key N" (0-4). */
+    // "i pressed skill key N" (0-4)
     public record ActivateSlot(int slot) implements CustomPacketPayload {
         public static final Type<ActivateSlot> TYPE = new Type<>(BrightCore.id("activate_slot"));
         public static final StreamCodec<ByteBuf, ActivateSlot> CODEC =
@@ -35,7 +33,7 @@ public final class BrightNetwork {
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     }
 
-    /** "Show page N of my ability bar" (0-9). */
+    // "show page N of my bar" (0-9)
     public record SetPage(int page) implements CustomPacketPayload {
         public static final Type<SetPage> TYPE = new Type<>(BrightCore.id("set_page"));
         public static final StreamCodec<ByteBuf, SetPage> CODEC =
@@ -43,7 +41,7 @@ public final class BrightNetwork {
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     }
 
-    /** "Put this ability in slot index N (0-49)". An empty id clears the slot. */
+    // "put this skill in slot N" (0-49). empty id clears it
     public record AssignSlot(int index, String ability) implements CustomPacketPayload {
         public static final Type<AssignSlot> TYPE = new Type<>(BrightCore.id("assign_slot"));
         public static final StreamCodec<ByteBuf, AssignSlot> CODEC = StreamCodec.composite(
@@ -53,7 +51,7 @@ public final class BrightNetwork {
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     }
 
-    /** "Switch the skill in slot N to its next mode" (Shift + ability key). */
+    // "next mode for the skill in slot N" (alt + skill key)
     public record CycleMode(int slot) implements CustomPacketPayload {
         public static final Type<CycleMode> TYPE = new Type<>(BrightCore.id("cycle_mode"));
         public static final StreamCodec<ByteBuf, CycleMode> CODEC =
@@ -61,7 +59,7 @@ public final class BrightNetwork {
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     }
 
-    /** "Set this skill to mode N" (menu). */
+    // "set this skill to mode N" (menu)
     public record SetMode(String ability, int mode) implements CustomPacketPayload {
         public static final Type<SetMode> TYPE = new Type<>(BrightCore.id("set_mode"));
         public static final StreamCodec<ByteBuf, SetMode> CODEC = StreamCodec.composite(
@@ -69,8 +67,8 @@ public final class BrightNetwork {
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     }
 
-    /** "I choose this race" from the first-join menu. "random" picks one of the starting races. */
-    /** The skill menu's on/off switch. */
+    // "i pick this race" from the first join menu. "random" picks a starting race
+    // the on/off switch in the skill menu
     public record FlipSwitch(String ability) implements CustomPacketPayload {
         public static final Type<FlipSwitch> TYPE = new Type<>(BrightCore.id("flip_switch"));
         public static final StreamCodec<ByteBuf, FlipSwitch> CODEC =
@@ -78,7 +76,7 @@ public final class BrightNetwork {
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     }
 
-    /** The Race Ability key (R) went down or up. */
+    // race key (R) went down or up
     public record RaceKey(boolean down) implements CustomPacketPayload {
         public static final Type<RaceKey> TYPE = new Type<>(BrightCore.id("race_key"));
         public static final StreamCodec<ByteBuf, RaceKey> CODEC =
@@ -86,7 +84,7 @@ public final class BrightNetwork {
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     }
 
-    /** A slot key was let go (ends held skills). */
+    // a slot key was let go (ends held skills)
     public record ReleaseSlot(int slot) implements CustomPacketPayload {
         public static final Type<ReleaseSlot> TYPE = new Type<>(BrightCore.id("release_slot"));
         public static final StreamCodec<ByteBuf, ReleaseSlot> CODEC =
@@ -101,7 +99,7 @@ public final class BrightNetwork {
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     }
 
-    /** "Evolve me into this race." The server checks every requirement. */
+    // "evolve me into this". server checks all the requirements
     public record Evolve(String target) implements CustomPacketPayload {
         public static final Type<Evolve> TYPE = new Type<>(BrightCore.id("evolve"));
         public static final StreamCodec<ByteBuf, Evolve> CODEC =
@@ -111,7 +109,7 @@ public final class BrightNetwork {
 
     @SubscribeEvent
     public static void register(RegisterPayloadHandlersEvent event) {
-        // Bump this whenever a packet's format changes.
+        // bump this whenever a packet changes
         PayloadRegistrar registrar = event.registrar("7");
         registrar.playToServer(ActivateSlot.TYPE, ActivateSlot.CODEC, BrightNetwork::onActivate);
         registrar.playToServer(ReleaseSlot.TYPE, ReleaseSlot.CODEC, (payload, context) -> com.brightwebs.brightcore.api.util.Safe.run("BrightNetwork.release", () -> {

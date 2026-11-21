@@ -10,13 +10,10 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 
-/**
- * The Existence System (B). One fixed frame: the artwork is 1536 x 1024 design pixels with the
- * side bar just outside its right edge, scaled to sit comfortably on screen with the game still
- * visible around it. The portrait, tabs and side bar never move; only the content changes.
- * Every page sits in the same Status frame with the tabs. B always opens on Status; Esc returns to Status,
- * and closes the menu from Status.
- */
+// the existence system (B). one frame, 1536 x 1024 design pixels with the side bar just past
+// the right edge, scaled so it fits with the game still showing around it. the portrait, tabs
+// and side bar stay put, only the content changes. every page uses the same status frame with
+// the tabs. B always opens on status, esc goes back to status, and esc on status closes it
 public class MenuScreen extends Screen {
     static final int W = 1630, H = 1024;
     static final int[][] TABS = {{116, 128, 454, 200}, {466, 128, 780, 200}, {794, 128, 1118, 200}, {1132, 128, 1452, 200}};
@@ -40,7 +37,7 @@ public class MenuScreen extends Screen {
         pages.put(Id.TITLES, new TitlesPage(this));
         pages.put(Id.BONDS, new BondsPage(this));
         pages.put(Id.EDITOR, new EditorPage(this));
-        page = Id.STATUS; // B always opens on Status
+        page = Id.STATUS;  // B always opens on status
     }
 
     LocalPlayer player() { return Minecraft.getInstance().player; }
@@ -57,19 +54,20 @@ public class MenuScreen extends Screen {
 
     @Override
     protected void init() {
-        // Fit the frame to ~88% of the screen height (and never wider than 94% of the width).
-        k = Math.min(width * 0.74f / W, height * 0.70f / H); // about 3/4 of the old size
+        // fixed size in gui pixels like tensura's menus, so it follows your GUI scale setting.
+        // only shrinks more if the window is too small to fit it
+        k = Math.min(0.30f, Math.min(width * 0.94f / W, height * 0.92f / H));
         left = Math.round((width - W * k) / 2);
         top = Math.round((height - H * k) / 2);
     }
 
-    /** Screen -> frame design pixels. */
+    // screen -> frame design pixels
     double fx(double sx) { return (sx - left) / k; }
     double fy(double sy) { return (sy - top) / k; }
     int sx(double fx) { return Math.round(left + (float) fx * k); }
     int sy(double fy) { return Math.round(top + (float) fy * k); }
 
-    /** No blur or dimming: the game stays visible behind and around the menu. */
+    // no blur or dark overlay, you can still see the game behind it
     @Override
     public void extractBackground(GuiGraphicsExtractor g, int mx, int my, float dt) {}
 
@@ -90,7 +88,7 @@ public class MenuScreen extends Screen {
     
             pg.drawScreen(g, mx, my);
             if (pg.showsPlayer()) {
-                // Your own skin, armour and look, turning to follow the cursor.
+                // your own skin, armor and all, turning to follow the mouse
                 InventoryScreen.extractEntityInInventoryFollowsMouse(g, sx(140), sy(270), sx(420), sy(752),
                         Math.max(8, Math.round(205 * k)), 0.0625f, mx, my, p);
             }
@@ -133,7 +131,7 @@ public class MenuScreen extends Screen {
         }
     }
 
-    // ---- input --------------------------------------------------------------------
+    // input
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
@@ -141,7 +139,7 @@ public class MenuScreen extends Screen {
             double x = fx(event.x()), y = fy(event.y());
             int b = UI.button(event);
             Page pg = pages.get(page);
-            if (b == 0) { // the tabs work from every page
+            if (b == 0) {  // the tabs work on every page
                 for (int i = 0; i < TABS.length; i++) {
                     if (Page.in(x, y, TABS[i][0], TABS[i][1], TABS[i][2], TABS[i][3])) { open(Id.values()[i]); click(); return true; }
                 }
@@ -206,10 +204,9 @@ public class MenuScreen extends Screen {
         }, false);
     }
 
-    /** Esc: step back toward Status; close from Status. */
+    // esc: back to status, or close if you're already on status
     @Override
     public void onClose() {
-        // Esc: any page goes back to Status; Status closes the menu
         if (page == Id.STATUS) super.onClose(); else page = Id.STATUS;
     }
 

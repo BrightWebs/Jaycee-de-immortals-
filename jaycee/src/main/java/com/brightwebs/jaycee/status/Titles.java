@@ -24,13 +24,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-/**
- * Titles: earned by what you do, equipped one at a time from the Titles page, each with its
- * own passive effect. An equipped title shows above your name when "Display Title Publicly" is on.
- */
+// titles: you earn them by doing stuff, wear one at a time from the titles page, each has its own
+// passive. the one you wear shows above your name when "display title publicly" is on
 @EventBusSubscriber(modid = JayceeMod.ID)
 public final class Titles {
-    /** One passive effect: a display line and, optionally, an attribute bonus. */
+    // one passive: a line to show and maybe an attribute bonus
     public record Effect(String label, String value, Holder<Attribute> attribute, double amount, AttributeModifier.Operation op) {}
     public record Title(String id, String rank, int emblem, List<Effect> effects, Predicate<ServerPlayer> unlock) {}
 
@@ -88,7 +86,7 @@ public final class Titles {
         p.refreshDisplayName();
     }
 
-    /** Applies the equipped title's attribute effects (and clears the old ones). */
+    // applies the equipped title's attribute stuff (and clears the old ones)
     public static void apply(Player p) {
         for (Holder<Attribute> a : List.of(Attributes.ATTACK_DAMAGE, Attributes.MAX_HEALTH, Attributes.ARMOR, Attributes.MOVEMENT_SPEED)) {
             AttributeInstance i = p.getAttribute(a);
@@ -115,7 +113,7 @@ public final class Titles {
         });
     }
 
-    /** "[Title] Name" above the head and in chat while the title is public. */
+    // "[Title] Name" above your head and in chat while the title is public
     @SubscribeEvent
     public static void onName(PlayerEvent.NameFormat event) {
         com.brightwebs.brightcore.api.util.Safe.run("Titles.onName", () -> {

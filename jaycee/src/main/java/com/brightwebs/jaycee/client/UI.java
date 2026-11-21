@@ -16,27 +16,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * Drawing helpers for the Existence System menus. All coordinates are in "design pixels" (the
- * pixels of the approved artwork); the caller sets up the pose so they map onto the screen.
- * Text uses the bundled Inter font so it reads the same as the designs at any GUI scale.
- */
+// drawing helpers for the menus. coords are "design pixels" (the pixels of the mockup art),
+// the caller sets up the pose so they land right on screen
+// text uses the Inter font we ship so it looks like the designs at any GUI scale
 public final class UI {
     public static final FontDescription BOLD = new FontDescription.Resource(Identifier.fromNamespaceAndPath(JayceeMod.ID, "inter"));
     public static final FontDescription SEMI = new FontDescription.Resource(Identifier.fromNamespaceAndPath(JayceeMod.ID, "inter_semibold"));
-    /** The TTF font's nominal size in GUI pixels (font/inter.json). */
+    // the TTF font's base size in GUI pixels (font/inter.json)
     private static final float FONT_PX = 11f;
-    /** Where the middle of capital letters sits below the draw y, in font pixels. Tuned for Inter. */
+    // how far below y the middle of capital letters sits, in font pixels. tuned for Inter
     public static float capMiddle = 4.0f;
 
     private UI() {}
 
     static Font font() { return Minecraft.getInstance().font; }
 
-    /**
-     * 26.3 reads the mouse through SDL, which numbers buttons 1 = left, 2 = middle, 3 = right.
-     * Menus use 0 = left, 1 = right, 2 = middle.
-     */
+    // 26.3 reads the mouse through SDL, which numbers buttons 1 = left, 2 = middle, 3 = right
+    // our menus use 0 = left, 1 = right, 2 = middle
     public static int button(net.minecraft.client.input.MouseButtonEvent event) {
         return switch (event.button()) {
             case 1 -> 0;
@@ -47,7 +43,7 @@ public final class UI {
     }
 
     public static Identifier gui(String name) {
-        // Resource paths may not contain "..", so "../race/x" means textures/race/x.
+        // resource paths can't have "..", so "../race/x" means textures/race/x
         String path = name.startsWith("../") ? "textures/" + name.substring(3) : "textures/gui/" + name;
         return Identifier.fromNamespaceAndPath(JayceeMod.ID, path + ".png");
     }
@@ -57,13 +53,13 @@ public final class UI {
         return s == null ? new int[]{16, 16} : s;
     }
 
-    /** Draws a GUI texture (path under textures/gui/) at its own size. */
+    // draws a GUI texture (path under textures/gui/) at its own size
     public static void tex(GuiGraphicsExtractor g, String name, float x, float y) {
         int[] s = size(name);
         tex(g, name, x, y, s[0], s[1]);
     }
 
-    /** Draws a whole texture stretched to w x h. */
+    // draws a whole texture stretched to w x h
     public static void tex(GuiGraphicsExtractor g, String name, float x, float y, float w, float h) {
         int[] s = size(name);
         g.pose().pushMatrix();
@@ -73,7 +69,7 @@ public final class UI {
         g.pose().popMatrix();
     }
 
-    /** Draws a texture tinted/faded by an ARGB color. */
+    // draws a texture tinted or faded by an ARGB color
     public static void tex(GuiGraphicsExtractor g, String name, float x, float y, float w, float h, int argb) {
         int[] s = size(name);
         g.pose().pushMatrix();
@@ -83,7 +79,7 @@ public final class UI {
         g.pose().popMatrix();
     }
 
-    /** Draws the left part of a texture (fraction 0..1 of its width), e.g. a bar fill. */
+    // draws the left part of a texture (0..1 of its width), like a bar fill
     public static void texPart(GuiGraphicsExtractor g, String name, float x, float y, float w, float h, double frac) {
         int[] s = size(name);
         int pw = (int) Math.round(s[0] * Math.max(0, Math.min(1, frac)));
@@ -95,7 +91,7 @@ public final class UI {
         g.pose().popMatrix();
     }
 
-    /** Any texture by full resource location, stretched to w x h. */
+    // any texture by full path, stretched to w x h
     public static void image(GuiGraphicsExtractor g, Identifier id, int texW, int texH, float x, float y, float w, float h, int argb) {
         g.pose().pushMatrix();
         g.pose().translate(x, y);
@@ -104,7 +100,7 @@ public final class UI {
         g.pose().popMatrix();
     }
 
-    // ---- icons -----------------------------------------------------------------------
+    // icons
 
     public static void abilityIcon(GuiGraphicsExtractor g, Ability a, float cx, float cy, float size) {
         String p = "../ability/" + a.id().getPath();
@@ -118,7 +114,7 @@ public final class UI {
         tex(g, p, cx - size / 2, cy - size / 2, size, size);
     }
 
-    // ---- fills ---------------------------------------------------------------------
+    // fills
 
     public static void fill(GuiGraphicsExtractor g, float x1, float y1, float x2, float y2, int argb) {
         g.fill(Math.round(x1), Math.round(y1), Math.round(x2), Math.round(y2), argb);
@@ -129,7 +125,7 @@ public final class UI {
         fill(g, x1, y1, x1 + t, y2, argb); fill(g, x2 - t, y1, x2, y2, argb);
     }
 
-    /** A rounded progress bar: dark track and a two-color gradient fill. */
+    // rounded progress bar: dark track with a two color fill
     public static void bar(GuiGraphicsExtractor g, float x, float y, float w, float h, double frac, int c1, int c2) {
         fill(g, x, y, x + w, y + h, 0xFF081422);
         rect(g, x, y, x + w, y + h, 1, 0xFF2A5068);
@@ -150,7 +146,7 @@ public final class UI {
         return 0xFF000000 | (r << 16) | (gg << 8) | bb;
     }
 
-    // ---- text ------------------------------------------------------------------------
+    // text
 
     public static MutableComponent styled(Component c, boolean bold) {
         return c.copy().withStyle(st -> st.withFont(bold ? BOLD : SEMI));
@@ -160,14 +156,14 @@ public final class UI {
         return styled(Component.literal(s), bold);
     }
 
-    /** Width in design pixels of text at a given size. */
+    // how wide text is in design pixels at this size
     public static float width(Component c, float size, boolean bold) {
         return font().width(styled(c, bold)) * size / FONT_PX;
     }
 
     public static float width(String s, float size, boolean bold) { return width(Component.literal(s), size, bold); }
 
-    /** Text with its capital letters vertically centred on y. align: 0 left, 1 centre, 2 right. */
+    // text with capital letters centered on y. align: 0 left, 1 center, 2 right
     public static void text(GuiGraphicsExtractor g, Component c, float x, float y, float size, int color, int align, boolean bold, boolean shadow) {
         MutableComponent s = styled(c, bold);
         float k = size / FONT_PX;
@@ -197,14 +193,14 @@ public final class UI {
         text(g, c, x, y, size, color, align, false, true);
     }
 
-    /** Cuts text to fit, adding an ellipsis. */
+    // cuts text to fit and adds ...
     public static String fit(String s, float size, float max, boolean bold) {
         if (width(s, size, bold) <= max) return s;
         while (s.length() > 1 && width(s + "…", size, bold) > max) s = s.substring(0, s.length() - 1);
         return s + "…";
     }
 
-    /** Wraps text into lines no wider than max (design pixels). */
+    // wraps text into lines no wider than max
     public static List<String> wrap(String s, float size, float max, boolean bold) {
         List<String> out = new ArrayList<>();
         for (String para : s.split("\n")) {
@@ -219,7 +215,7 @@ public final class UI {
         return out;
     }
 
-    /** Text auto-sized down (from size to min) so it fits max width. */
+    // shrinks text (from size down to min) until it fits max width
     public static float fitSize(String s, float size, float min, float max, boolean bold) {
         while (size > min && width(s, size, bold) > max) size -= 0.5f;
         return size;
@@ -227,7 +223,7 @@ public final class UI {
 
     public static String num(double v) { return String.format(Locale.US, "%,d", (long) Math.floor(v)); }
 
-    /** Short form for big numbers: 2.15 B, 47.3 T. */
+    // short form for big numbers: 2.15 B, 47.3 T
     public static String shortNum(double v) {
         String[] suf = {"", "K", "M", "B", "T", "Q"};
         int i = 0;

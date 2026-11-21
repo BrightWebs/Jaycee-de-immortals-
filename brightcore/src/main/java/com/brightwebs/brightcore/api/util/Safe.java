@@ -7,10 +7,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-/**
- * Crash guard. Menus, the skill bar, skill activation and per-tick systems run inside this, so a
- * bug in one of them is written to the log (once per place) and skipped instead of closing the game.
- */
+// crash guard. menus, the skill bar, using skills and tick stuff run in here,
+// so if something breaks it gets logged once and skipped instead of crashing the game
 public final class Safe {
     private static final Logger LOG = LogUtils.getLogger();
     private static final Set<String> REPORTED = ConcurrentHashMap.newKeySet();
@@ -35,7 +33,7 @@ public final class Safe {
     }
 
     private static void report(String where, Throwable t) {
-        if (t instanceof VirtualMachineError e) throw e; // out of memory and the like can't be skipped
+        if (t instanceof VirtualMachineError e) throw e;  // out of memory and stuff like that can't be skipped
         if (REPORTED.add(where + "|" + t)) {
             LOG.error("[BrightCore] {} failed and was skipped so the game keeps running", where, t);
         }

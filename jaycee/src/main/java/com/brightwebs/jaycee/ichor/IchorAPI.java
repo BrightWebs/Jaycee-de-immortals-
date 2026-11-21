@@ -13,7 +13,7 @@ import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 import java.util.function.Supplier;
 
-/** Everything that reads or changes a player's Ichor goes through here. */
+// anything that reads or changes a player's ichor goes through here
 public final class IchorAPI {
     private static final DeferredRegister<AttachmentType<?>> ATTACHMENTS =
             DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, JayceeMod.ID);
@@ -44,14 +44,14 @@ public final class IchorAPI {
         set(player, (int) Math.max(0, Math.min(Grade.MAX_ICHOR, next)));
     }
 
-    /** First join: draw the Birthright, set starting Ichor, and show the card. */
+    // first join: draw the birthright, set starting ichor, show the card
     public static void drawBirthright(ServerPlayer player) {
         Birthright b = Birthright.draw(player.getRandom());
         player.setData(ICHOR, get(player).withBirthright(b).withIchor(b.rollIchor(player.getRandom())));
         reveal(player, b);
     }
 
-    /** Shows the Birthright as a title card and a chat line. */
+    // shows the birthright as a title card and a chat line
     public static void reveal(ServerPlayer player, Birthright b) {
         String key = "jaycee.birthright." + b.getSerializedName();
         player.connection.send(new ClientboundSetTitleTextPacket(Component.translatable(key)));
@@ -59,7 +59,7 @@ public final class IchorAPI {
         player.sendSystemMessage(Component.translatable(key + ".chat"));
     }
 
-    /** Praying at a temple: the gods tell you your Ichor, and the menu remembers it. */
+    // praying at a temple: the gods tell you your ichor and the menu remembers it
     public static void pray(ServerPlayer player) {
         IchorData data = get(player);
         player.setData(ICHOR, data.withRevealed(data.ichor()));

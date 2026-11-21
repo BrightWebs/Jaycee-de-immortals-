@@ -31,13 +31,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 
-/** Status extras: titles, souls, rank (read from EP) and progress counters used to unlock things. */
+// status extras: titles, souls, rank (from EP) and progress counters for unlocking stuff
 @EventBusSubscriber(modid = JayceeMod.ID)
 public final class StatusData {
     private static final DeferredRegister<AttachmentType<?>> ATTACHMENTS =
             DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, JayceeMod.ID);
 
-    /** The equipped title's id ("" for none). Synced to everyone so it can show above the name. */
+    // the equipped title's id ("" for none). synced to everyone so it can show above the name
     public static final Supplier<AttachmentType<String>> TITLE = ATTACHMENTS.register("equipped_title",
             () -> AttachmentType.builder(() -> "").serialize(Codec.STRING.fieldOf("title")).copyOnDeath()
                     .sync(ByteBufCodecs.STRING_UTF8).build());
@@ -50,7 +50,7 @@ public final class StatusData {
     public static final Supplier<AttachmentType<Integer>> SOULS = ATTACHMENTS.register("souls",
             () -> AttachmentType.builder(() -> 0).serialize(Codec.INT.fieldOf("souls")).copyOnDeath()
                     .sync((holder, to) -> holder == to, ByteBufCodecs.VAR_INT).build());
-    /** Progress counters (mana spent, damage endured, monsters killed...). Server only. */
+    // progress counters (mana spent, damage taken, monsters killed...)
     public static final Supplier<AttachmentType<Map<String, Double>>> COUNTERS = ATTACHMENTS.register("counters",
             () -> AttachmentType.<Map<String, Double>>builder(() -> Map.of())
                     .serialize(Codec.unboundedMap(Codec.STRING, Codec.DOUBLE).fieldOf("counters")).copyOnDeath()
@@ -75,7 +75,7 @@ public final class StatusData {
         return v;
     }
 
-    /** Ranks need a Guild Card; until the guild exists the rank row stays hidden. */
+    // ranks need a guild card. until the guild exists the rank row stays hidden
     public static boolean hasGuildCard(Player p) { return false; }
 
     private static final double[] RANK_EP = {0, 1_000, 5_000, 20_000, 60_000, 150_000, 400_000, 1_000_000, 5_000_000};
@@ -100,9 +100,13 @@ public final class StatusData {
             if (!(event.getSource().getEntity() instanceof ServerPlayer killer) || killer == event.getEntity()) return;
             DemonLord.onKill(killer, event.getEntity());
             if (event.getEntity() instanceof Enemy) addCounter(killer, "monsters_killed", 1);
+            if (hasSoul(event.getEntity())) addCounter(killer, "human_kills", 1);
             String type = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(event.getEntity().getType()).getPath();
             if (type.contains("slime")) addCounter(killer, "slimes_killed", 1);
-            if (type.equals("elder_guardian")) addCounter(killer, "sea_boss_killed", 1); // Tensura: Charybdis
+            if (type.equals("cave_spider")) addCounter(killer, "cave_spiders_killed", 1);
+            if (type.equals("spider") || type.equals("cave_spider")) addCounter(killer, "spiders_killed", 1);
+            if (type.equals("magma_cube")) addCounter(killer, "magma_cubes_killed", 1);
+            if (type.equals("elder_guardian")) addCounter(killer, "sea_boss_killed", 1);  // tensura: charybdis
             if (type.equals("wither") || type.equals("ender_dragon") || type.equals("elder_guardian") || type.equals("warden")) addCounter(killer, "bosses_killed", 1);
             if (type.equals("warden")) addCounter(killer, "warden_killed", 1);
         });
@@ -129,16 +133,7 @@ public final class StatusData {
                             p.setData(TITLES, List.of());
                             c.getSource().sendSuccess(() -> Component.translatable("jaycee.command.title.clear", p.getDisplayName()), true);
                             return 1;
-                        }))))
-                .then(Commands.literal("souls")
-                        .then(Commands.literal("add").then(Commands.argument("player", EntityArgument.player())
-                                .then(Commands.argument("amount", IntegerArgumentType.integer()).executes(c -> {
-                                    ServerPlayer p = EntityArgument.getPlayer(c, "player");
-                                    int n = Math.max(0, souls(p) + IntegerArgumentType.getInteger(c, "amount"));
-                                    p.setData(SOULS, n);
-                                    c.getSource().sendSuccess(() -> Component.translatable("jaycee.command.souls", p.getDisplayName(), n), true);
-                                    return n;
-                                }))))));
+                        })))));
     }
 
     static List<String> withAdded(List<String> list, String id) {

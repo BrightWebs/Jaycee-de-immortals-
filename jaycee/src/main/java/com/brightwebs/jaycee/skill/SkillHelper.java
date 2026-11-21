@@ -23,11 +23,11 @@ import net.minecraft.world.phys.Vec3;
 import java.util.List;
 import java.util.Optional;
 
-/** Small tools every skill uses: aiming, area picks, lingering effects, mastery scaling. */
+// small stuff every skill uses: aiming, picking things in an area, effects that stay up, mastery scaling
 final class SkillHelper {
     private SkillHelper() {}
 
-    /** The living thing the player is looking at within range, or null (with a hint). */
+    // the living thing you're looking at in range, or null (with a hint)
     static LivingEntity target(ServerPlayer player, double range) {
         Vec3 eye = player.getEyePosition();
         Vec3 end = eye.add(player.getLookAngle().scale(range));
@@ -45,7 +45,7 @@ final class SkillHelper {
         return best;
     }
 
-    /** Like target, but without the hint message. */
+    // same as target but no hint message
     static LivingEntity targetQuiet(ServerPlayer player, double range) {
         Vec3 eye = player.getEyePosition();
         Vec3 end = eye.add(player.getLookAngle().scale(range));
@@ -59,7 +59,7 @@ final class SkillHelper {
         return best;
     }
 
-    /** The block the player is looking at, or null (with a hint). */
+    // the block you're looking at, or null (with a hint)
     static BlockHitResult block(ServerPlayer player, double range) {
         HitResult hit = player.pick(range, 0f, false);
         if (hit instanceof BlockHitResult b && hit.getType() == HitResult.Type.BLOCK) return b;
@@ -67,18 +67,18 @@ final class SkillHelper {
         return null;
     }
 
-    /** Everything alive near the player except the player. */
+    // everything alive near you except you
     static List<LivingEntity> around(ServerPlayer player, double radius) {
         return player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius),
                 e -> e != player && e.isAlive());
     }
 
-    /** 1.0 at no mastery, up to 2.0 once mastered. */
+    // 1.0 with no mastery, up to 2.0 mastered
     static float power(ServerPlayer player, Ability skill) {
         return 1f + (float) AbilityAPI.masteryFraction(player, skill);
     }
 
-    /** Keeps an effect up without flicker. For passives and toggles, called from tick. */
+    // keeps an effect up without it flickering. for passives and toggles, call it from tick
     static void keep(LivingEntity e, Holder<MobEffect> effect, int amplifier) {
         MobEffectInstance now = e.getEffect(effect);
         if (now == null || now.getDuration() < 220 || now.getAmplifier() < amplifier) {

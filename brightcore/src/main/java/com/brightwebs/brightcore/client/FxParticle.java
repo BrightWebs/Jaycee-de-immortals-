@@ -15,13 +15,11 @@ import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 
 import java.util.Map;
 
-/** How each particle family moves and fades. */
+// how each kind of particle moves and fades
 @EventBusSubscriber(modid = BrightCore.ID, value = Dist.CLIENT)
 public final class FxParticle extends SingleQuadParticle {
-    /**
-     * life in ticks (min, extra random), gravity (negative rises), friction, start size, end size
-     * (relative), spin per tick, glow (full bright), animate (frames over life) or pick a random frame.
-     */
+    // life in ticks (min, extra random), gravity (negative goes up), friction, start size, end size,
+    // spin per tick, glow (full bright), animate (play frames over its life) or just pick a random frame
     public record Style(int life, int lifeRand, float gravity, float friction, float size, float endSize,
                         float spin, boolean glow, boolean animate) {}
 
@@ -48,6 +46,12 @@ public final class FxParticle extends SingleQuadParticle {
             Map.entry("blood", new Style(28, 10, 0.06f, 0.98f, 0.09f, 1f, 0, false, false)),
             Map.entry("drop", new Style(28, 10, 0.06f, 0.98f, 0.09f, 1f, 0, false, false)),
             Map.entry("acid", new Style(28, 10, 0.06f, 0.98f, 0.1f, 1f, 0, true, false)),
+            Map.entry("haki", new Style(16, 8, -0.01f, 0.9f, 0.35f, 1.4f, 0.05f, true, false)),
+            Map.entry("haki_demon", new Style(16, 8, -0.01f, 0.9f, 0.35f, 1.4f, 0.05f, true, false)),
+            Map.entry("haki_hero", new Style(16, 8, -0.01f, 0.9f, 0.35f, 1.4f, 0.05f, true, false)),
+            Map.entry("haki_fear", new Style(16, 8, -0.01f, 0.9f, 0.35f, 1.4f, 0.05f, true, false)),
+            Map.entry("haki_sacred", new Style(16, 8, -0.01f, 0.9f, 0.35f, 1.4f, 0.05f, true, false)),
+            Map.entry("sonic", new Style(8, 2, 0, 1f, 0.6f, 3.5f, 0, true, false)),
             Map.entry("predator_mist", new Style(12, 6, 0, 0.86f, 0.42f, 1.9f, 0.09f, false, false)),
             Map.entry("slash", new Style(6, 2, 0, 0.9f, 0.8f, 1.3f, 0, true, true)));
 

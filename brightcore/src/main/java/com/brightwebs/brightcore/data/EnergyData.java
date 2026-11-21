@@ -6,22 +6,17 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
-/**
- * A being's energy. EP (Existence Points) = max Aura + max Mana.
- *
- * Aura is life-force (it backs physical power), Mana is magical energy (it pays for abilities),
- * and Spirit is spiritual health, a second health pool for attacks on the soul.
- *
- * Immutable: changes go through EnergyAPI so they save, and sync to the player who owns them.
- *
- * @param initialized false until the being's starting values are rolled
- */
+// energy. EP = max aura + max mana
+// aura is life force (physical power), mana is magic energy (pays for skills),
+// spirit is spiritual health, a second health bar for attacks on the soul
+// go through EnergyAPI to change it so it saves and syncs
+// initialized is false until the starting numbers get rolled
 public record EnergyData(double aura, double maxAura,
                          double mana, double maxMana,
                          double spirit, double maxSpirit,
                          boolean initialized) {
 
-    /** Every being's EP is clamped between these. */
+    // EP always stays between these
     public static final double MIN_POOL = 10, MAX_POOL = 1.0E9;
 
     public static final EnergyData EMPTY = new EnergyData(0, 0, 0, 0, 0, 0, false);
@@ -48,18 +43,18 @@ public record EnergyData(double aura, double maxAura,
         spirit = Math.clamp(spirit, 0, maxSpirit);
     }
 
-    /** Existence Points: the being's total power. */
+    // EP, your total power
     public double ep() { return maxAura + maxMana; }
 
     public EnergyData withAura(double v) { return new EnergyData(v, maxAura, mana, maxMana, spirit, maxSpirit, initialized); }
     public EnergyData withMana(double v) { return new EnergyData(aura, maxAura, v, maxMana, spirit, maxSpirit, initialized); }
     public EnergyData withSpirit(double v) { return new EnergyData(aura, maxAura, mana, maxMana, v, maxSpirit, initialized); }
 
-    /** Sets the maximums; current values are kept (and clamped). */
+    // sets the maxes, keeps the current values (clamped)
     public EnergyData withMax(double maxAura, double maxMana, double maxSpirit) {
         return new EnergyData(aura, maxAura, mana, maxMana, spirit, maxSpirit, true);
     }
 
-    /** Everything full. */
+    // everything full
     public EnergyData refilled() { return new EnergyData(maxAura, maxAura, maxMana, maxMana, maxSpirit, maxSpirit, initialized); }
 }

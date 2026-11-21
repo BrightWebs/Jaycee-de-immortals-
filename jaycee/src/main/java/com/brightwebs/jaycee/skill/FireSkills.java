@@ -27,20 +27,20 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
-/** Flame Breath and Fire Ball, as in Tensura: Reincarnated. */
+// flame breath and fire ball like tensura
 @EventBusSubscriber(modid = JayceeMod.ID)
 public final class FireSkills {
-    // Flame Breath (IntrinsicSkillConfig.FlameBreath)
+    // flame breath (IntrinsicSkillConfig.FlameBreath)
     static final double BREATH_COST = 30;
     static final int BREATH_DAMAGE = 8, BREATH_DAMAGE_MASTERED = 16, BREATH_RANGE = 7;
-    // Fire Ball (AspectualMagicConfig.FireBall)
+    // fire ball (AspectualMagicConfig.FireBall)
     static final int CAST = 60, CAST_MASTERED = 20, CD = 3, CD_MASTERED = 1, BURN = 100;
     static final double COST = 30_000, COST_CHARGED = 50_000;
     static final float MAGIC = 100, FIRE = 30, RADIUS = 3, MAGIC_CHARGED = 250, FIRE_CHARGED = 60, RADIUS_CHARGED = 6, SPEED = 1.5f;
 
     private FireSkills() {}
 
-    // ---- Flame Breath: hold the key ------------------------------------------
+    // flame breath: hold the key
 
     static boolean breathHeld(ServerPlayer p, Ability a, int held) {
         if (held % 20 == 0 && !Tk.spend(p, a, BREATH_COST)) return false;
@@ -66,9 +66,9 @@ public final class FireSkills {
         return true;
     }
 
-    // ---- Fire Ball: hold to chant, release to fire -----------------------------
+    // fire ball: hold to chant, let go to fire
 
-    /** Ticks to chant: 3 s (1 s mastered), halved by Great Sage, none with Raphael. */
+    // ticks to chant: 3s (1s mastered), half with great sage, none with raphael
     static int castTicks(ServerPlayer p, Ability a) {
         if (SkillState.instantCast(p)) return 0;
         int base = Tk.mastered(p, a) ? CAST_MASTERED : CAST;
@@ -79,7 +79,7 @@ public final class FireSkills {
         int cast = castTicks(p, a), full = (int) Math.ceil(CAST / GreatSage.chantSpeed(p));
         ServerLevel l = (ServerLevel) p.level();
         if (cast > 1) {
-            // the magic circle: a turning ring of flame at your feet
+            // the magic circle, a ring of fire turning at your feet
             double r = 0.75 + Math.min(1, held / (double) cast) * 0.5;
             Vec3 c = p.position().add(0, 0.05, 0);
             for (int i = 0; i < 3; i++) {
@@ -132,7 +132,7 @@ public final class FireSkills {
         });
     }
 
-    /** Moves a fireball one tick; true when it hit something and burst. */
+    // moves a fireball one tick. true when it hit something and blew up
     private static boolean step(Ball b) {
         Vec3 next = b.pos.add(b.vel);
         BlockHitResult hit = b.level.clip(new ClipContext(b.pos, next, ClipContext.Block.COLLIDER, ClipContext.Fluid.ANY, b.owner));

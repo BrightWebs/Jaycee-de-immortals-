@@ -51,25 +51,23 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-/**
- * Predator, as in Tensura: Reincarnated.
- *  Predation: breathe out a devouring mist for 3 s (range 3, 10 damage per bite, drains 100 magicules
- *  and takes a skill per bite). A kill devours every skill and 30% of the victim's EP into your
- *  maximum. Shift + press cycles what the mist also eats: nothing / blocks / fluids / everything.
- *  Mastered, the mist swallows projectiles too. Cooldown 5 s (3 s mastered).
- *  Isolation: empty hand clears harmful effects from your target (or yourself) for 200 magicules;
- *  holding an item dissolves it into magicules and health.
- */
+// predator like tensura
+//   predation: breathe out a mist that eats stuff for 3s (range 3, 10 damage a bite, drains 100
+//   magicules and takes a skill each bite). a kill eats every skill it had and 30% of its EP into
+//   your max. shift + press changes what else the mist eats: nothing / blocks / fluids / everything
+//   mastered, it eats projectiles too. cooldown 5s (3s mastered)
+//   isolation: empty hand clears bad effects off your target (or you) for 200 magicules,
+//   holding an item dissolves it into magicules and health
 @EventBusSubscriber(modid = JayceeMod.ID)
 public final class Predation {
-    // Tensura defaults (UniqueSkillConfig.Predator).
+    // tensura defaults (UniqueSkillConfig.Predator)
     static final float RANGE = 3, DAMAGE = 10, EP_DRAIN = 100, SKILL_CHANCE = 10, EP_STEAL = 0.3f;
     static final double ISOLATION_COST = 200, DISSOLVE_MAGICULE = 2.0, DISSOLVE_HEALTH = 2.0;
     static final int ISOLATION_CD = 5, ISOLATION_CD_MASTERED = 3, MIST_LIFE = 60;
 
     private static final class Mist {
         final ServerPlayer owner; final Ability skill; final int blockMode; final boolean eatsProjectiles; int age;
-        float range; // grows to RANGE, holds, then shrinks (Tensura's PredatorMistProjectile)
+        float range;  // grows to RANGE, stays, then shrinks (tensura's PredatorMistProjectile)
         Mist(ServerPlayer owner, Ability skill, int blockMode, boolean eatsProjectiles) {
             this.owner = owner; this.skill = skill; this.blockMode = blockMode; this.eatsProjectiles = eatsProjectiles;
         }
@@ -80,7 +78,7 @@ public final class Predation {
 
     private Predation() {}
 
-    // ---- Predation -----------------------------------------------------------
+    // predation
 
     static boolean predation(ServerPlayer p, Ability a) {
         if (p.isShiftKeyDown()) {
@@ -110,22 +108,18 @@ public final class Predation {
         });
     }
 
-    /**
-     * Tensura's mist: it grows out 0.25 blocks a tick to its 3-block reach and devours for its first
-     * 31 ticks (creatures, experience orbs, projectiles when mastered, and blocks or fluids by the
-     * block mode), then shrinks away. Creatures are always devoured, whatever the block mode.
-     */
-    /**
-     * Tensura draws the mist as a black vortex: rings of black streaks swirling along the reach,
-     * flowing back into the user, capped by a spinning seven-armed swirl at the mouth.
-     */
+    // tensura's mist: grows 0.25 blocks a tick out to 3 blocks and eats stuff for the first 31 ticks
+    // (mobs, xp orbs, projectiles when mastered, and blocks or fluids depending on block mode), then
+    // shrinks away. mobs always get eaten no matter the block mode
+    // tensura draws the mist as a black vortex: rings of black streaks swirling along it and
+    // flowing back into you, with a spinning seven armed swirl at the front
     private static void mistVisual(ServerLevel level, Mist m, Vec3 eye, Vec3 look) {
         var type = com.brightwebs.brightcore.fx.BrightParticles.PREDATOR_MIST;
         Vec3 up = Math.abs(look.y) > 0.95 ? new Vec3(1, 0, 0) : new Vec3(0, 1, 0);
         Vec3 u = look.cross(up).normalize(), v = u.cross(look).normalize();
         Vec3 base = eye.add(0, -0.25, 0);
         double phase = m.age * 0.35, mouth = 0.3 + m.range * 0.5;
-        // the swirl at the mouth: seven curved arms
+        // the swirl at the front, seven curved arms
         Vec3 front = base.add(look.scale(m.range));
         for (int arm = 0; arm < 7; arm++) {
             for (int s = 0; s < 4; s++) {
@@ -135,7 +129,7 @@ public final class Predation {
                 com.brightwebs.brightcore.fx.Fx.move(level, type, front.add(off), tangent.scale(0.06).add(look.scale(-0.04)));
             }
         }
-        // the body: rings of streaks swirling along the reach, drawn in toward the user
+        // the body: rings swirling along it, pulled back toward you
         for (double d = 1.2; d < m.range; d += 0.55) {
             double r = 0.15 + (d / Math.max(1, m.range)) * mouth;
             for (int k = 0; k < 4; k++) {
@@ -189,7 +183,7 @@ public final class Predation {
         return to.length() <= range + width && to.normalize().dot(look) >= 0.4;
     }
 
-    /** One bite: damage, drain magicules, and take one of the target's skills. */
+    // one bite: damage, drain magicules, take one of its skills
     private static void bite(ServerPlayer p, Ability predator, ServerLevel level, LivingEntity t) {
         if (t instanceof Player other && other.getAbilities().invulnerable) return;
         double drained = Tk.drainMana(t, EP_DRAIN);
@@ -213,7 +207,7 @@ public final class Predation {
         }
     }
 
-    /** Uniques and Ultimates can't be devoured; everything else can (magic only some of the time). */
+    // uniques and ultimates can't be eaten, everything else can (magic only sometimes)
     private static boolean devourable(Ability s) {
         return switch (s.type()) {
             case UNIQUE, ULTIMATE -> false;
@@ -221,7 +215,7 @@ public final class Predation {
         };
     }
 
-    /** A kill by the mist devours the victim: all its skills, 30% of its EP into your maximum, its drops into the Stomach. */
+    // a kill by the mist eats the victim: all its skills, 30% of its EP into your max, its drops into the stomach
     @SubscribeEvent
     public static void onDeath(LivingDeathEvent event) {
         Safe.run("Predation.onDeath", () -> {
@@ -233,7 +227,7 @@ public final class Predation {
                         p.sendSystemMessage(Component.translatable("brightcore.message.acquired", s.name()));
                     }
                 }
-            } else if (t.fireImmune()) { // creatures born of fire carry Flame Attack Resistance
+            } else if (t.fireImmune()) {  // fire mobs have flame attack resistance
                 Ability res = BrightSkills.resistance(DamageKind.FLAME);
                 if (res != null && AbilityAPI.learn(p, res)) p.sendSystemMessage(Component.translatable("brightcore.message.acquired", res.name()));
             }
@@ -246,7 +240,7 @@ public final class Predation {
         });
     }
 
-    /** Drops of a devoured creature go into the Stomach. */
+    // a devoured mob's drops go in the stomach
     @SubscribeEvent
     public static void onDrops(LivingDropsEvent event) {
         Safe.run("Predation.onDrops", () -> {
@@ -257,7 +251,7 @@ public final class Predation {
         });
     }
 
-    /** Blocks (mode 2/4) go into the Stomach; fluid sources (mode 3/4) are drunk. */
+    // blocks (mode 2/4) go in the stomach, fluid sources (mode 3/4) get drunk
     private static void eatBlock(ServerPlayer p, ServerLevel level, int blockMode, Vec3 ray, float range) {
         Vec3 eye = p.getEyePosition(), end = eye.add(ray.scale(range + 1));
         boolean fluids = blockMode == 3 || blockMode == 4, blocks = blockMode == 2 || blockMode == 4;
@@ -282,7 +276,7 @@ public final class Predation {
         level.playSound(null, pos, SoundEvents.GENERIC_EAT.value(), SoundSource.PLAYERS, 0.6f, 0.7f);
     }
 
-    // ---- Isolation -----------------------------------------------------------
+    // isolation
 
     static boolean isolation(ServerPlayer p, Ability a) {
         ItemStack held = p.getMainHandItem();
@@ -306,7 +300,7 @@ public final class Predation {
             level.playSound(null, p.blockPosition(), SoundEvents.BREWING_STAND_BREW, SoundSource.PLAYERS, 1, 0.6f);
             return true;
         }
-        // Dissolving: what the item is worth in magicules and health.
+        // dissolving: what the item's worth in magicules and health
         FoodProperties food = held.get(DataComponents.FOOD);
         if (food == null) {
             Tk.fail(p, "jaycee.skill.activation_failed.item");
@@ -321,7 +315,7 @@ public final class Predation {
         return true;
     }
 
-    /** For Appraisal: whether this target is worth devouring right now. */
+    // for appraisal: is this target worth eating right now
     static boolean canDevour(ServerPlayer p, LivingEntity t) {
         return p.isCreative() || t.getHealth() <= t.getMaxHealth() * 0.3f || EnergyAPI.ep(t) < EnergyAPI.ep(p) * 0.5;
     }

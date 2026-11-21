@@ -20,11 +20,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-/**
- * Tensura's refining: items in a skill's storage that can be smelted are refined, one at a time,
- * with no furnace or fuel. Great Sage refines its own storage automatically; Predator's Analysis
- * refines the Stomach while it is open.
- */
+// tensura's refining: stuff in a skill's storage that can be smelted gets refined one at a time,
+// no furnace or fuel. great sage does its own storage automatically, predator's analysis does the
+// stomach while it's open
 public final class Refining {
     public static final int SAGE_SIZE = 27, TICKS_PER_ITEM = 10;
     private static final DeferredRegister<AttachmentType<?>> ATTACHMENTS =
@@ -34,7 +32,7 @@ public final class Refining {
                     .serialize(ItemStack.OPTIONAL_CODEC.listOf().fieldOf("items"))
                     .copyOnDeath()
                     .build());
-    /** Storage menus open right now, so refining changes what the player sees instead of a stale copy. */
+    // storage menus that are open right now, so refining updates what the player sees
     private static final java.util.Map<UUID, SimpleContainer> OPEN_SAGE = new java.util.HashMap<>(), OPEN_STOMACH = new java.util.HashMap<>();
 
     private Refining() {}
@@ -47,7 +45,7 @@ public final class Refining {
         return list;
     }
 
-    /** Great Sage's refining storage. */
+    // great sage's refining storage
     static void openSage(ServerPlayer p) {
         SimpleContainer c = new SimpleContainer(load(p, SAGE, SAGE_SIZE).toArray(new ItemStack[0])) {
             @Override public void setChanged() { super.setChanged(); p.setData(SAGE, List.copyOf(getItems())); }
@@ -57,7 +55,7 @@ public final class Refining {
         OPEN_SAGE.put(p.getUUID(), c);
     }
 
-    /** Predator's Analysis: open the Stomach and refine it while it is open. */
+    // predator's analysis: open the stomach and refine it while it's open
     static void openStomachRefining(ServerPlayer p) {
         OPEN_STOMACH.put(p.getUUID(), Stomach.open(p));
     }
@@ -71,10 +69,8 @@ public final class Refining {
         if (stomach != null) refineOne(p, Stomach.STOMACH, Stomach.SIZE, stomach);
     }
 
-    /**
-     * Smelts one item from the first smeltable stack; the result stays in the same storage.
-     * Works on the open menu's container when there is one (its setChanged saves it).
-     */
+    // smelts one item from the first smeltable stack, result stays in the same storage
+    // works on the open menu's container if there is one (its setChanged saves it)
     private static void refineOne(ServerPlayer p, Supplier<AttachmentType<List<ItemStack>>> type, int size, SimpleContainer open) {
         ServerLevel level = (ServerLevel) p.level();
         SimpleContainer c = open != null ? open : new SimpleContainer(load(p, type, size).toArray(new ItemStack[0]));

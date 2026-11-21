@@ -9,12 +9,8 @@ import net.minecraft.resources.Identifier;
 
 import java.util.Optional;
 
-/**
- * A player's race. Stored by id so a world still loads if a race is removed.
- *
- * @param race   the race id, or "" before the player has chosen
- * @param chosen true once the player has picked from the race menu
- */
+// a player's race, saved by id so the world still loads if a race gets removed
+// race = race id, "" before they pick. chosen = true once they picked in the race menu
 public record RaceData(String race, boolean chosen) {
 
     public static final RaceData EMPTY = new RaceData("", false);

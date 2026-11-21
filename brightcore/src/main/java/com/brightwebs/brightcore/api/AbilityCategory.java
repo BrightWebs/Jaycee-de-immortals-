@@ -1,6 +1,6 @@
 package com.brightwebs.brightcore.api;
 
-/** What an ability does. Matches the category filter in Jaycee's Abilities tab. */
+// what a skill does. same as the category filter in the abilities tab
 public enum AbilityCategory {
     OFFENSE("Offense"),
     DEFENSE("Defense"),

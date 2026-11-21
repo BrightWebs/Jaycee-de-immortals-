@@ -11,11 +11,8 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
- * Bright Core's particle library: one family per element or effect, drawn for this mod. Every
- * ability's visuals are built from these (see {@link Fx}). Textures live in
- * assets/brightcore/textures/particle, behaviour in the client's FxParticle styles.
- */
+// bright core's particles, one set per element or effect. every skill's visuals use these (see Fx)
+// textures are in assets/brightcore/textures/particle, how they move is in FxParticle
 public final class BrightParticles {
     private static final DeferredRegister<ParticleType<?>> TYPES = DeferredRegister.create(Registries.PARTICLE_TYPE, BrightCore.ID);
     public static final Map<String, DeferredHolder<ParticleType<?>, SimpleParticleType>> ALL = new LinkedHashMap<>();
@@ -26,7 +23,9 @@ public final class BrightParticles {
             SPIRIT = reg("spirit"), MIST = reg("mist"), HEAL = reg("heal"), RUNE = reg("rune"), AURA = reg("aura"),
             HOLY = reg("holy"), VOID = reg("void"), BUBBLE = reg("bubble"), GUST = reg("gust"), PETAL = reg("petal"),
             SHARD = reg("shard"), BLOOD = reg("blood"), DROP = reg("drop"), ACID = reg("acid"), SLASH = reg("slash"),
-            PREDATOR_MIST = reg("predator_mist");
+            PREDATOR_MIST = reg("predator_mist"),
+            HAKI = reg("haki"), HAKI_DEMON = reg("haki_demon"), HAKI_HERO = reg("haki_hero"), HAKI_FEAR = reg("haki_fear"),
+            HAKI_SACRED = reg("haki_sacred"), SONIC = reg("sonic");
 
     private BrightParticles() {}
 

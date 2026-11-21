@@ -15,12 +15,12 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 
-/** The M key opens the menu; client setup gives Bright Core's ability bar the Jaycee look. */
+// B opens the menu, N names stuff. client setup gives bright core's skill bar the jaycee look
 @EventBusSubscriber(modid = JayceeMod.ID, value = Dist.CLIENT)
 public final class JayceeClient {
     public static final KeyMapping.Category CATEGORY = new KeyMapping.Category(Identifier.fromNamespaceAndPath(JayceeMod.ID, "main"));
     public static final KeyMapping MENU = new KeyMapping("key.jaycee.open_menu", InputConstants.KEY_B, CATEGORY);
-    /** Name the creature you're looking at (Shift: toggle whether others may name you). */
+    // name whatever you're looking at (shift: flip whether others can name you)
     public static final KeyMapping NAME = new KeyMapping("key.jaycee.name", InputConstants.KEY_N, CATEGORY);
 
     private JayceeClient() {}

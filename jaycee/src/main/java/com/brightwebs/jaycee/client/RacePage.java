@@ -22,10 +22,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Race Evolution: your line's evolution tree (branches and all), opened from the Race field.
- * Click a form to see its details, effects and requirements; evolve from here when ready.
- */
+// race evolution: your line's evolution tree with all its branches, opened from the race field
+// click a form to see its details, effects and requirements, and evolve from here when you're ready
 final class RacePage extends Page {
     private static final T TF = new T(494.323f, 218f, 0.77189f, 318, 104);
     private static final float TX1 = 334, TX2 = 1044, TY1 = 112, TY2 = 962;
@@ -44,7 +42,7 @@ final class RacePage extends Page {
 
     private static Race race(String id) { return RaceRegistry.get(Identifier.fromNamespaceAndPath(JayceeMod.ID, id)); }
 
-    /** Lays out the tree of the player's line: rows by depth, columns by leaf order. */
+    // lays out the tree for your line: rows by depth, columns by leaf order
     private void build(String current) {
         nodes.clear(); edges.clear();
         String root = JayceeRaces.lineOf(current);
@@ -64,7 +62,7 @@ final class RacePage extends Page {
                 edges.add(new String[]{id, c});
                 if (!depth.containsKey(c)) {
                     depth.put(c, depth.get(id) + 1);
-                    // another line's starting race is shown as a leaf, not expanded
+                    // another line's starting race just shows as an end point, we don't expand it
                     JayceeRaces.Form f = JayceeRaces.FORMS.get(c);
                     if (f == null || !f.starting()) queue.add(c);
                 }
@@ -87,7 +85,7 @@ final class RacePage extends Page {
         builtFor = current;
     }
 
-    /** Ancestors of the current form along the tree (what you have already been). */
+    // forms you already were on the way to your current one
     private Set<String> acquired(String current) {
         Set<String> out = new HashSet<>();
         boolean grew = true;
@@ -109,7 +107,7 @@ final class RacePage extends Page {
         if (!current.equals(builtFor)) { build(current); selected = current; }
         Set<String> acq = acquired(current);
         TF.push(g);
-        // connectors
+        // lines between forms
         for (String[] e : edges) {
             Node a = nodes.get(e[0]), b = nodes.get(e[1]);
             if (a == null || b == null || b.depth() <= a.depth()) continue;
@@ -122,7 +120,7 @@ final class RacePage extends Page {
             UI.fill(g, b.x() - 6, y2 - 8, b.x() + 6, y2 - 5, col);
             UI.fill(g, b.x() - 3, y2 - 5, b.x() + 3, y2 - 2, col);
         }
-        // nodes
+        // forms
         for (Node n : nodes.values()) drawNode(g, n, n.id().equals(current), acq.contains(n.id()));
         if (selected != null) details(g, p, cur, selected);
         TF.pop(g);
@@ -227,7 +225,7 @@ final class RacePage extends Page {
         }
     }
 
-    /** "62%: EP 400k + 4 bosses" in Tensura's weighted style. */
+    // "62%: EP 400k + 4 bosses", weighted like tensura
     static String requirementText(LocalPlayer p, Race.Evolution evo) {
         StringBuilder b = new StringBuilder(String.format("%.0f%%: ", RaceAPI.progress(p, evo)));
         for (int i = 0; i < evo.requirements().size(); i++) {

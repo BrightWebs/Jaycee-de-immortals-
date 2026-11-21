@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-/** Race abilities by race id, plus the key-hold state and cooldowns. */
+// race abilities by race id, plus key hold state and cooldowns
 @EventBusSubscriber(modid = BrightCore.ID)
 public final class RaceAbilities {
     private static final Map<Identifier, RaceAbility> BY_RACE = new HashMap<>();
@@ -29,7 +29,7 @@ public final class RaceAbilities {
         return RaceAPI.race(player).map(r -> BY_RACE.get(r.id())).orElse(null);
     }
 
-    /** Starts a cooldown in seconds (Tensura: instance.setCooldown). */
+    // starts a cooldown in seconds (tensura's instance.setCooldown)
     public static void setCooldown(ServerPlayer player, int seconds) {
         COOLDOWN.put(player.getUUID(), player.level().getGameTime() + seconds * 20L);
     }
@@ -38,7 +38,7 @@ public final class RaceAbilities {
         return COOLDOWN.getOrDefault(player.getUUID(), 0L) > player.level().getGameTime();
     }
 
-    /** From the network: the Race Ability key went down or up. */
+    // from the network: race ability key went down or up
     public static void key(ServerPlayer player, boolean down) {
         RaceAbility a = of(player);
         if (down) {

@@ -13,14 +13,12 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-/**
- * The one place other code goes through. Every rule (ownership, cooldown, mana, slots)
- * lives here, so abilities never check anything themselves.
- */
+// everything goes through here. all the rules (owning it, cooldown, mana, slots) are checked
+// in this one spot so the skills themselves don't have to
 public final class AbilityAPI {
     private AbilityAPI() {}
 
-    // ---- reading (works on the client too, using the synced copy) ---------------
+    // reading, works on the client too with the synced copy
 
     public static AbilityData get(Player player) {
         return player.getData(BrightAttachments.ABILITIES);
@@ -30,7 +28,7 @@ public final class AbilityAPI {
         return get(player).has(ability.id());
     }
 
-    /** Owned abilities that still exist, sorted by name id for a stable menu order. */
+    // skills you own that still exist, sorted by id so the menu doesn't jump around
     public static List<Ability> owned(Player player) {
         List<Ability> list = new ArrayList<>();
         for (Identifier id : get(player).owned()) {
@@ -41,20 +39,20 @@ public final class AbilityAPI {
         return list;
     }
 
-    // ---- changing (server only) --------------------------------------------------
+    // changing stuff, server only
 
     private static void set(ServerPlayer player, AbilityData data) {
-        player.setData(BrightAttachments.ABILITIES, data); // saves + syncs
+        player.setData(BrightAttachments.ABILITIES, data);  // saves and syncs
     }
 
-    /** Gives an ability. Returns false if already owned or a listener cancelled it. */
+    // gives a skill. false if you already have it or something cancelled it
     public static boolean learn(ServerPlayer player, Ability ability) {
         AbilityData data = get(player);
         if (data.has(ability.id())) return false;
         if (NeoForge.EVENT_BUS.post(new AbilityEvent.Learn(player, ability)).isCanceled()) return false;
 
         data = data.withAbility(ability.id());
-        // Put it in the first free slot, starting on the current page.
+        // put it in the first empty slot, starting from the page you're on
         if (!ability.isPassive()) {
             for (int n = 0; n < AbilityData.TOTAL_SLOTS; n++) {
                 int index = (data.page() * AbilityData.SLOTS_PER_PAGE + n) % AbilityData.TOTAL_SLOTS;
@@ -75,7 +73,7 @@ public final class AbilityAPI {
         return true;
     }
 
-    /** Puts an ability in one of the 50 slots (or clears it when ability is null). Removes it from any other slot. */
+    // puts a skill in one of the 50 slots (null clears it). takes it out of any other slot
     public static boolean assign(ServerPlayer player, int index, Ability ability) {
         if (index < 0 || index >= AbilityData.TOTAL_SLOTS) return false;
         AbilityData data = get(player);
@@ -93,7 +91,7 @@ public final class AbilityAPI {
         set(player, get(player).withPage(page));
     }
 
-    /** Starts a cooldown of the given length now (skills that set their own, like chanted spells). */
+    // starts a cooldown right now, for skills that set their own (chanted spells)
     public static void setCooldown(ServerPlayer player, Ability ability, int ticks) {
         long now = player.level().getGameTime();
         set(player, get(player).withCooldown(ability.id(), ticks <= 0 ? 0 : now + ticks));
@@ -107,7 +105,7 @@ public final class AbilityAPI {
         set(player, get(player).withCooldown(ability.id(), 0));
     }
 
-    // ---- mastery ---------------------------------------------------------------
+    // mastery
 
     public static int mastery(Player player, Ability ability) {
         return get(player).masteryOf(ability.id());
@@ -117,13 +115,13 @@ public final class AbilityAPI {
         return mastery(player, ability) >= ability.maxMastery();
     }
 
-    /** 0 to 1. */
+    // 0 to 1
     public static float masteryFraction(Player player, Ability ability) {
         return Math.min(1f, mastery(player, ability) / (float) ability.maxMastery());
     }
 
-    /** Adds mastery points, telling the player when the skill becomes mastered. */
-    /** Mastery shown as a level from 1 to 10 (10 = mastered). */
+    // adds mastery points and tells the player when it's mastered
+    // mastery as a level from 1 to 10, 10 is mastered
     public static int level(Player player, Ability ability) {
         return isMastered(player, ability) ? 10 : 1 + (int) Math.floor(masteryFraction(player, ability) * 9);
     }
@@ -140,10 +138,8 @@ public final class AbilityAPI {
         }
     }
 
-    /**
-     * One "mastery point" for using a skill, after listeners adjust it (Great Sage multiplies it).
-     * Fractions carry over so small gains still count.
-     */
+    // one mastery point for using a skill, after listeners change it (great sage multiplies it)
+    // leftover fractions carry over so small gains still add up
     public static void addMasteryPoint(ServerPlayer player, Ability ability) {
         double pts = NeoForge.EVENT_BUS.post(new AbilityEvent.MasteryGain(player, ability, 1)).getPoints();
         double carried = MASTERY_REST.getOrDefault(player.getUUID(), 0.0) + pts;
@@ -158,13 +154,13 @@ public final class AbilityAPI {
         set(player, get(player).withMastery(ability.id(), Math.min(points, ability.maxMastery())));
     }
 
-    // ---- modes and toggles ---------------------------------------------------------
+    // modes and toggles
 
     public static int modeOf(Player player, Ability ability) {
         return Math.floorMod(get(player).modeOf(ability.id()), ability.modes().size());
     }
 
-    /** Shift + key: switch the skill in that slot to its next mode. */
+    // alt + key: next mode for the skill in that slot
     public static void cycleMode(ServerPlayer player, int slot) {
         get(player).slot(slot).map(AbilityRegistry::get).ifPresent(ability -> {
             if (ability.modes().size() < 2) return;
@@ -174,16 +170,14 @@ public final class AbilityAPI {
         });
     }
 
-    /** Picks a skill's mode directly (from a menu). */
+    // sets the mode straight from a menu
     public static void setMode(ServerPlayer player, Ability ability, int mode) {
         if (!has(player, ability) || mode < 0 || mode >= ability.modes().size()) return;
         set(player, get(player).withMode(ability.id(), mode));
     }
 
-    /**
-     * Whether a switchable skill's passives are on. Stored inverted in the toggle set so that every
-     * switchable skill starts on, older saves included.
-     */
+    // is a switchable skill's passive on. it's stored flipped in the toggle set
+    // so every switchable skill starts on, old saves too
     public static boolean isSwitchedOn(Player player, Ability ability) {
         return has(player, ability) && (!ability.isSwitchable() || !get(player).isToggled(ability.id()));
     }
@@ -195,7 +189,7 @@ public final class AbilityAPI {
         player.sendOverlayMessage(Component.translatable(on ? "brightcore.message.toggle_on" : "brightcore.message.toggle_off", ability.name()));
     }
 
-    /** The menu switch: passives for switchable skills, on/off for toggles. */
+    // the menu switch. passives for switchables, on/off for toggles
     public static void flipSwitch(ServerPlayer player, Ability ability) {
         if (!has(player, ability)) return;
         if (ability.isSwitchable()) setSwitchedOn(player, ability, !isSwitchedOn(player, ability));
@@ -216,14 +210,14 @@ public final class AbilityAPI {
         player.sendOverlayMessage(Component.translatable(on ? "brightcore.message.toggle_on" : "brightcore.message.toggle_off", ability.name()));
     }
 
-    // ---- activation ----------------------------------------------------------------
+    // using skills
 
-    /** The client pressed key 1-5 (sent as 0-4). The server looks up what's in that slot on the current page. */
+    // client pressed key 1-5 (comes in as 0-4), server checks what's in that slot on this page
     public static void activateSlot(ServerPlayer player, int slot) {
         get(player).slot(slot).map(AbilityRegistry::get).ifPresent(a -> tryActivate(player, a));
     }
 
-    /** The client let go of a slot key: ends a held skill started from that slot. */
+    // client let go of a slot key, ends a held skill from that slot
     public static void releaseSlot(ServerPlayer player, int slot) {
         get(player).slot(slot).map(AbilityRegistry::get).ifPresent(a -> AbilityHolds.release(player, a));
     }
@@ -234,7 +228,7 @@ public final class AbilityAPI {
         Identifier id = ability.id();
         if (!data.has(id) || ability.isPassive()) return false;
 
-        // Turning a toggle off is always free.
+        // turning a toggle off is always free
         if (ability.isToggle() && data.isToggled(id)) {
             setToggled(player, ability, false);
             return true;
@@ -278,10 +272,10 @@ public final class AbilityAPI {
 
         EnergyAPI.spendMana(player, manaCost);
         EnergyAPI.spendAura(player, auraCost);
-        AbilityData after = get(player); // the skill itself may have changed the data
+        AbilityData after = get(player);  // the skill might've changed the data
         if (mode.cooldownTicks() > 0) after = after.withCooldown(id, now + mode.cooldownTicks());
         set(player, after);
-        // Skills grant their own mastery points (as in Tensura), so nothing is added here.
+        // skills give their own mastery points like tensura, so nothing gets added here
 
         NeoForge.EVENT_BUS.post(new AbilityEvent.Activated(player, ability, manaCost, auraCost));
         return true;

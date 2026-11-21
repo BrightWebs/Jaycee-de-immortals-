@@ -31,18 +31,16 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-/**
- * The path to True Demon Lord, as Tensura: Reincarnated does it.
- *  Seed:      a race that may become a Demon Lord (not Holy) reaching 200,000 EP becomes a Demon Lord Seed.
- *  Souls:     only a Seed gathers souls. Each kill adds 50% of the victim's EP as soul points
- *             (shown as souls = points / 1,000; animals give none).
- *  Awakening: at 10,000 souls you may begin the Harvest Festival (/jaycee harvest); at 20,000 it begins
- *             on its own. Starting it spends 10,000 souls.
- *  Festival:  3 minutes (3600 ticks). You can't fly; souls swirl around you; in the last stretch you are
- *             slowed, then blinded and bound. It ends in awakening: max aura and magicules x3, every
- *             resistance becomes its nullification, the race takes its awakening evolution, and the
- *             world is told a True Demon Lord was born.
- */
+// the road to true demon lord, same as tensura
+//   seed:      a race that can be a demon lord (not holy) hitting 200,000 EP becomes a demon lord seed
+//   souls:     only a seed collects souls. each kill adds 50% of the victim's EP as soul points
+//              (souls = points / 1,000, animals give none)
+//   awakening: at 10,000 souls you can start the harvest festival (/jaycee harvest), at 20,000 it
+//              starts by itself. starting it uses 10,000 souls
+//   festival:  3 minutes (3600 ticks). no flying, souls swirl around you, near the end you get
+//              slowed, then blinded and stuck. it ends in awakening: max aura and magicules x3, every
+//              resistance turns into its nullification, the race takes its awakening evolution,
+//              and the whole server gets told a true demon lord was born
 @EventBusSubscriber(modid = JayceeMod.ID)
 public final class DemonLord {
     static final double SEED_EP = 200_000, SOUL_RATE = 0.5, EP_MULTIPLIER = 3.0;
@@ -54,7 +52,15 @@ public final class DemonLord {
     public static boolean isTrue(Player p) { return StatusData.counter(p, "true_demon_lord") > 0; }
     public static double soulPoints(Player p) { return StatusData.counter(p, "soul_points"); }
 
-    private static void setFlag(ServerPlayer p, String key, double v) { StatusData.addCounter(p, key, v - StatusData.counter(p, key)); }
+    public static void setFlag(ServerPlayer p, String key, double v) { StatusData.addCounter(p, key, v - StatusData.counter(p, key)); }
+
+    /** for commands, sets soul points straight up */
+    public static void setSoulPoints(ServerPlayer p, double points) {
+        setFlag(p, "soul_points", Math.max(0, points));
+        syncSouls(p);
+    }
+
+    public static void forceAwaken(ServerPlayer p) { awaken(p); }
 
     private static void syncSouls(ServerPlayer p) { p.setData(StatusData.SOULS, (int) Math.min(Integer.MAX_VALUE, soulPoints(p) / 1000)); }
 
@@ -93,7 +99,7 @@ public final class DemonLord {
         });
     }
 
-    /** Begins the Harvest Festival if the souls are there. */
+    // starts the harvest festival if you have the souls
     public static boolean begin(ServerPlayer p) {
         if (!isSeed(p) || isTrue(p) || StatusData.counter(p, "harvest_tick") > 0) return false;
         if (soulPoints(p) < AWAKEN_SOULS * 1000.0) return false;
@@ -131,7 +137,7 @@ public final class DemonLord {
         if (tick - 1 <= 0) awaken(p);
     }
 
-    /** True Demon Lord. */
+    // true demon lord
     static void awaken(ServerPlayer p) {
         EnergyData d = EnergyAPI.get(p);
         EnergyAPI.set(p, d.withMax(d.maxAura() * EP_MULTIPLIER, d.maxMana() * EP_MULTIPLIER, d.maxSpirit()).refilled());
@@ -141,7 +147,7 @@ public final class DemonLord {
                 p.sendSystemMessage(Component.translatable("brightcore.message.acquired", nul.name()));
             }
         }
-        // Tensura: awakening jumps to the race's awakening form (Human -> Human Saint...), if it has one
+        // tensura: awakening jumps to the race's awakening form (human -> human saint...) if it has one
         RaceAPI.race(p).ifPresent(r -> {
             String to = com.brightwebs.jaycee.race.TensuraRequirements.AWAKENING.get(r.id().getPath());
             Race next = to == null ? null : RaceRegistry.get(com.brightwebs.jaycee.race.JayceeRaces.id(to));

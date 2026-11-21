@@ -7,7 +7,7 @@ import net.minecraft.world.entity.LivingEntity;
 
 import java.util.function.Predicate;
 
-/** The kinds of harm a resistance can guard against. */
+// kinds of damage a resistance can block
 public enum DamageKind {
     FLAME("flame", s -> s.is(DamageTypeTags.IS_FIRE)),
     COLD("cold", s -> s.is(DamageTypeTags.IS_FREEZING)),

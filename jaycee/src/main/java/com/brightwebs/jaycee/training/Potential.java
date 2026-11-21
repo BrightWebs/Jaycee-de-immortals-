@@ -5,10 +5,8 @@ import com.brightwebs.brightcore.api.race.RaceAPI;
 import com.brightwebs.jaycee.race.JayceeRaces;
 import net.minecraft.world.entity.player.Player;
 
-/**
- * Racial potential: how talented a race is at each attribute (a "talent" of 1-9, shown as a
- * growth grade F..SSS), the base level cap that talent gives, and how evolution raises that cap.
- */
+// racial potential: how good a race is at each attribute (a talent from 1-9, shown as a growth
+// grade F..SSS), the base level cap that gives, and how evolving raises the cap
 public final class Potential {
     private static final String[] GRADES = {"F", "F", "E", "D", "C", "B", "A", "S", "SS", "SSS"};
 
@@ -42,12 +40,12 @@ public final class Potential {
 
     public static String grade(int talent) { return GRADES[Math.max(0, Math.min(9, talent))]; }
 
-    /** XP multiplier from talent: F-grade trains at 55%, SSS at 175%. */
+    // XP multiplier from talent: F trains at 55%, SSS at 175%
     public static double growth(int talent) { return 0.4 + 0.15 * talent; }
 
     public static int baseLimit(int talent) { return 10 + 8 * talent; }
 
-    /** Evolution raises the cap; divine forms raise it further. */
+    // evolving raises the cap, divine forms raise it more
     public static int limit(int talent, int tier, boolean divine) {
         return (int) Math.round(baseLimit(talent) * (1 + 0.6 * (tier - 1)) * (divine ? 1.5 : 1));
     }
@@ -62,6 +60,6 @@ public final class Potential {
         return r == null ? baseLimit(t) : limit(t, r.tier(), r.isDivine());
     }
 
-    /** EXP needed to go from this level to the next. */
+    // EXP to get from this level to the next
     public static long need(int level) { return Math.round(60 * Math.pow(level + 1, 1.6)); }
 }

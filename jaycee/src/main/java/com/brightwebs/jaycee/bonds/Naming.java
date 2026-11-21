@@ -32,18 +32,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Naming, as Tensura: Reincarnated does it (RequestNamingKeyPacket / RequestNamingMenuPacket).
- *
- * N while looking at a creature within 6 blocks opens the naming pop-up; Shift + N toggles whether
- * others may name you. The target must submit: below 25% health, or weaker than 1% of your EP.
- * It must also be weaker than you, sane, unnamed and without another master.
- *
- * Three ways to name, each gives the target EP and costs you that much Magicule (capped):
- *   Subdue  x0.5 of its EP, never lowers your max Magicule
- *   Evolve  x1.5, it may evolve; 20% chance the cost comes out of your max Magicule
- *   Endow   x9,   it may evolve and grows its skills; 50% chance the cost comes out of your max
- */
+// naming, same as tensura (RequestNamingKeyPacket / RequestNamingMenuPacket)
+//
+// N while looking at something within 6 blocks opens the naming pop up. shift + N flips whether
+// other people can name you. the target has to give up first: under 25% health or weaker than 1% of
+// your EP. it also has to be weaker than you, sane, not named yet and not someone else's
+//
+// three ways to name it, each gives the target EP and costs you that much magicule (capped):
+//   subdue  x0.5 of its EP, never takes from your max magicule
+//   evolve  x1.5, it can evolve. 20% chance the cost comes out of your max magicule
+//   endow   x9, it can evolve and its skills grow. 50% chance it comes out of your max
 public final class Naming {
     public static final double LOW_HP = 25, MAX_EP_PERCENT = 1, MAX_GAIN = 1_000_000, MAX_COST = 3_000_000;
     public static final double[] GAIN = {0.5, 1.5, 9.0};
@@ -52,7 +50,7 @@ public final class Naming {
 
     private Naming() {}
 
-    /** N pressed. Shift toggles your own nameable status; otherwise opens naming for the creature in sight. */
+    // N pressed. shift flips your own nameable status, otherwise opens naming for whatever you're looking at
     public static void key(ServerPlayer player, boolean shift) {
         if (shift) {
             boolean now = !player.getData(Bonds.NAMEABLE);
@@ -72,7 +70,7 @@ public final class Naming {
                 sub.getHealth() / Math.max(1, sub.getMaxHealth()), gains[0], gains[1], gains[2], costs[0], costs[1], costs[2]));
     }
 
-    /** The living being you're looking at, within range. */
+    // whatever living thing you're looking at, in range
     static LivingEntity target(ServerPlayer player, double range) {
         Vec3 eye = player.getEyePosition(), look = player.getViewVector(1), end = eye.add(look.scale(range));
         LivingEntity best = null;
@@ -111,7 +109,7 @@ public final class Naming {
         return true;
     }
 
-    /** The pop-up's Name button. type 0 Subdue, 1 Evolve, 2 Endow. */
+    // name button in the pop up. type 0 subdue, 1 evolve, 2 endow
     public static void name(ServerPlayer owner, int entityId, String rawName, int type) {
         if (type < 0 || type > 2) return;
         String name = rawName.strip();
@@ -147,7 +145,7 @@ public final class Naming {
         }
         owner.sendSystemMessage(Component.translatable("jaycee.naming.named", sub.getType().getDescription(), name).withStyle(ChatFormatting.GOLD));
 
-        // the target's reward: half the gain to each max, and filled up
+        // what the target gets: half the gain to each max, then filled up
         EnergyData sd = EnergyAPI.get(sub);
         EnergyData grown = sd.withMax(sd.maxAura() + gain / 2, sd.maxMana() + gain / 2, sd.maxSpirit());
         EnergyAPI.set(sub, grown.withAura(Math.max(grown.aura(), grown.maxAura())).withMana(Math.max(grown.mana(), grown.maxMana())));
@@ -171,10 +169,10 @@ public final class Naming {
         EnergyAPI.set(owner, od);
     }
 
-    /** Evolve and Endow: a named player takes their race's Harvest Festival form, as in Tensura. */
+    // evolve and endow: a named player goes to their race's harvest festival form, like tensura
     private static void evolve(LivingEntity sub) {
         if (!(sub instanceof ServerPlayer p)) return;
-        // Tensura's getHarvestFestivalEvolution (Human -> Enlightened Human, Ogre -> Kijin...)
+        // tensura's getHarvestFestivalEvolution (human -> enlightened human, ogre -> kijin...)
         RaceAPI.race(p).ifPresent(r -> {
             String to = com.brightwebs.jaycee.race.TensuraRequirements.HARVEST.get(r.id().getPath());
             Race next = to == null ? null : RaceRegistry.get(com.brightwebs.jaycee.race.JayceeRaces.id(to));

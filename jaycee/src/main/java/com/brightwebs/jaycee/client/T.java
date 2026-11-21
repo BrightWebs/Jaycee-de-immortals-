@@ -2,10 +2,8 @@ package com.brightwebs.jaycee.client;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 
-/**
- * Maps a region of a reference design (its own pixel coordinates) into the menu frame:
- * frame = offset + (ref - src) * scale. Pages draw in their reference's coordinates.
- */
+// maps part of a mockup (in its own pixels) into the menu frame
+// frame = offset + (ref - src) * scale. pages just draw in their mockup's coords
 record T(float ox, float oy, float s, float sx, float sy) {
     static final T ID = new T(0, 0, 1, 0, 0);
 

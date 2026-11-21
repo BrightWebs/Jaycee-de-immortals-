@@ -21,9 +21,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
-/**
- * /race get | set | evolve | reset   and   /ep get | add | set   for testing and admins.
- */
+// /race get | set | evolve | reset and /ep get | add | set, for testing
 @EventBusSubscriber(modid = BrightCore.ID)
 public final class RaceCommand {
     private static final DynamicCommandExceptionType UNKNOWN =
@@ -33,6 +31,7 @@ public final class RaceCommand {
 
     @SubscribeEvent
     public static void register(RegisterCommandsEvent event) {
+        if (!BrightCore.legacyCommands()) return;  // content mod has its own commands
         var d = event.getDispatcher();
         d.register(Commands.literal(BrightCore.commandRoot()).requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).then(Commands.literal("race")
                 .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
@@ -61,7 +60,7 @@ public final class RaceCommand {
                                 .executes(c -> RaceAPI.evolve(EntityArgument.getPlayer(c, "player"), IdentifierArgument.getId(c, "race")) ? 1 : 0))))
                 .then(Commands.literal("reset").then(Commands.argument("player", EntityArgument.player())
                         .executes(c -> {
-                            // Clears the race so the race menu opens again.
+                            // clears the race so the race menu opens again
                             ServerPlayer p = EntityArgument.getPlayer(c, "player");
                             p.setData(BrightAttachments.RACE, RaceData.EMPTY);
                             p.setData(BrightAttachments.ENERGY, EnergyData.EMPTY);
@@ -82,7 +81,7 @@ public final class RaceCommand {
                 .then(Commands.literal("add").then(Commands.argument("player", EntityArgument.player())
                         .then(Commands.argument("amount", DoubleArgumentType.doubleArg(0, EnergyData.MAX_POOL))
                                 .executes(c -> {
-                                    // Split like a kill: 80% Aura, 20% Mana.
+                                    // split like a kill, 80% aura 20% mana
                                     ServerPlayer p = EntityArgument.getPlayer(c, "player");
                                     double amount = DoubleArgumentType.getDouble(c, "amount");
                                     EnergyData e = EnergyAPI.get(p);

@@ -8,32 +8,30 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.function.Supplier;
 
-/**
- * Server-side effect shapes built from Bright Core's particles. Abilities describe their look
- * with these (a burst, a ring, a beam...), so every effect stays consistent.
- * Particles sent with count 0 use dx/dy/dz as their velocity.
- */
+// effect shapes made out of our particles, server side. skills use these for their look
+// (burst, ring, beam...) so everything looks consistent
+// particles sent with count 0 use dx/dy/dz as velocity
 public final class Fx {
     private Fx() {}
 
     private static ParticleOptions p(Supplier<SimpleParticleType> type) { return type.get(); }
 
-    /** One particle moving with the given velocity. */
+    // one particle moving at this velocity
     public static void move(ServerLevel l, Supplier<SimpleParticleType> type, Vec3 at, Vec3 vel) {
         l.sendParticles(p(type), at.x, at.y, at.z, 0, vel.x, vel.y, vel.z, 1);
     }
 
-    /** A puff of particles flying outward from a point. */
+    // puff of particles flying out from a point
     public static void burst(ServerLevel l, Supplier<SimpleParticleType> type, Vec3 at, int count, double speed) {
         for (int i = 0; i < count; i++) move(l, type, at, randomDir(l).scale(speed * (0.4 + l.getRandom().nextDouble() * 0.6)));
     }
 
-    /** Particles scattered in a box around a point, drifting. */
+    // particles scattered in a box around a point, drifting
     public static void cloud(ServerLevel l, Supplier<SimpleParticleType> type, Vec3 at, int count, double spread) {
         l.sendParticles(p(type), at.x, at.y, at.z, count, spread, spread, spread, 0.01);
     }
 
-    /** A flat ring (on the ground or around a body); outward > 0 makes it expand. */
+    // flat ring (on the ground or around a body). outward > 0 makes it grow
     public static void ring(ServerLevel l, Supplier<SimpleParticleType> type, Vec3 c, double radius, int points, double outward) {
         for (int i = 0; i < points; i++) {
             double a = Math.PI * 2 * i / points, x = Math.cos(a), z = Math.sin(a);
@@ -41,19 +39,19 @@ public final class Fx {
         }
     }
 
-    /** A hollow sphere of particles. */
+    // hollow ball of particles
     public static void sphere(ServerLevel l, Supplier<SimpleParticleType> type, Vec3 c, double radius, int points) {
         for (int i = 0; i < points; i++) move(l, type, c.add(randomDir(l).scale(radius)), Vec3.ZERO);
     }
 
-    /** A straight beam from one point to another. */
+    // straight beam from one point to another
     public static void beam(ServerLevel l, Supplier<SimpleParticleType> type, Vec3 from, Vec3 to, double step) {
         Vec3 d = to.subtract(from);
         int n = Math.max(1, (int) (d.length() / step));
         for (int i = 0; i <= n; i++) move(l, type, from.add(d.scale(i / (double) n)), Vec3.ZERO);
     }
 
-    /** A rising spiral (auras, summons, transformations). */
+    // spiral going up (auras, summons, transformations)
     public static void spiral(ServerLevel l, Supplier<SimpleParticleType> type, Vec3 base, double radius, double height, double turns, int points, double phase) {
         for (int i = 0; i < points; i++) {
             double t = i / (double) points, a = phase + t * turns * Math.PI * 2;
@@ -61,7 +59,7 @@ public final class Fx {
         }
     }
 
-    /** A column rising from the ground (pillars, healing, ascension). */
+    // column coming up from the ground (pillars, healing, ascending)
     public static void column(ServerLevel l, Supplier<SimpleParticleType> type, Vec3 base, double radius, int count, double speed) {
         for (int i = 0; i < count; i++) {
             double a = l.getRandom().nextDouble() * Math.PI * 2, r = l.getRandom().nextDouble() * radius;
@@ -69,7 +67,7 @@ public final class Fx {
         }
     }
 
-    /** A cone spraying along a direction (breaths, sprays). */
+    // cone spraying in a direction (breaths, sprays)
     public static void cone(ServerLevel l, Supplier<SimpleParticleType> type, Vec3 from, Vec3 dir, double speed, double spread, int count) {
         Vec3 n = dir.normalize();
         for (int i = 0; i < count; i++) {
@@ -78,7 +76,7 @@ public final class Fx {
         }
     }
 
-    /** A magic circle on the ground: an outer ring with runes turning inside. */
+    // magic circle on the ground, outer ring with runes spinning inside
     public static void magicCircle(ServerLevel l, Supplier<SimpleParticleType> ringType, Vec3 c, double radius, int tick) {
         ring(l, ringType, c.add(0, 0.05, 0), radius, 24, 0);
         for (int i = 0; i < 6; i++) {
@@ -87,13 +85,13 @@ public final class Fx {
         }
     }
 
-    /** A shockwave ring plus a ground ring expanding outward. */
+    // shockwave ring plus a ground ring spreading out
     public static void shockwave(ServerLevel l, Vec3 c, double power) {
         move(l, BrightParticles.SHOCKWAVE, c, Vec3.ZERO);
         ring(l, BrightParticles.GUST, c, 0.5, 16, 0.25 * power);
     }
 
-    /** An aura rising around a body. */
+    // aura rising around a body
     public static void aura(ServerLevel l, Supplier<SimpleParticleType> type, Entity e, int count) {
         column(l, type, e.position(), e.getBbWidth() * 0.7, count, 0.04);
     }

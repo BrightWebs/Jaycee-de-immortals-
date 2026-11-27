@@ -130,7 +130,7 @@ public final class GreatSage {
     }
 
     // while the scan is on whatever you look at gets analyzed on screen. mastery makes it reach further and show more
-    private static void scan(ServerPlayer p, Ability a) {
+    static void scan(ServerPlayer p, Ability a) {
         boolean m = Tk.mastered(p, a) || hasRaphael(p);
         int radius = m ? RADIUS_MASTERED : RADIUS, level = m ? ANALYSIS_LEVEL_MASTERED : ANALYSIS_LEVEL;
         int mode = (int) StatusData.counter(p, "sage_scan_mode");

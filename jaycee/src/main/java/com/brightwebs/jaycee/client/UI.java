@@ -104,13 +104,25 @@ public final class UI {
 
     public static void abilityIcon(GuiGraphicsExtractor g, Ability a, float cx, float cy, float size) {
         String p = "../ability/" + a.id().getPath();
-        if (!TexSizes.S.containsKey(p)) return;
+        if (!hasIcon(p)) return;
         tex(g, p, cx - size / 2, cy - size / 2, size, size);
+    }
+
+    // icons that aren't in TexSizes still show if the png is there (they're all square, so the size is just for the ratio)
+    private static final java.util.Map<String, Boolean> ICON_SEEN = new java.util.HashMap<>();
+
+    static boolean hasIcon(String p) {
+        if (TexSizes.S.containsKey(p)) return true;
+        return ICON_SEEN.computeIfAbsent(p, k -> {
+            boolean there = net.minecraft.client.Minecraft.getInstance().getResourceManager().getResource(gui(k)).isPresent();
+            if (there) TexSizes.S.put(k, new int[]{64, 64});
+            return there;
+        });
     }
 
     public static void modeIcon(GuiGraphicsExtractor g, Ability a, int mode, float cx, float cy, float size) {
         String p = "../ability/mode/" + a.id().getPath() + "_" + a.mode(mode).key();
-        if (!TexSizes.S.containsKey(p)) { abilityIcon(g, a, cx, cy, size); return; }
+        if (!hasIcon(p)) { abilityIcon(g, a, cx, cy, size); return; }
         tex(g, p, cx - size / 2, cy - size / 2, size, size);
     }
 

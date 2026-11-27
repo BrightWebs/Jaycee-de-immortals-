@@ -73,6 +73,7 @@ public class MenuScreen extends Screen {
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor g, int mx, int my, float dt) {
+        com.brightwebs.brightcore.api.util.Safe.run("MenuScreen.text", () -> UI.textInput(this, pages.get(page).wantsText()));
         com.brightwebs.brightcore.api.util.Safe.run("MenuScreen.extractRenderState", () -> {
             LocalPlayer p = player();
             if (p == null) return;
@@ -202,6 +203,12 @@ public class MenuScreen extends Screen {
             if (event.key() != 256 && JayceeClient.MENU.matches(event)) { page = Id.STATUS; onClose(); return true; }
             return super.keyPressed(event);
         }, false);
+    }
+
+    @Override
+    public void removed() {
+        com.brightwebs.brightcore.api.util.Safe.run("MenuScreen.removed", () -> UI.textInput(this, false));
+        super.removed();
     }
 
     // esc: back to status, or close if you're already on status

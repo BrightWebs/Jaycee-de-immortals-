@@ -645,6 +645,9 @@ final class EditorPage extends Page {
     }
 
     @Override
+    boolean wantsText() { return editingHex; }
+
+    @Override
     boolean typed(int cp) {
         if (!editingHex) return false;
         char c = Character.toUpperCase((char) cp);

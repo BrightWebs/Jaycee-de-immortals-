@@ -9,7 +9,8 @@ public enum SkillType {
     ULTIMATE("Ultimate", 10_000, 0xFFE07BFF),
     RESISTANCE("Resistance", 100, 0xFFC2B59B),
     NULLIFICATION("Nullification", 100, 0xFFE9E1C8),
-    MAGIC("Magic", 1_000, 0xFF8FB8FF);
+    MAGIC("Magic", 1_000, 0xFF8FB8FF),
+    ARTS("Arts", 500, 0xFFFFA86B);
 
     private final String label;
     private final int maxMastery;

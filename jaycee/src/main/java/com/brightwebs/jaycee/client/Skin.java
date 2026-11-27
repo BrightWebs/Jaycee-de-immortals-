@@ -17,6 +17,8 @@ final class Skin {
             case RESISTANCE -> "resistance";
             case NULLIFICATION -> "nullification";
             case MAGIC -> "magic";
+            // arts (battlewill) use the extra cards until they get their own tab
+            case ARTS -> "extra";
         };
     }
 
@@ -30,7 +32,7 @@ final class Skin {
             case "resistance" -> a.type() == SkillType.RESISTANCE || a.type() == SkillType.NULLIFICATION;
             case "intrinsic" -> a.type() == SkillType.INTRINSIC;
             case "common" -> a.type() == SkillType.COMMON;
-            case "extra" -> a.type() == SkillType.EXTRA;
+            case "extra" -> a.type() == SkillType.EXTRA || a.type() == SkillType.ARTS;
             case "unique" -> a.type() == SkillType.UNIQUE;
             case "ultimate" -> a.type() == SkillType.ULTIMATE;
             default -> a.isMagic() && pill(a).equals(cat);

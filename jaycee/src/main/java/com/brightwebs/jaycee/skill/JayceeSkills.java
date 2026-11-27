@@ -481,6 +481,8 @@ public final class JayceeSkills {
     public static Identifier id(String path) { return Identifier.fromNamespaceAndPath(JayceeMod.ID, path); }
 
     public static void init(IEventBus modBus) {
+        // everything else from the lore list, after the hand made ones so those always win
+        LoreSkills.register(SKILLS);
         SKILLS.register(modBus);
         BrightSkills.addStartingUnique(id("great_sage"));
         BrightSkills.addStartingUnique(id("predator"));

@@ -1,0 +1,10 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:display_context",
+    "cases": [
+      { "when": ["gui", "ground", "fixed", "on_shelf"], "model": { "type": "minecraft:model", "model": "jaycee:item/body_armor_gauntlet" } }
+    ],
+    "fallback": { "type": "minecraft:empty" }
+  }
+}

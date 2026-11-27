@@ -30,7 +30,7 @@
  "ability.jaycee.flame_breath": "Flame Breath",
  "ability.jaycee.flame_breath.desc": "Hold to breathe a stream of fire: 8 damage a second (16 mastered) for 30 magicules a second.",
  "ability.jaycee.body_armor": "Body Armor",
- "ability.jaycee.body_armor.desc": "Press to grow scale armor into every empty armor slot (50 magicules). Press again with all four slots filled to shed it. The scales vanish if taken off.",
+ "ability.jaycee.body_armor.desc": "Press to grow scale armor over every empty armor slot (5 / 10 / 8 / 5 armor, 4 toughness each). Press again with all four on to shed it. Shift + press grows a clawed gauntlet on your main hand (hits for 23, and you can block with it). Costs 50 magicules.",
  "ability.jaycee.flame_attack_resistance": "Flame Attack Resistance",
  "ability.jaycee.flame_attack_resistance.desc": "Reduces fire and heat damage. Learned by enduring flames; grows stronger with every hit.",
  "ability.jaycee.flame_attack_nullification": "Flame Attack Nullification",
@@ -3058,5 +3058,11 @@
  "jaycee.lore.cast_stopped": "%s: let go too early, the cast fell apart.",
  "jaycee.lore.cast_ready": "%s is ready. Let go to cast!",
  "jaycee.lore.casting": "Casting %s... %ss",
- "jaycee.lore.blocked": "Something is in the way."
+ "jaycee.lore.blocked": "Something is in the way.",
+ "item.jaycee.body_armor_helmet": "Scale Helm",
+ "item.jaycee.body_armor_chestplate": "Scale Mail",
+ "item.jaycee.body_armor_leggings": "Scale Greaves",
+ "item.jaycee.body_armor_boots": "Scale Treads",
+ "item.jaycee.body_armor_gauntlet": "Scale Gauntlet",
+ "jaycee.skill.body_armor.hand_full": "Empty your main hand to grow the gauntlet."
 }

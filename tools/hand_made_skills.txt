@@ -42,3 +42,4 @@ water_blade
 water_breathing
 flame_attack_resistance
 flame_attack_nullification
+body_armor

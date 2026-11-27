@@ -32,6 +32,8 @@ abstract class Page {
     boolean release(double mx, double my) { return false; }
 
     boolean typed(int codepoint) { return false; }
+    // true while one of this page's text fields is being typed in (26.3 only sends letters when the game knows that)
+    boolean wantsText() { return false; }
 
     boolean key(int key) { return false; }
 

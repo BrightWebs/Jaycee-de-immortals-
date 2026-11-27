@@ -279,6 +279,9 @@ final class LibraryPage extends Page {
     }
 
     @Override
+    boolean wantsText() { return searching; }
+
+    @Override
     boolean typed(int cp) {
         if (!searching || cp < 32 || search.length() >= 24) return false;
         search += new String(Character.toChars(cp));

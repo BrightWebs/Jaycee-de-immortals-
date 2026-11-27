@@ -31,6 +31,8 @@ public class NamingScreen extends Screen {
 
     @Override
     protected void init() {
+        // the name box is the whole point of this screen, so typing is on while it is open
+        com.brightwebs.brightcore.api.util.Safe.run("NamingScreen.text", () -> UI.textInput(this, true));
         k = Math.min(0.42f, Math.min(width * 0.9f / W, height * 0.9f / H));  // follows GUI scale
         left = (width - W * k) / 2;
         top = (height - H * k) / 2;
@@ -153,5 +155,11 @@ public class NamingScreen extends Screen {
 
     static void open(JayceeNetwork.OpenNaming info) {
         Minecraft.getInstance().setScreenAndShow(new NamingScreen(info));
+    }
+
+    @Override
+    public void removed() {
+        com.brightwebs.brightcore.api.util.Safe.run("NamingScreen.removed", () -> UI.textInput(this, false));
+        super.removed();
     }
 }

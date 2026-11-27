@@ -100,6 +100,16 @@ public final class UI {
         g.pose().popMatrix();
     }
 
+    // typing: minecraft 26.3 only hands a screen typed letters after it turns text input on (vanilla's EditBox
+    // does this when it gets focus). our own fields call this instead
+    private static boolean textOn;
+
+    static void textInput(Object owner, boolean on) {
+        if (on == textOn) return;
+        textOn = on;
+        net.minecraft.client.Minecraft.getInstance().textInputManager().onTextInputFocusChange(owner, on);
+    }
+
     // icons
 
     public static void abilityIcon(GuiGraphicsExtractor g, Ability a, float cx, float cy, float size) {

@@ -510,7 +510,8 @@ public final class LoreEngine {
             case "holy" -> t.addEffect(new MobEffectInstance(MobEffects.GLOWING, 100, 0), p);
             case "gust", "shockwave", "bubble", "drop" -> {
                 Vec3 push = t.position().subtract(p.position()).normalize();
-                t.knockback(0.6 + 0.3 * t2, -push.x, -push.z);
+                double kb = 0.6 + 0.3 * t2;
+                t.push(push.x * kb, 0.25, push.z * kb);
                 if (s.elem().equals("gust")) t.addEffect(new MobEffectInstance(MobEffects.LEVITATION, 15, 0), p);
                 if (!s.elem().equals("gust") && !s.elem().equals("shockwave")) t.clearFire();
             }

@@ -1,0 +1,1 @@
+{ "parent": "minecraft:item/generated", "textures": { "layer0": "jaycee:item/body_armor_gauntlet" } }

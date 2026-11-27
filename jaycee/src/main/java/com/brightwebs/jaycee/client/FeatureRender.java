@@ -51,7 +51,10 @@ public final class FeatureRender {
             @Override
             public <T extends Avatar & ClientAvatarEntity> void accept(T entity, AvatarRenderState state) {
                 com.brightwebs.brightcore.api.util.Safe.run("FeatureRender.modifier", () -> {
-                    if (entity instanceof Player p) apply(state, worn(p, Appearance.of(p)));
+                    if (entity instanceof Player p) {
+                        apply(state, worn(p, Appearance.of(p)));
+                        state.setRenderData(BodyArmorRender.KEY, BodyArmorRender.worn(p));
+                    }
                 });
             }
         });
@@ -61,7 +64,10 @@ public final class FeatureRender {
     public static void layers(EntityRenderersEvent.AddLayers event) {
         for (PlayerModelType type : event.getSkins()) {
             var renderer = event.getPlayerRenderer(type);
-            if (renderer != null) renderer.addLayer(new Layer(renderer));
+            if (renderer != null) {
+                renderer.addLayer(new Layer(renderer));
+                renderer.addLayer(new BodyArmorRender.Layer(renderer));
+            }
         }
     }
 

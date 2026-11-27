@@ -23,7 +23,33 @@ public final class FxParticle extends SingleQuadParticle {
     public record Style(int life, int lifeRand, float gravity, float friction, float size, float endSize,
                         float spin, boolean glow, boolean animate) {}
 
+    private static final Style SPARK_STYLE = new Style(5, 15, 0, 0.77f, 0.45f, 1f, 0, true, true);
+    private static final Style FIRE_STYLE = new Style(15, 10, -0.1f, 0.96f, 0.3f, 1f, 0, true, true);
+
     private static final Map<String, Style> STYLES = Map.ofEntries(
+            // tensura / manas reborn style ones. their lightning sparks: 5-20 ticks, x3 size, 0.77 friction, frames play out
+            Map.entry("spark_yellow", SPARK_STYLE), Map.entry("spark_blue", SPARK_STYLE), Map.entry("spark_purple", SPARK_STYLE),
+            Map.entry("spark_dark_purple", SPARK_STYLE), Map.entry("spark_dark_red", SPARK_STYLE), Map.entry("spark_red", SPARK_STYLE),
+            Map.entry("spark_green", SPARK_STYLE), Map.entry("spark_black", SPARK_STYLE),
+            // their fire: 15-25 ticks, rises (gravity -0.1), 1-2.75x size, frames play out
+            Map.entry("fire_red", FIRE_STYLE), Map.entry("fire_black", FIRE_STYLE), Map.entry("fire_plasma", FIRE_STYLE),
+            Map.entry("fire_illusion", FIRE_STYLE), Map.entry("fire_soul", FIRE_STYLE), Map.entry("fire_holy", FIRE_STYLE),
+            Map.entry("heat", new Style(12, 8, -0.05f, 0.96f, 0.3f, 1f, 0, true, true)),
+            Map.entry("shock_ring", new Style(8, 0, 0, 1f, 1.3f, 1.2f, 0, true, true)),
+            Map.entry("shock_ring_in", new Style(8, 0, 0, 1f, 1.3f, 1f, 0, true, true)),
+            Map.entry("slash_full", new Style(8, 0, 0, 1f, 1.5f, 1f, 0, true, true)),
+            Map.entry("slash_light", new Style(8, 0, 0, 1f, 1.5f, 1f, 0, true, true)),
+            // their snowflakes drift for 20-100 ticks and slowly start to fall
+            Map.entry("snowflake", new Style(20, 80, 0.01f, 0.9f, 0.2f, 1f, 0.02f, false, false)),
+            Map.entry("bubble_pop", new Style(10, 4, -0.01f, 0.96f, 0.22f, 1f, 0, false, true)),
+            Map.entry("solar_flash", new Style(6, 2, 0, 1f, 1f, 1.4f, 0, true, false)),
+            Map.entry("sonic_curl", new Style(8, 2, 0, 0.95f, 0.6f, 1f, 0, true, true)),
+            Map.entry("soul_wisp", new Style(24, 10, -0.02f, 0.96f, 0.3f, 1f, 0, false, true)),
+            Map.entry("bat", new Style(30, 10, 0, 0.98f, 0.35f, 1f, 0, false, false)),
+            Map.entry("blossom", new Style(20, 10, 0.002f, 0.98f, 0.15f, 1f, 0.05f, true, false)),
+            Map.entry("acid_drop", new Style(30, 10, 0.06f, 0.98f, 0.12f, 1f, 0, true, true)),
+            Map.entry("heal_drop", new Style(30, 10, 0.06f, 0.98f, 0.12f, 1f, 0, true, true)),
+
             Map.entry("flame", new Style(14, 8, -0.02f, 0.92f, 0.22f, 0.3f, 0, true, true)),
             Map.entry("black_flame", new Style(16, 8, -0.02f, 0.92f, 0.26f, 0.3f, 0, true, true)),
             Map.entry("ember", new Style(20, 12, -0.006f, 0.96f, 0.08f, 0.2f, 0, true, true)),

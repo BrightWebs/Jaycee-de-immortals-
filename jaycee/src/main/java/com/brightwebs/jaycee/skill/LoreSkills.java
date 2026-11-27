@@ -33,10 +33,23 @@ public final class LoreSkills {
     private LoreSkills() {}
     private static final org.slf4j.Logger LOG = com.mojang.logging.LogUtils.getLogger();
 
+    // one mode of a skill: its name and the action it does (LoreActions), with a power multiplier
+    public record Act(String k, String n, String a, float p) {}
+
     public record Spec(String id, String name, SkillType type, String rank, String elem, String acc, String arch,
                        int mp, int ap, float dmg, int cd, int cdm, float range, float radius, int cast, int castm,
                        String mclass, int dur, List<String> modes, boolean toggle, boolean tensura,
-                       String f1, String f2, int c1, int c2, Map<String, String> pats, List<String> tags) {
+                       String f1, String f2, int c1, int c2, Map<String, String> pats, List<String> tags, List<Act> acts) {
+        // the same skill drawing one kind of thing with a different pattern
+        Spec with(String kind, String pattern) {
+            Map<String, String> m = new java.util.HashMap<>(pats);
+            m.put(kind, pattern);
+            return new Spec(id, name, type, rank, elem, acc, arch, mp, ap, dmg, cd, cdm, range, radius, cast, castm, mclass, dur, modes, toggle, tensura, f1, f2, c1, c2, m, tags, acts);
+        }
+        Spec withRange(float r) {
+            return new Spec(id, name, type, rank, elem, acc, arch, mp, ap, dmg, cd, cdm, r, radius, cast, castm, mclass, dur, modes, toggle, tensura, f1, f2, c1, c2, pats, tags, acts);
+        }
+        Act act(int mode) { return acts.isEmpty() ? new Act("cast", name, "buff", 1) : acts.get(Math.floorMod(mode, acts.size())); }
         // the look pattern for one kind of thing this skill does
         String pat(String kind) { return pats.getOrDefault(kind, pats.getOrDefault(arch, "")); }
         boolean tag(String t) { return tags.contains(t); }
@@ -63,6 +76,11 @@ public final class LoreSkills {
                     if (fx.has("pat")) for (var e : fx.getAsJsonObject("pat").entrySet()) pats.put(e.getKey(), e.getValue().getAsString());
                     List<String> tags = new ArrayList<>();
                     if (fx.has("tags")) for (JsonElement t : fx.getAsJsonArray("tags")) tags.add(t.getAsString());
+                    List<Act> acts = new ArrayList<>();
+                    if (o.has("acts")) for (JsonElement ae : o.getAsJsonArray("acts")) {
+                        JsonObject ao = ae.getAsJsonObject();
+                        acts.add(new Act(str(ao, "k", "mode"), str(ao, "n", ""), str(ao, "a", "buff"), (float) dbl(ao, "p", 1)));
+                    }
                     Spec s = new Spec(str(o, "id", ""), str(o, "name", ""), SkillType.valueOf(str(o, "type", "EXTRA")), str(o, "rank", "extra"),
                             str(o, "elem", "aura"), str(o, "acc", "aura"), str(o, "arch", "aura"),
                             num(o, "mp", 0), num(o, "ap", 0), (float) dbl(o, "dmg", 10), num(o, "cd", 60), num(o, "cdm", 30),
@@ -70,7 +88,7 @@ public final class LoreSkills {
                             str(o, "mclass", "other"), num(o, "dur", 600), modes, o.has("toggle") && o.get("toggle").getAsBoolean(),
                             "tensura".equals(str(o, "src", "")),
                             str(fx, "f1", str(o, "elem", "aura")), str(fx, "f2", str(o, "acc", "aura")),
-                            color(str(fx, "c1", "#c9a7ff")), color(str(fx, "c2", "#ffffff")), pats, tags);
+                            color(str(fx, "c1", "#c9a7ff")), color(str(fx, "c2", "#ffffff")), pats, tags, acts);
                     if (!s.id().isEmpty()) SPECS.put(s.id(), s);
                 } catch (Exception bad) {
                     LOG.warn("[Jaycee] skipped a broken lore skill entry: {}", bad.toString());
@@ -120,16 +138,13 @@ public final class LoreSkills {
         Ability.Properties p = new Ability.Properties().type(s.type()).category(category(s.arch()));
         if (s.resist()) return p.passive().switchable();
         if (s.magic()) p.magic(s.mclass(), s.elem(), s.cast() / 20f, Math.round(s.range())).held();
-        // cooldowns are set by the engine itself (they're shorter once mastered), so the modes carry 0
-        if (s.modes().isEmpty()) {
-            p.mode("cast", s.mp(), s.ap(), 0);
-            if (s.toggle()) p.toggle();
-        } else {
-            for (String m : s.modes()) {
-                int mult = m.equals("awaken") ? 2 : 1;
-                p.mode(m, s.mp() * mult, s.ap() * mult, 0);
-            }
+        // one mode per real ability of the skill. cooldowns are set by the engine (shorter once mastered), so modes carry 0
+        if (s.acts().isEmpty()) p.mode("cast", s.mp(), s.ap(), 0);
+        for (Act a : s.acts()) {
+            double k = LoreActions.costMult(a.a());
+            p.mode(a.k(), (int) Math.round(s.mp() * k), (int) Math.round(s.ap() * k), 0);
         }
+        if (s.toggle() && s.acts().size() <= 1) p.toggle();
         return p;
     }
 
@@ -143,13 +158,14 @@ public final class LoreSkills {
         }
 
         @Override public Component modeName(int index) {
-            if (spec.modes().isEmpty()) return name();
-            return Component.translatable("jaycee.lore.mode." + spec.archOf(index));
+            if (spec.acts().size() <= 1) return name();
+            Act a = spec.act(index);
+            return Component.translatableWithFallback("ability.jaycee." + spec.id() + ".mode." + a.k(), a.n());
         }
 
         @Override public boolean activate(ServerPlayer p, ServerLevel l, int mode) {
             if (spec.magic()) return true;  // magic is held: the circle builds up and it goes off when you let go
-            return LoreEngine.use(p, this, spec, spec.archOf(mode));
+            return LoreEngine.use(p, this, spec, spec.act(mode));
         }
 
         @Override public boolean onHeld(ServerPlayer p, ServerLevel l, int mode, int held) {
@@ -159,12 +175,12 @@ public final class LoreSkills {
 
         @Override public void onRelease(ServerPlayer p, ServerLevel l, int mode, int held) {
             if (!spec.magic()) return;
-            int need = AbilityAPI.isMastered(p, this) ? spec.castm() : spec.cast();
+            int need = LoreEngine.castNeed(p, this, spec);
             if (held < need) {
                 p.sendOverlayMessage(Component.translatable("jaycee.lore.cast_stopped", name()).withStyle(ChatFormatting.GRAY));
                 return;
             }
-            LoreEngine.use(p, this, spec, spec.archOf(mode));
+            LoreEngine.use(p, this, spec, spec.act(mode));
         }
 
         @Override public void tick(ServerPlayer p, ServerLevel l) {
@@ -179,7 +195,7 @@ public final class LoreSkills {
         @Override public void onForgotten(ServerPlayer p) { LoreEngine.stop(p, spec); }
 
         @Override public void onHit(ServerPlayer p, net.minecraft.world.entity.LivingEntity target, float damage) {
-            if (spec.arch().equals("aura") && LoreEngine.isActive(p, spec)) LoreEngine.element(p, target, spec, damage * 0.25f);
+            if (LoreEngine.isActive(p, spec)) LoreEngine.element(p, target, spec, damage * 0.25f);
         }
 
         Identifier key() { return id(); }

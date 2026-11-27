@@ -67,29 +67,23 @@ public final class LoreEngine {
 
     // ------------------------------------------------------------ using a skill
 
-    static boolean use(ServerPlayer p, Ability a, Spec s, String arch) {
+    static boolean use(ServerPlayer p, Ability a, Spec s, LoreSkills.Act act) {
         ServerLevel l = (ServerLevel) p.level();
-        float dmg = s.dmg() * (1f + 0.25f * AbilityAPI.masteryFraction(p, a));
-        boolean ok = switch (arch) {
-            case "projectile" -> shoot(p, s, dmg);
-            case "beam" -> beam(p, s, dmg);
-            case "cone" -> cone(p, s, dmg);
-            case "area" -> area(p, s, dmg);
-            case "slash" -> slash(p, s, dmg);
-            case "heal" -> heal(p, s, dmg);
-            case "move" -> move(p, s);
-            case "summon" -> summon(p, s);
-            case "aura", "guard", "sense", "awaken" -> timed(p, s, arch);
-            default -> false;
-        };
+        boolean ok = LoreActions.run(p, a, s, act);
         if (!ok) return false;
         AbilityAPI.addMasteryPoint(p, a);
-        int cd = AbilityAPI.isMastered(p, a) ? s.cdm() : s.cd();
-        if (arch.equals("awaken")) cd = Math.max(cd, s.dur() + 600);
-        if (arch.equals("summon")) cd = Math.max(cd, 600);
+        int cd = LoreActions.cooldown(s, act, AbilityAPI.isMastered(p, a));
         if (cd > 0) AbilityAPI.setCooldown(p, a, cd);
-        sound(l, p, s, arch);
+        sound(l, p, s, LoreActions.kind(act.a()));
         return true;
+    }
+
+    // how long a spell has to be held. chant annulment (or great sage's instant cast) skips the chant
+    static int castNeed(ServerPlayer p, Ability a, Spec s) {
+        if (SkillState.instantCast(p)) return 0;
+        Map<String, Active> mine = ACTIVE.get(p.getUUID());
+        if (mine != null) for (Active x : mine.values()) if (x.arch.equals("chant")) return 0;
+        return AbilityAPI.isMastered(p, a) ? s.castm() : s.cast();
     }
 
     // magic: the circle under you while you build up the cast, like tensura's castMagicCircle
@@ -122,7 +116,7 @@ public final class LoreEngine {
         }
     }
 
-    private static boolean shoot(ServerPlayer p, Spec s, float dmg) {
+    static boolean shoot(ServerPlayer p, Spec s, float dmg) {
         ServerLevel l = (ServerLevel) p.level();
         Vec3 dir = p.getLookAngle();
         double speed = s.type() == SkillType.ULTIMATE ? 2.4 : 1.6;
@@ -192,7 +186,7 @@ public final class LoreEngine {
     }
 
     // a straight ray, hits everything on the line
-    private static boolean beam(ServerPlayer p, Spec s, float dmg) {
+    static boolean beam(ServerPlayer p, Spec s, float dmg) {
         ServerLevel l = (ServerLevel) p.level();
         Vec3 eye = p.getEyePosition(), end = eye.add(p.getLookAngle().scale(s.range()));
         BlockHitResult wall = l.clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, p));
@@ -206,7 +200,7 @@ public final class LoreEngine {
     }
 
     // breaths and sprays: everything in front of you within range
-    private static boolean cone(ServerPlayer p, Spec s, float dmg) {
+    static boolean cone(ServerPlayer p, Spec s, float dmg) {
         ServerLevel l = (ServerLevel) p.level();
         Vec3 eye = LoreFx.mouth(p), look = p.getLookAngle();
         double range = Math.min(s.range(), 12);
@@ -219,9 +213,8 @@ public final class LoreEngine {
     }
 
     // storms, rains, explosions: lands where you look
-    private static boolean area(ServerPlayer p, Spec s, float dmg) {
+    static boolean area(ServerPlayer p, Spec s, float dmg, Vec3 at) {
         ServerLevel l = (ServerLevel) p.level();
-        Vec3 at = aim(p, s.range());
         float r = Math.max(2, s.radius());
         for (LivingEntity e : near(l, p, at, r)) hurt(p, e, s, dmg);
         // gravity storms drag everything to the middle, vortexes too
@@ -231,7 +224,7 @@ public final class LoreEngine {
     }
 
     // melee arts and claws: a sweep in front of you. your own attack adds in, like tensura's attack multipliers
-    private static boolean slash(ServerPlayer p, Spec s, float dmg) {
+    static boolean slash(ServerPlayer p, Spec s, float dmg) {
         ServerLevel l = (ServerLevel) p.level();
         Vec3 eye = p.getEyePosition(), look = p.getLookAngle();
         double reach = Math.max(4, Math.min(s.range(), 8));
@@ -246,7 +239,7 @@ public final class LoreEngine {
     }
 
     // heals you a lot and people near you some. cures and antidotes clear bad effects
-    private static boolean heal(ServerPlayer p, Spec s, float dmg) {
+    static boolean heal(ServerPlayer p, Spec s, float dmg) {
         ServerLevel l = (ServerLevel) p.level();
         float amount = Math.max(6, dmg);
         p.heal(amount);
@@ -262,12 +255,12 @@ public final class LoreEngine {
     }
 
     // dashes and teleports: straight to where you look (or right behind someone if you look at them)
-    private static boolean move(ServerPlayer p, Spec s) {
+    static boolean move(ServerPlayer p, Spec s, boolean behind) {
         ServerLevel l = (ServerLevel) p.level();
         Vec3 from = p.position();
         LivingEntity t = SkillHelper.targetQuiet(p, s.range());
         Vec3 to;
-        if (t != null && foe(p, t)) {
+        if (behind && t != null && foe(p, t)) {
             to = t.position().subtract(t.getLookAngle().multiply(1, 0, 1).normalize().scale(1.5));
         } else {
             Vec3 eye = p.getEyePosition(), end = eye.add(p.getLookAngle().scale(s.range()));
@@ -292,9 +285,9 @@ public final class LoreEngine {
     private static final List<Summon> SUMMONS = new ArrayList<>();
 
     // what shows up depends on the element. they fight for you and leave after a while
-    private static boolean summon(ServerPlayer p, Spec s) {
+    static boolean summon(ServerPlayer p, Spec s, EntityType<?> forced, int countMult) {
         ServerLevel l = (ServerLevel) p.level();
-        EntityType<?> type = switch (s.elem()) {
+        EntityType<?> type = forced != null ? forced : switch (s.elem()) {
             case "flame", "ember", "black_flame" -> EntityTypes.BLAZE;
             case "frost" -> EntityTypes.STRAY;
             case "gust" -> EntityTypes.BREEZE;
@@ -305,7 +298,7 @@ public final class LoreEngine {
             case "holy", "shard", "shockwave", "aura" -> EntityTypes.IRON_GOLEM;
             default -> EntityTypes.WOLF;
         };
-        int count = switch (s.type()) { case ULTIMATE -> 3; case UNIQUE, MAGIC -> 2; default -> 1; };
+        int count = countMult * switch (s.type()) { case ULTIMATE -> 3; case UNIQUE, MAGIC -> 2; default -> 1; };
         Vec3 at = aim(p, Math.min(s.range(), 8));
         for (int i = 0; i < count; i++) {
             Entity e = type.create(l, EntitySpawnReason.MOB_SUMMONED);
@@ -348,16 +341,16 @@ public final class LoreEngine {
     private record Active(Spec spec, String arch, long until) {}
     private static final Map<UUID, Map<String, Active>> ACTIVE = new HashMap<>();
 
-    private static boolean timed(ServerPlayer p, Spec s, String arch) {
-        int dur = arch.equals("awaken") ? s.dur() : Math.min(s.dur(), 600);
-        ACTIVE.computeIfAbsent(p.getUUID(), k -> new HashMap<>()).put(s.id() + "/" + arch, new Active(s, arch, p.level().getGameTime() + dur));
-        started(p, s, arch);
+    static boolean timed(ServerPlayer p, Spec s, String act, int dur) {
+        ACTIVE.computeIfAbsent(p.getUUID(), k -> new HashMap<>()).put(s.id() + "/" + act, new Active(s, act, p.level().getGameTime() + dur));
+        started(p, s, act);
         return true;
     }
 
     // the moment it switches on: the big version of its look, and a sound (toggles come through here too)
-    static void started(ServerPlayer p, Spec s, String arch) {
+    static void started(ServerPlayer p, Spec s, String act) {
         ServerLevel l = (ServerLevel) p.level();
+        String arch = LoreActions.kind(act);
         LoreFx.self(l, s, p, arch, p.tickCount, true);
         if (arch.equals("awaken")) {
             LoreFx.self(l, s, p, "awaken", p.tickCount, true);
@@ -370,7 +363,8 @@ public final class LoreEngine {
     // toggles: on until you switch it off, costs a tenth of the skill's price every second
     static void toggledTick(ServerPlayer p, Ability a, Spec s) {
         Map<String, Active> mine = ACTIVE.computeIfAbsent(p.getUUID(), k -> new HashMap<>());
-        mine.putIfAbsent(s.id() + "/" + s.arch(), new Active(s, s.arch(), Long.MAX_VALUE));
+        String act = s.act(0).a();
+        mine.putIfAbsent(s.id() + "/" + act, new Active(s, act, Long.MAX_VALUE));
         if (p.tickCount % 20 == 0 && !p.isCreative()) {
             int mp = Math.max(0, s.mp() / 10), ap = Math.max(0, s.ap() / 10);
             boolean paid = (mp == 0 || EnergyAPI.spendMana(p, mp)) && (ap == 0 || EnergyAPI.spendAura(p, ap));
@@ -400,7 +394,7 @@ public final class LoreEngine {
     }
 
     // how strong buffs are by rank
-    private static int tier(Spec s) {
+    static int tier(Spec s) {
         return switch (s.type()) { case ULTIMATE -> 3; case UNIQUE -> 2; case EXTRA, MAGIC -> 1; default -> 0; };
     }
 
@@ -420,31 +414,54 @@ public final class LoreEngine {
         });
     }
 
-    private static void apply(ServerPlayer p, Spec s, String arch) {
+    // what an action that sits on you does every tick while it's on (toggles and timed modes)
+    private static void apply(ServerPlayer p, Spec s, String act) {
         ServerLevel l = (ServerLevel) p.level();
         int t = tier(s);
-        switch (arch) {
-            case "aura" -> {
-                // the skill's element pours off you: more attack, and on-hit elemental effects (see onHit)
+        String kind = LoreActions.kind(act);
+        switch (act) {
+            case "buff" -> {
+                // the skill's power pours off you: more attack, and its element on your hits (see onHit)
                 attr(p, Attributes.ATTACK_DAMAGE, mod(s, "atk"), 2 + t * 3);
                 if (s.elem().matches("gust|spark|ember")) attr(p, Attributes.MOVEMENT_SPEED, mod(s, "spd"), 0.01 + 0.01 * t);
                 if (s.elem().matches("frost|shard|rune|holy|aura")) attr(p, Attributes.ARMOR, mod(s, "arm"), 2 + t * 2);
                 if (s.elem().matches("heal|petal|holy")) SkillHelper.keep(p, MobEffects.REGENERATION, Math.min(1, t));
-                if (s.elem().matches("mist|void")) SkillHelper.keep(p, MobEffects.INVISIBILITY, 0);
                 if (s.tag("beast")) { SkillHelper.keep(p, MobEffects.SPEED, 0); SkillHelper.keep(p, MobEffects.STRENGTH, 0); }
-                if (s.tag("undying")) SkillHelper.keep(p, MobEffects.REGENERATION, 1);
-                if (p.tickCount % 5 == 0) LoreFx.self(l, s, p, arch, p.tickCount, false);
             }
-            case "guard" -> {
-                // the damage cut is in onIncomingDamage. barriers also give a layer of absorption
+            case "rage" -> {
+                // gets stronger the longer it stays on, like wrath
+                Map<String, Active> mine = ACTIVE.get(p.getUUID());
+                Active me = mine == null ? null : mine.get(s.id() + "/rage");
+                long on = me == null || me.until == Long.MAX_VALUE ? (p.tickCount % 2400) : (s.dur() - (me.until - l.getGameTime()));
+                SkillHelper.keep(p, MobEffects.STRENGTH, (int) Math.min(2 + t, on / 300));
+                SkillHelper.keep(p, MobEffects.SPEED, 0);
+                attr(p, Attributes.ARMOR, mod(s, "arm"), -2);
+            }
+            case "haste" -> { SkillHelper.keep(p, MobEffects.SPEED, 1 + Math.min(1, t)); SkillHelper.keep(p, MobEffects.HASTE, 1); attr(p, Attributes.ATTACK_SPEED, mod(s, "spd"), 0.5 + 0.3 * t); }
+            case "invis", "mimic" -> {
+                SkillHelper.keep(p, MobEffects.INVISIBILITY, 0);
+                if (p.tickCount % 10 == 0) for (Mob m : l.getEntitiesOfClass(Mob.class, p.getBoundingBox().inflate(16), m -> m.getTarget() == p)) m.setTarget(null);
+            }
+            case "barrier", "reflect" -> {
+                // the damage cut (and reflecting) is in onIncomingDamage
                 attr(p, Attributes.ARMOR, mod(s, "arm"), 4 + t * 3);
                 attr(p, Attributes.KNOCKBACK_RESISTANCE, mod(s, "kb"), 0.25 + 0.15 * t);
-                if (p.tickCount % 6 == 0) LoreFx.self(l, s, p, arch, p.tickCount, false);
             }
+            case "protect", "music" -> {
+                // you and everyone on your side nearby
+                if (p.tickCount % 20 == 0) for (LivingEntity e : l.getEntitiesOfClass(LivingEntity.class, p.getBoundingBox().inflate(12), e -> e == p || !foe(p, e))) {
+                    e.addEffect(new MobEffectInstance(act.equals("music") ? MobEffects.SPEED : MobEffects.RESISTANCE, 60, Math.min(1, t), true, true));
+                    e.addEffect(new MobEffectInstance(act.equals("music") ? MobEffects.STRENGTH : MobEffects.REGENERATION, 60, 0, true, true));
+                    if (e != p && p.tickCount % 40 == 0) LoreFx.self(l, s, e, kind, p.tickCount, false);
+                }
+                if (act.equals("music") && p.tickCount % 20 == 0) for (LivingEntity e : near(l, p, p.position(), 10)) e.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 60, t), p);
+                if (act.equals("music") && p.tickCount % 8 == 0) l.sendParticles(net.minecraft.core.particles.ParticleTypes.NOTE, p.getX(), p.getY() + 2.2, p.getZ(), 1, 0.4, 0.1, 0.4, 1);
+            }
+            case "regen" -> SkillHelper.keep(p, MobEffects.REGENERATION, 1 + Math.min(1, t));
+            case "undying" -> SkillHelper.keep(p, MobEffects.REGENERATION, 0);
             case "sense" -> {
                 if (p.tickCount % 10 == 0) MagicSense.glowAround(p, 16 + 8 * t);
                 SkillHelper.keep(p, MobEffects.NIGHT_VISION, 0);
-                if (p.tickCount % 6 == 0) LoreFx.self(l, s, p, arch, p.tickCount, false);
             }
             case "awaken" -> {
                 SkillHelper.keep(p, MobEffects.STRENGTH, t);
@@ -452,10 +469,11 @@ public final class LoreEngine {
                 SkillHelper.keep(p, MobEffects.SPEED, Math.min(2, t));
                 SkillHelper.keep(p, MobEffects.REGENERATION, Math.min(1, t));
                 attr(p, Attributes.MAX_HEALTH, mod(s, "hp"), 10 + 10 * t);
-                if (p.tickCount % 4 == 0) LoreFx.self(l, s, p, arch, p.tickCount, false);
             }
             default -> {}
         }
+        int every = kind.equals("awaken") ? 4 : 6;
+        if (p.tickCount % every == 0) LoreFx.self(l, s, p, kind, p.tickCount, false);
     }
 
     private static void attr(ServerPlayer p, Holder<net.minecraft.world.entity.ai.attributes.Attribute> at, Identifier id, double v) {
@@ -465,7 +483,7 @@ public final class LoreEngine {
 
     private static void clearBuffs(ServerPlayer p, Spec s) {
         for (String w : new String[]{"atk", "spd", "arm", "kb", "hp"}) {
-            for (var at : List.of(Attributes.ATTACK_DAMAGE, Attributes.MOVEMENT_SPEED, Attributes.ARMOR, Attributes.KNOCKBACK_RESISTANCE, Attributes.MAX_HEALTH)) {
+            for (var at : List.of(Attributes.ATTACK_DAMAGE, Attributes.MOVEMENT_SPEED, Attributes.ARMOR, Attributes.KNOCKBACK_RESISTANCE, Attributes.MAX_HEALTH, Attributes.ATTACK_SPEED)) {
                 AttributeInstance inst = p.getAttribute(at);
                 if (inst != null) inst.removeModifier(mod(s, w));
             }
@@ -579,7 +597,7 @@ public final class LoreEngine {
             Map<String, Active> mine = ACTIVE.get(p.getUUID());
             long now = p.level().getGameTime();
             if (mine != null && now - LAST_SAVE.getOrDefault(p.getUUID(), -100000L) > 1200) {
-                for (Active a : mine.values()) if (a.spec.tag("undying")) {
+                for (Active a : mine.values()) if (a.spec.tag("undying") || a.arch.equals("undying")) {
                     LAST_SAVE.put(p.getUUID(), now);
                     event.setCanceled(true);
                     p.setHealth(Math.max(p.getHealth(), 4));
@@ -599,7 +617,13 @@ public final class LoreEngine {
             // guards cut what comes in
             Map<String, Active> mine = ACTIVE.get(p.getUUID());
             if (mine != null) for (Active a : mine.values()) {
-                if (a.arch.equals("guard")) amount *= switch (tier(a.spec)) { case 3 -> 0.5f; case 2 -> 0.6f; case 1 -> 0.7f; default -> 0.8f; };
+                if (a.arch.equals("barrier") || a.arch.equals("protect")) amount *= switch (tier(a.spec)) { case 3 -> 0.5f; case 2 -> 0.6f; case 1 -> 0.7f; default -> 0.8f; };
+                if (a.arch.equals("reflect") && event.getSource().getEntity() instanceof LivingEntity att && att != p) {
+                    float back = amount * 0.5f;
+                    amount *= 0.6f;
+                    att.hurtServer((ServerLevel) p.level(), p.level().damageSources().thorns(p), back);
+                    LoreFx.dustRing((ServerLevel) p.level(), a.spec.c1(), p.position().add(0, 1, 0), 1, 16, 1f, 0.6);
+                }
             }
             // resistances, tensura's rule: resistance halves it unless one hit is over half your current health, nullification blocks it.
             // nullification still breaks against someone with twice your EP (tensura's EP gap rule)
@@ -679,7 +703,7 @@ public final class LoreEngine {
     // ------------------------------------------------------------ bits
 
     // where your look lands: a block, or something alive, or the full range out
-    private static Vec3 aim(ServerPlayer p, double range) {
+    static Vec3 aim(ServerPlayer p, double range) {
         LivingEntity t = SkillHelper.targetQuiet(p, range);
         if (t != null) return t.position();
         Vec3 eye = p.getEyePosition(), end = eye.add(p.getLookAngle().scale(range));
@@ -695,7 +719,7 @@ public final class LoreEngine {
         return true;
     }
 
-    private static List<LivingEntity> near(ServerLevel l, ServerPlayer p, Vec3 at, double r) {
+    static List<LivingEntity> near(ServerLevel l, ServerPlayer p, Vec3 at, double r) {
         return l.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(r), e -> foe(p, e) && e.position().distanceToSqr(at) <= r * r + 4);
     }
 

@@ -27,6 +27,12 @@ public final class BrightParticles {
             HAKI = reg("haki"), HAKI_DEMON = reg("haki_demon"), HAKI_HERO = reg("haki_hero"), HAKI_FEAR = reg("haki_fear"),
             HAKI_SACRED = reg("haki_sacred"), SONIC = reg("sonic");
 
+    // the same kinds of particles tensura / manas reborn use, drawn our own way (tools/paint_particles.py),
+    // and moving the same way theirs do (FxParticle styles). looked up by name through ALL
+    static {
+        for (String n : new String[]{"spark_yellow", "spark_blue", "spark_purple", "spark_dark_purple", "spark_dark_red", "spark_red", "spark_green", "spark_black", "fire_red", "fire_black", "fire_plasma", "fire_illusion", "fire_soul", "fire_holy", "heat", "shock_ring", "shock_ring_in", "slash_full", "slash_light", "snowflake", "bubble_pop", "solar_flash", "sonic_curl", "soul_wisp", "bat", "blossom", "acid_drop", "heal_drop"}) reg(n);
+    }
+
     private BrightParticles() {}
 
     private static DeferredHolder<ParticleType<?>, SimpleParticleType> reg(String name) {

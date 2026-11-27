@@ -50,7 +50,27 @@ final class LoreFx {
 
     // a jagged lightning line from a to b, with a branch or two
     static void zigzag(ServerLevel l, Spec s, Vec3 a, Vec3 b, int segs, double jag, boolean sprites) {
+        String spark = s.f1().startsWith("spark_") ? s.f1() : s.f2().startsWith("spark_") ? s.f2() : null;
+        if (spark != null) { sparkBolt(l, sprite(spark), s.c1(), a, b, segs, jag); return; }
         bolt(l, s.c1(), s.c2(), sprites ? sprite(s.f1()) : null, a, b, segs, jag);
+    }
+
+    // their lightning: spark particles packed along a jagged path, a faint glow of dust behind
+    static void sparkBolt(ServerLevel l, Supplier<SimpleParticleType> spark, int glow, Vec3 a, Vec3 b, int segs, double jag) {
+        Vec3 prev = a;
+        java.util.Random r = new java.util.Random();
+        for (int i = 1; i <= segs; i++) {
+            Vec3 next = a.lerp(b, i / (double) segs);
+            if (i < segs) next = next.add((r.nextDouble() - 0.5) * jag, (r.nextDouble() - 0.5) * jag, (r.nextDouble() - 0.5) * jag);
+            Vec3 d = next.subtract(prev);
+            double len = d.length();
+            for (double t = 0; t < len; t += 0.35) {
+                Vec3 at = prev.add(d.scale(t / len));
+                l.sendParticles(spark.get(), at.x, at.y, at.z, 1, 0, 0, 0, 0);
+            }
+            if (i % 2 == 0) dust(l, glow, next, 1, 0.05, 0.8f);
+            prev = next;
+        }
     }
 
     static void bolt(ServerLevel l, int c1, int c2, Supplier<SimpleParticleType> spr, Vec3 a, Vec3 b, int segs, double jag) {
@@ -109,7 +129,7 @@ final class LoreFx {
         }
         dustRing(l, s.c2(), at, Math.max(1, r), 20, 1f, 0);
         Fx.burst(l, sprite(s.f2()), at, 14, 0.18);
-        Fx.shockwave(l, at, Math.max(1, r / 2));
+        l.sendParticles(BrightParticles.ALL.get("shock_ring").get(), at.x, at.y, at.z, 1, 0, 0, 0, 0);
     }
 
     // ------------------------------------------------------------ rays, breaths, storms, strikes
@@ -243,6 +263,8 @@ final class LoreFx {
             default -> arc(l, s, mid, sd, look, 1.8);
         }
         Fx.burst(l, sprite(s.f2()), mid, 8, 0.18);
+        String sl = s.f1().equals("slash_light") || s.f2().equals("slash_light") ? "slash_light" : "slash_full";
+        l.sendParticles(BrightParticles.ALL.get(sl).get(), mid.x, mid.y, mid.z, 1, 0, 0, 0, 0);
     }
 
     // one sweeping crescent: across 'axis', bowed toward 'look'

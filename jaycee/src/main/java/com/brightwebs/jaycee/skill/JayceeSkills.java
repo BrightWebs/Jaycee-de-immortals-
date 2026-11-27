@@ -396,6 +396,86 @@ public final class JayceeSkills {
                 @Override public void onToggle(ServerPlayer p, boolean on) { if (!on) MagicSense.clear(p); }
             });
 
+    // ---------------- batch 2 ----------------
+
+    // shadow motion: hold to melt into the shadows (dark places only until mastered). mastered: step behind a target
+    public static final DeferredHolder<Ability, Ability> SHADOW_MOTION = SKILLS.register("shadow_motion", () ->
+            new Ability(new Ability.Properties().type(SkillType.EXTRA).category(AbilityCategory.MOVEMENT).held()
+                    .mode("shadow", 0, 0, 0).mode("step", 0, 0, 0)) {
+                @Override public boolean activate(ServerPlayer p, ServerLevel l, int mode) {
+                    if (mode == 1) {
+                        if (!Tk.mastered(p, this)) { p.sendOverlayMessage(Component.translatable("jaycee.skill.scale.not_mastered")); return false; }
+                        MoreSkills.shadowStep(p, this);
+                        return false;
+                    }
+                    return true;
+                }
+                @Override public boolean onHeld(ServerPlayer p, ServerLevel l, int mode, int held) { return mode == 0 && MoreSkills.shadowHeld(p, this, held); }
+            });
+
+    // ultra instinct: toggle, 10% chance to dodge any hit
+    public static final DeferredHolder<Ability, Ability> ULTRA_INSTINCT = SKILLS.register("ultra_instinct", () ->
+            new Ability(new Ability.Properties().type(SkillType.EXTRA).category(AbilityCategory.DEFENSE).toggle()) {});
+
+    // danger sense: toggle, you hear a bell from wherever something starts hunting you
+    public static final DeferredHolder<Ability, Ability> DANGER_SENSE = SKILLS.register("danger_sense", () ->
+            new Ability(new Ability.Properties().type(SkillType.EXTRA).category(AbilityCategory.SUPPORT).toggle()) {
+                @Override public void onLearned(ServerPlayer p) {
+                    AbilityAPI.setToggled(p, this, true);
+                    // tensura: learning danger sense also teaches magic sense
+                    Ability sense = AbilityRegistry.get(JayceeSkills.id("magic_perception"));
+                    if (sense != null && AbilityAPI.learn(p, sense)) p.sendSystemMessage(Component.translatable("brightcore.message.acquired", sense.name()));
+                }
+            });
+
+    // snake eye: stare something down. corrosion / poison / paralysis / petrification / insanity
+    public static final DeferredHolder<Ability, Ability> SNAKE_EYE = SKILLS.register("snake_eye", () ->
+            new Ability(new Ability.Properties().type(SkillType.EXTRA).category(AbilityCategory.OFFENSE).held()
+                    .mode("corrosion", 0, 0, 0).mode("poison", 0, 0, 0).mode("paralysis", 0, 0, 0)
+                    .mode("petrification", 0, 0, 0).mode("insanity", 0, 0, 0)) {
+                @Override public boolean activate(ServerPlayer p, ServerLevel l, int mode) { return true; }
+                @Override public boolean onHeld(ServerPlayer p, ServerLevel l, int mode, int held) { return MoreSkills.snakeEye(p, this, mode, held); }
+            });
+
+    // drain (vampires): bite for 6 and heal 6
+    public static final DeferredHolder<Ability, Ability> DRAIN = SKILLS.register("drain", () ->
+            new Ability(new Ability.Properties().type(SkillType.INTRINSIC).category(AbilityCategory.OFFENSE)) {
+                @Override public boolean activate(ServerPlayer p, ServerLevel l) { return MoreSkills.drain(p, this); }
+            });
+
+    // ogre berserker (ogres): +30 attack, +10 armor for 3 minutes
+    public static final DeferredHolder<Ability, Ability> OGRE_BERSERKER = SKILLS.register("ogre_berserker", () ->
+            new Ability(new Ability.Properties().type(SkillType.INTRINSIC).category(AbilityCategory.SUPPORT)) {
+                @Override public boolean activate(ServerPlayer p, ServerLevel l) { return MoreSkills.ogreBerserker(p, this); }
+                @Override public void tick(ServerPlayer p, ServerLevel l) { MoreSkills.ogreTick(p, this); }
+                @Override public boolean ignoresCooldown(ServerPlayer p, int mode) { return p.hasEffect(com.brightwebs.jaycee.effect.JayceeEffects.OGRE_BERSERKER); }
+                @Override public void onForgotten(ServerPlayer p) { p.removeEffect(com.brightwebs.jaycee.effect.JayceeEffects.OGRE_BERSERKER); }
+            });
+
+    // scale armor (lizardmen): +6 armor, swim faster
+    public static final DeferredHolder<Ability, Ability> SCALE_ARMOR = SKILLS.register("scale_armor", () ->
+            new Ability(new Ability.Properties().type(SkillType.INTRINSIC).category(AbilityCategory.DEFENSE).passive().switchable()) {
+                @Override public void tick(ServerPlayer p, ServerLevel l) { if (p.tickCount % 20 == 0) MoreSkills.scaleArmor(p, this, true); }
+                @Override public void onSwitch(ServerPlayer p, boolean on) { MoreSkills.scaleArmor(p, this, on); }
+                @Override public void onForgotten(ServerPlayer p) { MoreSkills.scaleArmor(p, this, false); }
+            });
+
+    // dragon skin (dragons): skin as tough as armor, tougher with more EP
+    public static final DeferredHolder<Ability, Ability> DRAGON_SKIN = SKILLS.register("dragon_skin", () ->
+            new Ability(new Ability.Properties().type(SkillType.INTRINSIC).category(AbilityCategory.DEFENSE).passive().switchable()) {
+                @Override public void tick(ServerPlayer p, ServerLevel l) { if (p.tickCount % 20 == 0) MoreSkills.dragonSkin(p, this, true); }
+                @Override public void onSwitch(ServerPlayer p, boolean on) { MoreSkills.dragonSkin(p, this, on); }
+                @Override public void onForgotten(ServerPlayer p) { MoreSkills.dragonSkin(p, this, false); }
+            });
+
+    // water breathing (merfolk): breathe underwater
+    public static final DeferredHolder<Ability, Ability> WATER_BREATHING = SKILLS.register("water_breathing", () ->
+            new Ability(new Ability.Properties().type(SkillType.INTRINSIC).category(AbilityCategory.SUPPORT).passive().switchable()) {
+                @Override public void tick(ServerPlayer p, ServerLevel l) {
+                    if (p.isUnderWater() && p.tickCount % 20 == 0) p.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, 60, 2, false, false, false));
+                }
+            });
+
     private JayceeSkills() {}
 
     public static Identifier id(String path) { return Identifier.fromNamespaceAndPath(JayceeMod.ID, path); }

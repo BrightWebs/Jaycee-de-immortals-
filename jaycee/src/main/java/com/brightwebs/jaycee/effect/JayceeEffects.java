@@ -55,6 +55,15 @@ public final class JayceeEffects {
     // demon lord haki's coat: your physical hits cut through resistances (see Pressure.onHitWithCoat)
     public static final DeferredHolder<MobEffect, MobEffect> HAKI_COAT = EFFECTS.register("haki_coat", () -> new MobEffect(MobEffectCategory.BENEFICIAL, 0x3A0101) {});
 
+    // ogre berserker: tensura's numbers, +30 attack, +10 armor, a bit faster
+    public static final DeferredHolder<MobEffect, MobEffect> OGRE_BERSERKER = EFFECTS.register("ogre_berserker", () -> new MobEffect(MobEffectCategory.BENEFICIAL, 0xB01818) {
+        {
+            addAttributeModifier(Attributes.ATTACK_DAMAGE, id("ogre_berserker"), 30, AttributeModifier.Operation.ADD_VALUE);
+            addAttributeModifier(Attributes.ARMOR, id("ogre_berserker"), 10, AttributeModifier.Operation.ADD_VALUE);
+            addAttributeModifier(Attributes.MOVEMENT_SPEED, id("ogre_berserker"), 0.03, AttributeModifier.Operation.ADD_VALUE);
+        }
+    });
+
     private JayceeEffects() {}
 
     public static void init(IEventBus bus) { EFFECTS.register(bus); }

@@ -46,6 +46,12 @@ public final class Acquisition {
     //   universal perception  magic sense and sense heat source both mastered
     private static void more(ServerPlayer p, double ep) {
         Pressure.learnChecks(p);
+        // natural race skills (also catches players who were already that race before these existed)
+        RaceAPI.race(p).ifPresent(r -> { for (String id : com.brightwebs.jaycee.race.RaceExtras.intrinsics(r.id().getPath())) learn(p, id); });
+        if (ep > 0) learn(p, "danger_sense");  // tensura's danger sense has no EP gate
+        if (ep > 50_000) learn(p, "shadow_motion");
+        if (ep > 80_000) learn(p, "ultra_instinct");
+        if (ep > 30_000 && StatusData.counter(p, "spiders_killed") >= 50) learn(p, "snake_eye");
         if (ep > 3_000) learn(p, "strength");
         if (ep > 8_000) learn(p, "thought_acceleration");
         if (ep > 10_000) { learn(p, "voice_cannon"); learn(p, "water_blade"); learn(p, "hydraulic_propulsion"); learn(p, "gravity_flight"); }

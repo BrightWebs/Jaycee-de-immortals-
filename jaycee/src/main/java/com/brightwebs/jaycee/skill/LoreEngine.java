@@ -458,6 +458,13 @@ public final class LoreEngine {
                 if (act.equals("music") && p.tickCount % 8 == 0) l.sendParticles(net.minecraft.core.particles.ParticleTypes.NOTE, p.getX(), p.getY() + 2.2, p.getZ(), 1, 0.4, 0.1, 0.4, 1);
             }
             case "regen" -> SkillHelper.keep(p, MobEffects.REGENERATION, 1 + Math.min(1, t));
+            case "analyze" -> {
+                // same appraisal panel great sage uses, for as long as it's on
+                if (p.tickCount % 10 == 0) {
+                    Ability me = com.brightwebs.brightcore.api.AbilityRegistry.get(JayceeSkills.id(s.id()));
+                    if (me != null) GreatSage.scan(p, me);
+                }
+            }
             case "undying" -> SkillHelper.keep(p, MobEffects.REGENERATION, 0);
             case "sense" -> {
                 if (p.tickCount % 10 == 0) MagicSense.glowAround(p, 16 + 8 * t);
@@ -489,7 +496,8 @@ public final class LoreEngine {
             }
         }
         if (p.getHealth() > p.getMaxHealth()) p.setHealth(p.getMaxHealth());
-        if (s.arch().equals("sense") || (s.modes().contains("sense"))) MagicSense.clear(p);
+        MagicSense.clear(p);
+        for (LoreSkills.Act a : s.acts()) if (a.a().equals("analyze")) { GreatSage.send(p, com.brightwebs.jaycee.network.JayceeNetwork.AppraisalInfo.NONE); break; }
     }
 
     @SubscribeEvent

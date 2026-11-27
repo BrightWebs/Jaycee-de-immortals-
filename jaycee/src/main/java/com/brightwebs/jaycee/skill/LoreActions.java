@@ -140,7 +140,7 @@ public final class LoreActions {
             case "copy" -> GreatSage.analysis(p, a);
             case "devour" -> Predation.predation(p, a);
             case "isolate" -> Predation.isolation(p, a);
-            case "analyze" -> GreatSage.appraisal(p, a);
+            case "analyze" -> LoreEngine.timed(p, s, "analyze", 600);
             case "storage" -> { Stomach.open(p); yield true; }
             case "craft" -> { Refining.openSage(p); yield true; }
             // ---- on you (for a while)

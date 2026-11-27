@@ -46,11 +46,11 @@ public final class FireSkills {
         if (held % 20 == 0 && !Tk.spend(p, a, BREATH_COST)) return false;
         if (held > 0 && held % Tk.MASTERY_HOLD_TICK == 0) AbilityAPI.addMasteryPoint(p, a);
         ServerLevel l = (ServerLevel) p.level();
-        Vec3 eye = p.getEyePosition().add(0, -0.15, 0), look = p.getLookAngle();
+        Vec3 eye = LoreFx.mouth(p), look = p.getLookAngle();
         for (int i = 1; i <= BREATH_RANGE; i++) {
             Vec3 at = eye.add(look.scale(i * 0.9));
             double s = 0.06 * i;
-            if (i == 1) com.brightwebs.brightcore.fx.Fx.cone(l, com.brightwebs.brightcore.fx.BrightParticles.FLAME, at, look, 0.45, 0.22, 4);
+            if (i == 1) com.brightwebs.brightcore.fx.Fx.cone(l, com.brightwebs.brightcore.fx.BrightParticles.FLAME, eye.add(look.scale(0.15)), look, 0.5, 0.16, 6);
             if (i > 3 && held % 3 == 0) com.brightwebs.brightcore.fx.Fx.move(l, com.brightwebs.brightcore.fx.BrightParticles.EMBER, at, look.scale(0.2));
         }
         if (held % 2 == 0) l.playSound(null, p.blockPosition(), SoundEvents.BLAZE_BURN, SoundSource.PLAYERS, 0.75f, 1.0f);

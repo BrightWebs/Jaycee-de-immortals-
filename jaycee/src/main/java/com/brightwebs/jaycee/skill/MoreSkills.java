@@ -301,4 +301,190 @@ public final class MoreSkills {
         atk.addOrUpdateTransientModifier(new AttributeModifier(THOUGHT, m ? 0.4 : 0.2, AttributeModifier.Operation.ADD_VALUE));
         if (p.tickCount % Tk.SKILL_TICK == 0) Tk.activatedTime(p, a);
     }
+
+    // ------------------------------------------------------------ batch 2
+
+    /**
+     * tensura's shadow motion, mode 0: hold to sink into the shadows. only works somewhere dark
+     * (light 10 or less) until mastered. you go invisible and quick, ink puffs off you
+     */
+    static boolean shadowHeld(ServerPlayer p, Ability a, int held) {
+        ServerLevel l = (ServerLevel) p.level();
+        if (l.getMaxLocalRawBrightness(p.blockPosition()) > 10 && !AbilityAPI.isMastered(p, a)) {
+            if (held == 0) p.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("jaycee.skill.too_bright").withStyle(net.minecraft.ChatFormatting.RED));
+            return false;
+        }
+        if (held <= 2) {
+            l.sendParticles(net.minecraft.core.particles.ParticleTypes.SQUID_INK, p.getX(), p.getY() + 1, p.getZ(), 30, 0.5, 0.8, 0.5, 0.05);
+            if (held == 0) l.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.SQUID_SQUIRT, SoundSource.PLAYERS, 1, 0.6f);
+        }
+        if (held % 20 == 0 && !Tk.spend(p, a, 10)) return false;
+        if (held % Tk.MASTERY_HOLD_TICK == 0 && held > 0) AbilityAPI.addMasteryPoint(p, a);
+        p.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 5, 0, false, false, false));
+        p.addEffect(new MobEffectInstance(MobEffects.SPEED, 5, 1, false, false, false));
+        if (held % 4 == 0) l.sendParticles(net.minecraft.core.particles.ParticleTypes.SQUID_INK, p.getX(), p.getY() + 0.2, p.getZ(), 2, 0.3, 0.1, 0.3, 0.01);
+        return true;
+    }
+
+    /** shadow motion, mode 1 (mastered): step through the shadows to right behind what you're looking at, 20 blocks */
+    static boolean shadowStep(ServerPlayer p, Ability a) {
+        LivingEntity t = SkillHelper.target(p, 20);
+        if (t == null) return false;
+        if (!Tk.spend(p, a, 200)) return false;
+        ServerLevel l = (ServerLevel) p.level();
+        l.sendParticles(net.minecraft.core.particles.ParticleTypes.SQUID_INK, p.getX(), p.getY() + 1, p.getZ(), 40, 0.4, 0.8, 0.4, 0.05);
+        Vec3 behind = t.position().subtract(t.getLookAngle().multiply(1, 0, 1).normalize().scale(1.5));
+        p.teleportTo(behind.x, t.getY(), behind.z);
+        p.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, t.getEyePosition());
+        l.sendParticles(net.minecraft.core.particles.ParticleTypes.SQUID_INK, p.getX(), p.getY() + 1, p.getZ(), 40, 0.4, 0.8, 0.4, 0.05);
+        l.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.6f, 0.5f);
+        Tk.activatedTime(p, a);
+        return true;
+    }
+
+    /** tensura's ultra instinct: 10% to just not get hit, melee or projectile. checked in onDodge */
+    @net.neoforged.bus.api.SubscribeEvent
+    public static void onDodge(net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent event) {
+        com.brightwebs.brightcore.api.util.Safe.run("MoreSkills.onDodge", () -> {
+            if (!(event.getEntity() instanceof ServerPlayer p) || event.getSource().getEntity() == null) return;
+            Ability ui = com.brightwebs.brightcore.api.AbilityRegistry.get(id("ultra_instinct"));
+            if (ui == null || !AbilityAPI.has(p, ui) || !AbilityAPI.isToggled(p, ui)) return;
+            if (p.getRandom().nextFloat() >= 0.10f) return;
+            event.setCanceled(true);
+            ServerLevel l = (ServerLevel) p.level();
+            Fx.burst(l, BrightParticles.GUST, p.position().add(0, 1, 0), 10, 0.2);
+            l.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, SoundSource.PLAYERS, 1, 1.6f);
+            Tk.activatedTime(p, ui);
+        });
+    }
+
+    /**
+     * tensura's danger sense: when something starts hunting you, you hear a bell from the direction
+     * it's coming from (only you hear it). a mastery point now and then
+     */
+    @net.neoforged.bus.api.SubscribeEvent
+    public static void onTargeted(net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent event) {
+        com.brightwebs.brightcore.api.util.Safe.run("MoreSkills.onTargeted", () -> {
+            if (!(event.getNewAboutToBeSetTarget() instanceof ServerPlayer p) || !(event.getEntity() instanceof net.minecraft.world.entity.Mob mob)) return;
+            if (mob.getTarget() == p) return;
+            Ability ds = com.brightwebs.brightcore.api.AbilityRegistry.get(id("danger_sense"));
+            if (ds == null || !AbilityAPI.has(p, ds) || !AbilityAPI.isToggled(p, ds)) return;
+            if (p.getRandom().nextBoolean()) AbilityAPI.addMasteryPoint(p, ds);
+            Vec3 eye = p.getEyePosition(), at = eye.add(mob.getEyePosition().subtract(eye).normalize().scale(5));
+            p.connection.send(new net.minecraft.network.protocol.game.ClientboundSoundPacket(
+                    net.minecraft.core.registries.BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.BELL_BLOCK), SoundSource.PLAYERS,
+                    at.x, eye.y, at.z, 1, 1, p.getRandom().nextLong()));
+        });
+    }
+
+    /** tensura's drain: bite something within 3 blocks for 6 damage and heal that much. no blood, no drain */
+    static boolean drain(ServerPlayer p, Ability a) {
+        LivingEntity t = SkillHelper.target(p, 3);
+        if (t == null) return false;
+        if (t.getType().is(net.minecraft.tags.EntityTypeTags.UNDEAD) || t instanceof net.minecraft.world.entity.animal.golem.AbstractGolem) {
+            p.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("jaycee.skill.no_blood").withStyle(net.minecraft.ChatFormatting.RED));
+            return false;
+        }
+        ServerLevel l = (ServerLevel) p.level();
+        if (t.hurtServer(l, l.damageSources().playerAttack(p), 6)) {
+            p.heal(6);
+            AbilityAPI.addMasteryPoint(p, a);
+            Fx.burst(l, BrightParticles.BLOOD, t.position().add(0, t.getBbHeight() / 2, 0), 16, 0.12);
+            Fx.beam(l, BrightParticles.BLOOD, t.position().add(0, t.getBbHeight() / 2, 0), p.position().add(0, 1, 0), 0.4);
+            l.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.GENERIC_DRINK.value(), SoundSource.PLAYERS, 1, 0.7f);
+        }
+        return true;
+    }
+
+    /**
+     * tensura's ogre berserker: a huge boost (+30 attack, +10 armor) for 3 minutes (6 mastered), costs 5,000.
+     * press again to calm down. 10 minute cooldown on top of the time it lasts
+     */
+    static boolean ogreBerserker(ServerPlayer p, Ability a) {
+        ServerLevel l = (ServerLevel) p.level();
+        if (p.hasEffect(JayceeEffects.OGRE_BERSERKER)) {
+            p.removeEffect(JayceeEffects.OGRE_BERSERKER);
+            AbilityAPI.setCooldown(p, a, 600 * 20);
+            l.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 1, 0.6f);
+            return false;
+        }
+        if (!Tk.spend(p, a, 5000)) return false;
+        int dur = AbilityAPI.isMastered(p, a) ? 7200 : 3600;
+        p.addEffect(new MobEffectInstance(JayceeEffects.OGRE_BERSERKER, dur, 0, false, false, true));
+        AbilityAPI.setCooldown(p, a, (dur / 20 + 600) * 20);
+        l.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 1.2f, 0.7f);
+        Fx.shockwave(l, p.position().add(0, 0.2, 0), 2);
+        Fx.spiral(l, BrightParticles.FLAME, p.position(), 0.9, 2.4, 2, 40, 0);
+        return true;
+    }
+
+    /** while berserk you smoke red, and the skill earns mastery like tensura's activatedTimes */
+    static void ogreTick(ServerPlayer p, Ability a) {
+        if (!p.hasEffect(JayceeEffects.OGRE_BERSERKER)) return;
+        if (p.tickCount % 5 == 0) Fx.aura((ServerLevel) p.level(), BrightParticles.EMBER, p, 2);
+        if (p.tickCount % Tk.SKILL_TICK == 0) Tk.activatedTime(p, a);
+    }
+
+    private static final Identifier SCALES = id("scale_armor"), DRAGON_SKIN = id("dragon_skin");
+
+    /** tensura's scale armor: +6 armor and you swim twice as fast (dolphin's grace here) */
+    static void scaleArmor(ServerPlayer p, Ability a, boolean on) {
+        AttributeInstance armor = p.getAttribute(Attributes.ARMOR);
+        if (armor == null) return;
+        if (!on) { armor.removeModifier(SCALES); return; }
+        armor.addOrUpdateTransientModifier(new AttributeModifier(SCALES, 6, AttributeModifier.Operation.ADD_VALUE));
+        if (p.isInWater()) p.addEffect(new MobEffectInstance(MobEffects.DOLPHINS_GRACE, 40, 0, false, false, false));
+        if (p.tickCount % Tk.SKILL_TICK == 0) Tk.activatedTime(p, a);
+    }
+
+    /**
+     * tensura's dragon skin: your skin is as good as armor, and better the more EP you have.
+     * tensura goes magisteel (50k) / adamantite (400k) / hihiirokane (800k), we use iron / diamond / netherite / beyond.
+     * only works with no armor on, same as tensura
+     */
+    static void dragonSkin(ServerPlayer p, Ability a, boolean on) {
+        AttributeInstance armor = p.getAttribute(Attributes.ARMOR), tough = p.getAttribute(Attributes.ARMOR_TOUGHNESS);
+        if (armor == null || tough == null) return;
+        boolean wearing = false;
+        for (net.minecraft.world.entity.EquipmentSlot s : new net.minecraft.world.entity.EquipmentSlot[]{
+                net.minecraft.world.entity.EquipmentSlot.HEAD, net.minecraft.world.entity.EquipmentSlot.CHEST,
+                net.minecraft.world.entity.EquipmentSlot.LEGS, net.minecraft.world.entity.EquipmentSlot.FEET}) {
+            if (!p.getItemBySlot(s).isEmpty() && !BodyArmor.isScale(p.getItemBySlot(s))) wearing = true;
+        }
+        if (!on || wearing) { armor.removeModifier(DRAGON_SKIN); tough.removeModifier(DRAGON_SKIN); return; }
+        double ep = com.brightwebs.brightcore.api.EnergyAPI.ep(p);
+        double ar = ep >= 800_000 ? 24 : ep >= 400_000 ? 20 : ep >= 50_000 ? 20 : 15;
+        double tg = ep >= 800_000 ? 16 : ep >= 400_000 ? 12 : ep >= 50_000 ? 8 : 0;
+        armor.addOrUpdateTransientModifier(new AttributeModifier(DRAGON_SKIN, ar, AttributeModifier.Operation.ADD_VALUE));
+        tough.addOrUpdateTransientModifier(new AttributeModifier(DRAGON_SKIN, tg, AttributeModifier.Operation.ADD_VALUE));
+    }
+
+    /**
+     * tensura's snake eye: hold your gaze on something within 20 blocks and it gets worse the longer
+     * you stare. modes: corrosion, poison, paralysis, petrification, insanity. 80 magicules a second
+     */
+    static boolean snakeEye(ServerPlayer p, Ability a, int mode, int held) {
+        if (held % 20 == 0 && !Tk.spend(p, a, 80)) return false;
+        LivingEntity t = SkillHelper.targetQuiet(p, 20);
+        if (t == null) return true;
+        if (held % Tk.MASTERY_HOLD_TICK == 0 && held > 0) AbilityAPI.addMasteryPoint(p, a);
+        ServerLevel l = (ServerLevel) p.level();
+        if (held % 10 == 0) l.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.PARROT_IMITATE_SPIDER, SoundSource.PLAYERS, 1, 1);
+        var effect = switch (mode) {
+            case 0 -> MobEffects.WITHER;
+            case 1 -> MobEffects.POISON;
+            case 2 -> JayceeEffects.PARALYSIS;
+            case 3 -> MobEffects.SLOWNESS;
+            default -> MobEffects.NAUSEA;
+        };
+        // tensura: the effect builds a level every few seconds you keep staring (we cap it at V)
+        MobEffectInstance now = t.getEffect(effect);
+        int level = now == null ? 0 : Math.min(4, now.getAmplifier() + (held % 60 == 0 ? 1 : 0));
+        t.addEffect(new MobEffectInstance(effect, 60, level, false, true), p);
+        if (mode == 3 && level >= 3) t.addEffect(new MobEffectInstance(MobEffects.MINING_FATIGUE, 60, 2), p);
+        if (mode == 4) t.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 60, 0), p);
+        if (held % 4 == 0) Fx.beam(l, mode == 2 ? BrightParticles.SPARK : mode == 3 ? BrightParticles.SHARD : BrightParticles.ACID,
+                p.getEyePosition(), t.getEyePosition(), 1.2);
+        return true;
+    }
 }

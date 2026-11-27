@@ -65,8 +65,8 @@ public final class BodyArmorRender {
         if (BITS != null) return BITS;
         List<Bit> b = new ArrayList<>();
         // helmet: two swept-back horns, a crest of spikes, a brow ridge and cheek fins
-        box(b, HELMET, HEAD, true, BONE, -3.5f, -8.6f, 0, -35, 0, -22, -1, -5, -1, 2, 5, 2);
-        box(b, HELMET, HEAD, true, BONE, -3.5f, -8.6f, 0, -62, 0, -30, -0.5f, -9.5f, -0.5f, 1, 4.5f, 1);
+        box(b, HELMET, HEAD, true, BONE, -3.5f, -8.6f, 0, -40, 0, -14, -1, -5, -1, 2, 5, 2);
+        box(b, HELMET, HEAD, true, BONE, -3.5f, -8.6f, 0, -58, 0, -16, -0.5f, -9.2f, -0.5f, 1, 4.5f, 1);
         box(b, HELMET, HEAD, false, BONE, 0, -9, -3, -20, 0, 0, -0.5f, -2, -0.5f, 1, 2, 1);
         box(b, HELMET, HEAD, false, BONE, 0, -9, -0.5f, -25, 0, 0, -0.5f, -2.8f, -0.5f, 1, 2.8f, 1);
         box(b, HELMET, HEAD, false, BONE, 0, -9, 2, -30, 0, 0, -0.5f, -2.2f, -0.5f, 1, 2.2f, 1);

@@ -96,7 +96,12 @@ public final class LoreEngine {
     static void casting(ServerPlayer p, Ability a, Spec s, int held) {
         ServerLevel l = (ServerLevel) p.level();
         int need = AbilityAPI.isMastered(p, a) ? s.castm() : s.cast();
-        if (held % 2 == 0) Fx.magicCircle(l, part(s.elem()), p.position().add(0, 0.05, 0), 1.2 + Math.min(1, held / (double) Math.max(1, need)), held);
+        if (held % 2 == 0) {
+            double r = 1.2 + Math.min(1, held / (double) Math.max(1, need));
+            Fx.magicCircle(l, LoreFx.sprite(s.f1()), p.position().add(0, 0.05, 0), r, held);
+            LoreFx.dustRing(l, s.c1(), p.position().add(0, 0.06, 0), r, 24, 1f, 0);
+            LoreFx.dustRing(l, s.c2(), p.position().add(0, 0.06, 0), r * 0.62, 14, 0.8f, 0);
+        }
         if (held % 5 == 0) {
             if (held >= need) p.sendOverlayMessage(Component.translatable("jaycee.lore.cast_ready", a.name()).withStyle(ChatFormatting.GOLD));
             else p.sendOverlayMessage(Component.translatable("jaycee.lore.casting", a.name(), String.format("%.1f", (need - held) / 20f)).withStyle(ChatFormatting.AQUA));
@@ -118,10 +123,30 @@ public final class LoreEngine {
     }
 
     private static boolean shoot(ServerPlayer p, Spec s, float dmg) {
+        ServerLevel l = (ServerLevel) p.level();
         Vec3 dir = p.getLookAngle();
         double speed = s.type() == SkillType.ULTIMATE ? 2.4 : 1.6;
         int life = (int) Math.ceil(s.range() / speed) + 2;
-        BOLTS.add(new Bolt((ServerLevel) p.level(), p, s, dmg, p.getEyePosition().add(dir.scale(0.8)).add(0, -0.2, 0), dir.scale(speed), life));
+        Vec3 start = p.getEyePosition().add(dir.scale(0.8)).add(0, -0.2, 0);
+        switch (s.pat("projectile")) {
+            case "triple" -> {
+                for (int k = -1; k <= 1; k++) BOLTS.add(new Bolt(l, p, s, dmg * 0.45f, start, dir.yRot(k * 0.14f).scale(speed), life));
+            }
+            case "barrage" -> {
+                for (int k = 0; k < 5; k++) {
+                    Vec3 d = dir.add((Math.random() - 0.5) * 0.12, (Math.random() - 0.5) * 0.08, (Math.random() - 0.5) * 0.12).normalize();
+                    BOLTS.add(new Bolt(l, p, s, dmg * 0.3f, start.add(d.scale(-k * 0.8)), d.scale(speed), life + k));
+                }
+            }
+            case "meteor" -> {
+                // drops out of the sky onto where you look
+                Vec3 at = aim(p, s.range());
+                Vec3 sky = at.add(-3, 14, -2);
+                Vec3 d = at.subtract(sky).normalize();
+                BOLTS.add(new Bolt(l, p, s, dmg, sky, d.scale(speed * 1.2), (int) Math.ceil(at.distanceTo(sky) / (speed * 1.2)) + 3));
+            }
+            default -> BOLTS.add(new Bolt(l, p, s, dmg, start, dir.scale(speed), life));
+        }
         return true;
     }
 
@@ -141,9 +166,7 @@ public final class LoreEngine {
     // moves one bolt one tick. true when it hit something
     private static boolean stepBolt(Bolt b) {
         Vec3 from = b.pos, to = b.pos.add(b.vel);
-        Supplier<SimpleParticleType> a = part(b.spec.elem()), c = part(b.spec.acc());
-        Fx.beam(b.level, a, from, to, 0.35);
-        Fx.burst(b.level, c, to, 2, 0.02);
+        LoreFx.boltTrail(b.level, b.spec, from, to, b.life);
         BlockHitResult wall = b.level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, b.owner));
         Vec3 end = wall.getType() == HitResult.Type.MISS ? to : wall.getLocation();
         LivingEntity hit = null; double best = Double.MAX_VALUE;
@@ -156,9 +179,7 @@ public final class LoreEngine {
         if (hit != null) hurt(b.owner, hit, b.spec, b.dmg);
         float splash = splash(b.spec);
         if (splash > 0) for (LivingEntity e : near(b.level, b.owner, at, splash)) if (e != hit) hurt(b.owner, e, b.spec, b.dmg * 0.5f);
-        Fx.sphere(b.level, a, at, Math.max(0.5, splash * 0.5), 16);
-        Fx.burst(b.level, c, at, 18, 0.2);
-        Fx.shockwave(b.level, at, Math.max(1, splash / 2));
+        LoreFx.boltImpact(b.level, b.spec, at, splash);
         b.level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.5f, 1.4f);
         return true;
     }
@@ -180,25 +201,20 @@ public final class LoreEngine {
         for (LivingEntity e : l.getEntitiesOfClass(LivingEntity.class, new AABB(eye, stop).inflate(1), e -> foe(p, e))) {
             if (e.getBoundingBox().inflate(0.5).clip(eye, stop).isPresent()) hurt(p, e, s, dmg);
         }
-        Vec3 start = eye.add(p.getLookAngle().scale(0.6)).add(0, -0.15, 0);
-        Fx.beam(l, part(s.elem()), start, stop, 0.2);
-        Fx.beam(l, part(s.acc()), start, stop, 0.7);
-        Fx.burst(l, part(s.acc()), stop, 20, 0.2);
+        LoreFx.beam(l, s, eye.add(p.getLookAngle().scale(0.6)).add(0, -0.15, 0), stop);
         return true;
     }
 
     // breaths and sprays: everything in front of you within range
     private static boolean cone(ServerPlayer p, Spec s, float dmg) {
         ServerLevel l = (ServerLevel) p.level();
-        Vec3 eye = p.getEyePosition(), look = p.getLookAngle();
+        Vec3 eye = LoreFx.mouth(p), look = p.getLookAngle();
         double range = Math.min(s.range(), 12);
         for (LivingEntity e : near(l, p, p.position(), range)) {
             Vec3 to = e.position().add(0, e.getBbHeight() / 2, 0).subtract(eye);
             if (to.normalize().dot(look) > 0.8 && p.hasLineOfSight(e)) hurt(p, e, s, dmg);
         }
-        Vec3 from = eye.add(look.scale(0.6));
-        Fx.cone(l, part(s.elem()), from, look, 0.6, 0.25, 40);
-        Fx.cone(l, part(s.acc()), from, look, 0.45, 0.3, 14);
+        LoreFx.cone(l, s, p, range);
         return true;
     }
 
@@ -208,10 +224,9 @@ public final class LoreEngine {
         Vec3 at = aim(p, s.range());
         float r = Math.max(2, s.radius());
         for (LivingEntity e : near(l, p, at, r)) hurt(p, e, s, dmg);
-        Fx.magicCircle(l, part(s.elem()), at.add(0, 0.1, 0), r, p.tickCount);
-        Fx.column(l, part(s.elem()), at, r * 0.6, 40, 0.12);
-        Fx.cloud(l, part(s.acc()), at.add(0, 1.2, 0), 30, r * 0.6);
-        Fx.shockwave(l, at, r / 2);
+        // gravity storms drag everything to the middle, vortexes too
+        if (s.tag("gravity") || s.pat("area").equals("vortex")) for (LivingEntity e : near(l, p, at, r + 2)) pull(e, at, 0.6);
+        LoreFx.area(l, s, at, r, p.tickCount);
         return true;
     }
 
@@ -226,13 +241,7 @@ public final class LoreEngine {
             Vec3 to = e.position().add(0, e.getBbHeight() / 2, 0).subtract(eye);
             if (to.normalize().dot(look) > 0.45) { hurt(p, e, s, total); any = true; }
         }
-        Vec3 side = look.cross(new Vec3(0, 1, 0)).normalize();
-        Vec3 mid = eye.add(look.scale(1.8));
-        for (int i = -6; i <= 6; i++) {
-            Vec3 at = mid.add(side.scale(i * 0.3)).add(look.scale(-Math.abs(i) * 0.08)).add(0, -Math.abs(i) * 0.05, 0);
-            Fx.move(l, part(s.elem()), at, look.scale(0.25));
-        }
-        Fx.burst(l, part(s.acc()), mid, 10, 0.2);
+        LoreFx.slash(l, s, p);
         return true;
     }
 
@@ -248,8 +257,7 @@ public final class LoreEngine {
         if (s.id().matches(".*(cure|antidote|purif|clean|recovery).*")) {
             p.getActiveEffects().stream().filter(i -> !i.getEffect().value().isBeneficial()).map(MobEffectInstance::getEffect).toList().forEach(p::removeEffect);
         }
-        Fx.aura(l, part(s.elem()), p, 16);
-        Fx.spiral(l, part(s.acc()), p.position(), 0.8, 2.2, 2, 24, p.tickCount * 0.2);
+        LoreFx.heal(l, s, p);
         return true;
     }
 
@@ -272,11 +280,9 @@ public final class LoreEngine {
             p.sendOverlayMessage(Component.translatable("jaycee.lore.blocked").withStyle(ChatFormatting.RED));
             return false;
         }
-        Fx.burst(l, part(s.elem()), from.add(0, 1, 0), 20, 0.15);
-        Fx.beam(l, part(s.acc()), from.add(0, 1, 0), to.add(0, 1, 0), 0.5);
+        LoreFx.move(l, s, from, to);
         p.teleportTo(to.x, to.y, to.z);
         p.resetFallDistance();
-        Fx.burst(l, part(s.elem()), to.add(0, 1, 0), 20, 0.15);
         return true;
     }
 
@@ -310,8 +316,7 @@ public final class LoreEngine {
             m.setData(Bonds.OWNER, p.getStringUUID());
             l.addFreshEntity(m);
             SUMMONS.add(new Summon(l, m.getUUID(), p.getUUID(), l.getGameTime() + Math.max(600, s.dur())));
-            Fx.magicCircle(l, part(s.elem()), m.position().add(0, 0.05, 0), 1.4, p.tickCount);
-            Fx.spiral(l, part(s.acc()), m.position(), 1, 2.4, 2, 30, 0);
+            LoreFx.summon(l, s, m.position(), p.getLookAngle(), p.tickCount);
         }
         return true;
     }
@@ -346,16 +351,20 @@ public final class LoreEngine {
     private static boolean timed(ServerPlayer p, Spec s, String arch) {
         int dur = arch.equals("awaken") ? s.dur() : Math.min(s.dur(), 600);
         ACTIVE.computeIfAbsent(p.getUUID(), k -> new HashMap<>()).put(s.id() + "/" + arch, new Active(s, arch, p.level().getGameTime() + dur));
-        ServerLevel l = (ServerLevel) p.level();
-        if (arch.equals("awaken")) {
-            Fx.spiral(l, part(s.elem()), p.position(), 0.9, 2.6, 3, 40, 0);
-            Fx.spiral(l, part(s.acc()), p.position(), 0.9, 2.6, 3, 40, Math.PI);
-            Fx.shockwave(l, p.position().add(0, 1, 0), 1.5);
-        } else {
-            Fx.aura(l, part(s.elem()), p, 14);
-            Fx.ring(l, part(s.acc()), p.position().add(0, 0.1, 0), 1.2, 16, 0.1);
-        }
+        started(p, s, arch);
         return true;
+    }
+
+    // the moment it switches on: the big version of its look, and a sound (toggles come through here too)
+    static void started(ServerPlayer p, Spec s, String arch) {
+        ServerLevel l = (ServerLevel) p.level();
+        LoreFx.self(l, s, p, arch, p.tickCount, true);
+        if (arch.equals("awaken")) {
+            LoreFx.self(l, s, p, "awaken", p.tickCount, true);
+            Fx.shockwave(l, p.position().add(0, 1, 0), 1.5);
+        }
+        if (s.tag("undying")) { p.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 600, tier(s))); }
+        sound(l, p, s, arch);
     }
 
     // toggles: on until you switch it off, costs a tenth of the skill's price every second
@@ -422,18 +431,20 @@ public final class LoreEngine {
                 if (s.elem().matches("frost|shard|rune|holy|aura")) attr(p, Attributes.ARMOR, mod(s, "arm"), 2 + t * 2);
                 if (s.elem().matches("heal|petal|holy")) SkillHelper.keep(p, MobEffects.REGENERATION, Math.min(1, t));
                 if (s.elem().matches("mist|void")) SkillHelper.keep(p, MobEffects.INVISIBILITY, 0);
-                if (p.tickCount % 8 == 0) Fx.aura(l, part(s.elem()), p, 3);
+                if (s.tag("beast")) { SkillHelper.keep(p, MobEffects.SPEED, 0); SkillHelper.keep(p, MobEffects.STRENGTH, 0); }
+                if (s.tag("undying")) SkillHelper.keep(p, MobEffects.REGENERATION, 1);
+                if (p.tickCount % 5 == 0) LoreFx.self(l, s, p, arch, p.tickCount, false);
             }
             case "guard" -> {
                 // the damage cut is in onIncomingDamage. barriers also give a layer of absorption
                 attr(p, Attributes.ARMOR, mod(s, "arm"), 4 + t * 3);
                 attr(p, Attributes.KNOCKBACK_RESISTANCE, mod(s, "kb"), 0.25 + 0.15 * t);
-                if (p.tickCount % 20 == 0) Fx.sphere(l, part(s.elem()), p.position().add(0, p.getBbHeight() / 2, 0), p.getBbWidth() + 0.5, 14);
+                if (p.tickCount % 6 == 0) LoreFx.self(l, s, p, arch, p.tickCount, false);
             }
             case "sense" -> {
                 if (p.tickCount % 10 == 0) MagicSense.glowAround(p, 16 + 8 * t);
                 SkillHelper.keep(p, MobEffects.NIGHT_VISION, 0);
-                if (p.tickCount % 30 == 0) Fx.ring(l, part(s.elem()), p.position().add(0, 0.1, 0), 1.0, 14, 0.15);
+                if (p.tickCount % 6 == 0) LoreFx.self(l, s, p, arch, p.tickCount, false);
             }
             case "awaken" -> {
                 SkillHelper.keep(p, MobEffects.STRENGTH, t);
@@ -441,8 +452,7 @@ public final class LoreEngine {
                 SkillHelper.keep(p, MobEffects.SPEED, Math.min(2, t));
                 SkillHelper.keep(p, MobEffects.REGENERATION, Math.min(1, t));
                 attr(p, Attributes.MAX_HEALTH, mod(s, "hp"), 10 + 10 * t);
-                if (p.tickCount % 4 == 0) Fx.aura(l, part(s.elem()), p, 3);
-                if (p.tickCount % 6 == 0) Fx.aura(l, part(s.acc()), p, 2);
+                if (p.tickCount % 4 == 0) LoreFx.self(l, s, p, arch, p.tickCount, false);
             }
             default -> {}
         }
@@ -490,9 +500,10 @@ public final class LoreEngine {
         }
     }
 
-    // what each element does on top of the damage
+    // what each element does on top of the damage, then what the skill's name says it does
     static void element(ServerPlayer p, LivingEntity t, Spec s, float dmg) {
         int t2 = tier(s);
+        tags(p, t, s, dmg, t2);
         switch (s.elem()) {
             case "flame", "ember" -> t.igniteForSeconds(4 + t2 * 2);
             case "black_flame" -> { t.igniteForSeconds(6 + t2 * 2); t.addEffect(new MobEffectInstance(MobEffects.WITHER, 80, t2), p); }
@@ -519,8 +530,69 @@ public final class LoreEngine {
         }
     }
 
+    private static void tags(ServerPlayer p, LivingEntity t, Spec s, float dmg, int t2) {
+        ServerLevel l = (ServerLevel) p.level();
+        for (String tag : s.tags()) switch (tag) {
+            // dominating / commanding skills drag the target to you and break its will
+            case "control" -> { pull(t, p.position(), 0.5); t.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 60, 1), p); t.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 100, t2), p); }
+            case "gravity" -> { t.push(0, -0.8, 0); t.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 60, 2 + t2), p); }
+            case "time" -> { t.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 80, 3 + t2), p); t.addEffect(new MobEffectInstance(MobEffects.MINING_FATIGUE, 80, 2), p); }
+            case "space" -> {
+                // flung somewhere close by through space
+                Vec3 to = t.position().add((Math.random() - 0.5) * 8, 0.5, (Math.random() - 0.5) * 8);
+                if (l.noCollision(t, t.getBoundingBox().move(to.subtract(t.position())))) { LoreFx.move(l, s, t.position(), to); t.teleportTo(to.x, to.y, to.z); }
+            }
+            case "drain" -> { p.heal(dmg * 0.25f); LoreFx.essence(l, s.c1(), s.c2(), t, p); }
+            case "bind" -> { t.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 50, 6), p); t.addEffect(new MobEffectInstance(JayceeEffects.PARALYSIS, 20, 0), p); }
+            case "fear" -> t.addEffect(new MobEffectInstance(JayceeEffects.FEAR, 100, 1 + t2), p);
+            case "blind" -> t.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 50, 0), p);
+            case "beast" -> t.addEffect(new MobEffectInstance(MobEffects.WITHER, 40, 0), p);
+            case "chain" -> {
+                // the lightning jumps on to two more nearby
+                int jumps = 0;
+                for (LivingEntity e : near(l, p, t.position(), 5)) {
+                    if (e == t || jumps >= 2) continue;
+                    LoreFx.zigzag(l, s, t.position().add(0, t.getBbHeight() / 2, 0), e.position().add(0, e.getBbHeight() / 2, 0), 6, 0.5, true);
+                    HITTING.set(s.elem());
+                    try { e.hurtServer(l, l.damageSources().indirectMagic(p, p), dmg * 0.5f); } finally { HITTING.remove(); }
+                    jumps++;
+                }
+            }
+            default -> {}
+        }
+    }
+
+    // drags something toward a point
+    private static void pull(LivingEntity e, Vec3 to, double k) {
+        Vec3 d = to.subtract(e.position());
+        if (d.lengthSqr() < 1) return;
+        d = d.normalize().scale(k);
+        e.push(d.x, 0.15, d.z);
+    }
+
+    // undying skills (immortality and friends) keep you alive once a minute while they're on
+    private static final Map<UUID, Long> LAST_SAVE = new HashMap<>();
+
     @SubscribeEvent
     public static void onIncomingDamage(LivingIncomingDamageEvent event) {
+        if (event.getEntity() instanceof ServerPlayer p && event.getAmount() >= p.getHealth()) {
+            Map<String, Active> mine = ACTIVE.get(p.getUUID());
+            long now = p.level().getGameTime();
+            if (mine != null && now - LAST_SAVE.getOrDefault(p.getUUID(), -100000L) > 1200) {
+                for (Active a : mine.values()) if (a.spec.tag("undying")) {
+                    LAST_SAVE.put(p.getUUID(), now);
+                    event.setCanceled(true);
+                    p.setHealth(Math.max(p.getHealth(), 4));
+                    LoreFx.self((ServerLevel) p.level(), a.spec, p, "awaken", p.tickCount, true);
+                    p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 1, 1.2f);
+                    return;
+                }
+            }
+        }
+        onIncomingDamage2(event);
+    }
+
+    private static void onIncomingDamage2(LivingIncomingDamageEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer p) || event.getAmount() <= 0) return;
         Safe.run("LoreEngine.defend", () -> {
             float amount = event.getAmount();
@@ -541,6 +613,7 @@ public final class LoreEngine {
                 if (nul) amount = 0;
                 else if (amount <= p.getHealth() * 0.5f) amount *= 0.5f;
                 if (p.tickCount % 20 == 0) Tk.activatedTime(p, ab);
+                LoreFx.dustRing((ServerLevel) p.level(), s.c1(), p.position().add(0, 1, 0), 0.9, 14, 0.9f, 0.6);
                 if (amount <= 0) break;
             }
             if (amount <= 0) event.setCanceled(true);

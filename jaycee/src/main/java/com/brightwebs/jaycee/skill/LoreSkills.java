@@ -35,7 +35,11 @@ public final class LoreSkills {
 
     public record Spec(String id, String name, SkillType type, String rank, String elem, String acc, String arch,
                        int mp, int ap, float dmg, int cd, int cdm, float range, float radius, int cast, int castm,
-                       String mclass, int dur, List<String> modes, boolean toggle, boolean tensura) {
+                       String mclass, int dur, List<String> modes, boolean toggle, boolean tensura,
+                       String f1, String f2, int c1, int c2, Map<String, String> pats, List<String> tags) {
+        // the look pattern for one kind of thing this skill does
+        String pat(String kind) { return pats.getOrDefault(kind, pats.getOrDefault(arch, "")); }
+        boolean tag(String t) { return tags.contains(t); }
         boolean magic() { return type == SkillType.MAGIC; }
         boolean resist() { return arch.equals("resist"); }
         // which arch a mode uses (one mode skills just use their own)
@@ -54,12 +58,19 @@ public final class LoreSkills {
                     JsonObject o = el.getAsJsonObject();
                     List<String> modes = new ArrayList<>();
                     if (o.has("modes")) for (JsonElement m : o.getAsJsonArray("modes")) modes.add(m.getAsString());
+                    JsonObject fx = o.has("fx") ? o.getAsJsonObject("fx") : new JsonObject();
+                    Map<String, String> pats = new java.util.HashMap<>();
+                    if (fx.has("pat")) for (var e : fx.getAsJsonObject("pat").entrySet()) pats.put(e.getKey(), e.getValue().getAsString());
+                    List<String> tags = new ArrayList<>();
+                    if (fx.has("tags")) for (JsonElement t : fx.getAsJsonArray("tags")) tags.add(t.getAsString());
                     Spec s = new Spec(str(o, "id", ""), str(o, "name", ""), SkillType.valueOf(str(o, "type", "EXTRA")), str(o, "rank", "extra"),
                             str(o, "elem", "aura"), str(o, "acc", "aura"), str(o, "arch", "aura"),
                             num(o, "mp", 0), num(o, "ap", 0), (float) dbl(o, "dmg", 10), num(o, "cd", 60), num(o, "cdm", 30),
                             (float) dbl(o, "range", 16), (float) dbl(o, "radius", 3), num(o, "cast", 20), num(o, "castm", 10),
                             str(o, "mclass", "other"), num(o, "dur", 600), modes, o.has("toggle") && o.get("toggle").getAsBoolean(),
-                            "tensura".equals(str(o, "src", "")));
+                            "tensura".equals(str(o, "src", "")),
+                            str(fx, "f1", str(o, "elem", "aura")), str(fx, "f2", str(o, "acc", "aura")),
+                            color(str(fx, "c1", "#c9a7ff")), color(str(fx, "c2", "#ffffff")), pats, tags);
                     if (!s.id().isEmpty()) SPECS.put(s.id(), s);
                 } catch (Exception bad) {
                     LOG.warn("[Jaycee] skipped a broken lore skill entry: {}", bad.toString());
@@ -68,6 +79,10 @@ public final class LoreSkills {
         } catch (Exception ex) {
             LOG.error("[Jaycee] couldn't read lore_skills.json", ex);
         }
+    }
+
+    private static int color(String hex) {
+        try { return Integer.parseInt(hex.replace("#", ""), 16); } catch (Exception e) { return 0xC9A7FF; }
     }
 
     private static String str(JsonObject o, String k, String d) { return o.has(k) ? o.get(k).getAsString() : d; }
@@ -157,7 +172,8 @@ public final class LoreSkills {
         }
 
         @Override public void onToggle(ServerPlayer p, boolean on) {
-            if (!on) LoreEngine.stop(p, spec);
+            if (on) LoreEngine.started(p, spec, spec.arch());
+            else LoreEngine.stop(p, spec);
         }
 
         @Override public void onForgotten(ServerPlayer p) { LoreEngine.stop(p, spec); }

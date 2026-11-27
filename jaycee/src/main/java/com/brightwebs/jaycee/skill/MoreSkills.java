@@ -132,9 +132,17 @@ public final class MoreSkills {
         if (held % 20 == 0 && !Tk.spend(p, a, cost)) return false;
         if (held > 0 && held % Tk.MASTERY_HOLD_TICK == 0) AbilityAPI.addMasteryPoint(p, a);
         ServerLevel l = (ServerLevel) p.level();
-        Vec3 eye = p.getEyePosition().add(0, -0.15, 0), look = p.getLookAngle();
-        Fx.cone(l, main, eye.add(look.scale(0.9)), look, 0.45, 0.22, 4);
-        for (int i = 4; i <= range; i += 2) if (held % 3 == 0) Fx.move(l, trail, eye.add(look.scale(i * 0.9)), look.scale(0.2));
+        Vec3 eye = LoreFx.mouth(p), look = p.getLookAngle();
+        if (main == BrightParticles.SPARK) {
+            // tensura's thunder breath colours (its lightning effect is a blue-violet), bolts running out along your aim
+            if (held % 2 == 0) for (int k = 0; k < 2; k++) {
+                Vec3 end = eye.add(look.scale(range)).add((Math.random() - 0.5) * range * 0.3, (Math.random() - 0.5) * range * 0.2, (Math.random() - 0.5) * range * 0.3);
+                LoreFx.bolt(l, 0x9FB0FF, 0xFFFFFF, BrightParticles.SPARK, eye, end, Math.max(5, range), 0.45);
+            }
+        } else {
+            Fx.cone(l, main, eye.add(look.scale(0.3)), look, 0.45, 0.18, 5);
+            for (int i = 4; i <= range; i += 2) if (held % 3 == 0) Fx.move(l, trail, eye.add(look.scale(i * 0.9)), look.scale(0.2));
+        }
         if (held % 2 == 0) l.playSound(null, p.blockPosition(), sound, SoundSource.PLAYERS, 0.75f, 1.0f);
         if (held % 5 == 0) {
             float d = Tk.mastered(p, a) ? dpsMastered : dps;
@@ -390,7 +398,7 @@ public final class MoreSkills {
             p.heal(6);
             AbilityAPI.addMasteryPoint(p, a);
             Fx.burst(l, BrightParticles.BLOOD, t.position().add(0, t.getBbHeight() / 2, 0), 16, 0.12);
-            Fx.beam(l, BrightParticles.BLOOD, t.position().add(0, t.getBbHeight() / 2, 0), p.position().add(0, 1, 0), 0.4);
+            for (int k = 0; k < 3; k++) LoreFx.essence(l, 0xB0122A, 0xFF7799, t, p);
             l.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.GENERIC_DRINK.value(), SoundSource.PLAYERS, 1, 0.7f);
         }
         return true;
@@ -415,13 +423,18 @@ public final class MoreSkills {
         l.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 1.2f, 0.7f);
         Fx.shockwave(l, p.position().add(0, 0.2, 0), 2);
         Fx.spiral(l, BrightParticles.FLAME, p.position(), 0.9, 2.4, 2, 40, 0);
+        LoreFx.fade(l, 0xC01010, 0xFF4A2A, p.position().add(0, 1, 0), 40, 0.6, 1.6f);
         return true;
     }
 
     /** while berserk you smoke red, and the skill earns mastery like tensura's activatedTimes */
     static void ogreTick(ServerPlayer p, Ability a) {
         if (!p.hasEffect(JayceeEffects.OGRE_BERSERKER)) return;
-        if (p.tickCount % 5 == 0) Fx.aura((ServerLevel) p.level(), BrightParticles.EMBER, p, 2);
+        if (p.tickCount % 4 == 0) {
+            ServerLevel l = (ServerLevel) p.level();
+            for (int i = 0; i < 4; i++) LoreFx.dust(l, i % 2 == 0 ? 0xC01010 : 0xFF4A2A, p.position().add((Math.random() - 0.5) * 1.1, Math.random() * 2, (Math.random() - 0.5) * 1.1), 1, 0, 1.3f);
+            Fx.aura(l, BrightParticles.FLAME, p, 1);
+        }
         if (p.tickCount % Tk.SKILL_TICK == 0) Tk.activatedTime(p, a);
     }
 
@@ -456,6 +469,8 @@ public final class MoreSkills {
         double ar = ep >= 800_000 ? 24 : ep >= 400_000 ? 20 : ep >= 50_000 ? 20 : 15;
         double tg = ep >= 800_000 ? 16 : ep >= 400_000 ? 12 : ep >= 50_000 ? 8 : 0;
         armor.addOrUpdateTransientModifier(new AttributeModifier(DRAGON_SKIN, ar, AttributeModifier.Operation.ADD_VALUE));
+        ServerLevel dl = (ServerLevel) p.level();
+        for (int i = 0; i < 3; i++) LoreFx.dust(dl, i == 0 ? 0xBFE0FF : 0x2F6FD8, p.position().add((Math.random() - 0.5) * 0.8, 0.2 + Math.random() * 1.6, (Math.random() - 0.5) * 0.8), 1, 0, 0.9f);
         tough.addOrUpdateTransientModifier(new AttributeModifier(DRAGON_SKIN, tg, AttributeModifier.Operation.ADD_VALUE));
     }
 

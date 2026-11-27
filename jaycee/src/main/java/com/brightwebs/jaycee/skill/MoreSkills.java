@@ -381,7 +381,7 @@ public final class MoreSkills {
     static boolean drain(ServerPlayer p, Ability a) {
         LivingEntity t = SkillHelper.target(p, 3);
         if (t == null) return false;
-        if (t.getType().is(net.minecraft.tags.EntityTypeTags.UNDEAD) || t instanceof net.minecraft.world.entity.animal.golem.AbstractGolem) {
+        if (t.typeHolder().is(net.minecraft.tags.EntityTypeTags.UNDEAD) || t instanceof net.minecraft.world.entity.animal.golem.AbstractGolem) {
             p.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("jaycee.skill.no_blood").withStyle(net.minecraft.ChatFormatting.RED));
             return false;
         }

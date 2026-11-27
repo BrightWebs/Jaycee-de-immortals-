@@ -51,14 +51,8 @@ public final class AbilityAPI {
         if (data.has(ability.id())) return false;
         if (NeoForge.EVENT_BUS.post(new AbilityEvent.Learn(player, ability)).isCanceled()) return false;
 
+        // just learned, not slotted. the player picks what goes in their slots from the library
         data = data.withAbility(ability.id());
-        // put it in the first empty slot, starting from the page you're on
-        if (!ability.isPassive()) {
-            for (int n = 0; n < AbilityData.TOTAL_SLOTS; n++) {
-                int index = (data.page() * AbilityData.SLOTS_PER_PAGE + n) % AbilityData.TOTAL_SLOTS;
-                if (data.slotAt(index).isEmpty()) { data = data.withSlotAt(index, ability.id()); break; }
-            }
-        }
         set(player, data);
         ability.onLearned(player);
         return true;

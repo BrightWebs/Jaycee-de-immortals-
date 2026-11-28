@@ -183,7 +183,7 @@ public final class LoreSkills {
         @Override public void onRelease(ServerPlayer p, ServerLevel l, int mode, int held) {
             if (!spec.magic()) {
                 Act act = spec.act(mode);
-                if (LoreActions.HELD.contains(act.a()) && held > 0) {
+                if (LoreActions.HELD.contains(act.a()) && held > 0 && !AbilityAPI.onCooldown(p, this)) {
                     AbilityAPI.setCooldown(p, this, LoreActions.cooldown(spec, act, AbilityAPI.isMastered(p, this)));
                 }
                 return;

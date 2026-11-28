@@ -7,6 +7,10 @@ import json, re, sys, os
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 man = json.load(open(sys.argv[1]))['abilities']
+# sins the icon pack missed (tensura and manas reborn both have them)
+_have = {a['id'] for a in man}
+for _id, _nm in [('wrath', 'Wrath'), ('envy', 'Envy')]:
+    if _id not in _have: man.append({'id': _id, 'display_name': _nm, 'variant': None, 'categories': ['unique'], 'sources': []})
 tcfg = json.load(open(sys.argv[2]))
 tab = json.load(open(sys.argv[3]))
 existing = set(open(sys.argv[4]).read().split())

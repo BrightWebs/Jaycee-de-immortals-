@@ -2,7 +2,7 @@
 #   python3 tools/apply_design.py <ref_modes.json>
 import json, re, sys, os
 sys.path.insert(0, os.path.dirname(__file__))
-from skill_design import U, act_for, KIND, TOGGLE, FIX, SKIP_MODE, MODE_FIX
+from skill_design import U, act_for, KIND, TOGGLE, FIX, SKIP_MODE, MODE_FIX, DESC, ULT_OF, SKILL_DESC
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REF = json.load(open(sys.argv[1]))
 def norm(s): return re.sub(r'[^a-z0-9]', '', s.lower())
@@ -44,6 +44,18 @@ for s in specs:
     if len(acts) == 1 and acts[0]['a'] in TOGGLE and s['type'] != 'MAGIC': s['toggle'] = True
     if s.get('modes') is None: s.pop('modes', None)
 json.dump(specs, open(p, 'w'), separators=(',', ':'))
+# mode descriptions for the hand-built ones
+lp = os.path.join(ROOT, 'jaycee/src/main/resources/assets/jaycee/lang/en_us.json')
+lang = json.load(open(lp))
+for s in specs:
+    if s['id'] in SKILL_DESC: lang['ability.jaycee.%s.desc' % s['id']] = SKILL_DESC[s['id']]
+    d = DESC.get(ULT_OF.get(s['id'], s['id']))
+    if not d: continue
+    for a in s['acts']:
+        if a['n'] in d:
+            lang['ability.jaycee.%s.mode.%s' % (s['id'], a['k'])] = a['n']
+            lang['ability.jaycee.%s.mode.%s.desc' % (s['id'], a['k'])] = d[a['n']]
+json.dump(lang, open(lp, 'w'), indent=1, ensure_ascii=False)
 json.dump(review, open('/home/claude/work/gen/design_review.json', 'w'))
 import collections
 print('acts:', collections.Counter(a['a'] for s in specs for a in s.get('acts', [])).most_common(70))

@@ -49,6 +49,7 @@ public final class LoreActions {
 
     // which look kind (LoreFx) each action draws with
     static String kind(String act) {
+        if (Sins.handles(act)) return "sense";
         return switch (act) {
             case "bolt", "lance", "barrage", "meteor" -> "projectile";
             case "beam", "chain" -> "beam";
@@ -80,6 +81,7 @@ public final class LoreActions {
 
     // modes whose cost is their own (from tensura / manas reborn), not the skill's base price. -1 = use the base
     static int fixedCost(String act) {
+        if (Sins.handles(act)) return Sins.cost(act);
         return switch (act) {
             case "devour", "storage", "isolate", "receive", "provide", "corrosion", "grasp" -> 0;  // they spend their own as they go
             case "void" -> 2000;
@@ -90,6 +92,7 @@ public final class LoreActions {
 
     static int cooldown(Spec s, Act act, boolean mastered) {
         int base = mastered ? s.cdm() : s.cd();
+        if (Sins.handles(act.a())) return Sins.cooldown(act.a(), mastered);
         return switch (act.a()) {
             case "devour", "isolate" -> 0;  // predation sets its own (5s, 3s mastered)
             case "storage", "receive", "provide" -> 20;
@@ -175,19 +178,20 @@ public final class LoreActions {
             case "clone" -> LoreEngine.summon(p, s, net.minecraft.world.entity.EntityTypes.ZOMBIE, 2);
             case "weapon" -> weapon(p, s, dmg);
             case "weather" -> weather(p, s);
-            default -> false;
+            default -> Sins.handles(k) && Sins.run(p, a, s, k);
         };
         return ok;
     }
 
     // actions you hold the key down for (like tensura's corrosion and manas reborn's ravenous grasp)
-    static final java.util.Set<String> HELD = java.util.Set.of("corrosion", "grasp");
+    static final java.util.Set<String> HELD = union(java.util.Set.of("corrosion", "grasp"), Sins.HELD);
+    private static java.util.Set<String> union(java.util.Set<String> a, java.util.Set<String> b) { var u = new java.util.HashSet<>(a); u.addAll(b); return java.util.Set.copyOf(u); }
 
     static boolean held(ServerPlayer p, Ability a, Spec s, Act act, int ticks) {
         return switch (act.a()) {
             case "corrosion" -> Gluttonous.corrosion(p, a, s, ticks);
             case "grasp" -> Gluttonous.grasp(p, a, s, ticks);
-            default -> false;
+            default -> Sins.HELD.contains(act.a()) && Sins.held(p, a, s, act.a(), ticks);
         };
     }
 

@@ -83,13 +83,15 @@ public final class LoreEngine {
         if (SkillState.instantCast(p)) return 0;
         Map<String, Active> mine = ACTIVE.get(p.getUUID());
         if (mine != null) for (Active x : mine.values()) if (x.arch.equals("chant")) return 0;
-        return AbilityAPI.isMastered(p, a) ? s.castm() : s.cast();
+        int base = AbilityAPI.isMastered(p, a) ? s.castm() : s.cast();
+        var sil = p.getEffect(com.brightwebs.jaycee.effect.LoreEffects.SILENCE);
+        return sil == null ? base : (int) (base * (1 + 0.1 * (sil.getAmplifier() + 1)));
     }
 
     // magic: the circle under you while you build up the cast, like tensura's castMagicCircle
     static void casting(ServerPlayer p, Ability a, Spec s, int held) {
         ServerLevel l = (ServerLevel) p.level();
-        int need = AbilityAPI.isMastered(p, a) ? s.castm() : s.cast();
+        int need = castNeed(p, a, s);
         if (held % 2 == 0) {
             double r = 1.2 + Math.min(1, held / (double) Math.max(1, need));
             Fx.magicCircle(l, LoreFx.sprite(s.f1()), p.position().add(0, 0.05, 0), r, held);
@@ -512,6 +514,8 @@ public final class LoreEngine {
 
     // the element of whatever lore hit is landing right now, so resistances can see it
     private static final ThreadLocal<String> HITTING = new ThreadLocal<>();
+    // and which skill it is (pride / greed use this to copy what hit them)
+    static final ThreadLocal<Spec> SOURCE = new ThreadLocal<>();
 
     static void hurt(ServerPlayer p, LivingEntity t, Spec s, float dmg) {
         ServerLevel l = (ServerLevel) p.level();
@@ -519,10 +523,12 @@ public final class LoreEngine {
                 ? l.damageSources().indirectMagic(p, p) : l.damageSources().playerAttack(p);
         if (s.elem().equals("holy") && t.getType().builtInRegistryHolder().is(net.minecraft.tags.EntityTypeTags.UNDEAD)) dmg *= 2;
         HITTING.set(s.elem());
+        SOURCE.set(s);
         try {
             if (t.hurtServer(l, src, dmg)) element(p, t, s, dmg);
         } finally {
             HITTING.remove();
+            SOURCE.remove();
         }
     }
 

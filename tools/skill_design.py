@@ -18,6 +18,8 @@ def m(sid, *modes):
     U[sid] = list(modes)
 
 # ------------------------------------------------------------ uniques (tensura / manas reborn names first)
+m('envy', 'Absorb|absorb', 'Strength Sap|sap', 'Envious Field|envy_field', 'Resentful Barrier|resent', 'Disordered Desire|desire')
+m('wrath', 'Breeder Reactor|breeder', 'Enrage|enrage', 'Seismic Fury|fury', 'Growing Rampage|rampage_cast', 'Crimson Rupture|rupture')
 m('absolute_end', 'Ending|execute|1.4', 'Finality Field|field', 'Last Rites|suppress')
 m('adapter', 'Adapt|buff', 'Resistance Growth|barrier', 'Evolve|awaken')
 m('all_rounder', 'Versatile Strike|strike', 'Versatile Shot|bolt', 'Versatile Guard|barrier')
@@ -49,7 +51,7 @@ m('glutton', 'Gobble|devour', 'Digest|heal', 'Stomach|storage')
 m('gluttony', 'Predation|devour', 'Stomach|storage', 'Mimicry|mimicry', 'Isolation|isolate', 'Corrosion|corrosion', 'Receive|receive', 'Provide|provide', 'Ravenous Grasp|grasp', 'Devouring Void|void')
 m('gourmand', 'Devour|devour', 'Savour|heal', 'Stockpile|storage')
 m('gourmet', 'Taste|analyze', 'Delicacy|heal', 'Devour|devour')
-m('greed', 'Death Wish|execute', 'Greed Flare|nova', 'Spiritual Domination|dominate', 'Endless Avarice|essence')
+m('greed', 'Spiritual Domination|domination', 'Greed Flare|flare', 'Death Wish|death_wish', 'Energy Seize|seize', 'Endless Avarice|avarice')
 m('guardian', 'Grant Protection|protect', 'Iron Wall|barrier')
 m('guide', 'Guidance|sense', 'Path|teleport', 'Lead|protect')
 m('healer', 'Heal|heal', 'Plague|field', 'Infection|chain')
@@ -61,7 +63,7 @@ m('leader', 'Rally|protect', 'Command|dominate', 'Charge|dash')
 m('limiter', 'Limit|suppress', 'Release Limit|awaken', 'Restrain|bind')
 m('looter', 'Loot|essence', 'Snatch|copy', 'Stash|storage')
 m('lord_of_magewolves', 'Wolf Pack|summon', 'Howl|fear', 'Lunar Fang|strike')
-m('lust', 'Death Blessing|execute', 'Drain|drain', 'Embracing Drain|essence', 'Invigorate|buff', 'Rebirth|undying', 'Spiritual Manipulation|charm')
+m('lust', 'Drain|lust_drain', 'Invigorate|invigorate', 'Rebirth|rebirth', 'Embracing Drain|embrace', 'Death Blessing|blessing', 'Spiritual Manipulation|manipulate', 'Transmission|transmit', 'Siphoning|siphon', 'Implode|implode')
 m('manipulator', 'Manipulate|charm', 'Puppet|dominate', 'String Bind|bind')
 m('manufacturer', 'Manufacture|craft', 'Create Weapon|weapon', 'Mass Produce|barrage')
 m('martial_master', 'Thousand Cuts|flurry', 'Ultra Acceleration|haste', 'Martial Stance|barrier')
@@ -80,7 +82,7 @@ m('overcomer', 'Overcome|undying', 'Adversity|rage', 'Second Wind|heal')
 m('paranoia', 'Suspicion|sense', 'Persecution|fear', 'Defensive Instinct|reflect')
 m('perceiver', 'Perceive|sense', 'Discern|analyze', 'Foresight|reflect')
 m('planner', 'Plan|analyze', 'Trap|imprison', 'Contingency|undying')
-m('pride', 'Copy|copy', 'Imperial Ascension|awaken', 'Declare Supremacy|fear', 'Supreme Order|dominate')
+m('pride', 'Copy|pride_copy', 'Declare Supremacy|declare', 'Supreme Order|order', 'Imperial Ascension|ascension')
 m('reaper', 'Attack|cleave', 'Infinite Eater|devour', 'Harvest|execute')
 m('recorder', 'Record|analyze', 'Replay|copy', 'Archive|storage')
 m('reflector', 'Echo Counter|reflect', 'Echo Reflection|barrier')
@@ -95,7 +97,7 @@ m('seer', 'Foresee|sense', 'Prophecy|reflect', 'Clairvoyance|analyze')
 m('sentient_being', 'Sentience|sense', 'Self Will|undying', 'Mind Over Matter|barrier')
 m('severer', 'Severance|cleave|1.4', 'Blade Storm|flurry', 'Dummy Sword|weapon')
 m('shadow_striker', 'Espionage|invis', 'Insta-kill|execute', 'Ultra Acceleration|haste')
-m('sloth', 'Deep Hypno|sleep', 'Deprive|essence', 'Fallen Hypno|field', 'Fallen Strike|strike', 'Phantasmal Style|clone', 'Rest|rest')
+m('sloth', 'Deep Hypno|deep_hypno', 'Fallen Hypno|fallen_hypno', 'Deprive|deprive', 'Rest|sloth_rest', 'Phantasmal Style|phantasmal', 'Fallen Strike|fallen_strike', 'Lethargy|lethargy', 'Effort|effort', 'Final Lullaby|lullaby')
 m('sniper', 'Spatial Manipulation|lance|1.3', 'Create Weapon|weapon', 'Deadeye|sense')
 m('spearhead', 'Spearhead|dash', 'Piercing Charge|lance', 'Vanguard|protect')
 m('spiral_body', 'Spiral Body|barrier', 'Spiral Strike|strike', 'Coil|regen')
@@ -127,7 +129,7 @@ m('amaterasu', 'Sun Goddess|beam', 'Heavenly Radiance|nova', 'Sacred Mirror|refl
 m('amon', 'Hellfire|blast', 'Knowledge of Past and Future|sense', 'Reconcile|charm', 'Infernal Wolf|summon')
 m('angra_mainyu', 'Destructive Spirit|nova', 'Corruption|debuff', 'Darkness|field', 'Evil Domination|dominate')
 m('artist', 'Create|craft', 'Masterpiece|summon', 'Paint Reality|field', 'Brushstroke|strike')
-m('asmodeus', 'Death Blessing|execute', 'Embracing Drain|essence', 'Rebirth|undying', 'Spiritual Manipulation|charm')
+m('asmodeus', 'Drain|lust_drain', 'Invigorate|invigorate', 'Rebirth|rebirth', 'Embracing Drain|embrace', 'Death Blessing|blessing', 'Spiritual Manipulation|manipulate', 'Transmission|transmit', 'Siphoning|siphon', 'Implode|implode')
 m('astaroth', 'Truth Seeing|analyze', 'Serpent Breath|breath', 'Fallen Knowledge|copy', 'Duke of Hell|fear')
 m('astarte', 'Love and War|buff', 'Morning Star|lance', 'Fertility|heal', 'Charm|charm')
 m('azathoth', 'Void Manipulation|blackhole', 'Void Collapse|devour', 'Absolute Defense|barrier', 'Spatial Domination|teleport', 'Disintegration|execute')
@@ -140,7 +142,7 @@ m('bahamut', 'Mega Flare|beam|1.4', 'Dragon Scale|barrier', 'Dragon King|fear', 
 m('beelzebub', 'Predation|devour', 'Stomach|storage', 'Isolation|isolate', 'Mimicry|mimicry', 'Corrosion|corrosion', 'Ravenous Grasp|grasp', 'Devouring Void|void', 'Food Chain: Receive|receive', 'Food Chain: Provide|provide')
 m('beelzebuth', 'Lord of Flies|summon', 'Ravenous Plague|field', 'Devour|devour', 'Gluttonous Void|blackhole')
 m('belial', 'Lord of Lies|clone', 'Worthless|suppress', 'Deceit|invis', 'Wicked Flame|blast')
-m('belphegor', 'Deep Hypno|sleep', 'Deprive|essence', 'Rest|rest', 'Phantasmal Style|clone')
+m('belphegor', 'Deep Hypno|deep_hypno', 'Fallen Hypno|fallen_hypno', 'Deprive|deprive', 'Rest|sloth_rest', 'Phantasmal Style|phantasmal', 'Fallen Strike|fallen_strike', 'Lethargy|lethargy', 'Effort|effort', 'Final Lullaby|lullaby')
 m('blade_transformation', 'Blade Body|barrier', 'Sword Form|awaken', 'Thousand Blades|flurry', 'Blade Storm|nova')
 m('cthugha', 'Living Flame|blast', 'Fomalhaut|beam', 'Flame Body|barrier', 'Fire Vampires|summon')
 m('cthulhu', 'Dreaming God|sleep', "R'lyeh Rising|summon", 'Madness|fear', 'Tentacles|bind')
@@ -158,9 +160,9 @@ m('immortal', 'Immortality|undying', 'Infinite Regeneration|regen', 'Deathless|b
 m('indra', 'Vajra|chain', 'Thunder God|beam', 'King of Heaven|fear', 'Storm Call|weather')
 m('israfil', 'Trumpet of Resurrection|heal', 'Trumpet of the End|nova', 'Angel of Music|music', 'Burning Wings|dash')
 m('jibril', 'Divine Message|analyze', 'Holy Spear|lance', 'Archangel Wings|dash', 'Revelation|dispel')
-m('leviathan', 'Envious Field|field', 'Absorb|essence', 'Strength Sap|drain', 'Tidal Wave|breath')
-m('lucifer', 'Copy|copy', 'Imperial Ascension|awaken', 'Declare Supremacy|fear', 'Supreme Order|dominate', 'Morning Star|beam')
-m('mammon', 'Greed Flare|nova', 'Death Wish|execute', 'Spiritual Domination|dominate', 'Endless Avarice|essence')
+m('leviathan', 'Absorb|absorb', 'Strength Sap|sap', 'Envious Field|envy_field', 'Resentful Barrier|resent', 'Disordered Desire|desire', 'Tidal Wave|breath')
+m('lucifer', 'Copy|pride_copy', 'Declare Supremacy|declare', 'Supreme Order|order', 'Imperial Ascension|ascension', 'Morning Star|beam')
+m('mammon', 'Spiritual Domination|domination', 'Greed Flare|flare', 'Death Wish|death_wish', 'Energy Seize|seize', 'Endless Avarice|avarice')
 m('melchizedek', 'King of Righteousness|protect', 'Priestly Blessing|heal', 'Judgment|beam', 'Covenant|bind')
 m('mephisto', 'Contract|charm', 'Curse|debuff', 'Hellfire|blast', 'Soul Price|drain')
 m('metatron', 'Purifying Light|beam', 'Absolute Defense|barrier', 'Purification|dispel', 'Light Manipulation|nova')
@@ -178,7 +180,7 @@ m('rex', 'Royal Decree|dominate', 'King Strike|cleave|1.3', 'Royal Guard|summon'
 m('samael', 'Venom of God|chain', 'Angel of Death|execute', 'Blind Angel|debuff', 'Fall|gravity')
 m('sandalphon', 'Prayer|heal', 'Gather Prayers|protect', 'Giant Angel|awaken', 'Holy Song|music')
 m('sariel', 'Judgment|beam|1.3', 'Absolute Severance|cleave|1.5', 'Absolute Defense|barrier', 'Moon Gaze|sense')
-m('satanael', 'Breeder Reactor|rage', 'Enrage|awaken', 'Absolute Annihilation|nova|1.4', 'Wrath Domain|field')
+m('satanael', 'Breeder Reactor|breeder', 'Enrage|enrage', 'Seismic Fury|fury', 'Growing Rampage|rampage_cast', 'Crimson Rupture|rupture', 'Absolute Annihilation|nova|1.4')
 m('sephirot', 'Tree of Life|heal', 'Ten Lights|barrage', 'Kether|awaken', 'Malkuth|barrier')
 m('shub_niggurath', 'Creation|craft', 'Thousand Young|summon', 'Fertility|regen', 'Black Goat|devour')
 m('small_world', 'Pocket Space|storage', 'Shrink|gravity', 'Small World|imprison', 'Spatial Step|blink')
@@ -338,6 +340,8 @@ MODE_FIX = {'Repeat': 'lance', 'Single': 'lance', 'Condensed': 'blast', 'Spread'
 KIND['chant'] = 'aura'; KIND['debuff'] = 'aura'
 KIND.update({'void': 'area', 'corrosion': 'aura', 'grasp': 'aura', 'receive': 'sense', 'provide': 'sense', 'mimicry': 'sense'})
 TOGGLE.add('chant')
+# the sins (Sins.java)
+KIND.update({a: 'aura' for a in ['absorb', 'ascension', 'avarice', 'blessing', 'breeder', 'death_wish', 'declare', 'deep_hypno', 'deprive', 'desire', 'domination', 'effort', 'embrace', 'enrage', 'envy_field', 'fallen_hypno', 'fallen_strike', 'flare', 'fury', 'implode', 'invigorate', 'lethargy', 'lullaby', 'lust_drain', 'manipulate', 'order', 'phantasmal', 'pride_copy', 'rampage_cast', 'rebirth', 'resent', 'rupture', 'sap', 'seize', 'siphon', 'sloth_rest', 'transmit']})
 
 # a few mod skills whose modes need a better fit than the names alone give
 m('thunder_rain', 'Thunder Rain|meteor', 'Coating|buff')
@@ -347,3 +351,72 @@ m('mud_spears', 'Targeted Mode|lance', 'Spread Mode|barrage')
 m('stone_shot', 'Single|lance', 'Spread Mode|barrage')
 m('explosion', 'Explosion Strike|blast', 'Explosion Trap|field')
 m('black_lightning', 'Black Lightning|chain', 'Death Storm|blast')
+
+# ------------------------------------------------------------ what each hand-built mode does (shown in the library)
+# keyed by the base skill; its ultimate uses the same text (it's the same power, stronger)
+ULT_OF = {'satanael': 'wrath', 'leviathan': 'envy', 'asmodeus': 'lust', 'mammon': 'greed', 'lucifer': 'pride', 'belphegor': 'sloth'}
+DESC = {
+ 'wrath': {
+  'Breeder Reactor': 'hold: pump 2% of your max magicules into yourself every 5s, past your max. each pump can stack Rampage (3%, 6% while over max)',
+  'Enrage': 'hold: everything within 7 flies into a Rampage and attacks whatever is near it, deeper the longer you hold. 100 magicules a second',
+  'Seismic Fury': 'slam the ground: everything within 10 takes your attack damage x0.5 (x1 mastered), more for every combo hit you stacked',
+  'Growing Rampage': 'hold 3s: you Rampage for a minute and it grows a level every 30s (up to 30, 40 mastered)',
+  'Crimson Rupture': 'needs Rampage 10+. hold 5s and it bursts out of you: 20 damage a level, 5 blocks + 0.5 a level. spends your Rampage',
+ },
+ 'envy': {
+  'Absorb': 'take the EP gap from someone stronger than you within 5 blocks, a quarter of it stays yours for good',
+  'Strength Sap': 'hold: everything within 15 that is weaker than you slows down, weakens and bleeds EP. it can drive you a little insane. 1000 magicules a second',
+  'Envious Field': 'a field 10 blocks wide (15 mastered) for 30s: drains aura and magicules from everything inside, anti skill and weakness every 5s',
+  'Resentful Barrier': '20s (30s mastered): hits come out of your magicules instead of your health',
+  'Disordered Desire': 'hold 3s on someone within 10: a quarter of their EP becomes yours',
+ },
+ 'lust': {
+  'Drain': 'pull 200 EP out of someone within 5. with nobody there your hits drain for 10s instead',
+  'Invigorate': 'heal everything you are missing (80 magicules a heart, 40 mastered) and shake off bad effects. sneak: do it for who you look at',
+  'Rebirth': 'you and your allies within 15 are held back from death once for 30s: the killing hit leaves them at full health',
+  'Embracing Drain': 'lock someone in reach for 5s. they cannot look away or move, and it drains them every second',
+  'Death Blessing': 'hold 5s: a field where you look. half your EP or less dies, 3/4 loses half its health, up to yours loses a quarter. 7500 a second',
+  'Spiritual Manipulation': 'hold on something within 30 until its will breaks (90s mobs, 60s players, faster up close). sneak: let it go',
+  'Transmission': 'hold 2s: give a fifth of your health to who you look at. sneak: take it from them',
+  'Siphoning': 'hold on someone within 10 (20 mastered): their life flows into you',
+  'Implode': 'hold 3s on someone within 10: a tenth of your magicules lands on them as damage',
+ },
+ 'greed': {
+  'Spiritual Domination': 'hold on something within 30 until its will breaks (90s mobs, 60s players, faster up close, faster the more it trades). sneak: let it go',
+  'Greed Flare': 'burn your own power into attack (5% of your health, 10% mastered), or give an ally half. each hit costs magicules. press again to put it out',
+  'Death Wish': 'hold 10s on something in reach. it can barely move, and when the wish is done it dies',
+  'Energy Seize': '30s: everything within 15 has its power drained into you while it stays near (level 1, 3 mastered)',
+  'Endless Avarice': 'grab at someone within 10: rip mastery out of a skill you both have, or a chance to take one you do not',
+ },
+ 'pride': {
+  'Copy': 'skills that hit you can become yours (20%, always mastered). press to try again at the last one that hit you',
+  'Declare Supremacy': 'name something within 30 with half your EP or less as beneath you: it hits you for a quarter and folds when you hit it',
+  'Supreme Order': 'everything within 30 with 3/4 your EP or less (all of it mastered) has its attacks and movement shut down for 15s',
+  'Imperial Ascension': 'hold 5s: for 2 minutes your health and magicules double and nothing can knock you back',
+ },
+ 'sloth': {
+  'Deep Hypno': 'hold on something within 10: drowsier the longer you hold, then it falls asleep. breaks the spells of players you look at',
+  'Fallen Hypno': 'hold: the same, on everything within 5 of you (10 mastered)',
+  'Deprive': 'hold: everything within 5 (15 mastered) loses 1000 EP a second and some of its soul to you',
+  'Rest': 'hold: lie still and recover 10 health and 10 magicules a second. sneak+press: heal your allies within 15',
+  'Phantasmal Style': 'switch on: your hits strike the soul too (+10, +1% of their health mastered) and you move like a shadow',
+  'Fallen Strike': 'step behind something within 8 and hit its soul: a quarter of its health plus 50, through armor',
+  'Lethargy': 'everything within 15 is weighed down more every 10s for a minute. ten levels in, it sleeps',
+  'Effort': 'why do it yourself: a copy of you fights for you (4 at once, 9 mastered). costs a tenth of your magicules',
+  'Final Lullaby': 'hold 3s: you and your allies within 15 get +20% damage, +10% speed and 5% less damage for 2 minutes, then fall asleep',
+ },
+}
+SKILL_DESC = {
+ 'wrath': 'The sin of wrath. Anger becomes power: a breeder reactor of magicules, a rampage that keeps growing, and fury that shakes the ground. Hits landed in rhythm build a combo.',
+ 'satanael': 'Wrath King. The ultimate form of Wrath: a bigger reactor, a deeper rampage and a rupture that levels everything around you.',
+ 'envy': 'The sin of envy. Take what others have: their EP, their strength, their energy. Lucky, and hits sometimes just miss you; weakness and slowness cannot hold you.',
+ 'leviathan': 'Envy Lord. The ultimate form of Envy, wider and hungrier, and harder to hit.',
+ 'lust': 'The sin of lust. Power over life and desire: drain, heal, embrace, bless with death, and bend wills.',
+ 'asmodeus': 'Lust King. The ultimate form of Lust: life and death in your hands.',
+ 'greed': 'The sin of greed. Want everything: wills, power, skills, even lives.',
+ 'mammon': 'Greed King. The ultimate form of Greed: wills break twice as fast and a death wish needs half the time.',
+ 'pride': 'The sin of pride. Everything beneath you is beneath you: skills that hit you become yours, the weak are crushed by your presence.',
+ 'lucifer': 'Pride King. The ultimate form of Pride: you can copy even ultimate skills.',
+ 'sloth': 'The sin of sloth. Sleep, rest and letting others do the work: hypnosis, drowsiness, soul strikes and copies of yourself.',
+ 'belphegor': 'Sloth King. The ultimate form of Sloth: deeper sleep over a wider area, and twice the copies.',
+}

@@ -65,13 +65,23 @@ public final class Predation {
     static final double ISOLATION_COST = 200, DISSOLVE_MAGICULE = 2.0, DISSOLVE_HEALTH = 2.0;
     static final int ISOLATION_CD = 5, ISOLATION_CD_MASTERED = 3, MIST_LIFE = 60;
 
+    // how strong a devourer is. predator and gluttony are tensura's UniqueSkillConfig numbers, beelzebub is above them
+    // skillChance is a percent, skills is how many skills a kill can take (99 = all of them)
+    public record Stats(float range, float rangeMastered, float damage, float epDrain, float skillChance, float epSteal, int skills) {}
+    public static final Stats PREDATOR = new Stats(RANGE, RANGE, DAMAGE, EP_DRAIN, SKILL_CHANCE, EP_STEAL, 99);
+    public static final Stats GLUTTONY = new Stats(10, 15, 50, 1000, 30, 0.5f, 99);
+    public static final Stats BEELZEBUB = new Stats(15, 20, 100, 3000, 50, 0.6f, 99);
+
     private static final class Mist {
-        final ServerPlayer owner; final Ability skill; final int blockMode; final boolean eatsProjectiles; int age;
-        float range;  // grows to RANGE, stays, then shrinks (tensura's PredatorMistProjectile)
-        Mist(ServerPlayer owner, Ability skill, int blockMode, boolean eatsProjectiles) {
+        final ServerPlayer owner; final Ability skill; final int blockMode; final boolean eatsProjectiles; final Stats stats; final float maxRange; int age;
+        float range;  // grows to its max, stays, then shrinks (tensura's PredatorMistProjectile)
+        Mist(ServerPlayer owner, Ability skill, int blockMode, boolean eatsProjectiles, Stats stats, boolean mastered) {
             this.owner = owner; this.skill = skill; this.blockMode = blockMode; this.eatsProjectiles = eatsProjectiles;
+            this.stats = stats; this.maxRange = mastered ? stats.rangeMastered() : stats.range();
         }
     }
+    // how strongly what's being bitten right now gets eaten if it dies
+    private static final Map<UUID, Stats> DEVOURING_WITH = new HashMap<>();
     private static final List<Mist> MISTS = new ArrayList<>();
     private static final Set<UUID> BEING_DEVOURED = new HashSet<>();
     private static final Map<UUID, UUID> LAST_BITTEN_BY = new HashMap<>();
@@ -80,7 +90,9 @@ public final class Predation {
 
     // predation
 
-    static boolean predation(ServerPlayer p, Ability a) {
+    static boolean predation(ServerPlayer p, Ability a) { return predation(p, a, PREDATOR); }
+
+    static boolean predation(ServerPlayer p, Ability a, Stats stats) {
         if (p.isShiftKeyDown()) {
             int mode = (int) StatusData.counter(p, "predator_block_mode");
             int next = mode == 1 ? 2 : mode == 2 ? 3 : mode == 3 ? 4 : 1;
@@ -90,7 +102,7 @@ public final class Predation {
             p.level().playSound(null, p.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1, 1);
             return true;
         }
-        MISTS.add(new Mist(p, a, (int) StatusData.counter(p, "predator_block_mode"), Tk.mastered(p, a)));
+        MISTS.add(new Mist(p, a, (int) StatusData.counter(p, "predator_block_mode"), Tk.mastered(p, a), stats, Tk.mastered(p, a)));
         p.level().playSound(null, p.blockPosition(), SoundEvents.SCULK_SHRIEKER_SHRIEK, SoundSource.PLAYERS, 0.5f, 1.6f);
         AbilityAPI.addMasteryPoint(p, a);
         AbilityAPI.setCooldown(p, a, (Tk.mastered(p, a) ? 3 : 5) * 20);
@@ -145,15 +157,15 @@ public final class Predation {
         ServerPlayer p = m.owner;
         ServerLevel level = (ServerLevel) p.level();
         boolean active = MIST_LIFE - m.age >= 29;
-        if (!active && m.range > 1) m.range = Math.max(1, m.range - RANGE / 30f);
-        else if (m.range < RANGE) m.range = Math.min(RANGE, m.range + 0.25f);
+        if (!active && m.range > 1) m.range = Math.max(1, m.range - m.maxRange / 30f);
+        else if (m.range < m.maxRange) m.range = Math.min(m.maxRange, m.range + 0.25f);
         Vec3 eye = p.getEyePosition(), look = p.getLookAngle();
         mistVisual(level, m, eye, look);
         if (!active) return;
         AABB box = p.getBoundingBox().inflate(m.range + 1);
         if (m.age % 10 == 0) {
             for (LivingEntity t : level.getEntitiesOfClass(LivingEntity.class, box, e -> e != p && e.isAlive())) {
-                if (inMist(eye, look, m.range, t.position().add(0, t.getBbHeight() / 2, 0), t.getBbWidth())) bite(p, m.skill, level, t);
+                if (inMist(eye, look, m.range, t.position().add(0, t.getBbHeight() / 2, 0), t.getBbWidth())) bite(p, m.skill, level, t, m.stats);
             }
         }
         for (net.minecraft.world.entity.ExperienceOrb orb : level.getEntitiesOfClass(net.minecraft.world.entity.ExperienceOrb.class, box, e -> true)) {
@@ -184,15 +196,9 @@ public final class Predation {
     }
 
     // one bite: damage, drain magicules, take one of its skills
-    private static void bite(ServerPlayer p, Ability predator, ServerLevel level, LivingEntity t) {
+    private static void bite(ServerPlayer p, Ability predator, ServerLevel level, LivingEntity t, Stats st) {
         if (t instanceof Player other && other.getAbilities().invulnerable) return;
-        double drained = Tk.drainMana(t, EP_DRAIN);
-        if (drained > 0) Tk.gainMana(p, drained, false);
-        if (t instanceof Player other && p.getRandom().nextFloat() < SKILL_CHANCE / 10f) devourRandomSkill(p, other);
-        LAST_BITTEN_BY.put(t.getUUID(), p.getUUID());
-        BEING_DEVOURED.add(t.getUUID());
-        t.hurtServer(level, p.damageSources().playerAttack(p), DAMAGE);
-        BEING_DEVOURED.remove(t.getUUID());
+        devourHit(p, t, st.damage(), st, null);
         com.brightwebs.brightcore.fx.Fx.burst(level, com.brightwebs.brightcore.fx.BrightParticles.PREDATOR_MIST, t.position().add(0, t.getBbHeight() / 2, 0), 10, 0.08); com.brightwebs.brightcore.fx.Fx.beam(level, com.brightwebs.brightcore.fx.BrightParticles.SOUL, t.position().add(0, t.getBbHeight() / 2, 0), p.position().add(0, 1, 0), 0.6);
     }
 
@@ -204,6 +210,24 @@ public final class Predation {
         if (AbilityAPI.learn(p, got)) {
             p.sendSystemMessage(Component.translatable("brightcore.message.acquired", got.name()));
             p.level().playSound(null, p.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1, 1);
+        }
+    }
+
+    // one devouring hit, for anything that eats (the mist, gluttony's grasp, corrosion, the void):
+    // drains magicules, maybe takes a skill (players), and if it dies it's devoured with these stats
+    public static void devourHit(ServerPlayer p, LivingEntity t, float damage, Stats st, net.minecraft.world.damagesource.DamageSource source) {
+        if (t instanceof Player other && other.getAbilities().invulnerable) return;
+        if (st.epDrain() > 0) { double drained = Tk.drainMana(t, st.epDrain()); if (drained > 0) Tk.gainMana(p, drained, false); }
+        // tensura: the chance is a percent, one random skill a bite
+        if (t instanceof Player other && st.skillChance() > 0 && p.getRandom().nextFloat() * 100 < st.skillChance()) devourRandomSkill(p, other);
+        LAST_BITTEN_BY.put(t.getUUID(), p.getUUID());
+        BEING_DEVOURED.add(t.getUUID());
+        DEVOURING_WITH.put(t.getUUID(), st);
+        try {
+            t.hurtServer((ServerLevel) p.level(), source != null ? source : p.damageSources().playerAttack(p), damage);
+        } finally {
+            BEING_DEVOURED.remove(t.getUUID());
+            DEVOURING_WITH.remove(t.getUUID());
         }
     }
 
@@ -221,6 +245,8 @@ public final class Predation {
         Safe.run("Predation.onDeath", () -> {
             LivingEntity t = event.getEntity();
             if (!BEING_DEVOURED.contains(t.getUUID()) || !(event.getSource().getEntity() instanceof ServerPlayer p)) return;
+            Stats st = DEVOURING_WITH.getOrDefault(t.getUUID(), PREDATOR);
+            Gluttonous.LAST_EATEN.put(p.getUUID(), t.getType());
             if (t instanceof Player other) {
                 for (Ability s : AbilityAPI.owned(other)) {
                     if (devourable(s) && (!s.isMagic() || p.getRandom().nextFloat() <= 0.5f) && AbilityAPI.learn(p, s)) {
@@ -231,7 +257,7 @@ public final class Predation {
                 Ability res = BrightSkills.resistance(DamageKind.FLAME);
                 if (res != null && AbilityAPI.learn(p, res)) p.sendSystemMessage(Component.translatable("brightcore.message.acquired", res.name()));
             }
-            double ep = EnergyAPI.ep(t) * EP_STEAL;
+            double ep = EnergyAPI.ep(t) * st.epSteal();
             if (ep > 0) Tk.gainMana(p, ep, true);
             ServerLevel level = (ServerLevel) p.level();
             com.brightwebs.brightcore.fx.Fx.sphere(level, com.brightwebs.brightcore.fx.BrightParticles.PREDATOR_MIST, t.position().add(0, t.getBbHeight() / 2, 0), t.getBbWidth() + 0.3, 30); com.brightwebs.brightcore.fx.Fx.burst(level, com.brightwebs.brightcore.fx.BrightParticles.SOUL, t.position().add(0, t.getBbHeight() / 2, 0), 12, 0.15);

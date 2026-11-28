@@ -141,10 +141,13 @@ public final class LoreSkills {
         // one mode per real ability of the skill. cooldowns are set by the engine (shorter once mastered), so modes carry 0
         if (s.acts().isEmpty()) p.mode("cast", s.mp(), s.ap(), 0);
         for (Act a : s.acts()) {
+            int fixed = LoreActions.fixedCost(a.a());
             double k = LoreActions.costMult(a.a());
-            p.mode(a.k(), (int) Math.round(s.mp() * k), (int) Math.round(s.ap() * k), 0);
+            p.mode(a.k(), fixed >= 0 ? fixed : (int) Math.round(s.mp() * k), fixed >= 0 ? 0 : (int) Math.round(s.ap() * k), 0);
         }
         if (s.toggle() && s.acts().size() <= 1) p.toggle();
+        // any hold-down mode (corrosion, grasp) makes the skill held; its other modes end the hold straight away
+        if (!s.magic() && s.acts().stream().anyMatch(a -> LoreActions.HELD.contains(a.a()))) p.held();
         return p;
     }
 
@@ -165,16 +168,26 @@ public final class LoreSkills {
 
         @Override public boolean activate(ServerPlayer p, ServerLevel l, int mode) {
             if (spec.magic()) return true;  // magic is held: the circle builds up and it goes off when you let go
-            return LoreEngine.use(p, this, spec, spec.act(mode));
+            Act act = spec.act(mode);
+            if (LoreActions.HELD.contains(act.a())) return true;  // starts the hold
+            return LoreEngine.use(p, this, spec, act);
         }
 
         @Override public boolean onHeld(ServerPlayer p, ServerLevel l, int mode, int held) {
-            if (spec.magic()) LoreEngine.casting(p, this, spec, held);
-            return true;
+            if (spec.magic()) { LoreEngine.casting(p, this, spec, held); return true; }
+            Act act = spec.act(mode);
+            if (!LoreActions.HELD.contains(act.a())) return false;
+            return LoreActions.held(p, this, spec, act, held);
         }
 
         @Override public void onRelease(ServerPlayer p, ServerLevel l, int mode, int held) {
-            if (!spec.magic()) return;
+            if (!spec.magic()) {
+                Act act = spec.act(mode);
+                if (LoreActions.HELD.contains(act.a()) && held > 0) {
+                    AbilityAPI.setCooldown(p, this, LoreActions.cooldown(spec, act, AbilityAPI.isMastered(p, this)));
+                }
+                return;
+            }
             int need = LoreEngine.castNeed(p, this, spec);
             if (held < need) {
                 p.sendOverlayMessage(Component.translatable("jaycee.lore.cast_stopped", name()).withStyle(ChatFormatting.GRAY));

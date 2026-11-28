@@ -45,7 +45,8 @@ m('falsifier', 'Presence Concealment|invis', 'Fake Death|undying', 'Illusion|clo
 m('fusionist', 'Fuse|craft', 'Disassemble|drain', 'Stone|barrier')
 m('give_me_strength', 'Borrow Strength|essence', 'Empower|rage')
 m('glutton', 'Gobble|devour', 'Digest|heal', 'Stomach|storage')
-m('gluttony', 'Hollow Cavity|blackhole', 'Ravenous Grasp|devour', 'Bitter Swallow|isolate', 'Devouring Void|pull', 'Stomach|storage', 'Mimicry|mimic')
+# gluttony: tensura's 7 modes (predation, stomach, mimicry, isolation, corrosion, receive, provide) + manas reborn's grasp and void
+m('gluttony', 'Predation|devour', 'Stomach|storage', 'Mimicry|mimicry', 'Isolation|isolate', 'Corrosion|corrosion', 'Receive|receive', 'Provide|provide', 'Ravenous Grasp|grasp', 'Devouring Void|void')
 m('gourmand', 'Devour|devour', 'Savour|heal', 'Stockpile|storage')
 m('gourmet', 'Taste|analyze', 'Delicacy|heal', 'Devour|devour')
 m('greed', 'Death Wish|execute', 'Greed Flare|nova', 'Spiritual Domination|dominate', 'Endless Avarice|essence')
@@ -98,7 +99,7 @@ m('sloth', 'Deep Hypno|sleep', 'Deprive|essence', 'Fallen Hypno|field', 'Fallen 
 m('sniper', 'Spatial Manipulation|lance|1.3', 'Create Weapon|weapon', 'Deadeye|sense')
 m('spearhead', 'Spearhead|dash', 'Piercing Charge|lance', 'Vanguard|protect')
 m('spiral_body', 'Spiral Body|barrier', 'Spiral Strike|strike', 'Coil|regen')
-m('starved', 'Spiritual Domination|dominate', 'Starve|drain', 'Hunger|devour')
+m('starved', 'Corrosion|corrosion', 'Receive|receive', 'Spiritual Domination|dominate')
 m('supporter', 'Support|protect', 'Reinforce|buff', 'Mend|heal')
 m('suppressor', 'Spatial Suppression|suppress', 'Spatial Motion|blink', 'Swap|swap')
 m('survivor', 'Survive|undying', 'Endure|barrier', 'Recover|regen')
@@ -134,7 +135,9 @@ m('azazel', 'Scapegoat|reflect', 'Forbidden Arts|craft', 'Fallen Watcher|sense',
 m('azi_dahaka', 'Three Heads|barrage', 'Serpent Breath|breath', 'Thousand Senses|sense', 'Endless Body|regen')
 m('azrael', 'Angel of Death|execute', 'Soul Reaping|drain', 'Record of Souls|analyze', 'Wings of Death|nova')
 m('bahamut', 'Mega Flare|beam|1.4', 'Dragon Scale|barrier', 'Dragon King|fear', 'Gigaflare|nova')
-m('beelzebub', 'Predation|devour', 'Stomach|storage', 'Isolation|isolate', 'Mimicry|mimic', 'Food Chain|copy', 'Spatial Domination|teleport')
+# beelzebub, lord of gluttony: everything gluttony has, at ultimate strength (the show: predation, stomach, isolation, mimicry,
+# corrosion, and the food chain - receiving and providing skills through your subordinates)
+m('beelzebub', 'Predation|devour', 'Stomach|storage', 'Isolation|isolate', 'Mimicry|mimicry', 'Corrosion|corrosion', 'Ravenous Grasp|grasp', 'Devouring Void|void', 'Food Chain: Receive|receive', 'Food Chain: Provide|provide')
 m('beelzebuth', 'Lord of Flies|summon', 'Ravenous Plague|field', 'Devour|devour', 'Gluttonous Void|blackhole')
 m('belial', 'Lord of Lies|clone', 'Worthless|suppress', 'Deceit|invis', 'Wicked Flame|blast')
 m('belphegor', 'Deep Hypno|sleep', 'Deprive|essence', 'Rest|rest', 'Phantasmal Style|clone')
@@ -333,6 +336,7 @@ MODE_FIX = {'Repeat': 'lance', 'Single': 'lance', 'Condensed': 'blast', 'Spread'
             'Clone Control': 'clone', 'Coating': 'buff', 'Holy': 'beam', 'Space': 'blink', 'Raise': 'summon', 'Mass Raise': 'summon', 'Self-lock': 'barrier',
             'Slinger': 'lance', 'Steel': 'strike', 'Sticky': 'bind', 'Arcane Thread Fetters': 'bind', 'Dress Change': 'mimic', 'Spatial Bag': 'storage'}
 KIND['chant'] = 'aura'; KIND['debuff'] = 'aura'
+KIND.update({'void': 'area', 'corrosion': 'aura', 'grasp': 'aura', 'receive': 'sense', 'provide': 'sense', 'mimicry': 'sense'})
 TOGGLE.add('chant')
 
 # a few mod skills whose modes need a better fit than the names alone give

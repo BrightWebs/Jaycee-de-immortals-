@@ -58,6 +58,9 @@ public final class LoreActions {
             case "dash", "blink", "behind", "teleport", "swap" -> "move";
             case "heal", "rest", "regen" -> "heal";
             case "summon", "clone", "weapon" -> "summon";
+            case "void" -> "area";
+            case "corrosion", "grasp" -> "aura";
+            case "receive", "provide", "mimicry" -> "sense";
             case "barrier", "reflect", "protect", "imprison" -> "guard";
             case "sense", "analyze", "storage", "craft", "copy", "bind" -> "sense";
             case "awaken", "rage", "undying", "fear", "dominate" -> "awaken";
@@ -75,9 +78,24 @@ public final class LoreActions {
         };
     }
 
+    // modes whose cost is their own (from tensura / manas reborn), not the skill's base price. -1 = use the base
+    static int fixedCost(String act) {
+        return switch (act) {
+            case "devour", "storage", "isolate", "receive", "provide", "corrosion", "grasp" -> 0;  // they spend their own as they go
+            case "void" -> 2000;
+            case "mimicry" -> 1000;
+            default -> -1;
+        };
+    }
+
     static int cooldown(Spec s, Act act, boolean mastered) {
         int base = mastered ? s.cdm() : s.cd();
         return switch (act.a()) {
+            case "devour", "isolate" -> 0;  // predation sets its own (5s, 3s mastered)
+            case "storage", "receive", "provide" -> 20;
+            case "corrosion", "grasp" -> mastered ? 20 : 60;
+            case "void" -> mastered ? 300 : 600;
+            case "mimicry" -> 200;
             case "analyze", "storage", "craft" -> 20;
             case "timestop" -> Math.max(base * 6, 600);
             case "undying" -> Math.max(base * 8, 1200);
@@ -138,7 +156,12 @@ public final class LoreActions {
             case "drain" -> onTarget(p, s, 12, e -> { LoreEngine.hurt(p, e, s, dmg * 0.7f); p.heal(dmg * 0.5f); for (int i = 0; i < 3; i++) LoreFx.essence(l, s.c1(), s.c2(), e, p); });
             case "essence" -> onTarget(p, s, 12, e -> { double got = Tk.drainMana(e, s.mp() * 2.0); Tk.gainMana(p, got, false); p.heal(2); for (int i = 0; i < 3; i++) LoreFx.essence(l, s.c2(), s.c1(), e, p); });
             case "copy" -> GreatSage.analysis(p, a);
-            case "devour" -> Predation.predation(p, a);
+            case "devour" -> Predation.predation(p, a, Gluttonous.predation(s));
+            case "void" -> Gluttonous.devouringVoid(p, a, s);
+            case "receive" -> Gluttonous.receive(p, a);
+            case "provide" -> Gluttonous.provide(p, a);
+            case "mimicry" -> Gluttonous.mimicry(p, a, s);
+            case "corrosion", "grasp" -> true;  // these are held, see held()
             case "isolate" -> Predation.isolation(p, a);
             case "analyze" -> LoreEngine.timed(p, s, "analyze", 600);
             case "storage" -> { Stomach.open(p); yield true; }
@@ -155,6 +178,17 @@ public final class LoreActions {
             default -> false;
         };
         return ok;
+    }
+
+    // actions you hold the key down for (like tensura's corrosion and manas reborn's ravenous grasp)
+    static final java.util.Set<String> HELD = java.util.Set.of("corrosion", "grasp");
+
+    static boolean held(ServerPlayer p, Ability a, Spec s, Act act, int ticks) {
+        return switch (act.a()) {
+            case "corrosion" -> Gluttonous.corrosion(p, a, s, ticks);
+            case "grasp" -> Gluttonous.grasp(p, a, s, ticks);
+            default -> false;
+        };
     }
 
     // ------------------------------------------------------------ helpers for the actions above

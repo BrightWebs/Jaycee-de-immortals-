@@ -60,7 +60,12 @@ final class LibraryPage extends Page {
 
     private String cat() { return magic ? magicCat : skillCat; }
     private Identifier pick() { return magic ? magicPick : skillPick; }
-    private void pick(Identifier id) { if (magic) magicPick = id; else skillPick = id; }
+    private void pick(Identifier id) { if (magic) magicPick = id; else skillPick = id; modeOff = 0; }
+
+    // the mode strip shows 3 at a time, the arrows (or the wheel over it) move along the rest
+    private int modeOff;
+    private static final int[][] MODE_X = {{1058, 1194}, {1209, 1346}, {1361, 1494}};
+    private static final float ARROW_L = 1040, ARROW_R = 1512, ARROW_Y = 511;
 
     private List<Ability> listed(LocalPlayer p) {
         List<Ability> out = new ArrayList<>();
@@ -169,11 +174,19 @@ final class LibraryPage extends Page {
             if (a.isSwitchable() || a.isToggle()) switchButton(g, p, a);
             else UI.text(g, act, 1488, 397, 18, 0xFF50E6FF, 2);
             // main functions = modes
-            int[][] fx = {{1058, 1194}, {1209, 1346}, {1361, 1494}};
-            int cur = AbilityAPI.modeOf(p, a), n = Math.min(3, a.modes().size());
-            for (int i = 0; i < n; i++) {
-                float cx = (fx[i][0] + fx[i][1]) / 2f;
-                if (n > 1 && i == cur) UI.rect(g, fx[i][0] + 2, 456, fx[i][1] - 2, 566, 2, 0xFFFFC24A);
+            int[][] fx = MODE_X;
+            int total = a.modes().size(), cur = AbilityAPI.modeOf(p, a), n = Math.min(3, total);
+            modeOff = Math.max(0, Math.min(modeOff, total - n));
+            if (total > 3) {
+                // arrows to see the other modes, plus where you are (like 2-4 of 6)
+                UI.text(g, "<", ARROW_L, ARROW_Y, 34, modeOff > 0 ? 0xFFFFC24A : 0x55FFFFFF, 1);
+                UI.text(g, ">", ARROW_R, ARROW_Y, 34, modeOff + 3 < total ? 0xFFFFC24A : 0x55FFFFFF, 1);
+                UI.semi(g, (modeOff + 1) + "-" + (modeOff + 3) + " / " + total, 1276, 445, 13, 0xFFBFC8DA, 1);
+            }
+            for (int j = 0; j < n; j++) {
+                int i = j + modeOff;
+                float cx = (fx[j][0] + fx[j][1]) / 2f;
+                if (n > 1 && i == cur) UI.rect(g, fx[j][0] + 2, 456, fx[j][1] - 2, 566, 2, 0xFFFFC24A);
                 if (n == 1) {
                     UI.abilityIcon(g, a, cx, 482, 44);
                     UI.text(g, UI.fit(a.name().getString(), 17, 128, true), cx, 512, 17, 0xFFFFFFFF, 1);
@@ -246,10 +259,12 @@ final class LibraryPage extends Page {
             return true;
         }
         if (!magic && sel != null && b == 0 && sel.modes().size() > 1) {
-            int[][] mx = {{1058, 1194}, {1209, 1346}, {1361, 1494}};
-            for (int i = 0; i < Math.min(3, sel.modes().size()); i++) {
-                if (in(x, y, mx[i][0], 454, mx[i][1], 568)) {
-                    ClientPacketDistributor.sendToServer(new BrightNetwork.SetMode(sel.id().toString(), i));
+            int total = sel.modes().size();
+            if (total > 3 && in(x, y, ARROW_L - 18, ARROW_Y - 30, ARROW_L + 16, ARROW_Y + 30)) { modeOff = Math.max(0, modeOff - 1); return true; }
+            if (total > 3 && in(x, y, ARROW_R - 16, ARROW_Y - 30, ARROW_R + 18, ARROW_Y + 30)) { modeOff = Math.min(total - 3, modeOff + 1); return true; }
+            for (int j = 0; j < Math.min(3, total); j++) {
+                if (in(x, y, MODE_X[j][0], 454, MODE_X[j][1], 568)) {
+                    ClientPacketDistributor.sendToServer(new BrightNetwork.SetMode(sel.id().toString(), j + modeOff));
                     return true;
                 }
             }
@@ -274,6 +289,9 @@ final class LibraryPage extends Page {
 
     @Override
     boolean scroll(double fx, double fy, double dy) {
+        // over the mode strip the wheel moves through the modes, anywhere else it scrolls the list
+        double x = l.t().x(fx), y = l.t().y(fy);
+        if (!magic && in(x, y, ARROW_L - 18, 440, ARROW_R + 18, 570)) { modeOff = Math.max(0, modeOff + (dy < 0 ? 1 : -1)); return true; }
         scroll += dy < 0 ? 1 : -1;
         return true;
     }

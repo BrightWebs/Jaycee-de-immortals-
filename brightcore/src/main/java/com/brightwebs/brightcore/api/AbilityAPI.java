@@ -86,9 +86,23 @@ public final class AbilityAPI {
     }
 
     // starts a cooldown right now, for skills that set their own (chanted spells)
+    // every cooldown shrinks as mastery grows: full price at no mastery, half once it's mastered, smoothly in between.
+    // pass the unmastered cooldown, this does the rest
     public static void setCooldown(ServerPlayer player, Ability ability, int ticks) {
         long now = player.level().getGameTime();
-        set(player, get(player).withCooldown(ability.id(), ticks <= 0 ? 0 : now + ticks));
+        int t = scaledCooldown(player, ability, ticks);
+        set(player, get(player).withCooldown(ability.id(), t <= 0 ? 0 : now + t));
+    }
+
+    public static int scaledCooldown(Player player, Ability ability, int ticks) {
+        if (ticks <= 0) return 0;
+        return Math.max(1, Math.round(ticks * (1f - 0.5f * masteryFraction(player, ability))));
+    }
+
+    // same for anything you have to hold or charge: the more you've used it, the quicker it comes out (half at mastery)
+    public static int scaledCharge(Player player, Ability ability, int ticks) {
+        if (ticks <= 0) return 0;
+        return Math.max(1, Math.round(ticks * (1f - 0.5f * masteryFraction(player, ability))));
     }
 
     public static boolean onCooldown(ServerPlayer player, Ability ability) {
@@ -267,7 +281,7 @@ public final class AbilityAPI {
         EnergyAPI.spendMana(player, manaCost);
         EnergyAPI.spendAura(player, auraCost);
         AbilityData after = get(player);  // the skill might've changed the data
-        if (mode.cooldownTicks() > 0) after = after.withCooldown(id, now + mode.cooldownTicks());
+        if (mode.cooldownTicks() > 0) after = after.withCooldown(id, now + scaledCooldown(player, ability, mode.cooldownTicks()));
         set(player, after);
         // skills give their own mastery points like tensura, so nothing gets added here
 

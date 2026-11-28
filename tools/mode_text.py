@@ -1,0 +1,83 @@
+# what each generic action actually does in game, with the skill's own numbers, for the library's mode descriptions
+ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI']
+TIER = {'ULTIMATE': 3, 'UNIQUE': 2, 'EXTRA': 1, 'MAGIC': 1}
+ELEM = {'flame': 'sets it on fire', 'ember': 'sets it on fire', 'black_flame': 'burns it with black flame', 'frost': 'freezes and slows it',
+        'shard': 'slows it', 'spark': 'shocks it', 'dark_spark': 'shocks it', 'gust': 'knocks it back', 'void': 'withers it', 'soul': 'withers it',
+        'acid': 'poisons and corrodes it', 'drop': 'soaks and slows it', 'bubble': 'soaks and slows it', 'holy': 'smites it (double against undead)',
+        'mist': 'blinds it', 'rune': 'weakens it', 'aura': 'staggers it', 'petal': 'weakens it', 'slash': 'cuts deep', 'heal': ''}
+def secs(t): return ('%g' % (t / 20)) + 's'
+def text(a, s):
+    t = TIER.get(s['type'], 0)
+    dmg = round(s.get('dmg', 6) * a.get('p', 1), 1)
+    rng = round(s.get('range', 16)); rad = round(s.get('radius', 3), 1); dur = s.get('dur', 600) or 600
+    el = ELEM.get(s.get('elem', ''), '')
+    hit = (', and ' + el) if el else ''
+    k = a['a']
+    T = {
+     'bolt': f"fires a bolt where you look (up to {rng} blocks): {dmg} damage{hit}",
+     'lance': f"throws a piercing lance (up to {rng} blocks): {round(dmg*1.1,1)} damage{hit}",
+     'barrage': f"a barrage of shots where you look: {dmg} damage spread over several hits{hit}",
+     'meteor': f"drops a heavy shot from above onto your target: {round(dmg*1.2,1)} damage in a small area{hit}",
+     'beam': f"a beam straight ahead ({rng} blocks) that hits everything in the line for {dmg}{hit}",
+     'chain': f"lightning that jumps from target to target, {dmg} to each{hit}",
+     'breath': f"a cone in front of you ({min(rng,12)} blocks): {dmg} to everything in it{hit}",
+     'blast': f"a blast where you look, {rad} blocks wide: {dmg} damage{hit}",
+     'nova': f"bursts out from you, {rad} blocks around: {dmg} damage{hit}",
+     'explode': f"a huge explosion around you, {rad} blocks: {round(dmg*1.6,1)} damage{hit}",
+     'blackhole': f"a black hole where you look that drags things in and crushes them ({dmg} a hit)",
+     'field': f"leaves a field where you look for 8s that hurts everything inside ({dmg} a second){hit}",
+     'gravity': f"crushes everything around you into the ground: {dmg} damage and heavy slowness",
+     'strike': f"a strike in front of you: {dmg} damage{hit}",
+     'flurry': f"three quick strikes, {round(dmg*0.5,1)} each{hit}",
+     'cleave': f"a wide cleave: {round(dmg*1.3,1)} to everything in front of you{hit}",
+     'execute': f"a finishing blow: {dmg} damage, and anything left under a quarter health dies",
+     'dash': f"dashes forward, hitting what you pass for {dmg}",
+     'blink': f"teleports you up to {min(rng,16)} blocks where you look",
+     'behind': "steps behind your target",
+     'teleport': "teleports you up to 64 blocks where you look",
+     'swap': "swaps places with your target",
+     'pull': "pulls everything within 12 blocks towards you",
+     'repel': "throws everything within 8 blocks away from you",
+     'bind': "binds your target (16 blocks): it can barely move for 5s and is paralysed for 2s",
+     'imprison': f"locks your target (20 blocks) in a cage for {secs(140+40*t)}",
+     'sleep': f"everything within {8+2*t} blocks falls asleep for 6s: it stops, can't see and loses its target",
+     'timestop': f"stops everything within {10+3*t} blocks dead for {secs(80+30*t)}",
+     'fear': f"everything within {10+2*t} blocks is struck with Fear {ROMAN[min(5,2+t)]} for 8s",
+     'charm': f"charms your target (16 blocks): it fights for you for {secs(300+100*t)}",
+     'dominate': "makes your target yours for good, if it's badly hurt or far weaker than you",
+     'dispel': "strips the good effects off enemies within 10 blocks and the bad ones off you",
+     'suppress': f"everything within 10 blocks is weakened ({ROMAN[min(5,1+t)]}) and loses its good effects for 10s",
+     'debuff': f"everything within 10 blocks takes {round(dmg*0.3,1)}, and is weakened and slowed for 8s",
+     'drain': f"drains your target (12 blocks): {round(dmg*0.7,1)} damage, and you heal {round(dmg*0.5,1)}",
+     'essence': f"pulls up to {s.get('mp',100)*2} magicules out of your target into you",
+     'copy': "analyses your target and copies a skill you saw",
+     'devour': "breathes out the devouring mist: what it kills is yours, skills and all",
+     'analyze': "shows everything about whatever you look at for 30s",
+     'storage': "opens your storage",
+     'craft': "opens refining and crafting",
+     'buff': f"30s: +{2+t*3} attack" + (" and more speed" if s.get('elem') in ('gust','spark','ember') else '') + (f" and +{2+t*2} armor" if s.get('elem') in ('frost','shard','rune','holy','aura') else '') + ", and your hits carry the skill's element",
+     'rage': f"for {secs(s.get('dur',600))} you grow stronger every 15s (up to Strength {ROMAN[min(5,2+t)]}), faster, but less armored",
+     'haste': f"30s: Speed {ROMAN[1+min(1,t)]}, Haste II and faster attacks",
+     'invis': "30s: invisible, and anything hunting you loses you",
+     'mimic': "30s: invisible, and anything hunting you loses you",
+     'barrier': f"30s: you take {[20,30,40,50][min(3,t)]}% less damage, +{4+t*3} armor and resist knockback",
+     'reflect': f"30s: +{4+t*3} armor and part of every hit goes back at the attacker",
+     'protect': f"30s: you and your allies within 12 take {[20,30,40,50][min(3,t)]}% less damage and regenerate",
+     'music': "30s: you and your allies within 12 get Speed and Strength, enemies nearby are weakened",
+     'regen': f"30s: Regeneration {ROMAN[1+min(1,t)]}",
+     'undying': "the next killing blow leaves you alive instead",
+     'sense': f"30s: see in the dark and everything within {16+8*t} blocks glows through walls",
+     'awaken': f"for {secs(s.get('dur',600))}: Strength {ROMAN[t]}, Resistance, Speed and +{10+10*t} max health",
+     'heal': f"heals you {dmg}, and clears some bad effects",
+     'rest': "heals 30% of your health and gives you Regeneration III for 10s",
+     'summon': "summons creatures that fight for you for 30s",
+     'clone': "makes copies of you that fight for you",
+     'weapon': "conjures a weapon in your hand for 60s",
+     'weather': "changes the weather",
+     'chant': "30s: your spells need no chant",
+     'isolate': "seals harmful effects away from your target (or you), or dissolves the item in your hand into magicules",
+     'mimicry': "takes the form of the last thing you devoured",
+     'receive': "takes the skills a subordinate has learned",
+     'provide': "shares one of your skills with a subordinate",
+    }
+    return T.get(k)

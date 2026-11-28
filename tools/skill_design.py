@@ -139,7 +139,7 @@ m('azrael', 'Angel of Death|execute', 'Soul Reaping|drain', 'Record of Souls|ana
 m('bahamut', 'Mega Flare|beam|1.4', 'Dragon Scale|barrier', 'Dragon King|fear', 'Gigaflare|nova')
 # beelzebub, lord of gluttony: everything gluttony has, at ultimate strength (the show: predation, stomach, isolation, mimicry,
 # corrosion, and the food chain - receiving and providing skills through your subordinates)
-m('beelzebub', 'Predation|devour', 'Stomach|storage', 'Isolation|isolate', 'Mimicry|mimicry', 'Corrosion|corrosion', 'Ravenous Grasp|grasp', 'Devouring Void|void', 'Food Chain: Receive|receive', 'Food Chain: Provide|provide')
+m('beelzebub', 'Soul Devour|soul_devour', 'Predation|devour', 'Gluttonous Darkness|darkness', 'Imaginary Space|storage', 'Mimicry|mimicry', 'Corrosion|corrosion', 'Soul Steal|soul_steal', 'Food Chain|food_chain', 'Imaginary Space Isolation|isolate')
 m('beelzebuth', 'Lord of Flies|summon', 'Ravenous Plague|field', 'Devour|devour', 'Gluttonous Void|blackhole')
 m('belial', 'Lord of Lies|clone', 'Worthless|suppress', 'Deceit|invis', 'Wicked Flame|blast')
 m('belphegor', 'Deep Hypno|deep_hypno', 'Fallen Hypno|fallen_hypno', 'Deprive|deprive', 'Rest|sloth_rest', 'Phantasmal Style|phantasmal', 'Fallen Strike|fallen_strike', 'Lethargy|lethargy', 'Effort|effort', 'Final Lullaby|lullaby')
@@ -340,6 +340,8 @@ MODE_FIX = {'Repeat': 'lance', 'Single': 'lance', 'Condensed': 'blast', 'Spread'
 KIND['chant'] = 'aura'; KIND['debuff'] = 'aura'
 KIND.update({'void': 'area', 'corrosion': 'aura', 'grasp': 'aura', 'receive': 'sense', 'provide': 'sense', 'mimicry': 'sense'})
 TOGGLE.add('chant')
+# beelzebuth's own (Gluttonous.java)
+KIND.update({'darkness': 'area', 'soul_steal': 'aura', 'soul_devour': 'aura', 'food_chain': 'sense'})
 # the sins (Sins.java)
 KIND.update({a: 'aura' for a in ['absorb', 'ascension', 'avarice', 'blessing', 'breeder', 'death_wish', 'declare', 'deep_hypno', 'deprive', 'desire', 'domination', 'effort', 'embrace', 'enrage', 'envy_field', 'fallen_hypno', 'fallen_strike', 'flare', 'fury', 'implode', 'invigorate', 'lethargy', 'lullaby', 'lust_drain', 'manipulate', 'order', 'phantasmal', 'pride_copy', 'rampage_cast', 'rebirth', 'resent', 'rupture', 'sap', 'seize', 'siphon', 'sloth_rest', 'transmit']})
 
@@ -356,6 +358,17 @@ m('black_lightning', 'Black Lightning|chain', 'Death Storm|blast')
 # keyed by the base skill; its ultimate uses the same text (it's the same power, stronger)
 ULT_OF = {'satanael': 'wrath', 'leviathan': 'envy', 'asmodeus': 'lust', 'mammon': 'greed', 'lucifer': 'pride', 'belphegor': 'sloth'}
 DESC = {
+ 'beelzebub': {
+  'Soul Devour': 'switch on: every hit you land eats at the soul (soul drain II for 5s)',
+  'Predation': 'hold: breathe out the devouring mist, 15 blocks (30 mastered, scroll to change). 150 a hit, 30% to take up to 3 skills, everything it kills is yours',
+  'Gluttonous Darkness': 'hold: a black hole in front of you (sneak: above you) that grows as you hold. drags everything in, drains it, eats its soul and swallows projectiles',
+  'Imaginary Space': 'your stomach: a storage space that never fills',
+  'Mimicry': 'take the form of the last thing you devoured',
+  'Corrosion': 'hold: everything within 12 rots, 50 every half second. kills give up their skills and all their EP',
+  'Soul Steal': 'hold: anything within 60 that is nearly dead, far weaker than you, or frozen with fear has its soul eaten whole',
+  'Food Chain': 'take a skill your subordinate learned. sneak: teach it one of yours',
+  'Imaginary Space Isolation': 'seal harmful effects away from your target (or you), or dissolve the item in your hand into magicules',
+ },
  'wrath': {
   'Breeder Reactor': 'hold: pump 2% of your max magicules into yourself every 5s, past your max. each pump can stack Rampage (3%, 6% while over max)',
   'Enrage': 'hold: everything within 7 flies into a Rampage and attacks whatever is near it, deeper the longer you hold. 100 magicules a second',
@@ -418,5 +431,6 @@ SKILL_DESC = {
  'pride': 'The sin of pride. Everything beneath you is beneath you: skills that hit you become yours, the weak are crushed by your presence.',
  'lucifer': 'Pride King. The ultimate form of Pride: you can copy even ultimate skills.',
  'sloth': 'The sin of sloth. Sleep, rest and letting others do the work: hypnosis, drowsiness, soul strikes and copies of yourself.',
+ 'beelzebub': 'Beelzebuth, Lord of Gluttony. Everything Gluttony has at ultimate strength, plus soul devouring, a black hole of darkness and the power to steal souls outright.',
  'belphegor': 'Sloth King. The ultimate form of Sloth: deeper sleep over a wider area, and twice the copies.',
 }

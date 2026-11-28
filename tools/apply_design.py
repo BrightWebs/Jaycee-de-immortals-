@@ -1,6 +1,12 @@
 # puts skill_design.py onto lore_skills.json: every skill gets 'acts' (its real modes, each with an action)
 #   python3 tools/apply_design.py <ref_modes.json>
-import json, re, sys, os
+import json, re, sys, os, glob, importlib.util
+sys.path.insert(0, os.path.dirname(__file__))
+from mode_text import text as mode_text
+MOD_DESC = json.load(open(os.path.join(os.path.dirname(__file__), 'mod_desc.json')))
+LORE_DESC = {}
+for _f in sorted(glob.glob(os.path.join(os.path.dirname(__file__), 'lore_desc', '*.py'))):
+    _sp = importlib.util.spec_from_file_location(os.path.basename(_f), _f); _m = importlib.util.module_from_spec(_sp); _sp.loader.exec_module(_m); LORE_DESC.update(_m.D)
 sys.path.insert(0, os.path.dirname(__file__))
 from skill_design import U, act_for, KIND, TOGGLE, FIX, SKIP_MODE, MODE_FIX, DESC, ULT_OF, SKILL_DESC
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -48,13 +54,16 @@ json.dump(specs, open(p, 'w'), separators=(',', ':'))
 lp = os.path.join(ROOT, 'jaycee/src/main/resources/assets/jaycee/lang/en_us.json')
 lang = json.load(open(lp))
 for s in specs:
-    if s['id'] in SKILL_DESC: lang['ability.jaycee.%s.desc' % s['id']] = SKILL_DESC[s['id']]
-    d = DESC.get(ULT_OF.get(s['id'], s['id']))
-    if not d: continue
-    for a in s['acts']:
-        if a['n'] in d:
-            lang['ability.jaycee.%s.mode.%s' % (s['id'], a['k'])] = a['n']
-            lang['ability.jaycee.%s.mode.%s.desc' % (s['id'], a['k'])] = d[a['n']]
+    sid = s['id']
+    # the skill's own description: ours for the hand-built ones, the mod's own text where a mod has it, the lore otherwise
+    if sid in SKILL_DESC: lang['ability.jaycee.%s.desc' % sid] = SKILL_DESC[sid]
+    elif sid in MOD_DESC: lang['ability.jaycee.%s.desc' % sid] = MOD_DESC[sid][1]
+    elif sid in LORE_DESC: lang['ability.jaycee.%s.desc' % sid] = LORE_DESC[sid]
+    d = DESC.get(ULT_OF.get(sid, sid)) or {}
+    for a in s.get('acts', []):
+        lang['ability.jaycee.%s.mode.%s' % (sid, a['k'])] = a['n']
+        t = d.get(a['n']) or mode_text(a, s)
+        if t: lang['ability.jaycee.%s.mode.%s.desc' % (sid, a['k'])] = t
 json.dump(lang, open(lp, 'w'), indent=1, ensure_ascii=False)
 json.dump(review, open('/home/claude/work/gen/design_review.json', 'w'))
 import collections

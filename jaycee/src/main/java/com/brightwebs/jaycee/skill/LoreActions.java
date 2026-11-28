@@ -83,7 +83,8 @@ public final class LoreActions {
     static int fixedCost(String act) {
         if (Sins.handles(act)) return Sins.cost(act);
         return switch (act) {
-            case "devour", "storage", "isolate", "receive", "provide", "corrosion", "grasp" -> 0;  // they spend their own as they go
+            case "devour", "storage", "isolate", "receive", "provide", "corrosion", "grasp", "darkness", "soul_steal", "soul_devour" -> 0;
+            case "food_chain" -> 15000;  // they spend their own as they go
             case "void" -> 2000;
             case "mimicry" -> 1000;
             default -> -1;
@@ -91,12 +92,16 @@ public final class LoreActions {
     }
 
     static int cooldown(Spec s, Act act, boolean mastered) {
-        int base = mastered ? s.cdm() : s.cd();
+        // always the unmastered number: AbilityAPI.setCooldown shortens it as mastery grows
+        mastered = false;
+        int base = s.cd();
         if (Sins.handles(act.a())) return Sins.cooldown(act.a(), mastered);
         return switch (act.a()) {
             case "devour", "isolate" -> 0;  // predation sets its own (5s, 3s mastered)
             case "storage", "receive", "provide" -> 20;
-            case "corrosion", "grasp" -> mastered ? 20 : 60;
+            case "corrosion", "grasp", "darkness", "soul_steal" -> 20;
+            case "soul_devour" -> 10;
+            case "food_chain" -> 100;
             case "void" -> mastered ? 300 : 600;
             case "mimicry" -> 200;
             case "analyze", "craft" -> 20;
@@ -164,6 +169,8 @@ public final class LoreActions {
             case "receive" -> Gluttonous.receive(p, a);
             case "provide" -> Gluttonous.provide(p, a);
             case "mimicry" -> Gluttonous.mimicry(p, a, s);
+            case "soul_devour" -> Gluttonous.soulDevour(p);
+            case "food_chain" -> Gluttonous.foodChain(p, a);
             case "corrosion", "grasp" -> true;  // these are held, see held()
             case "isolate" -> Predation.isolation(p, a);
             case "analyze" -> LoreEngine.timed(p, s, "analyze", 600);
@@ -184,13 +191,15 @@ public final class LoreActions {
     }
 
     // actions you hold the key down for (like tensura's corrosion and manas reborn's ravenous grasp)
-    static final java.util.Set<String> HELD = union(java.util.Set.of("corrosion", "grasp"), Sins.HELD);
+    static final java.util.Set<String> HELD = union(java.util.Set.of("corrosion", "grasp", "darkness", "soul_steal"), Sins.HELD);
     private static java.util.Set<String> union(java.util.Set<String> a, java.util.Set<String> b) { var u = new java.util.HashSet<>(a); u.addAll(b); return java.util.Set.copyOf(u); }
 
     static boolean held(ServerPlayer p, Ability a, Spec s, Act act, int ticks) {
         return switch (act.a()) {
             case "corrosion" -> Gluttonous.corrosion(p, a, s, ticks);
             case "grasp" -> Gluttonous.grasp(p, a, s, ticks);
+            case "darkness" -> Gluttonous.darkness(p, a, s, ticks);
+            case "soul_steal" -> Gluttonous.soulSteal(p, a, s, ticks);
             default -> Sins.HELD.contains(act.a()) && Sins.held(p, a, s, act.a(), ticks);
         };
     }

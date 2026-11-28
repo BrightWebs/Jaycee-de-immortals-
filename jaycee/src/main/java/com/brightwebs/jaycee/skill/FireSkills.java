@@ -108,7 +108,7 @@ public final class FireSkills {
                 charged ? FIRE_CHARGED : FIRE, charged ? MAGIC_CHARGED : MAGIC, charged ? RADIUS_CHARGED : RADIUS, charged ? 3 : 2));
         p.level().playSound(null, p.blockPosition(), SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 1, charged ? 0.7f : 1.0f);
         AbilityAPI.addMasteryPoint(p, a);
-        AbilityAPI.setCooldown(p, a, (Tk.mastered(p, a) ? CD_MASTERED : CD) * 20);
+        AbilityAPI.setCooldown(p, a, CD * 20);
     }
 
     private static final class Ball {

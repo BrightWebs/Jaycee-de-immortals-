@@ -70,7 +70,8 @@ public final class Predation {
     public record Stats(float range, float rangeMastered, float damage, float epDrain, float skillChance, float epSteal, int skills) {}
     public static final Stats PREDATOR = new Stats(RANGE, RANGE, DAMAGE, EP_DRAIN, SKILL_CHANCE, EP_STEAL, 99);
     public static final Stats GLUTTONY = new Stats(10, 15, 50, 1000, 30, 0.5f, 99);
-    public static final Stats BEELZEBUB = new Stats(15, 20, 100, 3000, 50, 0.6f, 99);
+    // trnightmare's beelzebuth: 15 blocks (30 mastered), 150 a hit, 25 EP drained a hit, 30% to take up to 3 skills, all its EP on a kill
+    public static final Stats BEELZEBUB = new Stats(15, 30, 150, 25, 30, 1.0f, 3);
 
     private static final class Mist {
         final ServerPlayer owner; final Ability skill; final int blockMode; final boolean eatsProjectiles; final Stats stats; final float maxRange; int age;
@@ -105,7 +106,7 @@ public final class Predation {
         MISTS.add(new Mist(p, a, (int) StatusData.counter(p, "predator_block_mode"), Tk.mastered(p, a), stats, Tk.mastered(p, a)));
         p.level().playSound(null, p.blockPosition(), SoundEvents.SCULK_SHRIEKER_SHRIEK, SoundSource.PLAYERS, 0.5f, 1.6f);
         AbilityAPI.addMasteryPoint(p, a);
-        AbilityAPI.setCooldown(p, a, (Tk.mastered(p, a) ? 3 : 5) * 20);
+        AbilityAPI.setCooldown(p, a, 5 * 20);
         return true;
     }
 
@@ -216,6 +217,7 @@ public final class Predation {
     // one devouring hit, for anything that eats (the mist, gluttony's grasp, corrosion, the void):
     // drains magicules, maybe takes a skill (players), and if it dies it's devoured with these stats
     public static void devourHit(ServerPlayer p, LivingEntity t, float damage, Stats st, net.minecraft.world.damagesource.DamageSource source) {
+        if (st == BEELZEBUB) t.addEffect(new net.minecraft.world.effect.MobEffectInstance(com.brightwebs.jaycee.effect.LoreEffects.CORROSION, 300, 0), p);
         if (t instanceof Player other && other.getAbilities().invulnerable) return;
         if (st.epDrain() > 0) { double drained = Tk.drainMana(t, st.epDrain()); if (drained > 0) Tk.gainMana(p, drained, false); }
         // tensura: the chance is a percent, one random skill a bite
@@ -322,7 +324,7 @@ public final class Predation {
             if (removed == 0) return false;
             com.brightwebs.brightcore.fx.Fx.ring(level, com.brightwebs.brightcore.fx.BrightParticles.PREDATOR_MIST, who.position().add(0, who.getBbHeight() * 0.66, 0), who.getBbWidth() * 1.2, 20, -0.04);
             com.brightwebs.brightcore.fx.Fx.ring(level, com.brightwebs.brightcore.fx.BrightParticles.DARK_SPARK, who.position().add(0, who.getBbHeight() * 0.33, 0), who.getBbWidth() * 1.5, 12, -0.05);
-            AbilityAPI.setCooldown(p, a, (Tk.mastered(p, a) ? ISOLATION_CD_MASTERED : ISOLATION_CD) * 20);
+            AbilityAPI.setCooldown(p, a, ISOLATION_CD * 20);
             level.playSound(null, p.blockPosition(), SoundEvents.BREWING_STAND_BREW, SoundSource.PLAYERS, 1, 0.6f);
             return true;
         }

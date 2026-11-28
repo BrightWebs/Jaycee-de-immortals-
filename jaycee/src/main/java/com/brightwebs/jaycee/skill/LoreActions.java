@@ -96,7 +96,7 @@ public final class LoreActions {
             case "corrosion", "grasp" -> mastered ? 20 : 60;
             case "void" -> mastered ? 300 : 600;
             case "mimicry" -> 200;
-            case "analyze", "storage", "craft" -> 20;
+            case "analyze", "craft" -> 20;
             case "timestop" -> Math.max(base * 6, 600);
             case "undying" -> Math.max(base * 8, 1200);
             case "dominate", "charm" -> Math.max(base * 4, 400);

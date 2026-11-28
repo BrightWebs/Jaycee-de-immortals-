@@ -120,7 +120,7 @@ public final class Gluttonous {
             Vec3 d = p.position().subtract(e.position());
             if (d.lengthSqr() > 4) { d = d.normalize().scale(0.6); e.push(d.x, 0.15, d.z); }
         }
-        if (used > 0) l.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.SCULK_SENSOR_CLICKING, SoundSource.PLAYERS, 1, 0.6f);
+        if (used > 0) l.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.SCULK_CLICKING, SoundSource.PLAYERS, 1, 0.6f);
         else {
             // nothing to grab: the tendrils just writhe around you
             for (int i = 0; i < tendrils; i++) {

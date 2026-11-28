@@ -83,7 +83,8 @@ public final class LoreEngine {
         if (SkillState.instantCast(p)) return 0;
         Map<String, Active> mine = ACTIVE.get(p.getUUID());
         if (mine != null) for (Active x : mine.values()) if (x.arch.equals("chant")) return 0;
-        int base = AbilityAPI.isMastered(p, a) ? s.castm() : s.cast();
+        // never more than 3 seconds, and it gets quicker with mastery (half once mastered)
+        int base = AbilityAPI.scaledCharge(p, a, Math.min(60, s.cast()));
         var sil = p.getEffect(com.brightwebs.jaycee.effect.LoreEffects.SILENCE);
         return sil == null ? base : (int) (base * (1 + 0.1 * (sil.getAmplifier() + 1)));
     }

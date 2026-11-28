@@ -57,7 +57,8 @@ public final class Gluttonous {
     // tensura's starved / gluttony numbers, manas reborn's gluttony numbers, and beelzebub above both
     static final Tier STARVED = new Tier(5, 5, 0.2f, 2, 4, 5, 10, 4, 100, 0.1f, 0.3f, 1.5f, 6, 30, 500);
     static final Tier GLUTTONY = new Tier(5, 10, 0.4f, 4, 8, 7, 14, 5, 200, 0.2f, 0.5f, 2f, 8, 50, 1000);
-    static final Tier BEELZEBUB = new Tier(8, 20, 0.6f, 8, 12, 12, 20, 12, 500, 0.4f, 0.7f, 3f, 12, 100, 3000);
+    // beelzebuth (trnightmare): corrosion 12 blocks, 50 every half second, every bit of EP on a kill
+    static final Tier BEELZEBUB = new Tier(12, 50, 1.0f, 8, 12, 12, 20, 12, 500, 0.4f, 0.7f, 3f, 12, 50, 25);
 
     static Tier tier(Spec s) {
         if (s.id().startsWith("beelzeb")) return BEELZEBUB;
@@ -189,6 +190,116 @@ public final class Gluttonous {
         if (tick % 20 == 0) l.playSound(null, c.x, c.y, c.z, SoundEvents.PORTAL_AMBIENT, SoundSource.PLAYERS, 0.6f, 0.5f);
     }
 
+
+    // ================================================================ beelzebuth (trnightmare's, mode by mode)
+
+    // soul devour: switch it on and every hit you land eats at the soul (soul drain II for 5 seconds)
+    static final java.util.Set<UUID> SOUL_DEVOUR = new java.util.HashSet<>();
+    static boolean soulDevour(ServerPlayer p) {
+        if (SOUL_DEVOUR.remove(p.getUUID())) {
+            p.sendOverlayMessage(Component.translatable("jaycee.gluttony.soul_devour_off").withStyle(ChatFormatting.GRAY));
+            return true;
+        }
+        SOUL_DEVOUR.add(p.getUUID());
+        ((ServerLevel) p.level()).sendParticles(ParticleTypes.SOUL, p.getX(), p.getY() + 1, p.getZ(), 20, 0.4, 0.6, 0.4, 0.03);
+        p.level().playSound(null, p.blockPosition(), SoundEvents.SOUL_ESCAPE.value(), SoundSource.PLAYERS, 1, 0.6f);
+        p.sendOverlayMessage(Component.translatable("jaycee.gluttony.soul_devour_on").withStyle(ChatFormatting.DARK_PURPLE));
+        return true;
+    }
+
+    @SubscribeEvent
+    public static void onHit(net.neoforged.neoforge.event.entity.living.LivingDamageEvent.Post event) {
+        if (event.getSource().getEntity() instanceof ServerPlayer p && SOUL_DEVOUR.contains(p.getUUID()) && event.getEntity() != p)
+            event.getEntity().addEffect(new MobEffectInstance(com.brightwebs.jaycee.effect.LoreEffects.SOUL_DRAIN, 100, 1, false, false, true), p);
+    }
+
+    // gluttonous darkness: hold and a black hole opens in front of you (sneak: ten blocks over your head). it starts 3 wide and grows
+    // 0.1 a second up to 8. it drags in everything around it, harder the closer it gets, drains 25 EP a second at full pull,
+    // hits what's inside for 50 and eats its soul, swallows projectiles. let go and it lingers 3 seconds
+    private static final class Dark { ServerLevel level; ServerPlayer owner; Vec3 at; float size = 3; long lastHeld; long fadeAt = Long.MAX_VALUE; }
+    private static final Map<UUID, Dark> DARK = new HashMap<>();
+
+    static boolean darkness(ServerPlayer p, Ability a, Spec s, int held) {
+        ServerLevel l = (ServerLevel) p.level();
+        if (held % 20 == 0 && !Tk.spend(p, a, 24000 / 20.0)) return false;
+        if (held > 0 && held % Tk.MASTERY_HOLD_TICK == 0) AbilityAPI.addMasteryPoint(p, a);
+        Dark d = DARK.computeIfAbsent(p.getUUID(), u -> new Dark());
+        d.level = l; d.owner = p; d.lastHeld = l.getGameTime(); d.fadeAt = Long.MAX_VALUE;
+        if (held > 0 && held % 20 == 0) d.size = Math.min(AbilityAPI.isMastered(p, a) ? 8 : 6, d.size + 0.1f + 0.2f * AbilityAPI.masteryFraction(p, a));
+        d.at = p.isShiftKeyDown() ? p.position().add(0, 10, 0) : p.getEyePosition().add(p.getLookAngle().scale(5 + Math.max(0, d.size - 3))).add(0, 2, 0);
+        if (held % 5 == 0) l.playSound(null, d.at.x, d.at.y, d.at.z, SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 0.6f, 0.4f + d.size * 0.05f);
+        return true;
+    }
+    static void darknessReleased(ServerPlayer p) {
+        Dark d = DARK.get(p.getUUID());
+        if (d != null) d.fadeAt = d.level.getGameTime() + 60;
+    }
+
+    private static void tickDark(Dark d, int tick) {
+        ServerLevel l = d.level; Vec3 c = d.at; float size = d.size;
+        double pull = size * 2.5;
+        // the look: a black core, a purple rim, mist spiralling in
+        LoreFx.dust(l, 0x050208, c, 10, size * 0.22, 3f);
+        if (tick % 3 == 0) { LoreFx.dustRing(l, 0x3a0a5a, c, size * 0.6, 24, 2f, 0); LoreFx.dustRing(l, 0x7a2ab0, c, size * 0.45, 18, 1.4f, 0.6); }
+        for (int i = 0; i < 8; i++) {
+            double ang = Math.random() * Math.PI * 2, r = size * (0.8 + Math.random() * 2), hgt = (Math.random() - 0.5) * size;
+            double sx = c.x + Math.cos(ang) * r, sy = c.y + hgt, sz = c.z + Math.sin(ang) * r, swirl = 0.3 * size / (r + 0.2);
+            l.sendParticles(BrightParticles.PREDATOR_MIST.get(), sx, sy, sz, 0, (c.x - sx) * 0.08 - Math.sin(ang) * swirl, (c.y - sy) * 0.08, (c.z - sz) * 0.08 + Math.cos(ang) * swirl, 1);
+        }
+        for (LivingEntity e : l.getEntitiesOfClass(LivingEntity.class, new net.minecraft.world.phys.AABB(c, c).inflate(pull), e -> LoreEngine.foe(d.owner, e))) {
+            Vec3 v = c.subtract(e.position().add(0, e.getBbHeight() / 2, 0));
+            double dist = v.length();
+            if (dist < 0.1 || dist >= pull) continue;
+            double inf = Math.max(0, Math.min(1, (pull - dist) / Math.max(0.001, pull - 3)));
+            Vec3 f = v.normalize().scale(0.2 * inf);
+            e.push(f.x, f.y, f.z);
+            if (tick % 20 == 0) {
+                double got = Tk.drainMana(e, 25 * inf);
+                var ed = EnergyAPI.get(e);
+                EnergyAPI.set(e, ed.withAura(Math.max(0, ed.aura() - 25 * inf)));
+                Tk.gainMana(d.owner, got + 25 * inf, false);
+            }
+            if (dist <= size && tick % 10 == 0) {
+                Predation.devourHit(d.owner, e, 50, Predation.BEELZEBUB, null);
+                e.addEffect(new MobEffectInstance(com.brightwebs.jaycee.effect.LoreEffects.SOUL_DRAIN, 60, 1), d.owner);
+            }
+        }
+        for (Projectile pr : l.getEntitiesOfClass(Projectile.class, new net.minecraft.world.phys.AABB(c, c).inflate(pull), pr -> pr.getOwner() != d.owner)) {
+            if (pr.position().distanceTo(c) < size) pr.discard();
+            else pr.setDeltaMovement(pr.getDeltaMovement().add(c.subtract(pr.position()).normalize().scale(0.15)));
+        }
+        for (var it : l.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, new net.minecraft.world.phys.AABB(c, c).inflate(pull), x -> true)) {
+            if (it.position().distanceTo(c) < size) it.discard(); else it.setDeltaMovement(it.getDeltaMovement().add(c.subtract(it.position()).normalize().scale(0.1)));
+        }
+        if (tick % 20 == 0) l.playSound(null, c.x, c.y, c.z, SoundEvents.PORTAL_AMBIENT, SoundSource.PLAYERS, 0.8f, 0.4f);
+    }
+
+    // soul steal: hold, and anything within 60 that's nearly dead (under 15% health), too small to matter (under 15% of your EP)
+    // or paralysed with fear has its soul eaten whole
+    static boolean soulSteal(ServerPlayer p, Ability a, Spec s, int held) {
+        if (held % 20 == 0 && !Tk.spend(p, a, 50000 / 20.0)) return false;
+        if (held > 0 && held % Tk.MASTERY_HOLD_TICK == 0) AbilityAPI.addMasteryPoint(p, a);
+        ServerLevel l = (ServerLevel) p.level();
+        if (held % 10 == 0) l.playSound(null, p.blockPosition(), SoundEvents.SOUL_ESCAPE.value(), SoundSource.PLAYERS, 1, 1);
+        l.sendParticles(ParticleTypes.SOUL, p.getX(), p.getY() + 1, p.getZ(), 2, 0.4, 0.6, 0.4, 0.02);
+        if (held % 5 != 0) return true;
+        double ep = EnergyAPI.ep(p) * 0.15;
+        for (LivingEntity e : LoreEngine.near(l, p, p.position(), 60)) {
+            var fear = e.getEffect(com.brightwebs.jaycee.effect.JayceeEffects.FEAR);
+            boolean take = e.getHealth() < e.getMaxHealth() * 0.15f || EnergyAPI.ep(e) < ep || (fear != null && fear.getAmplifier() >= 3);
+            if (!take) continue;
+            l.sendParticles(ParticleTypes.SOUL, e.getX(), e.getY() + 1, e.getZ(), 16, 0.3, 0.5, 0.3, 0.05);
+            LoreFx.essence(l, 0x5fd8ff, 0x28044b, e, p);
+            Predation.devourHit(p, e, e.getMaxHealth() * 10, Predation.BEELZEBUB, l.damageSources().magic());
+        }
+        return true;
+    }
+
+    // food chain: take a skill your subordinate learned, or sneak to teach it one of yours
+    static boolean foodChain(ServerPlayer p, Ability a) {
+        return p.isShiftKeyDown() ? provide(p, a) : receive(p, a);
+    }
+
     // ------------------------------------------------------------ receive / provide (the food chain)
 
     static boolean receive(ServerPlayer p, Ability a) {
@@ -296,6 +407,16 @@ public final class Gluttonous {
                     it.remove(); continue;
                 }
                 tickHole(h, tick);
+            }
+            for (Iterator<Dark> dt = DARK.values().iterator(); dt.hasNext(); ) {
+                Dark d = dt.next();
+                long now = d.level.getGameTime();
+                if (!d.owner.isAlive() || now > d.fadeAt || now - d.lastHeld > 65) {
+                    LoreFx.dust(d.level, 0x3a0a5a, d.at, 40, d.size * 0.5, 1.6f);
+                    dt.remove(); continue;
+                }
+                if (now - d.lastHeld > 2 && d.fadeAt == Long.MAX_VALUE) d.fadeAt = now + 60;
+                tickDark(d, tick);
             }
         });
     }

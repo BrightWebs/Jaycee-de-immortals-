@@ -168,7 +168,7 @@ public final class Pressure {
         }
         if (hit) {
             AbilityAPI.addMasteryPoint(p, a);
-            AbilityAPI.setCooldown(p, a, 20 * (AbilityAPI.isMastered(p, a) ? COERCION_COOLDOWN / 2 : COERCION_COOLDOWN));
+            AbilityAPI.setCooldown(p, a, 20 * COERCION_COOLDOWN);
         }
         return true;
     }
@@ -206,7 +206,7 @@ public final class Pressure {
 
     static void hakiReleased(ServerPlayer p, Ability a) {
         stopHolding(p);
-        AbilityAPI.setCooldown(p, a, 20 * (AbilityAPI.isMastered(p, a) ? HAKI_COOLDOWN_MASTERED : HAKI_COOLDOWN));
+        AbilityAPI.setCooldown(p, a, 20 * HAKI_COOLDOWN);
     }
 
     /** tensura holds you almost still while you let it out (x0.05 speed, x0.1 mastered) */

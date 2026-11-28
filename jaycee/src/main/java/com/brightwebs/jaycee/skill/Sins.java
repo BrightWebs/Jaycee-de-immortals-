@@ -158,7 +158,8 @@ public final class Sins {
     }
 
     // a cast you have to hold: shows the timer, true once it's done
-    static boolean timer(ServerPlayer p, int held, int need) {
+    static boolean timer(ServerPlayer p, Ability a, int held, int need) {
+        need = AbilityAPI.scaledCharge(p, a, need);
         if (held % 5 == 0 && held < need)
             bar(p, "jaycee.sin.held", ChatFormatting.GOLD, String.format("%.1f", held / 20f), String.format("%.1f", need / 20f));
         return held >= need;
@@ -267,7 +268,7 @@ public final class Sins {
 
     // a hold that ends on its own (a cast that went off) sets the cooldown itself
     static void done(ServerPlayer p, Ability a, String act) {
-        AbilityAPI.setCooldown(p, a, castCooldown(act, AbilityAPI.isMastered(p, a)));
+        AbilityAPI.setCooldown(p, a, castCooldown(act, false));
         AbilityAPI.addMasteryPoint(p, a);
     }
     static void holdMastery(ServerPlayer p, Ability a, int t) {
@@ -289,7 +290,7 @@ public final class Sins {
     // each pump has a 3% chance (6% once you're over your max, doubled mastered) to stack rampage
     static boolean breeder(ServerPlayer p, Ability a, Spec s, int t) {
         boolean m = mast(p, a, s);
-        if (t > 0 && t % 100 == 0) {
+        if (t > 0 && t % 40 == 0) {
             var d = EnergyAPI.get(p);
             boolean over = d.mana() > d.maxMana();
             EnergyAPI.set(p, d.withMana(d.mana() + d.maxMana() * 0.02 * big(s)));
@@ -353,7 +354,7 @@ public final class Sins {
     static boolean rampageCast(ServerPlayer p, Ability a, Spec s, int t) {
         aura(p, 0xff3030, 0x500000, 4);
         if (t % 20 == 0) snd(p, SoundEvents.WARDEN_AGITATED, 1, 1);
-        if (!timer(p, t, 60)) return true;
+        if (!timer(p, a, t, 20)) return true;
         boolean m = mast(p, a, s);
         rampage(p, Math.max(0, rampageLevel(p)), 1200);
         put(p, "rampage_grow", now(p) + 1200);
@@ -372,7 +373,7 @@ public final class Sins {
         if (t % 20 == 0 && !Tk.spend(p, a, 20000 / 5)) return false;
         aura(p, 0xff1010, 0x200000, 8);
         if (t % 10 == 0) snd(p, SoundEvents.WARDEN_HEARTBEAT, 2, 1 + t / 100f);
-        if (!timer(p, t, 100)) return true;
+        if (!timer(p, a, t, 30)) return true;
         ServerLevel l = lvl(p);
         double r = (5 + 0.5 * lvl) * big(s);
         float dmg = (float) (20 * lvl * big(s));
@@ -409,7 +410,7 @@ public final class Sins {
         LoreFx.essence(lvl(p), 0x1a3a1a, 0x5aff8a, t, p);
         aura(t, 0x101010, 0x002000, 20);
         snd(p, SoundEvents.EVOKER_CAST_SPELL, 1, 0.8f);
-        AbilityAPI.setCooldown(p, a, (mast(p, a, s) ? 10 : 30) * 20);
+        AbilityAPI.setCooldown(p, a, 30 * 20);
         return got > 0 || gap > 0;
     }
 
@@ -495,7 +496,7 @@ public final class Sins {
         LivingEntity e = look(p, 10);
         if (e == null || !LoreEngine.foe(p, e)) { if (t % 20 == 0) bar(p, "jaycee.sin.no_target", ChatFormatting.RED); return t < 200; }
         if (t % 4 == 0) LoreFx.essence(lvl(p), 0x0a2a0a, 0x6aff6a, e, p);
-        if (!timer(p, t, 60)) return true;
+        if (!timer(p, a, t, 20)) return true;
         if (!Tk.spend(p, a, 50000)) return false;
         double take = ep(e) * 0.25 * big(s);
         double got = Tk.drainMana(e, take);
@@ -547,7 +548,7 @@ public final class Sins {
         if (who instanceof net.minecraft.world.entity.animal.Animal an && an.getAge() >= 0) an.setInLove(p);
         around(who, ParticleTypes.COMPOSTER, 20);
         snd(who, SoundEvents.AMETHYST_BLOCK_CHIME, 1, 1.4f);
-        AbilityAPI.setCooldown(p, a, (mast(p, a, s) ? 3 : 5) * 20);
+        AbilityAPI.setCooldown(p, a, 5 * 20);
         return true;
     }
 
@@ -602,11 +603,11 @@ public final class Sins {
         if (t % 20 == 0 && !Tk.spend(p, a, 7500)) return false;
         holdMastery(p, a, t);
         ServerLevel l = lvl(p);
-        Vec3 at = t <= 50 ? LoreEngine.aim(p, 10) : get(p, "bless_at", LoreEngine.aim(p, 10));
+        Vec3 at = t <= 10 ? LoreEngine.aim(p, 10) : get(p, "bless_at", LoreEngine.aim(p, 10));
         put(p, "bless_at", at);
         double r = 3 * big(s);
         // the field: a golden dome that tightens as it charges
-        double phase = Math.min(1, t / 100.0);
+        double phase = Math.min(1, t / 30.0);
         if (t % 2 == 0) {
             LoreFx.dustRing(l, 0xffd34a, at.add(0, 0.1, 0), r, 30, 1.4f, 0);
             LoreFx.dustRing(l, 0xff6ad5, at.add(0, 0.1 + phase * 2, 0), r * (1 - phase * 0.6), 20, 1.1f, 0);
@@ -618,7 +619,7 @@ public final class Sins {
         }
         for (LivingEntity e : LoreEngine.near(l, p, at, r)) e.addEffect(new MobEffectInstance(LoreEffects.MOVEMENT_INTERFERENCE, 15, 5, false, false, false), p);
         if (t % 20 == 0) snd(p, SoundEvents.BELL_RESONATE, 0.6f, 1.5f);
-        if (!timer(p, t, 100)) return true;
+        if (!timer(p, a, t, 30)) return true;
         double mine = ep(p);
         for (LivingEntity e : LoreEngine.near(l, p, at, r + 1)) {
             double theirs = EnergyAPI.ep(e), ratio = theirs / mine;
@@ -648,7 +649,7 @@ public final class Sins {
         if (e == null) { if (t % 20 == 0) bar(p, "jaycee.sin.no_target", ChatFormatting.RED); return t < 100; }
         boolean take = p.isShiftKeyDown();
         if (t % 4 == 0) LoreFx.essence(lvl(p), 0xff6080, 0xffd0e0, take ? e : p, take ? p : e);
-        if (!timer(p, t, 40)) return true;
+        if (!timer(p, a, t, 15)) return true;
         if (!Tk.spend(p, a, take ? 40 : 80)) return false;
         if (take) {
             float amt = (float) ((e.getHealth() - 1) * 0.2 * big(s));
@@ -692,7 +693,7 @@ public final class Sins {
         LivingEntity e = look(p, 10);
         if (e == null || !LoreEngine.foe(p, e)) { if (t % 20 == 0) bar(p, "jaycee.sin.no_target", ChatFormatting.RED); return t < 200; }
         if (t % 3 == 0) { LoreFx.dustRing(lvl(p), 0xd0306a, e.position().add(0, e.getBbHeight() / 2, 0), 1.5 - (t % 30) / 30.0, 16, 1.2f, 0); sprite(e, "spark_yellow", 2); }
-        if (!timer(p, t, 60)) return true;
+        if (!timer(p, a, t, 20)) return true;
         if (!Tk.spend(p, a, 20)) return false;
         float dmg = (float) Math.max(10, Math.min(500, EnergyAPI.get(p).mana() * 0.1 / 100) * big(s));
         spiritual(p, e, dmg);
@@ -724,12 +725,12 @@ public final class Sins {
             else if (e instanceof net.minecraft.world.entity.npc.villager.AbstractVillager v) want = v.getOffers().size() * 2;
             put(p, "dom_target", e.getUUID()); put(p, "dom_want", want); put(p, "dom_secs", 0); secs = 0;
         }
-        int need = e instanceof Player ? 60 : 90;
+        int need = e instanceof Player ? 8 : 12;
         double dist = e.distanceTo(p);
-        if (dist < 5) need -= 30; else if (dist > 20) need += 30;
-        need -= get(p, "dom_want", 0);
+        if (dist < 5) need -= 4; else if (dist > 20) need += 4;
+        need -= Math.min(4, get(p, "dom_want", 0) / 10);
         if (ult(s)) need /= 2;
-        need = Math.max(3, need);
+        need = Math.max(2, Math.round(need * (1 - 0.5f * AbilityAPI.masteryFraction(p, a))));
         if (t % 20 == 0 && t > 0) { secs++; put(p, "dom_secs", secs); }
         if (t % 10 == 0) { around(e, ParticleTypes.RAID_OMEN, 1); LoreFx.dustLine(lvl(p), 0x8a1a5a, p.getEyePosition(), e.position().add(0, e.getBbHeight() * 0.7, 0), 0.6, 0.8f); }
         if (t % 5 == 0) bar(p, "jaycee.sin.dominating", ChatFormatting.GOLD, secs, need);
@@ -803,7 +804,7 @@ public final class Sins {
             return true;
         }
         put(p, "wish_target", e.getUUID());
-        int need = ult(s) ? 5 : 10;
+        int need = Math.max(1, Math.round((ult(s) ? 2 : 3) * (1 - 0.5f * AbilityAPI.masteryFraction(p, a))));
         if (t % 20 == 0 && t > 0) { secs++; put(p, "wish_secs", secs); }
         e.addEffect(new MobEffectInstance(LoreEffects.MOVEMENT_INTERFERENCE, 10, 5, false, false, false), p);
         if (t % 4 == 0) around(e, ParticleTypes.WHITE_ASH, 6);
@@ -949,7 +950,7 @@ public final class Sins {
     static boolean ascension(ServerPlayer p, Ability a, Spec s, int t) {
         if (t % 2 == 0) { aura(p, 0xfff2b0, 0xffd34a, 6); LoreFx.dustRing(lvl(p), 0xffd34a, p.position().add(0, 0.05, 0), 1.5 + t / 50.0, 24, 1.2f, 0); }
         if (t % 20 == 0) snd(p, SoundEvents.BEACON_AMBIENT, 1, 1.2f);
-        if (!timer(p, t, 100)) return true;
+        if (!timer(p, a, t, 30)) return true;
         if (!Tk.spend(p, a, 20000)) return false;
         int dur = (int) (2400 * big(s));
         p.addEffect(new MobEffectInstance(LoreEffects.IMPERIAL_ASCENSION, dur, 0, false, true, true));
@@ -1163,7 +1164,7 @@ public final class Sins {
     static boolean lullaby(ServerPlayer p, Ability a, Spec s, int t) {
         if (t % 4 == 0) wave(lvl(p), p.position(), 15, 0xc8b8f8, t);
         if (t % 20 == 0) lvl(p).sendParticles(ParticleTypes.NOTE, p.getX(), p.getY() + 2.2, p.getZ(), 3, 0.6, 0.2, 0.6, 1);
-        if (!timer(p, t, 60)) return true;
+        if (!timer(p, a, t, 20)) return true;
         if (!Tk.spend(p, a, 20000)) return false;
         int dur = (int) (2400 * big(s));
         List<LivingEntity> al = allies(p, 15);

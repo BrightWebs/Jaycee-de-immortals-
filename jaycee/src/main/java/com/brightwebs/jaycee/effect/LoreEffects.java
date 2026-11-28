@@ -297,6 +297,16 @@ public final class LoreEffects {
         }
     });
 
+    // soul drain (beelzebuth's soul devour): the soul is eaten away, a little every half second, through everything
+    public static final DeferredHolder<MobEffect, MobEffect> SOUL_DRAIN = EFFECTS.register("soul_drain", () -> new MobEffect(MobEffectCategory.HARMFUL, 0x28044B) {
+        @Override public boolean shouldApplyEffectTickThisTick(int d, int a) { return d % 10 == 0; }
+        @Override public boolean applyEffectTick(ServerLevel l, LivingEntity e, int a) {
+            e.hurtServer(l, l.damageSources().magic(), 2f * (a + 1));
+            l.sendParticles(net.minecraft.core.particles.ParticleTypes.SOUL, e.getX(), e.getY() + e.getBbHeight() / 2, e.getZ(), 2, 0.3, 0.4, 0.3, 0.02);
+            return true;
+        }
+    });
+
     public static void init(IEventBus bus) { EFFECTS.register(bus); }
 
     // ------------------------------------------------------------ hooks

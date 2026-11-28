@@ -302,7 +302,7 @@ public final class Sins {
         }
         holdMastery(p, a, t);
         aura(p, 0xd01010, 0x400000, 3);
-        if (t % 10 == 0) p.playNotifySound(SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 0.4f, 1);
+        if (t % 10 == 0) snd(p, SoundEvents.WARDEN_SONIC_BOOM, 0.4f, 1);
         return true;
     }
 
@@ -448,7 +448,6 @@ public final class Sins {
         boolean m = mast(p, a, s);
         FIELDS.removeIf(f -> f.owner.equals(p.getUUID()));
         FIELDS.add(new Field(lvl(p), p.getUUID(), p.position(), (m ? 15 : 10) * big(s), m ? 1000 : 200, now(p) + 600, ult(s)));
-        p.swing(net.minecraft.world.InteractionHand.MAIN_HAND, true);
         p.addEffect(new MobEffectInstance(MobEffects.LUCK, 600, 4, false, false, true));
         snd(p, SoundEvents.BEACON_ACTIVATE, 1.2f, 0.6f);
         return true;
@@ -516,7 +515,6 @@ public final class Sins {
     // with nobody there it charges your hands instead: your hits drain for 10 seconds
     static boolean lustDrain(ServerPlayer p, Ability a, Spec s) {
         LivingEntity t = SkillHelper.targetQuiet(p, 5);
-        p.swing(net.minecraft.world.InteractionHand.MAIN_HAND, true);
         if (t != null && LoreEngine.foe(p, t)) {
             double take = 200 + (mast(p, a, s) ? ep(t) * 0.005 : 0);
             Tk.gainMana(p, Tk.drainMana(t, take * big(s)), false);
@@ -1260,7 +1258,7 @@ public final class Sins {
                     boolean m = get(att, "phantasmal_m", false);
                     float extra = (float) ((10 + (m ? victim.getMaxHealth() * 0.01 : 0)) * (get(att, "phantasmal_ult", false) ? 1.5 : 1));
                     ServerLevel l = lvl(att);
-                    l.getServer().execute(() -> { if (victim.isAlive()) { victim.invulnerableTime = 0; spiritual(att, victim, extra); } });
+                    amount += extra;
                     wave(l, victim.position().add(0, victim.getBbHeight() / 2, 0), Math.max(1, victim.getBbWidth()), 0xb8a8e8, 10);
                 }
             }

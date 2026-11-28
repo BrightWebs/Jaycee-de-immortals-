@@ -196,7 +196,7 @@ public final class LoreEffects {
         @Override public boolean applyEffectTick(ServerLevel l, LivingEntity e, int a) {
             if (a > 0) e.hurtServer(l, l.damageSources().magic(), 2f + a * 2);
             if (e instanceof ServerPlayer p && p.getRandom().nextInt(10) == 3)
-                p.playNotifySound(SoundEvents.AMBIENT_CAVE.value(), SoundSource.HOSTILE, 0.5f, 1);
+                p.level().playSound(p, p.blockPosition(), SoundEvents.AMBIENT_CAVE.value(), SoundSource.HOSTILE, 0.5f, 1);
             return true;
         }
     });
